@@ -12,7 +12,7 @@ from PySide6.QtCore import Property, QObject, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
-from .. import APP_ID
+from .. import APP_ID, __version__
 from ..core import bridgectl, instance, launch, login, prepare, setup, state, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
@@ -420,6 +420,10 @@ class Backend(QObject):
     def autoStart(self) -> bool:
         """Mit `tretlager --start` aufgerufen: Zwift gleich starten, danach Tretlager beenden."""
         return self._auto_start and self.setupComplete
+
+    @Property(str, constant=True)
+    def version(self) -> str:
+        return __version__
 
     @Property(str, constant=True)
     def helpText(self) -> str:

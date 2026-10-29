@@ -26,5 +26,6 @@ RowLayout {
         wrapMode: Text.WordWrap
         color: Kirigami.Theme.disabledTextColor
         textFormat: Text.StyledText
+        onLinkActivated: (link) => Qt.openUrlExternally(link)
     }
 }

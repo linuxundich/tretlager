@@ -53,7 +53,16 @@ Kirigami.ScrollablePage {
         }
 
         Hint {
-            text: "Zwift unterstützt Linux offiziell nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle; an Zwift selbst wird nichts verändert."
+            icon: "dialog-warning"
+            text: "<b>Kein offizielles Zwift-Programm, Benutzung auf eigene Gefahr.</b> Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle; an Zwift selbst wird nichts verändert. Die Anmeldung über den Browser widerspricht den Zwift-Nutzungsbedingungen."
+        }
+
+        Controls.Button {
+            text: "Über Tretlager und Lizenzen"
+            icon.name: "help-about"
+            flat: true
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
         }
 
         Controls.Button {

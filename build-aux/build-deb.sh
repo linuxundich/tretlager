@@ -5,6 +5,8 @@ set -euo pipefail
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$(sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' "$SRC/CHANGELOG.md" | head -1)"
 [ -n "$VERSION" ] || { echo "Keine Version in CHANGELOG.md"; exit 1; }
+grep -q "^__version__ = \"$VERSION\"" "$SRC/tretlager/__init__.py" \
+  || { echo "tretlager/__init__.py: __version__ passt nicht zu CHANGELOG ($VERSION)"; exit 1; }
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 R="$STAGE/root"
@@ -42,6 +44,7 @@ install -D -m 0644 "$SRC/tretlager/data/icons/de.linuxundich.Tretlager.svg" \
 install -d "$R/usr/share/doc/tretlager"
 cp "$SRC"/README.md "$SRC"/FEASIBILITY.md "$SRC"/BACKLOG.md "$SRC"/docs/*.md "$R/usr/share/doc/tretlager/"
 gzip -9n -c "$SRC/CHANGELOG.md" > "$R/usr/share/doc/tretlager/changelog.gz"
+install -m 0644 "$SRC/build-aux/deb/copyright" "$R/usr/share/doc/tretlager/copyright"
 
 # Steuerdateien
 install -d "$R/DEBIAN"

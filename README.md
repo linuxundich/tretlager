@@ -54,3 +54,12 @@ Neue Version veröffentlichen: Paket bauen, dann `services/pacman-repo/publish-d
 
 Danach im Startmenü: **Tretlager** (Assistent/Hauptfenster) und **Zwift (Tretlager)** (Direktstart).
 Version steht in `CHANGELOG.md`.
+
+## Lizenz und Hinweis
+
+Tretlager steht unter der GPL-3.0-or-later (`LICENSE`), das gilt auch für das Symbol
+(`build-aux/make-icon.py`). Tretlager ist kein Produkt von Zwift Inc. und wird von Zwift nicht
+unterstützt; die Benutzung erfolgt auf eigene Gefahr. Zwift, .NET Framework, WebView2 und die
+übrigen Windows-Komponenten sind unfreie Software. Tretlager liefert sie nicht mit, die
+Einrichtung lädt sie beim Hersteller. Die Übersicht aller Komponenten und Lizenzen steht in der
+App unter *Über Tretlager*.

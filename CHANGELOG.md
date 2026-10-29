@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-30
+
+### Hinzugefügt
+- Seite „Über Tretlager“ (Menü und Willkommensseite): Version, Hinweis, dass Tretlager kein
+  offizielles Zwift-Programm ist und die Benutzung auf eigene Gefahr erfolgt, Lizenz sowie die
+  freien und unfreien Komponenten mit ihren Lizenzen.
+- Lizenz GPL-3.0-or-later (`LICENSE`), im Debian-Paket als `copyright`.
+- Die Willkommensseite nennt den Hinweis zu Zwift und Haftung gleich vor der Einrichtung.
+
+### Geändert
+- Neues Symbol im Stil heutiger Rennrad-Kurbeln: Vierarm-Spinne, zwei Kettenblätter,
+  verjüngte Kurbelarme, waagrechte Klickpedale mittig am Kurbelauge. Erzeugt von
+  `build-aux/make-icon.py`.
+
 ## [0.4.0] - 2026-10-30
 
 ### Geändert

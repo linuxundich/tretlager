@@ -56,6 +56,12 @@ Kirigami.ScrollablePage {
             icon.name: "tools-wizard"
             displayHint: Kirigami.DisplayHint.AlwaysHide
             onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
+        },
+        Kirigami.Action {
+            text: "Über Tretlager"
+            icon.name: "help-about"
+            displayHint: Kirigami.DisplayHint.AlwaysHide
+            onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
         }
     ]
 
