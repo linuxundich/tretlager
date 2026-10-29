@@ -2,7 +2,7 @@
 
 ## Offene Entscheidungen (vor Phase D)
 
-- [ ] **E1 Wine-Quelle.** Debian forky hat kein Wine. Empfehlung: WineHQ-Repo (`winehq-devel`,
+- [x] **E1 Wine-Quelle.** Freigegeben 2026-10-29 für tinytin (T2). Debian forky hat kein Wine. Empfehlung: WineHQ-Repo (`winehq-devel`,
   Suite forky) über einen pkexec-Helfer mit fester Aktion, festgenageltem Schlüssel und
   ausdrücklicher Zustimmung. Alternative: umu-launcher + Proton im Benutzerverzeichnis (kein
   root, aber Steam-Runtime-Container und weniger erprobt mit Zwift).
@@ -12,9 +12,10 @@
 - [ ] **E3 Sensoren.** Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
   DIRCON statt qdomyos-zwift. Projekt-Lizenz GPL-3, damit qdomyos-Protokollcode als Referenz
   übernommen werden darf.
-- [ ] **E4 Desktop.** Zielrechner tinytin läuft mit Plasma 6.7.4 (Wayland), der Auftrag nennt
-  GNOME. Empfehlung: bei GTK4/libadwaita bleiben (läuft unter Plasma, Hauptziel bleibt GNOME),
-  unter Plasma testen; eine eigene Kirigami-Oberfläche erst bei Bedarf.
+- [x] **E4 Desktop.** Christoph 2026-10-29: GTK4/libadwaita oder Qt/Plasma, beides erlaubt.
+  Umsetzung wie bei Stafette: Kern als UI-freie Python-Bibliothek (Diagnose, Installation,
+  Updates, Bridge-Steuerung), darauf GTK/libadwaita und Qt/Kirigami. Welche Oberfläche zuerst
+  kommt, entscheidet Phase C; der Zielrechner tinytin läuft mit Plasma.
 - [ ] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
   mit PRIME-Offload, Treiber 580, AX201). Geräte: Wahoo KICKR V4, Garmin HRM-Pro Plus
   (BLE + ANT+), eingebauter Adapter. Keine weiteren Sensoren.
