@@ -53,3 +53,12 @@
 - [x] Netzwechsel während der Fahrt: Ankündigung auf 127.0.0.1, Lauschen nur auf Loopback (2026-10-29)
 - [ ] Oberfläche: Schalter „Auch für Zwift auf anderen Geräten im Netz anbieten“ (local_only)
 - [ ] Netzwechsel-Test wiederholen: Kabel ab/an während der Fahrt
+
+## Bedienung (Konzept: docs/bedienkonzept.md)
+
+- [ ] Entscheidungen: E2 Browser-Anmeldung als Nutzeroption, Bezugsweg (eigenes Paket/TUXEDO-Repo), Oberfläche zuerst (Kirigami/GTK), Wine-Pinning
+- [ ] Kern: Zustandsautomat der Einrichtung mit Wiederaufnahme (`~/.local/state/tretlager/state.json`)
+- [ ] Polkit-Helfer `setup-system` (WineHQ-Quelle + feste Paketliste, APT-Simulation vorab)
+- [ ] Assistent: Prüfen → Vorbereiten → Zwift → Anmeldung → Sensoren → Fertig
+- [ ] Hauptfenster mit einem Knopf „Zwift starten“ (Bridge, Token, Update, Start, Fenster)
+- [ ] Debian-Paket `tretlager`

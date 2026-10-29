@@ -7,7 +7,8 @@ Grafikdiagnose (NVIDIA), Sensoren über Bluetooth LE ohne Zwift Companion App.
 **Stand (2026-10-29):** Machbarkeit geprüft, Zwift läuft auf dem Testrechner tinytin (Opt-in-
 Token-Login, NVIDIA per GLX + PRIME-Offload). Die **Sensor-Bridge** mit Oberfläche funktioniert:
 Zwift koppelt Trainer und Pulsgurt über Wahoo Direct Connect, ohne Companion App.
-Ergebnis in [FEASIBILITY.md](FEASIBILITY.md), offene Entscheidungen und Phasen in
+Ergebnis in [FEASIBILITY.md](FEASIBILITY.md), Bedienkonzept in
+[docs/bedienkonzept.md](docs/bedienkonzept.md), offene Entscheidungen und Phasen in
 [BACKLOG.md](BACKLOG.md).
 
 Kernbefunde:
