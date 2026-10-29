@@ -667,3 +667,21 @@ Befunde:
   Kabel/WLAN-Wechsel betreffen die Verbindung Zwift–Bridge nicht mehr, und der Trainer ist im
   LAN nicht steuerbar. Für Zwift auf anderen Geräten gibt es `"local_only": false` in
   `~/.config/tretlager/bridge.json` (noch ohne Schalter in der Oberfläche).
+
+### M3: Einrichtung durch den Kern, tinytin, 2026-10-29 spät — funktioniert
+
+`tretlager/core/setup.py` mit frischem Prefix `~/.local/share/tretlager/prefix`, ohne Zutun:
+
+| Schritt | Dauer |
+|---|---|
+| Installer laden, Signatur prüfen (osslsigncode, Signierer Zwift, Inc. / 5463328) | ~1 s |
+| Wine-Umgebung (`wineboot -u`, Mono/Gecko aus) | 15 s |
+| winetricks (Commit f3890f6, SHA-256 geprüft): corefonts, dotnet48, d3dcompiler_47, webview2 | 281 s |
+| Launcher (`/VERYSILENT`, danach `wineserver -k`) | 15 s |
+| Spiel per `SilentLaunch` (Zwift 1.124.0) | 127 s |
+| Grafik: `UseEGL=N`, `UseXRandR=N`, GL-Test → NVIDIA RTX 3050 Ti, OpenGL 4.6.0 | 20 s |
+| **gesamt** | **459 s** |
+
+Zweiter Lauf: alle Schritte als erledigt erkannt, 2 s. Gefundener Fehler beim Schreiben:
+`WINEDLLOVERRIDES=mscoree,mshtml=` darf nur für `wineboot` gelten, sonst ist .NET (winetricks,
+`csc.exe`) abgeschaltet.
