@@ -96,3 +96,19 @@ def test_logout_remote_posts_refresh_token():
         return FakeResponse(b"")
     login.logout_remote({"refresh_token": "r1"}, opener)
     assert seen[0][0].endswith("/logout") and "refresh_token=r1" in seen[0][1]
+
+
+def test_help_text_and_icon_are_bundled():
+    from pathlib import Path
+    data = Path(launch.__file__).resolve().parent.parent / "data"
+    assert "## Sensoren in Zwift koppeln" in (data / "hilfe.md").read_text()
+    assert (data / "icons" / "de.linuxundich.Tretlager.svg").read_text().startswith("<svg")
+
+
+def test_desktop_files_offer_direct_start():
+    from pathlib import Path
+    root = Path(launch.__file__).resolve().parents[2] / "data"
+    main = (root / "de.linuxundich.Tretlager.desktop.in").read_text()
+    zwift = (root / "de.linuxundich.Tretlager.Zwift.desktop.in").read_text()
+    assert "Actions=start;" in main and "--start" in main
+    assert "--start" in zwift and "Icon=de.linuxundich.Tretlager" in zwift

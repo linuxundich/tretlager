@@ -10,7 +10,7 @@ Kirigami.ScrollablePage {
         spacing: Kirigami.Units.largeSpacing
 
         Kirigami.Icon {
-            source: "applications-games"
+            source: Qt.resolvedUrl("../../data/icons/de.linuxundich.Tretlager.svg")
             Layout.preferredWidth: Kirigami.Units.iconSizes.enormous
             Layout.preferredHeight: Kirigami.Units.iconSizes.enormous
             Layout.alignment: Qt.AlignHCenter
@@ -58,6 +58,14 @@ Kirigami.ScrollablePage {
             visible: true
             type: Kirigami.MessageType.Information
             text: "Zwift unterstützt Linux offiziell nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle; an Zwift selbst wird nichts verändert."
+        }
+
+        Controls.Button {
+            text: "Hilfe lesen"
+            icon.name: "help-contents"
+            flat: true
+            Layout.alignment: Qt.AlignHCenter
+            onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("HelpPage.qml"))
         }
 
         Controls.Button {

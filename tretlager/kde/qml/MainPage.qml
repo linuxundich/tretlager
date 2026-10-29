@@ -17,7 +17,12 @@ Kirigami.ScrollablePage {
         return parts.join(" · ")
     }
 
-    Component.onCompleted: { backend.refreshOverview(); backend.setSensorPolling(true) }
+    Component.onCompleted: {
+        backend.refreshOverview()
+        backend.setSensorPolling(true)
+        backend.prewarmBridge()
+        if (backend.autoStart) backend.startZwift()
+    }
 
     actions: [
         Kirigami.Action {
@@ -30,6 +35,12 @@ Kirigami.ScrollablePage {
             icon.name: "tools-wizard"
             displayHint: Kirigami.DisplayHint.AlwaysHide
             onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
+        },
+        Kirigami.Action {
+            text: "Hilfe"
+            icon.name: "help-contents"
+            displayHint: Kirigami.DisplayHint.AlwaysHide
+            onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("HelpPage.qml"))
         },
         Kirigami.Action {
             text: "Neu anmelden"

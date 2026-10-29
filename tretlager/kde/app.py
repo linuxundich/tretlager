@@ -16,6 +16,8 @@ from .. import APP_ID
 from ..core import bridgectl, launch, login, prepare, setup, state, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ICON_FILE = DATA_DIR / "icons" / "de.linuxundich.Tretlager.svg"
 
 
 class Backend(QObject):
@@ -25,8 +27,9 @@ class Backend(QObject):
     busyChanged = Signal()
     _checksDone = Signal(list)
 
-    def __init__(self) -> None:
+    def __init__(self, auto_start: bool = False) -> None:
         super().__init__()
+        self._auto_start = auto_start
         self._checks: list[dict] = []
         self._busy = False
         self._checksDone.connect(self._set_checks)  # Thread → Hauptthread (queued)
@@ -406,6 +409,24 @@ class Backend(QObject):
         return self._launch
 
     @Property(bool, constant=True)
+    def autoStart(self) -> bool:
+        """Mit `tretlager --start` aufgerufen: Zwift gleich starten, danach Tretlager beenden."""
+        return self._auto_start and self.setupComplete
+
+    @Property(str, constant=True)
+    def helpText(self) -> str:
+        return (DATA_DIR / "hilfe.md").read_text()
+
+    @Slot()
+    def prewarmBridge(self) -> None:
+        """Bridge schon beim Öffnen starten, damit Trainer und Gurt beim Aufsteigen verbunden sind."""
+        def work():
+            if bridgectl.unit_installed() and not bridgectl.is_running():
+                bridgectl.set_running(True)
+            self.refreshSensors()
+        self._bg(work)
+
+    @Property(bool, constant=True)
     def setupComplete(self) -> bool:
         return state.load().get("setup", {}).get("complete") is True
 
@@ -425,6 +446,11 @@ class Backend(QObject):
             st = state.load()
             info = {"version": setup.game_version(), "remote": st.get("game", {}).get("remote", ""),
                     "renderer": st.get("graphics", {}).get("gl_renderer", "")}
+            try:  # Update-Prüfung im Hintergrund, damit das Hauptfenster es vor dem Start zeigt
+                info["remote"] = launch.remote_version()
+                state.update("game", remote=info["remote"], checked=int(time.time()))
+            except OSError:
+                pass
             try:
                 tok = login.Keyring().load()
                 ls = login.status(tok)
@@ -473,9 +499,9 @@ def main() -> int:
     app.setApplicationName("Tretlager")
     app.setOrganizationDomain("linuxundich.de")
     app.setDesktopFileName(APP_ID)
-    app.setWindowIcon(QIcon.fromTheme("applications-games"))
+    app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
     engine = QQmlApplicationEngine()
-    backend = Backend()
+    backend = Backend(auto_start="--start" in sys.argv[1:])
     engine.rootContext().setContextProperty("backend", backend)
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():

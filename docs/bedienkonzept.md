@@ -180,7 +180,15 @@ Diese Seite hängt an Entscheidung **E2**; ohne Freigabe endet der Assistent hie
 6. Nach dem Beenden: Launcher-Reste beenden, Bridge stoppen (falls nicht im Autostart),
    Bildschirmmodus prüfen.
 
-Das Menü ☰ enthält: *Sensoren verwalten*, *Diagnose*, *Protokolle*, *Einstellungen*, *Über*.
+Das Menü ☰ enthält: *Sensoren*, *Einrichtung prüfen*, *Hilfe*, *Neu anmelden*.
+
+Umgesetzt in 0.2.0 für den Alltag nach der Einrichtung:
+- **Direktstart:** Startmenü-Eintrag *Zwift (Tretlager)* bzw. Schnellaktion *Zwift starten*
+  (`tretlager --start`) öffnet das Hauptfenster, startet sofort und beendet Tretlager nach der
+  Fahrt. Ist die Einrichtung nicht abgeschlossen, erscheint stattdessen der Assistent.
+- **Bridge vorwärmen:** Schon beim Öffnen des Hauptfensters läuft die Sensor-Bridge an.
+- **Update-Prüfung im Hintergrund:** Das Hauptfenster zeigt ein anstehendes Update vor dem Klick.
+- **Aus dem Weg:** Während der Fahrt minimiert sich Tretlager, danach kommt es zurück.
 
 ## 6. Updates
 

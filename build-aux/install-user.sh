@@ -11,7 +11,7 @@ APPDIR="$HOME/.local/share/applications"
 
 if [ "${1:-}" = "--remove" ]; then
   systemctl --user disable --now tretlager-bridge.service 2>/dev/null || true
-  rm -rf "$LIBDIR" "$DOCDIR" "$UNITDIR/tretlager-bridge.service" "$APPDIR/de.linuxundich.Tretlager.desktop"
+  rm -rf "$LIBDIR" "$DOCDIR" "$UNITDIR/tretlager-bridge.service" "$APPDIR"/de.linuxundich.Tretlager*.desktop
   systemctl --user daemon-reload
   echo "Tretlager entfernt (Einstellungen in ~/.config/tretlager bleiben)."
   exit 0
@@ -22,7 +22,7 @@ rm -rf "$LIBDIR/tretlager"
 cp -r "$SRC/tretlager" "$LIBDIR/"
 find "$LIBDIR" -name __pycache__ -prune -exec rm -rf {} +
 cp "$SRC"/*.md "$DOCDIR/" 2>/dev/null || true
-for f in tretlager-bridge.service de.linuxundich.Tretlager.desktop; do
+for f in tretlager-bridge.service de.linuxundich.Tretlager.desktop de.linuxundich.Tretlager.Zwift.desktop; do
   case $f in *.service) dest="$UNITDIR/$f" ;; *) dest="$APPDIR/$f" ;; esac
   sed -e "s|@LIBDIR@|$LIBDIR|g" -e "s|@DOCDIR@|$DOCDIR|g" "$SRC/data/$f.in" > "$dest"
 done

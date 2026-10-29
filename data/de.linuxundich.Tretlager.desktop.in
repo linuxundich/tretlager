@@ -1,9 +1,15 @@
 [Desktop Entry]
 Type=Application
 Name=Tretlager
-Comment=Zwift unter Linux: Sensoren über Bluetooth verbinden
-Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.ui
-Icon=applications-games-symbolic
+GenericName=Zwift-Einrichtung
+Comment=Zwift unter Linux einrichten, starten und mit Sensoren verbinden
+Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde
+Icon=de.linuxundich.Tretlager
 Categories=Game;Sports;
-Keywords=Zwift;Bluetooth;Trainer;Wahoo;
+Keywords=Zwift;Bluetooth;Trainer;Wahoo;Rad;Rennrad;
 StartupNotify=true
+Actions=start;
+
+[Desktop Action start]
+Name=Zwift starten
+Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde --start

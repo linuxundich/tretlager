@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zwift (Tretlager)
+Comment=Zwift mit Sensor-Bridge starten
+Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde --start
+Icon=de.linuxundich.Tretlager
+Categories=Game;Sports;
+Keywords=Zwift;Rad;Training;
+StartupNotify=true
