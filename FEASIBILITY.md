@@ -685,3 +685,12 @@ Befunde:
 Zweiter Lauf: alle Schritte als erledigt erkannt, 2 s. Gefundener Fehler beim Schreiben:
 `WINEDLLOVERRIDES=mscoree,mshtml=` darf nur für `wineboot` gelten, sonst ist .NET (winetricks,
 `csc.exe`) abgeschaltet.
+
+### M4: Anmeldung im Assistenten, tinytin, 2026-10-29 spät — funktioniert
+
+- Seite *Anmeldung*: offizielle Anmeldung als „derzeit nicht möglich“ erklärt; Browser-Anmeldung
+  erst nach Haken bei „auf eigenes Risiko“ (AGB §5). Tretlager öffnet die Zwift-Seite im
+  Standardbrowser; nach dem Kopieren der Rücksprungadresse übernimmt es den Code selbst aus der
+  Zwischenablage (Christoph: „hat geklappt“).
+- Token im Secret Service (Plasma: ksecretd über `python3-secretstorage`), nicht in Dateien.
+- Erneuerung über `grant_type=refresh_token` geprüft: danach 359 min Zugriff, 7 Tage Erneuerung.

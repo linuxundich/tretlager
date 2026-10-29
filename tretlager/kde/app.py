@@ -8,11 +8,11 @@ import threading
 from pathlib import Path
 
 from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
-from PySide6.QtGui import QGuiApplication, QIcon
+from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID
-from ..core import prepare, setup, systemcheck
+from ..core import login, prepare, setup, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
 
@@ -31,6 +31,7 @@ class Backend(QObject):
         self._checksDone.connect(self._set_checks)  # Thread → Hauptthread (queued)
         self._init_prepare()
         self._init_setup()
+        self._init_login()
 
     @Property(list, notify=checksChanged)
     def checks(self) -> list:
@@ -208,6 +209,92 @@ class Backend(QObject):
                 s.update(result="done", current="", text="")
         self._setup = s
         self.setupChanged.emit()
+
+
+    # --- Schritt „Anmeldung“ ---
+
+    loginChanged = Signal()
+    _loginEvent = Signal(dict)
+
+    def _init_login(self) -> None:
+        self._login = {"state": "none", "access_left": 0, "refresh_left": 0, "consent": login.consent_given(),
+                       "busy": False, "waiting": False, "error": ""}
+        self._login_state_value = ""
+        self._loginEvent.connect(self._on_login_event)
+        app = QGuiApplication.instance()
+        app.clipboard().dataChanged.connect(self.checkClipboard)
+        # Beim Zurückwechseln ins Fenster prüfen; unter Wayland ist die Zwischenablage erst mit Fokus lesbar.
+        app.focusWindowChanged.connect(lambda _window: self.checkClipboard())
+
+    @Property("QVariantMap", notify=loginChanged)
+    def loginInfo(self) -> dict:
+        return self._login
+
+    def _login_update(self, **kw) -> None:
+        self._login = dict(self._login, **kw)
+        self.loginChanged.emit()
+
+    def _on_login_event(self, ev: dict) -> None:
+        self._login_update(**ev)
+
+    @Slot()
+    def loadLogin(self) -> None:
+        self._login_update(busy=True, error="")
+
+        def work():
+            try:
+                token = login.valid_token()  # erneuert bei Bedarf
+                st = login.status(token)
+                self._loginEvent.emit(dict(st, busy=False))
+            except login.LoginError as e:
+                self._loginEvent.emit({"busy": False, "error": str(e)})
+        threading.Thread(target=work, daemon=True).start()
+
+    @Slot()
+    def giveConsent(self) -> None:
+        login.give_consent()
+        self._login_update(consent=True)
+
+    @Slot()
+    def startBrowserLogin(self) -> None:
+        self._login_state_value = login.new_state()
+        self._login_update(waiting=True, error="")
+        QDesktopServices.openUrl(QUrl(login.auth_url(self._login_state_value)))
+
+    @Slot()
+    def checkClipboard(self) -> None:
+        if not self._login.get("waiting") or self._login.get("busy"):
+            return
+        text = QGuiApplication.clipboard().text().strip()
+        if text.startswith("https://launcher.zwift.com/launcher") and "code=" in text:
+            self.submitRedirect(text)
+
+    @Slot(str)
+    def submitRedirect(self, url: str) -> None:
+        try:
+            code = login.parse_redirect(url, self._login_state_value or None)
+        except login.LoginError as e:
+            self._login_update(error=str(e))
+            return
+        self._login_update(busy=True, error="")
+
+        def work():
+            try:
+                token = login.exchange_code(code)
+                login.Keyring().save(token)
+                self._loginEvent.emit(dict(login.status(token), busy=False, waiting=False))
+            except login.LoginError as e:
+                self._loginEvent.emit({"busy": False, "error": str(e)})
+        threading.Thread(target=work, daemon=True).start()
+
+    @Slot()
+    def logout(self) -> None:
+        try:
+            login.Keyring().delete()
+        except login.LoginError as e:
+            self._login_update(error=str(e))
+            return
+        self._login_update(state="none", access_left=0, refresh_left=0)
 
 
 def main() -> int:
