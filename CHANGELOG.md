@@ -4,6 +4,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-30
+
+### Geändert
+- Im breiten Fenster zeigt das Hauptfenster die Sensoren gleich rechts daneben.
+
 ## [0.3.1] - 2026-10-30
 
 ### Geändert

@@ -17,11 +17,20 @@ Kirigami.ScrollablePage {
         return parts.join(" · ")
     }
 
+    // Im breiten Fenster die Sensoren gleich rechts daneben zeigen; im schmalen würden sie das
+    // Hauptfenster verdecken, dort bleibt der Knopf „Sensoren“.
+    function showSensorsBeside() {
+        const stack = applicationWindow().pageStack
+        if (stack.wideMode && stack.depth === 1)
+            stack.push(Qt.resolvedUrl("SensorsPage.qml"), { wizard: false })
+    }
+
     Component.onCompleted: {
         backend.refreshOverview()
         backend.setSensorPolling(true)
         backend.prewarmBridge()
         if (backend.autoStart) backend.startZwift()
+        Qt.callLater(showSensorsBeside)  // erst nach dem Aufbau pushen (Kirigami-Falle)
     }
 
     actions: [
