@@ -79,3 +79,5 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] Direktstart „Zwift (Tretlager)“ auf tinytin prüfen (startet Zwift, minimiert, beendet sich nach der Fahrt)
 - [ ] Nur eine Tretlager-Instanz (zweiter Aufruf soll das vorhandene Fenster nutzen)
 - [ ] Paketquelle auf bender (Debian), analog pacman-repo
+- [ ] Reichweite: Notebook im Nebenraum → KICKR verbindet nur wackelig (AX201). Hinweis in der Oberfläche bei häufigen Abbrüchen; Empfehlung USB-Bluetooth-Stick mit Verlängerung oder Bridge auf einem Rechner neben dem Trainer
+- [ ] Oberfläche: Schalter „Auch für Zwift auf anderen Geräten im Netz anbieten“ (`local_only`), z. B. Bridge auf Raspberry Pi neben dem Trainer

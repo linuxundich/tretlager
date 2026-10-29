@@ -165,6 +165,10 @@ class BridgedDevice:
                 elif "was not found" in str(e):
                     text = "Nicht in Reichweite oder schläft"
                     not_found = True
+                elif "failed to discover services" in str(e):
+                    # Gerät ist beim Verbinden wieder eingeschlafen (KICKR nach Pause): bald erneut.
+                    text = "Gerät schläft – kurz treten bzw. Gurt anlegen"
+                    not_found = True
                 else:
                     text = str(e) or type(e).__name__
                 self._set_state("fehler", text)
