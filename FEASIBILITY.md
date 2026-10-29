@@ -436,3 +436,29 @@ System-Speicher.
 
 Nächster Schritt: derselbe Test mit `wine-staging` 11.20 (`/opt/wine-staging`, parallel zu
 wine-devel installierbar).
+
+### T2 (Teil 3): wine-staging, tinytin, 2026-10-29
+
+- `wine-staging 11.20` aus WineHQ, nach `/opt/wine-staging`, parallel zu wine-devel.
+- Erster Start im Klon: Staging aktualisiert den Prefix (`wine.inf`). Dabei bleibt ein Dialog
+  „rundll32 … This application could not be started“ hängen, bis jemand am Bildschirm *Nein*
+  klickt. Die App muss den Prefix deshalb immer mit derselben Wine-Version betreiben oder die
+  Aktualisierung selbst unbeaufsichtigt anstoßen.
+- Launcher mit WebView2 156 (Fixed Version, Win10): **gleiches Bild wie bei vanilla.**
+  „EnsureCoreWebView2Async“, danach kein `msedgewebview2.exe`, nach ~20 s Ende mit rc 0.
+
+Stand bei netbrain (#420/#421, 2026-10-23): Der Absturz von Launcher 1.2 ist umgangen, „the
+webview2 content in the launcher still does not render“. Niemand berichtet eine funktionierende
+Launcher-Anmeldung mit 1.2 unter Wine.
+
+**Zwischenergebnis T2:** Die offizielle Anmeldung ist mit Launcher 1.2 unter Wine 11.20 derzeit
+nicht möglich: vanilla und Staging, WebView2 109 und 156 getestet. Installieren und Aktualisieren
+gehen.
+
+Mögliche nächste Schritte:
+1. Proton per umu-launcher im Benutzerverzeichnis (kein root, eigene WebView2-Fixes von Valve/GE)
+2. WebView2 getrennt vom Launcher testen (Microsoft-Beispiel-App), um Launcher- und Wine-Problem
+   zu trennen; ggf. Fehlerbericht an Wine
+3. nachgebauter Token-Login (netbrain): technisch erprobt, aber AGB-Risiko → nur auf
+   ausdrückliche Entscheidung (E2)
+4. abwarten: App installiert und aktualisiert, meldet Start ehrlich als „derzeit nicht möglich“
