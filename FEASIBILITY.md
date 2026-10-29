@@ -694,3 +694,16 @@ Zweiter Lauf: alle Schritte als erledigt erkannt, 2 s. Gefundener Fehler beim Sc
   Zwischenablage (Christoph: „hat geklappt“).
 - Token im Secret Service (Plasma: ksecretd über `python3-secretstorage`), nicht in Dateien.
 - Erneuerung über `grant_type=refresh_token` geprüft: danach 359 min Zugriff, 7 Tage Erneuerung.
+
+### M5: Start aus dem Hauptfenster, tinytin, 2026-10-29 nachts — funktioniert
+
+- Erster Versuch: Zwift startete, aber der Startaufruf lief in eine Zeitüberschreitung (Zwift
+  erbte die Ausgabe-Pipe). Pythons Fehlermeldung mit dem Token in der Befehlszeile landete im
+  Protokoll der Oberfläche. Log gelöscht, Sitzung bei Zwift beendet (Erneuerung danach
+  abgelehnt), Ursache behoben: Token per 0600-Datei auf tmpfs, `RunFromProcess` liest
+  `--token=@Datei`, keine Pipes, keine Tracebacks mit Befehlszeilen.
+- Außerdem stellte Zwift trotz `UseXRandR=N` die Auflösung auf 2560×1600 um; zusätzlich
+  `UseXVidMode=N` behebt das (wird bei jedem Start gesetzt).
+- Zweiter Versuch nach Neuanmeldung: nur `ZwiftApp.exe` läuft, Auflösung 2880×1800, Fenster
+  2880×1686 ab y=44 (KWin-Skript), `nvidia-smi pmon`: ZwiftApp.exe Typ G, 66 % SM, 3,4 GB;
+  kein Token im Protokoll, Übergabedatei gelöscht; in Zwift alle vier Sensorkacheln verbunden.

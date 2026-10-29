@@ -70,5 +70,8 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] M3 Seite „Zwift einrichten“ in der Oberfläche durchgeklickt (alle Schritte „schon erledigt“)
 - [x] M4 Anmeldung: Browser-Anmeldung mit Hinweis, Übernahme aus der Zwischenablage, Token im Schlüsselbund (ksecretd), Erneuerung — auf tinytin geprüft (2026-10-29)
 - [ ] Breeze-Warnungen „ProgressBar.qml: Cannot read property 'top' of null“ beim Seitenaufbau klären
-- [ ] M5 Sensoren-Seite (Bridge über D-Bus) + Hauptfenster „Zwift starten“
+- [x] M5 Sensoren-Seite (Bridge über D-Bus) + Hauptfenster „Zwift starten“ — auf tinytin: Start mit Token aus dem Schlüsselbund, NVIDIA, Fenster per KWin maximiert, Auflösung bleibt, Launcher-Reste beendet (2026-10-29)
+- [x] Sicherheit: Token nie in Befehlszeilen/Protokollen (Datei + `--token=@`), Abmelden beendet die Sitzung bei Zwift
+- [ ] Bridge-Neustart beim Einspielen trennt Sensoren kurz – beim Paket-Update Zwift-Lauf beachten
+- [ ] Ende einer Zwift-Sitzung im Hauptfenster prüfen (Bridge stoppen, wenn nicht im Autostart)
 - [ ] M6 Debian-Paket `tretlager`, Ende-zu-Ende auf frischem TUXEDO OS forky (VM für den Ablauf, tinytin für NVIDIA/Sensoren)
