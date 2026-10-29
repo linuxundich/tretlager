@@ -5,13 +5,12 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
     id: root
     title: "Tretlager"
-    // Breit genug für zwei Spalten (Hauptfenster + Sensoren/Hilfe), sofern der Bildschirm es hergibt;
-    // sonst 90 % der freien Fläche, dann stapelt Kirigami die Seiten.
-    readonly property int columnWidth: Kirigami.Units.gridUnit * 26
-    width: Math.min(columnWidth * 2 + Kirigami.Units.gridUnit * 2, Screen.desktopAvailableWidth * 0.9)
-    height: Math.min(Kirigami.Units.gridUnit * 42, Screen.desktopAvailableHeight * 0.9)
-    minimumWidth: Kirigami.Units.gridUnit * 22
-    pageStack.defaultColumnWidth: columnWidth
+    // Für PC-Bildschirme großzügig: Platz für die Übersicht mit zwei Kartenspalten bzw. für
+    // Übersicht und Sensoren nebeneinander; auf kleinen Bildschirmen höchstens 90 % der Fläche.
+    width: Math.min(Kirigami.Units.gridUnit * 70, Screen.desktopAvailableWidth * 0.9)
+    height: Math.min(Kirigami.Units.gridUnit * 50, Screen.desktopAvailableHeight * 0.9)
+    minimumWidth: Kirigami.Units.gridUnit * 24
+    pageStack.defaultColumnWidth: Kirigami.Units.gridUnit * 30
 
     // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
     readonly property var steps: ["Prüfen", "Vorbereiten", "Zwift", "Anmeldung", "Sensoren", "Fertig"]

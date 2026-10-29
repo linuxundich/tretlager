@@ -6,8 +6,7 @@ import org.kde.kirigami as Kirigami
 Kirigami.ScrollablePage {
     title: "Willkommen"
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    PageContent {
 
         Kirigami.Icon {
             source: Qt.resolvedUrl("../../data/icons/de.linuxundich.Tretlager.svg")
@@ -53,10 +52,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        Kirigami.InlineMessage {
-            Layout.fillWidth: true
-            visible: true
-            type: Kirigami.MessageType.Information
+        Hint {
             text: "Zwift unterstützt Linux offiziell nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle; an Zwift selbst wird nichts verändert."
         }
 

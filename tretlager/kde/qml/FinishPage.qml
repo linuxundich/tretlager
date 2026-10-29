@@ -8,8 +8,7 @@ Kirigami.ScrollablePage {
 
     Component.onCompleted: backend.markSetupComplete()
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    PageContent {
 
         Kirigami.Icon {
             source: "data-success"

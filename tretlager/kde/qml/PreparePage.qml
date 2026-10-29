@@ -23,8 +23,7 @@ Kirigami.ScrollablePage {
         color: Kirigami.Theme.disabledTextColor
     }
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    PageContent {
 
         Kirigami.PlaceholderMessage {
             Layout.fillWidth: true
@@ -104,10 +103,7 @@ Kirigami.ScrollablePage {
                 }
             }
 
-            Kirigami.InlineMessage {
-                Layout.fillWidth: true
-                visible: true
-                type: Kirigami.MessageType.Information
+            Hint {
                 text: "Nicht verändert werden: keine 32-Bit-Architektur, kein Systemupgrade, keine Grafiktreiber, nichts wird entfernt. TUXEDO OS legt vor und nach der Installation automatisch einen Schnappschuss an."
             }
         }

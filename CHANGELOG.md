@@ -4,6 +4,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-30
+
+### Geändert
+- Neue Übersicht für den Desktop: oben „Zwift starten“ mit Erklärung, darunter Karten in zwei
+  Spalten für Sensoren, Zwift-Version, Grafik, Anmeldung sowie Hilfe und Wartung; jede Karte
+  erklärt kurz, was dahintersteckt.
+- Sensoren-Seite neu gegliedert: Bridge mit ihren Schaltern, deine Geräte als große Karten mit
+  Zustand, Werten und Zwift-Namen, Suche nach neuen Geräten, „Wenn etwas hakt“.
+- Beim Start stehen Übersicht und Sensoren nebeneinander, das Fenster öffnet größer.
+- Einrichtungsseiten mit begrenzter Lesebreite; Erklärungen als ruhige Hinweise statt blauer
+  Meldungskästen.
+- Symbol: Die Pedale stehen waagrecht, das hintere liegt hinter Kurbelarm und Kettenblatt.
+
 ## [0.3.2] - 2026-10-30
 
 ### Geändert

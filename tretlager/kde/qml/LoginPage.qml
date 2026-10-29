@@ -22,8 +22,7 @@ Kirigami.ScrollablePage {
         wrapMode: Text.WordWrap
     }
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    PageContent {
 
         Kirigami.InlineMessage {
             Layout.fillWidth: true

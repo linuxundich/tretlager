@@ -21,8 +21,7 @@ Kirigami.ScrollablePage {
         color: Kirigami.Theme.disabledTextColor
     }
 
-    ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+    PageContent {
 
         Repeater {
             model: page.st.steps
@@ -88,10 +87,8 @@ Kirigami.ScrollablePage {
             text: "Zwift ist eingerichtet."
         }
 
-        Kirigami.InlineMessage {
-            Layout.fillWidth: true
+        Hint {
             visible: page.st.running
-            type: Kirigami.MessageType.Information
             text: "Du kannst das Fenster schließen; beim nächsten Start macht Tretlager dort weiter. Die Komponenten von Microsoft (.NET, WebView2, Schriften) unterliegen Microsofts Lizenzbedingungen."
         }
 
