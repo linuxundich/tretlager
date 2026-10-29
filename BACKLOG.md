@@ -64,7 +64,7 @@
 - [x] Entscheidungen: E2 ja, lokales .deb (später bender), Kirigami zuerst, neueste Wine (2026-10-29)
 Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + Kirigami `tretlager/kde`):
 
-- [ ] M1 Systemprüfung im Kern (ohne root) + Kirigami-Gerüst: Willkommen, Prüfseite mit Ampel
+- [x] M1 Systemprüfung im Kern (ohne root) + Kirigami-Gerüst: Willkommen, Prüfseite mit Ampel (auf tinytin geprüft 2026-10-29)
 - [ ] M2 Vorbereiten: Polkit-Helfer `setup-system` (WineHQ-Quelle, Paketliste per APT-Simulation), Seite mit Änderungsliste
 - [ ] M3 Zwift einrichten: Zustandsautomat mit Wiederaufnahme (`~/.local/state/tretlager/state.json`), Download + Signatur, Prefix, winetricks, Launcher, Spiel, GL-Test
 - [ ] M4 Anmeldung: Browser-Anmeldung mit Hinweis, Token im Schlüsselbund, Erneuerung

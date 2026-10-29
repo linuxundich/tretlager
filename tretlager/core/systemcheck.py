@@ -61,7 +61,7 @@ def check_system(root: Path = Path("/"), machine: str | None = None) -> Check:
         return Check("system", "System", FAIL, f"{machine} wird nicht unterstützt (Zwift braucht x86-64)", details)
     is_debian = osr.get("ID") == "debian" or "debian" in osr.get("ID_LIKE", "")
     if osr.get("ID") == "tuxedo" and codename == "forky":
-        return Check("system", "System", OK, f"{name} (forky)", details)
+        return Check("system", "System", OK, f"{name}, forky", details)
     if is_debian and codename == "forky":
         return Check("system", "System", WARN, f"{name}: Debian testing, nicht TUXEDO OS – nicht getestet", details)
     return Check("system", "System", WARN, f"{name} ist nicht das Zielsystem (TUXEDO OS forky)", details)
