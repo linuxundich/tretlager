@@ -39,3 +39,11 @@ laufender `avahi-daemon` und BlueZ. Tests: `python -m pytest tests`.
 Braucht zusätzlich `python3-pyside6.qtqml`, `python3-pyside6.qtquick`,
 `python3-pyside6.qtquickcontrols2`, `python3-pyside6.qtgui` und `qml6-module-org-kde-kirigami`.
 Stand: Willkommen und Systemprüfung (M1); die weiteren Schritte folgen laut BACKLOG.
+
+## Debian-Paket
+
+    build-aux/build-deb.sh            # → dist/tretlager_<Version>_all.deb (braucht dpkg-deb)
+    sudo apt install ./dist/tretlager_<Version>_all.deb
+
+Danach im Startmenü: **Tretlager** (Assistent/Hauptfenster) und **Zwift (Tretlager)** (Direktstart).
+Version steht in `CHANGELOG.md`.

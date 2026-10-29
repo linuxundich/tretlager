@@ -74,4 +74,8 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] Sicherheit: Token nie in Befehlszeilen/Protokollen (Datei + `--token=@`), Abmelden beendet die Sitzung bei Zwift
 - [ ] Bridge-Neustart beim Einspielen trennt Sensoren kurz – beim Paket-Update Zwift-Lauf beachten
 - [ ] Ende einer Zwift-Sitzung im Hauptfenster prüfen (Bridge stoppen, wenn nicht im Autostart)
-- [ ] M6 Debian-Paket `tretlager`, Ende-zu-Ende auf frischem TUXEDO OS forky (VM für den Ablauf, tinytin für NVIDIA/Sensoren)
+- [x] M6a Debian-Paket `tretlager` (`build-aux/build-deb.sh`), 0.2.0 auf tinytin installiert, Bridge aus dem Paket läuft (2026-10-29)
+- [ ] M6b Ende-zu-Ende auf frischem TUXEDO OS forky (VM `tuxedo-os-forky`: Ablauf ohne NVIDIA/Bluetooth; Polkit-Passwort und Zwift-Anmeldung durch Christoph)
+- [ ] Direktstart „Zwift (Tretlager)“ auf tinytin prüfen (startet Zwift, minimiert, beendet sich nach der Fahrt)
+- [ ] Nur eine Tretlager-Instanz (zweiter Aufruf soll das vorhandene Fenster nutzen)
+- [ ] Paketquelle auf bender (Debian), analog pacman-repo
