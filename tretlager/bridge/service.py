@@ -82,7 +82,8 @@ class Bridge(ServiceInterface):
                 devices.append({"address": cfg.address, "name": cfg.name, "role": cfg.role,
                                 "enabled": cfg.enabled, "port": cfg.port, "state": "aus",
                                 "error": "", "services": [], "zwift_clients": 0, "values": {}})
-        return json.dumps({"running": True, "scanning": self.scanning, "devices": devices})
+        return json.dumps({"running": True, "scanning": self.scanning, "local_only": self.config.local_only,
+                           "devices": devices})
 
     # --- D-Bus ---
 
@@ -152,6 +153,19 @@ class Bridge(ServiceInterface):
             self._start(cfg.address)
         else:
             await self._stop(cfg.address)
+        self._mark_dirty()
+        return True
+
+    @method()
+    async def SetLocalOnly(self, local_only: "b") -> "b":
+        """Nur für Zwift auf diesem Rechner (True) oder auch im Netz (False); Geräte neu ankündigen."""
+        if self.config.local_only == local_only:
+            return True
+        self.config.local_only = local_only
+        self.config.save()
+        for address in list(self.devices):
+            await self._stop(address)
+        self.start_devices()
         self._mark_dirty()
         return True
 

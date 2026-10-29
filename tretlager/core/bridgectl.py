@@ -52,6 +52,10 @@ def set_device_enabled(address: str, enabled: bool, run=subprocess.run) -> None:
     _busctl("SetDeviceEnabled", "sb", address, enabled, run=run)
 
 
+def set_local_only(local_only: bool, run=subprocess.run) -> None:
+    _busctl("SetLocalOnly", "b", local_only, run=run)
+
+
 def _systemctl(*args, run=subprocess.run) -> subprocess.CompletedProcess:
     return run(["systemctl", "--user", *args, BRIDGE_UNIT], capture_output=True, text=True, timeout=30)
 

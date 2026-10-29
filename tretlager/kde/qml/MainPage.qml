@@ -92,6 +92,16 @@ Kirigami.ScrollablePage {
         }
         Kirigami.InlineMessage {
             Layout.fillWidth: true
+            visible: page.se.devices.some(function (d) { return d.unstable })
+            type: Kirigami.MessageType.Warning
+            text: "Ein Sensor verliert oft die Verbindung – vermutlich ist der Rechner zu weit weg. Details unter Sensoren."
+            actions: [Kirigami.Action {
+                text: "Sensoren"; icon.name: "network-bluetooth"
+                onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("SensorsPage.qml"), { wizard: false })
+            }]
+        }
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
             visible: page.la.error !== ""
             type: Kirigami.MessageType.Error
             text: page.la.error

@@ -56,7 +56,6 @@
 - [ ] Ohne jede Netzverbindung testen (Ankündigung auf lo vorhanden)
 - [ ] Längere Fahrt (≥ 30 min) auf Stabilität prüfen
 - [x] Netzwechsel während der Fahrt: Ankündigung auf 127.0.0.1, Lauschen nur auf Loopback (2026-10-29)
-- [ ] Oberfläche: Schalter „Auch für Zwift auf anderen Geräten im Netz anbieten“ (local_only)
 - [ ] Netzwechsel-Test wiederholen: Kabel ab/an während der Fahrt
 
 ## Bedienung (Konzept: docs/bedienkonzept.md)
@@ -77,7 +76,8 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] M6a Debian-Paket `tretlager` (`build-aux/build-deb.sh`), 0.2.0 auf tinytin installiert, Bridge aus dem Paket läuft (2026-10-29)
 - [ ] M6b Ende-zu-Ende auf frischem TUXEDO OS forky (VM `tuxedo-os-forky`: Ablauf ohne NVIDIA/Bluetooth; Polkit-Passwort und Zwift-Anmeldung durch Christoph)
 - [x] Direktstart „Zwift (Tretlager)“ auf tinytin geprüft: Start nach 15 s, NVIDIA, Fenster/Auflösung ok, kein Token im Journal, nach der Fahrt Tretlager beendet, Bridge gestoppt (2026-10-29)
-- [ ] Nur eine Tretlager-Instanz (zweiter Aufruf soll das vorhandene Fenster nutzen)
-- [ ] Paketquelle auf bender (Debian), analog pacman-repo
-- [ ] Reichweite: Notebook im Nebenraum → KICKR verbindet nur wackelig (AX201). Hinweis in der Oberfläche bei häufigen Abbrüchen; Empfehlung USB-Bluetooth-Stick mit Verlängerung oder Bridge auf einem Rechner neben dem Trainer
-- [ ] Oberfläche: Schalter „Auch für Zwift auf anderen Geräten im Netz anbieten“ (`local_only`), z. B. Bridge auf Raspberry Pi neben dem Trainer
+- [x] Nur eine Tretlager-Instanz (zweiter Aufruf nutzt das vorhandene Fenster; 0.3.0)
+- [x] Paketquelle auf bender (Debian): `services/pacman-repo/publish-deb.sh`, `http://bender:8095/debian` (0.3.0)
+- [x] Reichweite: Hinweis in der Oberfläche bei häufigen Abbrüchen (≥ 3 in 10 min) mit Abhilfe (0.3.0)
+- [x] Oberfläche: Schalter „Im Netz anbieten“ (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
+- [ ] GTK-Oberfläche der Bridge: Netzschalter und Funkhinweis nachziehen

@@ -45,5 +45,12 @@ Stand: Willkommen und Systemprüfung (M1); die weiteren Schritte folgen laut BAC
     build-aux/build-deb.sh            # → dist/tretlager_<Version>_all.deb (braucht dpkg-deb)
     sudo apt install ./dist/tretlager_<Version>_all.deb
 
+Im Heimnetz einfacher über die eigene Paketquelle auf bender (unsigniert, nur LAN):
+
+    echo 'deb [trusted=yes] http://bender:8095/debian ./' | sudo tee /etc/apt/sources.list.d/linuxundich.list
+    sudo apt update && sudo apt install tretlager
+
+Neue Version veröffentlichen: Paket bauen, dann `services/pacman-repo/publish-deb.sh`.
+
 Danach im Startmenü: **Tretlager** (Assistent/Hauptfenster) und **Zwift (Tretlager)** (Direktstart).
 Version steht in `CHANGELOG.md`.

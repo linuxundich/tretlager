@@ -13,7 +13,7 @@ from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID
-from ..core import bridgectl, launch, login, prepare, setup, state, systemcheck
+from ..core import bridgectl, instance, launch, login, prepare, setup, state, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -25,6 +25,7 @@ class Backend(QObject):
 
     checksChanged = Signal()
     busyChanged = Signal()
+    remoteCommand = Signal(str)  # von einem zweiten Aufruf: "show" oder "start"
     _checksDone = Signal(list)
 
     def __init__(self, auto_start: bool = False) -> None:
@@ -319,7 +320,8 @@ class Backend(QObject):
     _sensorsEvent = Signal(dict)
 
     def _init_sensors(self) -> None:
-        self._sensors = {"installed": True, "running": False, "autostart": False, "devices": [], "scanning": False,
+        self._sensors = {"installed": True, "running": False, "autostart": False, "network": False,
+                         "devices": [], "scanning": False,
                          "found": [], "scanned": False, "error": ""}
         self._sensorsEvent.connect(self._on_sensors_event)
         self._poll = QTimer(self)
@@ -362,7 +364,8 @@ class Backend(QObject):
                 st = bridgectl.status()
                 self._sensorsEvent.emit({
                     "installed": bridgectl.unit_installed(), "running": st is not None,
-                    "autostart": bridgectl.autostart(), "devices": (st or {}).get("devices", [])})
+                    "autostart": bridgectl.autostart(), "devices": (st or {}).get("devices", []),
+                    "network": not (st or {}).get("local_only", True)})
             finally:
                 self._poll_busy = False
         self._bg(work)
@@ -370,6 +373,11 @@ class Backend(QObject):
     @Slot(bool)
     def setBridgeRunning(self, on: bool) -> None:
         self._bg(lambda: (bridgectl.set_running(on), self.refreshSensors()))
+
+    @Slot(bool)
+    def setBridgeNetwork(self, on: bool) -> None:
+        """Bridge auch für Zwift auf anderen Geräten im Netz anbieten (statt nur 127.0.0.1)."""
+        self._bg(lambda: (bridgectl.set_local_only(not on), self.refreshSensors()))
 
     @Slot(bool)
     def setBridgeAutostart(self, on: bool) -> None:
@@ -494,14 +502,25 @@ class Backend(QObject):
         threading.Thread(target=work, daemon=True).start()
 
 
+    # --- Nur eine Instanz ---
+
+    def listen_for_instances(self) -> None:
+        """Weitere Aufrufe nicht als zweites Fenster starten, sondern an dieses weitergeben."""
+        self._instance_socket = instance.listen(self.remoteCommand.emit)
+
+
 def main() -> int:
+    start = "--start" in sys.argv[1:]
+    if instance.forward("start" if start else "show"):
+        return 0
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Tretlager")
     app.setOrganizationDomain("linuxundich.de")
     app.setDesktopFileName(APP_ID)
     app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
     engine = QQmlApplicationEngine()
-    backend = Backend(auto_start="--start" in sys.argv[1:])
+    backend = Backend(auto_start=start)
+    backend.listen_for_instances()
     engine.rootContext().setContextProperty("backend", backend)
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():

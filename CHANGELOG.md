@@ -4,6 +4,17 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-30
+
+### Hinzugefügt
+- Nur eine Tretlager-Instanz: Ein zweiter Aufruf holt das offene Fenster nach vorn;
+  „Zwift (Tretlager)“ startet Zwift dann im vorhandenen Fenster.
+- Schalter „Im Netz anbieten“ in der Sensoren-Seite: Die Bridge kündigt ihre Geräte auch im LAN
+  an (z. B. Bridge auf einem Rechner neben dem Trainer, Zwift auf einem anderen Gerät).
+- Hinweis bei schwachem Funk: Bricht eine Sensorverbindung in 10 Minuten dreimal oder öfter ab,
+  zeigen Sensoren-Seite und Hauptfenster einen Hinweis mit Abhilfe.
+- Debian-Paketquelle im Heimnetz: `deb [trusted=yes] http://bender:8095/debian ./`.
+
 ## [0.2.1] - 2026-10-29
 
 ### Behoben

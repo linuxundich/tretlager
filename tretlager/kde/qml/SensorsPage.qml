@@ -71,12 +71,35 @@ Kirigami.ScrollablePage {
                 onToggled: backend.setBridgeRunning(checked)
             }
             Controls.Switch {
+                Kirigami.FormData.label: "Im Netz anbieten:"
+                text: checked ? "ja – auch für Zwift auf anderen Geräten" : "nein – nur Zwift auf diesem Rechner"
+                checked: page.se.network
+                enabled: page.se.installed && page.se.running
+                onToggled: backend.setBridgeNetwork(checked)
+            }
+            Controls.Switch {
                 Kirigami.FormData.label: "Beim Anmelden starten:"
                 text: checked ? "ja" : "nein (Tretlager startet sie mit Zwift)"
                 checked: page.se.autostart
                 enabled: page.se.installed
                 onToggled: backend.setBridgeAutostart(checked)
             }
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: page.se.network
+            type: Kirigami.MessageType.Information
+            text: "Die Bridge ist im lokalen Netz sichtbar. So kann ein Rechner neben dem Trainer die Sensoren halten und Zwift auf einem anderen Gerät sie nutzen. Jeder im Netz könnte dann aber auch den Trainer steuern."
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: page.se.devices.some(function (d) { return d.unstable })
+            type: Kirigami.MessageType.Warning
+            text: "Die Bluetooth-Verbindung zu " + page.se.devices.filter(function (d) { return d.unstable })
+                  .map(function (d) { return d.name }).join(", ")
+                  + " bricht oft ab. Meist ist der Funkweg zu lang: Rechner näher an den Trainer stellen, einen USB-Bluetooth-Stick mit Verlängerungskabel nutzen oder die Bridge auf einem Rechner neben dem Trainer laufen lassen (Schalter „Im Netz anbieten“)."
         }
 
         Kirigami.Heading { text: "Deine Geräte"; level: 2 }

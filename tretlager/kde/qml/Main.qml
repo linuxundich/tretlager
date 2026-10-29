@@ -15,6 +15,13 @@ Kirigami.ApplicationWindow {
     property bool zwiftWasRunning: false
     Connections {
         target: backend
+        // Zweiter Aufruf (Startmenü): dieses Fenster nach vorn, bei „start“ gleich Zwift starten.
+        function onRemoteCommand(cmd) {
+            root.showNormal()
+            root.raise()
+            root.requestActivate()
+            if (cmd === "start" && backend.setupComplete) backend.startZwift()
+        }
         function onLaunchChanged() {
             const running = backend.launchInfo.zwiftRunning
             if (running && !root.zwiftWasRunning) {

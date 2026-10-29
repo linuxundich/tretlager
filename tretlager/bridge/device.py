@@ -23,6 +23,9 @@ RECONNECT_DELAY = 5.0
 CONTROL_POINT_TIMEOUT = 3.0
 MAX_RECONNECT_DELAY = 60.0
 NOT_FOUND_DELAY = 10.0
+# Hinweis „Verbindung instabil“: so viele Abbrüche oder Fehlversuche in diesem Zeitraum.
+UNSTABLE_EVENTS = 3
+UNSTABLE_WINDOW = 600.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
 # BlueZ baut pro Adapter nur eine Verbindung gleichzeitig auf („Operation already in progress“).
@@ -82,6 +85,7 @@ class BridgedDevice:
         self._disconnected = asyncio.Event()
         self._was_connected = False
         self._pending: dict[str, asyncio.Future] = {}
+        self._trouble: list[float] = []  # Zeitpunkte von Abbrüchen und Fehlversuchen
 
     # --- GattBackend für den DIRCON-Server ---
 
@@ -135,6 +139,15 @@ class BridgedDevice:
                 pass
         await self._teardown()
 
+    def _note_trouble(self) -> None:
+        now = time.monotonic()
+        self._trouble = [t for t in self._trouble if now - t < UNSTABLE_WINDOW] + [now]
+
+    @property
+    def unstable(self) -> bool:
+        now = time.monotonic()
+        return sum(1 for t in self._trouble if now - t < UNSTABLE_WINDOW) >= UNSTABLE_EVENTS
+
     def status(self) -> dict:
         fresh = time.monotonic() - self.values_at < 5
         return {
@@ -148,6 +161,7 @@ class BridgedDevice:
             "error": self.error,
             "services": [s.uuid for s in self._services],
             "zwift_clients": self._server.client_count,
+            "unstable": self.unstable,
             "values": self.values if fresh else {},
         }
 
@@ -171,6 +185,8 @@ class BridgedDevice:
                     not_found = True
                 else:
                     text = str(e) or type(e).__name__
+                if not not_found or "failed to discover" in str(e):
+                    self._note_trouble()
                 self._set_state("fehler", text)
                 log.warning("%s: %s (%s)", self.cfg.address, text, type(e).__name__)
             # Nach einer stehenden Verbindung gleich wieder versuchen; ein Gerät, das immer wieder
