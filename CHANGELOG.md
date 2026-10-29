@@ -4,6 +4,12 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-29
+
+### Behoben
+- Sensor-Bridge: Geräte, die beim Verbinden wieder einschlafen (Trainer nach einer Pause), werden
+  nach 10 s erneut versucht statt mit wachsender Pause bis 60 s.
+
 ## [0.2.0] - 2026-10-29
 
 ### Hinzugefügt

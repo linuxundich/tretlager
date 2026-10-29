@@ -73,10 +73,10 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] M5 Sensoren-Seite (Bridge über D-Bus) + Hauptfenster „Zwift starten“ — auf tinytin: Start mit Token aus dem Schlüsselbund, NVIDIA, Fenster per KWin maximiert, Auflösung bleibt, Launcher-Reste beendet (2026-10-29)
 - [x] Sicherheit: Token nie in Befehlszeilen/Protokollen (Datei + `--token=@`), Abmelden beendet die Sitzung bei Zwift
 - [ ] Bridge-Neustart beim Einspielen trennt Sensoren kurz – beim Paket-Update Zwift-Lauf beachten
-- [ ] Ende einer Zwift-Sitzung im Hauptfenster prüfen (Bridge stoppen, wenn nicht im Autostart)
+- [x] Ende einer Zwift-Sitzung: Bridge stoppt, wenn nicht im Autostart (beim Direktstart geprüft)
 - [x] M6a Debian-Paket `tretlager` (`build-aux/build-deb.sh`), 0.2.0 auf tinytin installiert, Bridge aus dem Paket läuft (2026-10-29)
 - [ ] M6b Ende-zu-Ende auf frischem TUXEDO OS forky (VM `tuxedo-os-forky`: Ablauf ohne NVIDIA/Bluetooth; Polkit-Passwort und Zwift-Anmeldung durch Christoph)
-- [ ] Direktstart „Zwift (Tretlager)“ auf tinytin prüfen (startet Zwift, minimiert, beendet sich nach der Fahrt)
+- [x] Direktstart „Zwift (Tretlager)“ auf tinytin geprüft: Start nach 15 s, NVIDIA, Fenster/Auflösung ok, kein Token im Journal, nach der Fahrt Tretlager beendet, Bridge gestoppt (2026-10-29)
 - [ ] Nur eine Tretlager-Instanz (zweiter Aufruf soll das vorhandene Fenster nutzen)
 - [ ] Paketquelle auf bender (Debian), analog pacman-repo
 - [ ] Reichweite: Notebook im Nebenraum → KICKR verbindet nur wackelig (AX201). Hinweis in der Oberfläche bei häufigen Abbrüchen; Empfehlung USB-Bluetooth-Stick mit Verlängerung oder Bridge auf einem Rechner neben dem Trainer
