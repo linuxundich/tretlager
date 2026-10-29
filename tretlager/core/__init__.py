@@ -1,1 +1,1 @@
-"""UI-freier Kern: Systemprüfung, Einrichtung, Start. Von Kirigami- und GTK-Oberfläche genutzt."""
+"""UI-freier Kern: Systemprüfung, Einrichtung, Start. Von der Kirigami-Oberfläche genutzt."""

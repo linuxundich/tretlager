@@ -34,7 +34,7 @@
 - [ ] D' Machbarkeitstests T1–T7 (T1 Signatur weitgehend erledigt 2026-10-29) vor der Installationslogik (siehe FEASIBILITY.md, Abschnitt 9)
 - [ ] B Systemdiagnose rein lesend (os-release, sysfs/DRM, nvidia-smi, EGL-Test, BlueZ per D-Bus,
   Wine-Version + Stub-Prüfung, Platz, vorhandene Prefixe)
-- [ ] C GTK4-Prototyp: Hauptfenster, Assistent, Diagnose; Platzhalter klar erkennbar
+- [x] ~~C GTK4-Prototyp~~ entfällt: Christoph 2026-10-30, es bleibt bei der Kirigami-Oberfläche
 - [ ] D Installation: PackageKit (Simulation + Installation), pkexec-Helfer für WineHQ-Quelle,
   Download + Authenticode, Prefix, Launcher, Zustandsautomat mit Wiederaufnahme
 - [ ] E Bridge BLE → DIRCON mit echter Hardware (Leistung, Kadenz, ERG, Puls)
@@ -80,4 +80,4 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] Paketquelle auf bender (Debian): `services/pacman-repo/publish-deb.sh`, `http://bender:8095/debian` (0.3.0)
 - [x] Reichweite: Hinweis in der Oberfläche bei häufigen Abbrüchen (≥ 3 in 10 min) mit Abhilfe (0.3.0)
 - [x] Oberfläche: Schalter „Im Netz anbieten“ (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
-- [ ] GTK-Oberfläche der Bridge: Netzschalter und Funkhinweis nachziehen
+- [x] ~~GTK-Oberfläche der Bridge nachziehen~~ entfällt: GTK-Oberfläche in 0.5.1 entfernt (Christoph 2026-10-30)

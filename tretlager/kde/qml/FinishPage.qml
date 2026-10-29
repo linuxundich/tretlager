@@ -29,13 +29,13 @@ FormCard.FormCardPage {
         FormCard.FormTextDelegate {
             text: "Leistung, Trittfrequenz und Widerstand"
             description: "„Wahoo KICKR …“ auswählen"
-            icon.source: Qt.resolvedUrl("../../ui/icons/hicolor/scalable/actions/tretlager-trainer-symbolic.svg")
+            icon.source: Qt.resolvedUrl("../../data/icons/tretlager-trainer-symbolic.svg")
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {
             text: "Herzfrequenz"
             description: "„Wahoo HRM …“ auswählen"
-            icon.source: Qt.resolvedUrl("../../ui/icons/hicolor/scalable/actions/tretlager-heartrate-symbolic.svg")
+            icon.source: Qt.resolvedUrl("../../data/icons/tretlager-heartrate-symbolic.svg")
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {

@@ -4,6 +4,18 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-30
+
+### Entfernt
+- GTK4-/libadwaita-Oberfläche der Bridge (`tretlager-sensoren-gtk`, Empfehlungen `python3-gi`,
+  `gir1.2-gtk-4.0`, `gir1.2-adw-1`). Die Bridge wird nur noch über die Kirigami-Oberfläche
+  gesteuert; deren Sensorsymbole liegen jetzt in `tretlager/data/icons`.
+
+### Geändert
+- Die Hilfe spricht nicht mehr mit „du“ an (KDE-HIG) und nennt die neuen Bezeichnungen
+  (Übersicht, Seitenleiste, *Neu anmelden …*).
+- Hilfe: Abschnitt zu abbrechenden Verbindungen ergänzt, UI-Namen kursiv.
+
 ## [0.5.0] - 2026-10-30
 
 ### Geändert

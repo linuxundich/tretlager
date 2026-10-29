@@ -20,7 +20,6 @@ find "$R/usr/lib/python3/dist-packages/tretlager" -name __pycache__ -prune -exec
 install -d "$R/usr/bin"
 printf '#!/bin/sh\nexec python3 -m tretlager.kde "$@"\n' > "$R/usr/bin/tretlager"
 printf '#!/bin/sh\nexec python3 -m tretlager.bridge "$@"\n' > "$R/usr/bin/tretlager-bridge"
-printf '#!/bin/sh\nexec python3 -m tretlager.ui "$@"\n' > "$R/usr/bin/tretlager-sensoren-gtk"
 chmod 0755 "$R"/usr/bin/*
 
 # Helfer, Schlüssel, Polkit

@@ -10,7 +10,7 @@ Depends: python3 (>= 3.12), python3-bleak, python3-dbus-fast, python3-secretstor
  python3-pyside6.qtquickcontrols2, qml6-module-org-kde-kirigami, qml6-module-org-kde-kirigamiaddons-formcard,
  qml6-module-org-kde-kirigamiaddons-components, qml6-module-qtquick-layouts,
  qml6-module-qtquick-controls, avahi-daemon, bluez, pkexec, gpg, osslsigncode, cabextract, systemd
-Recommends: qml6-module-org-kde-desktop, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1
+Recommends: qml6-module-org-kde-desktop
 Description: Zwift unter Linux einrichten, starten und mit Sensoren verbinden
  Tretlager richtet den offiziellen Windows-Client von Zwift unter Wine ein (WineHQ),
  prüft den Installer per Signatur, wählt den Grafikweg (NVIDIA per PRIME-Offload)

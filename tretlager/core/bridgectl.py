@@ -1,7 +1,7 @@
 """Sensor-Bridge aus dem Kern steuern: D-Bus über `busctl --json`, Dienst über `systemctl --user`.
 
-Synchron und ohne zusätzliche Python-Pakete, damit Kirigami- und GTK-Oberfläche es aus Threads
-nutzen können.
+Synchron und ohne zusätzliche Python-Pakete, damit die Kirigami-Oberfläche es aus Threads
+nutzen kann.
 """
 
 from __future__ import annotations

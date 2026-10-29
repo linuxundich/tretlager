@@ -1,6 +1,6 @@
 # Tretlager (Arbeitstitel)
 
-Native GTK4-/libadwaita-Anwendung, die den offiziellen Windows-Client von **Zwift** unter
+Native Qt-/Kirigami-Anwendung für KDE Plasma, die den offiziellen Windows-Client von **Zwift** unter
 **TUXEDO OS Forky** (Debian testing) einrichtet, startet und aktuell hält: Wine, Laufzeit,
 Grafikdiagnose (NVIDIA), Sensoren über Bluetooth LE ohne Zwift Companion App.
 
@@ -27,10 +27,10 @@ Telemetrie, keine stillen Systemänderungen. Nicht Funktionierendes wird als sol
 
     build-aux/install-user.sh          # nach ~/.local, systemd-Benutzerdienst tretlager-bridge
     systemctl --user start tretlager-bridge
-    PYTHONPATH=~/.local/lib/tretlager python3 -m tretlager.ui
 
-Abhängigkeiten (Debian forky): `python3-bleak`, `python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`,
-laufender `avahi-daemon` und BlueZ. Tests: `python -m pytest tests`.
+Abhängigkeiten (Debian forky): `python3-bleak`, `python3-dbus-fast`, laufender `avahi-daemon`
+und BlueZ. Gesteuert wird die Bridge über die Sensoren-Seite der Kirigami-Oberfläche.
+Tests: `python -m pytest tests`.
 
 ## Oberfläche (Kirigami)
 

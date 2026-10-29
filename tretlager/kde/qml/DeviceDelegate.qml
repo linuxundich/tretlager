@@ -25,7 +25,7 @@ FormCard.AbstractFormDelegate {
         "aus": "Weiterreichen ist für dieses Gerät abgeschaltet." })
     readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",
         "cadence": "Trittfrequenzsensor", "heartrate": "Pulsgurt", "other": "Sensor" })
-    readonly property string iconDir: Qt.resolvedUrl("../../ui/icons/hicolor/scalable/actions/")
+    readonly property string iconDir: Qt.resolvedUrl("../../data/icons/")
 
     function stateColor(st) {
         return st === "verbunden" ? Kirigami.Theme.positiveTextColor

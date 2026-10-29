@@ -9,7 +9,7 @@ FormCard.FormCardPage {
     id: page
     title: "Sensoren"
 
-    property bool wizard: true
+    property bool wizard: !applicationWindow().navigation
     readonly property var se: backend.sensors
     readonly property var unstable: se.devices.filter(function (d) { return d.unstable })
     readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",
