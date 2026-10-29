@@ -65,7 +65,7 @@
 Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + Kirigami `tretlager/kde`):
 
 - [x] M1 Systemprüfung im Kern (ohne root) + Kirigami-Gerüst: Willkommen, Prüfseite mit Ampel (auf tinytin geprüft 2026-10-29)
-- [ ] M2 Vorbereiten: Polkit-Helfer `setup-system` (WineHQ-Quelle, Paketliste per APT-Simulation), Seite mit Änderungsliste — gebaut; Planung ohne root auf tinytin geprüft, Polkit-Aktion installiert; **offen: Ausführung mit Polkit-Dialog auf tinytin** (`TRETLAGER_TEST_FORCE_SOURCE=1`)
+- [x] M2 Vorbereiten: Polkit-Helfer `setup-system` (WineHQ-Quelle, Paketliste per APT-Simulation), Seite mit Änderungsliste — auf tinytin mit Polkit-Dialog ausgeführt (2026-10-29, nach Fix des gpg-Arbeitsverzeichnisses)
 - [x] M3 Zwift einrichten (Kern): Schritte mit Wiederaufnahme, Download + Signatur, Prefix, winetricks, Launcher, Spiel, GL-Test — auf tinytin Ende-zu-Ende in 459 s, zweiter Lauf 2 s (2026-10-29)
 - [ ] M3 Seite „Zwift einrichten“ in der Oberfläche einmal durchklicken (Kern bereits geprüft)
 - [ ] M4 Anmeldung: Browser-Anmeldung mit Hinweis, Token im Schlüsselbund, Erneuerung
