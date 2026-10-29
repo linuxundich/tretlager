@@ -152,3 +152,7 @@ def test_server_end_to_end_over_tcp():
     assert [p.message for p in pkts] == [1, 5, 6]
     assert pkts[2].payload.endswith(b"\x40\x00\xc8\x00")
     assert clients == 0
+
+
+def test_local_ipv4_addresses_include_loopback():
+    assert "127.0.0.1" in dircon.local_ipv4_addresses()

@@ -13,7 +13,9 @@ der Aufrufer über die Schnittstelle `GattBackend`.
 from __future__ import annotations
 
 import asyncio
+import fcntl
 import logging
+import socket
 import struct
 import uuid as uuidlib
 from dataclasses import dataclass, field
@@ -46,6 +48,22 @@ PROP_NOTIFY = 0x04
 PROP_INDICATE = 0x08
 
 BLUETOOTH_BASE = "0000{:04x}-0000-1000-8000-00805f9b34fb"
+
+ADDRESS_CHECK_INTERVAL = 3.0
+SIOCGIFADDR = 0x8915
+
+
+def local_ipv4_addresses() -> set[str]:
+    """IPv4-Adressen aller Schnittstellen (ohne externe Werkzeuge, per ioctl)."""
+    out = set()
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        for _index, name in socket.if_nameindex():
+            try:
+                req = struct.pack("256s", name.encode()[:15])
+                out.add(socket.inet_ntoa(fcntl.ioctl(s.fileno(), SIOCGIFADDR, req)[20:24]))
+            except OSError:
+                pass  # Schnittstelle ohne IPv4-Adresse
+    return out
 
 
 def full_uuid(value: str | int) -> str:
@@ -230,12 +248,32 @@ class Server:
         self.port = port
         self.sessions: set[Session] = set()
         self._server: asyncio.base_events.Server | None = None
+        self._watchdog: asyncio.Task | None = None
 
     async def start(self) -> None:
         self._server = await asyncio.start_server(self._client, self.host, self.port)
+        self._watchdog = asyncio.create_task(self._watch_addresses())
         log.info("DIRCON lauscht auf %s:%d", self.host, self.port)
 
+    async def _watch_addresses(self) -> None:
+        """Verbindungen schließen, deren lokale Adresse verschwunden ist (Kabel ab, WLAN-Wechsel).
+
+        TCP merkt das sonst erst nach Minuten; Zwift wartet so lange auf Daten, die nie kommen,
+        statt sich über die neue Adresse wieder zu verbinden.
+        """
+        while True:
+            await asyncio.sleep(ADDRESS_CHECK_INTERVAL)
+            current = local_ipv4_addresses()
+            for s in list(self.sessions):
+                local = s.writer.get_extra_info("sockname") if s.writer else None
+                if local and local[0] not in current and not local[0].startswith("127."):
+                    log.info("DIRCON: lokale Adresse %s ist weg, Verbindung wird geschlossen", local[0])
+                    s.writer.transport.abort()
+
     async def stop(self) -> None:
+        if self._watchdog:
+            self._watchdog.cancel()
+            self._watchdog = None
         if self._server:
             self._server.close()
             for s in list(self.sessions):
