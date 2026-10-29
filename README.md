@@ -32,13 +32,16 @@ Telemetrie, keine stillen Systemänderungen. Nicht Funktionierendes wird als sol
 Abhängigkeiten (Debian forky): `python3-bleak`, `python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`,
 laufender `avahi-daemon` und BlueZ. Tests: `python -m pytest tests`.
 
-## Einrichtungsassistent (Kirigami, in Arbeit)
+## Oberfläche (Kirigami)
 
     PYTHONPATH=. python3 -m tretlager.kde
 
 Braucht zusätzlich `python3-pyside6.qtqml`, `python3-pyside6.qtquick`,
-`python3-pyside6.qtquickcontrols2`, `python3-pyside6.qtgui` und `qml6-module-org-kde-kirigami`.
-Stand: Willkommen und Systemprüfung (M1); die weiteren Schritte folgen laut BACKLOG.
+`python3-pyside6.qtquickcontrols2`, `python3-pyside6.qtgui`, `qml6-module-org-kde-kirigami` und
+`qml6-module-org-kde-kirigamiaddons-formcard` (plus `-components`). Die Oberfläche folgt den
+KDE Human Interface Guidelines: Seitenleiste nach der Einrichtung, FormCards, Hilfeknöpfe,
+Assistent als linearer Ablauf. `TRETLAGER_INSTANCE=test` startet eine zweite Instanz neben der
+laufenden, etwa zum Testen aus dem Quellbaum.
 
 ## Debian-Paket
 

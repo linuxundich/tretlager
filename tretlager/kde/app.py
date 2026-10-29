@@ -13,6 +13,7 @@ from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
+from .i18n import LocalizedContext
 from ..core import bridgectl, instance, launch, login, prepare, setup, state, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
@@ -426,6 +427,14 @@ class Backend(QObject):
         return __version__
 
     @Property(str, constant=True)
+    def licenseText(self) -> str:
+        """Volltext der GPL für die Infoseite: Debian-Systemkopie, sonst LICENSE aus dem Quellbaum."""
+        for path in (Path("/usr/share/common-licenses/GPL-3"), Path(__file__).resolve().parents[2] / "LICENSE"):
+            if path.is_file():
+                return path.read_text()
+        return "GNU General Public License, Version 3 oder später: https://www.gnu.org/licenses/gpl-3.0.html"
+
+    @Property(str, constant=True)
     def helpText(self) -> str:
         return (DATA_DIR / "hilfe.md").read_text()
 
@@ -523,6 +532,8 @@ def main() -> int:
     app.setDesktopFileName(APP_ID)
     app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
     engine = QQmlApplicationEngine()
+    localized = LocalizedContext()  # i18n-Funktionen für Kirigami Addons
+    engine.rootContext().setContextObject(localized)
     backend = Backend(auto_start=start)
     backend.listen_for_instances()
     engine.rootContext().setContextProperty("backend", backend)

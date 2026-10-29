@@ -14,7 +14,9 @@ COMMANDS = ("show", "start")
 
 
 def socket_name(uid: int | None = None) -> str:
-    return f"\0tretlager-{os.getuid() if uid is None else uid}"
+    # TRETLAGER_INSTANCE nur für Tests: eine zweite Instanz neben der laufenden starten
+    suffix = os.environ.get("TRETLAGER_INSTANCE", "")
+    return f"\0tretlager-{os.getuid() if uid is None else uid}" + (f"-{suffix}" if suffix else "")
 
 
 def forward(command: str, name: str | None = None) -> bool:

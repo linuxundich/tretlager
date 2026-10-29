@@ -4,6 +4,29 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-30
+
+### Geändert
+- Oberfläche nach den aktuellen KDE Human Interface Guidelines überarbeitet:
+  - Seitenleiste (Kirigami-GlobalDrawer) mit Übersicht, Sensoren, Hilfe, Einrichtung prüfen
+    und Über Tretlager; der Assistent bleibt ein linearer Ablauf mit einer Seite und
+    Zurück-Knopf.
+  - Einstellungen, Geräte und Listen als FormCards aus Kirigami Addons statt eigener Karten;
+    Erklärungen hinter Hilfeknöpfen (ContextualHelpButton) statt langer Textblöcke.
+  - Übersicht: Start rahmenlos oben, darunter Sensoren und Zwift in zwei Spalten.
+  - Entfernen-Knöpfe bleiben sichtbar, Protokolle öffnen sich in einem Dialog.
+  - Texte knapp und unpersönlich, Einheiten ausgeschrieben, Auslassungspunkte bei Aktionen,
+    die weitere Eingaben verlangen.
+  - Assistentenseiten mit Fortschrittsbalken „Schritt n von 6“ und einheitlicher Fußleiste.
+- Über Tretlager nutzt die Standard-Infoseite von KDE (Kirigami Addons) mit Lizenztext.
+- Neue Paketabhängigkeiten: `qml6-module-org-kde-kirigamiaddons-formcard` und
+  `-components`; empfohlen `qml6-module-org-kde-desktop`.
+
+### Hinzugefügt
+- Ersatz für KLocalizedContext (`tretlager/kde/i18n.py`): Kirigami Addons zeigt seine eigenen
+  Beschriftungen übersetzt, obwohl PySide keine KI18n-Bindung hat.
+- `TRETLAGER_INSTANCE` startet zum Testen eine zweite Instanz neben der laufenden.
+
 ## [0.4.1] - 2026-10-30
 
 ### Hinzugefügt

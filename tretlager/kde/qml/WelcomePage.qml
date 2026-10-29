@@ -2,87 +2,84 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
+import org.kde.kirigamiaddons.formcard as FormCard
 
-Kirigami.ScrollablePage {
+FormCard.FormCardPage {
+    id: page
     title: "Willkommen"
 
-    PageContent {
+    ColumnLayout {
+        Layout.alignment: Qt.AlignHCenter
+        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+        Layout.topMargin: Kirigami.Units.gridUnit * 2
+        spacing: Kirigami.Units.smallSpacing
 
         Kirigami.Icon {
-            source: Qt.resolvedUrl("../../data/icons/de.linuxundich.Tretlager.svg")
+            source: "de.linuxundich.Tretlager"
+            fallback: Qt.resolvedUrl("../../data/icons/de.linuxundich.Tretlager.svg")
             Layout.preferredWidth: Kirigami.Units.iconSizes.enormous
             Layout.preferredHeight: Kirigami.Units.iconSizes.enormous
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Kirigami.Units.gridUnit
         }
-
         Kirigami.Heading {
             text: "Zwift unter Linux"
             level: 1
             Layout.alignment: Qt.AlignHCenter
         }
-
         Controls.Label {
-            text: "Tretlager richtet Zwift auf diesem Rechner ein und verbindet deinen Trainer und Pulsgurt."
+            text: "Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt."
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
+            color: Kirigami.Theme.disabledTextColor
             Layout.fillWidth: true
         }
+    }
 
-        Kirigami.Separator { Layout.fillWidth: true }
-
-        Kirigami.Heading { text: "Das brauchst du"; level: 3 }
-
-        Repeater {
-            model: [
-                ["user-identity", "Ein Zwift-Konto"],
-                ["drive-harddisk", "Etwa 11 GB freien Speicher"],
-                ["network-wired", "Internet für etwa 5 GB Download"],
-                ["network-bluetooth", "Smart-Trainer und Pulsgurt mit Bluetooth (später)"]
-            ]
-            delegate: RowLayout {
-                required property var modelData
-                spacing: Kirigami.Units.smallSpacing
-                Kirigami.Icon {
-                    source: modelData[0]
-                    Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
-                    Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
-                }
-                Controls.Label { text: modelData[1]; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-            }
+    FormCard.FormHeader { title: "Voraussetzungen" }
+    FormCard.FormCard {
+        FormCard.FormTextDelegate { text: "Zwift-Konto mit Abo"; icon.name: "user-identity" }
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormTextDelegate { text: "Etwa 11 GB freier Speicher"; icon.name: "drive-harddisk" }
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormTextDelegate { text: "Internetzugang für etwa 5 GB Download"; icon.name: "network-wired" }
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormTextDelegate {
+            text: "Smart-Trainer und Pulsgurt mit Bluetooth"
+            description: "Erst im fünften Schritt nötig"
+            icon.name: "network-bluetooth"
         }
+    }
 
-        Hint {
-            icon: "dialog-warning"
-            text: "<b>Kein offizielles Zwift-Programm, Benutzung auf eigene Gefahr.</b> Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle; an Zwift selbst wird nichts verändert. Die Anmeldung über den Browser widerspricht den Zwift-Nutzungsbedingungen."
+    FormCard.FormHeader { title: "Wichtig" }
+    FormCard.FormCard {
+        FormCard.FormTextDelegate {
+            text: "Kein offizielles Zwift-Programm"
+            description: "Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen "
+                + "Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser widerspricht den "
+                + "Zwift-Nutzungsbedingungen. Benutzung auf eigene Gefahr."
+            icon.name: "dialog-warning"
         }
-
-        Controls.Button {
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormButtonDelegate {
             text: "Über Tretlager und Lizenzen"
             icon.name: "help-about"
-            flat: true
-            Layout.alignment: Qt.AlignHCenter
             onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
         }
-
-        Controls.Button {
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormButtonDelegate {
             text: "Hilfe lesen"
             icon.name: "help-contents"
-            flat: true
-            Layout.alignment: Qt.AlignHCenter
             onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("HelpPage.qml"))
         }
+    }
 
-        Controls.Button {
-            text: "Los geht's"
-            icon.name: "go-next"
-            highlighted: true
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Kirigami.Units.largeSpacing
-            onClicked: {
-                backend.runChecks()
-                applicationWindow().pageStack.push(Qt.resolvedUrl("CheckPage.qml"))
-            }
+    Item { implicitHeight: Kirigami.Units.gridUnit }
+
+    footer: WizardFooter {
+        nextText: "Einrichtung beginnen"
+        onNext: {
+            backend.runChecks()
+            applicationWindow().pageStack.push(Qt.resolvedUrl("CheckPage.qml"))
         }
     }
 }
