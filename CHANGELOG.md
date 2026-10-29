@@ -4,6 +4,12 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-30
+
+### Geändert
+- Tretlager öffnet sich so breit, dass Hauptfenster und Sensoren bzw. Hilfe nebeneinander
+  passen, sofern der Bildschirm Platz hat.
+
 ## [0.3.0] - 2026-10-30
 
 ### Hinzugefügt

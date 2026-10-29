@@ -1,12 +1,17 @@
 import QtQuick
+import QtQuick.Window
 import org.kde.kirigami as Kirigami
 
 Kirigami.ApplicationWindow {
     id: root
     title: "Tretlager"
-    width: Kirigami.Units.gridUnit * 36
-    height: Kirigami.Units.gridUnit * 40
+    // Breit genug für zwei Spalten (Hauptfenster + Sensoren/Hilfe), sofern der Bildschirm es hergibt;
+    // sonst 90 % der freien Fläche, dann stapelt Kirigami die Seiten.
+    readonly property int columnWidth: Kirigami.Units.gridUnit * 26
+    width: Math.min(columnWidth * 2 + Kirigami.Units.gridUnit * 2, Screen.desktopAvailableWidth * 0.9)
+    height: Math.min(Kirigami.Units.gridUnit * 42, Screen.desktopAvailableHeight * 0.9)
     minimumWidth: Kirigami.Units.gridUnit * 22
+    pageStack.defaultColumnWidth: columnWidth
 
     // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
     readonly property var steps: ["Prüfen", "Vorbereiten", "Zwift", "Anmeldung", "Sensoren", "Fertig"]
