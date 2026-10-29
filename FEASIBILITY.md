@@ -313,7 +313,7 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
 |---|---|---|
 | T1 ✔ | beliebig | Authenticode von `ZwiftSetup.exe`: Signierer, Kette, Zeitstempel |
 | T2 ◐ | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: rendert die Anmeldung im Launcher 1.2.x? startet er das Spiel selbst? |
-| T3 | Forky + NVIDIA | OpenGL-Renderer in Wine = NVIDIA? EGL oder GLX nötig? fps auf Watopia |
+| T3 ✔ | Forky + NVIDIA | OpenGL-Renderer in Wine = NVIDIA? EGL oder GLX nötig? fps auf Watopia |
 | T4 | Forky-VM | Prefix-Einrichtung idempotent, Abbruch/Wiederaufnahme |
 | T5 | Forky + BLE | Bridge-Prototyp (FTMS) auf demselben Host: findet Zwift das Gerät? |
 | T6 | Forky + Trainer + Gurt | Leistung, Kadenz, ERG, Steigungssimulation, Puls über DIRCON |
@@ -513,3 +513,47 @@ Folgen:
   (groß, Fehlerbericht lohnt sich mit diesem Minimalbeispiel) oder dass Zwift zum klassischen
   Steuerelement zurückkehrt bzw. darauf ausweicht (Rückmeldung an Zwift möglich).
 - Einen Launcher-Patch baut Tretlager nicht (Grundsatz: Zwift-Dateien bleiben unverändert).
+
+### T2b: Opt-in-Token-Login, T3: Grafik, tinytin, 2026-10-29
+
+**Zwift läuft auf tinytin.** Weg (`poc/token-login/`):
+1. Anmeldung im System-Browser auf `secure.zwift.com` mit `client_id=Game_Launcher`. Christoph
+   meldet sich selbst an; das Skript sieht das Passwort nie.
+2. Der Browser landet auf `launcher.zwift.com/launcher?state=…&code=…` und zeigt „Bad Request“.
+   Die Adresse wird ins Terminal kopiert, der Code ist nur kurz gültig.
+3. Code gegen Token tauschen (`/openid-connect/token`). Das Token liegt in `$XDG_RUNTIME_DIR` und
+   wird nach dem Start gelöscht.
+4. `ZwiftLauncher.exe SilentLaunch`, dann `ZwiftApp.exe --token=…` als **Kind des Launchers**
+   über ein eigenes `RunFromProcess.exe` (C#, `PROC_THREAD_ATTRIBUTE_PARENT_PROCESS`, mit
+   csc.exe im Prefix gebaut). Danach Launcher und Crash-Handler beenden.
+
+Ohne den richtigen Elternprozess startet `ZwiftApp.exe` den Launcher neu. Dieser stürzt dann ab
+(`AccessViolationException` in `ZwiftPatcher.patcher_CheckExperimentation`).
+
+Einordnung: Der Weg nutzt die nicht dokumentierte Launcher-Anmeldung und täuscht den
+Elternprozess vor (AGB §5, Grundsatz 7). Er ist ein **Test für Christophs eigenes Konto auf
+dessen ausdrückliche Entscheidung**, kein beschlossener Bestandteil der App (E2 bleibt offen).
+
+**T3 Grafik** (`poc/gltest/GLTest.cs`, gleicher WGL-Weg wie GLFW in Zwift):
+
+| Variante | Ergebnis |
+|---|---|
+| Wine-Standard (EGL) | Intel Iris Xe, OpenGL 4.6 Mesa 26.1.6 |
+| EGL + `__EGL_VENDOR_LIBRARY_FILENAMES=10_nvidia.json` + Offload | **kein Pixelformat** → Zwift „OpenGL 3.1 required“ |
+| EGL, Vendor leer (netbrain) | Intel |
+| GLX (`HKCU\Software\Wine\X11 Driver\UseEGL=N`) | Intel |
+| **GLX + `__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia`** | **NVIDIA RTX 3050 Ti, OpenGL 4.6.0, 580.178.04** |
+
+Im Spiel: `ZwiftApp.exe` mit 3,3 GB VRAM und 58 % SM-Last auf der NVIDIA-Karte; im Log steht
+„GPU … NVIDIA GeForce RTX 3050 Ti Laptop GPU“. Die App muss auf Hybrid-Rechnern also GLX und
+PRIME-Offload setzen und das mit diesem GL-Test nachweisen.
+
+**Sensoren im Spiel:** `BLE_LOAD_FAIL; library="BleWin10Lib_fallback.dll", windowsBuild=19045`
+→ „Native BLE unavailable, deferring scan“ → „Starting ANT+ scan“. Wie erwartet findet Zwift
+kein Bluetooth. Weiter geht es mit T5 (Bridge).
+
+Nebenbefunde:
+- Zwift schreibt Sentry-Absturzberichte (`AppData/Local/Zwift/.sentry`). Das gehört in die
+  Datenschutz-Übersicht; es stammt von Zwift, nicht von Tretlager.
+- Beim ersten Start fehlen Welten-Daten („Watopia not found“). Das Spiel lief trotzdem; ob es
+  sie nachlädt, ist noch zu prüfen.
