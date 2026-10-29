@@ -170,9 +170,12 @@ class Launcher:
     def run_from_process(self) -> Path:
         work = paths.CACHE / "rfp"
         exe = work / "RunFromProcess.exe"
-        if not exe.exists():
+        src = work / "RunFromProcess.cs"
+        # Neu übersetzen, wenn die mitgelieferte Quelle sich geändert hat.
+        if not exe.exists() or not src.exists() or src.read_bytes() != RFP_SRC.read_bytes():
             work.mkdir(parents=True, exist_ok=True)
-            shutil.copy(RFP_SRC, work / "RunFromProcess.cs")
+            exe.unlink(missing_ok=True)
+            shutil.copy(RFP_SRC, src)
             self.ctx.run(["wine", setup.CSC, "/nologo", "/target:exe", "/platform:x64", "/out:RunFromProcess.exe",
                           "RunFromProcess.cs"], cwd=work)
             if not exe.exists():
@@ -195,12 +198,25 @@ class Launcher:
         time.sleep(5)
         gfx = state.load().get("graphics", {})
         env = dict(self.env, **setup.graphics_env(gfx))
-        # Token als Argument; es liegt nur im Speicher dieses Prozesses und im Schlüsselbund.
-        r = subprocess.run(["wine", str(rfp), str(pid), "ZwiftApp.exe", "--token=" + json.dumps(token)],
-                           cwd=paths.ZWIFT_DIR, env=env, capture_output=True, text=True, timeout=60)
-        if r.returncode != 0:
-            raise LaunchError("Zwift ließ sich nicht starten: " + (r.stderr or r.stdout).strip()[-200:])
-        time.sleep(15)
+        # Das Token nie in eine Linux-Befehlszeile oder ein Protokoll: Es geht über eine Datei, die nur
+        # der Benutzer lesen kann (tmpfs), RunFromProcess setzt es selbst ein; danach wird sie gelöscht.
+        tok_file = Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "tretlager-start.json"
+        fd = os.open(tok_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(json.dumps(token))
+        try:
+            win_path = "Z:" + str(tok_file).replace("/", "\\")
+            # Ohne Pipe: Zwift erbt sonst die Ausgabe und hält sie offen (Zeitüberschreitung).
+            proc = subprocess.run(["wine", str(rfp), str(pid), "ZwiftApp.exe", "--token=@" + win_path],
+                                  cwd=paths.ZWIFT_DIR, env=env, stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL, timeout=60, check=False)
+            if proc.returncode != 0:
+                raise LaunchError(f"Zwift ließ sich nicht starten (RunFromProcess, Code {proc.returncode}).")
+            time.sleep(15)
+        except subprocess.TimeoutExpired:
+            raise LaunchError("Zwift ließ sich nicht starten (Zeitüberschreitung).") from None
+        finally:
+            tok_file.unlink(missing_ok=True)
         for name in ("ZwiftLauncher.exe", "ZwiftWindowsCrashHandler.exe"):
             subprocess.run(["wine", "taskkill", "/f", "/im", name], env=self.env, capture_output=True, timeout=30)
 

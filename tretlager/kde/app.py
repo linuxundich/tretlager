@@ -292,12 +292,22 @@ class Backend(QObject):
 
     @Slot()
     def logout(self) -> None:
-        try:
-            login.Keyring().delete()
-        except login.LoginError as e:
-            self._login_update(error=str(e))
-            return
-        self._login_update(state="none", access_left=0, refresh_left=0)
+        """Bei Zwift abmelden (Sitzung serverseitig beenden) und das Token aus dem Schlüsselbund löschen."""
+        def work():
+            err = ""
+            try:
+                kr = login.Keyring()
+                tok = kr.load()
+                if tok and tok.get("refresh_token"):
+                    try:
+                        login.logout_remote(tok)
+                    except login.LoginError as e:
+                        err = str(e)
+                kr.delete()
+            except login.LoginError as e:
+                err = str(e)
+            self._loginEvent.emit({"state": "none", "access_left": 0, "refresh_left": 0, "error": err})
+        threading.Thread(target=work, daemon=True).start()
 
 
     # --- Sensoren (Bridge) ---
@@ -445,6 +455,9 @@ class Backend(QObject):
             except (launch.LaunchError, bridgectl.BridgeError, login.LoginError, setup.SetupError) as e:
                 self._launchEvent.emit({"busy": False, "error": str(e), "text": ""})
                 launcher.after_exit()
+                return
+            except Exception as e:  # nur den Typ melden: Ausnahmen können Befehlszeilen enthalten
+                self._launchEvent.emit({"busy": False, "error": f"Unerwarteter Fehler ({type(e).__name__})", "text": ""})
                 return
             self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": "Zwift läuft"})
             while launcher.running():

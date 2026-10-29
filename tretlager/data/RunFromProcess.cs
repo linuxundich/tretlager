@@ -46,12 +46,22 @@ class RunFromProcess
         return "\"" + a.Replace("\\\"", "\\\\\"").Replace("\"", "\\\"") + "\"";
     }
 
+    // "--token=@C:\\pfad\\datei" wird durch den Dateiinhalt ersetzt. So taucht das Token nicht in der
+    // Befehlszeile des aufrufenden Linux-Prozesses auf (Prozessliste, Fehlermeldungen).
+    static string ExpandFileArg(string a)
+    {
+        int at = a.IndexOf("=@", StringComparison.Ordinal);
+        if (at < 0) return a;
+        string path = a.Substring(at + 2);
+        return a.Substring(0, at + 1) + System.IO.File.ReadAllText(path).Trim();
+    }
+
     static int Main(string[] args)
     {
         if (args.Length < 2) { Console.Error.WriteLine("Aufruf: RunFromProcess.exe <PID> <Programm> [Argumente]"); return 2; }
         int pid = int.Parse(args[0]);
         var cmd = new StringBuilder(Quote(args[1]));
-        for (int i = 2; i < args.Length; i++) cmd.Append(' ').Append(Quote(args[i]));
+        for (int i = 2; i < args.Length; i++) cmd.Append(' ').Append(Quote(ExpandFileArg(args[i])));
 
         IntPtr parent = OpenProcess(PROCESS_CREATE_PROCESS, false, pid);
         if (parent == IntPtr.Zero) { Console.Error.WriteLine("OpenProcess: " + new Win32Exception().Message); return 1; }

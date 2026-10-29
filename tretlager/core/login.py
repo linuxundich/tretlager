@@ -71,10 +71,10 @@ def _post(form: dict, opener=urllib.request.urlopen) -> dict:
             token = json.loads(r.read())
     except urllib.error.HTTPError as e:
         if e.code in (400, 401):
-            raise LoginError("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).") from e
-        raise LoginError(f"Zwift-Anmeldung nicht erreichbar (HTTP {e.code}).") from e
-    except (urllib.error.URLError, TimeoutError) as e:
-        raise LoginError("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?") from e
+            raise LoginError("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).") from None
+        raise LoginError(f"Zwift-Anmeldung nicht erreichbar (HTTP {e.code}).") from None
+    except (urllib.error.URLError, TimeoutError):
+        raise LoginError("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?") from None
     if "access_token" not in token:
         raise LoginError("Unerwartete Antwort von Zwift.")
     token["obtained_at"] = int(time.time())
@@ -89,6 +89,19 @@ def exchange_code(code: str, opener=urllib.request.urlopen) -> dict:
 def refresh(token: dict, opener=urllib.request.urlopen) -> dict:
     return _post({"client_id": CLIENT_ID, "grant_type": "refresh_token",
                   "refresh_token": token["refresh_token"]}, opener)
+
+
+def logout_remote(token: dict, opener=urllib.request.urlopen) -> None:
+    """Sitzung bei Zwift beenden (Keycloak-Logout); das Erneuerungs-Token wird damit ungültig."""
+    data = urllib.parse.urlencode({"client_id": CLIENT_ID, "refresh_token": token["refresh_token"]}).encode()
+    req = urllib.request.Request(f"{REALM}/logout", data=data, headers={"User-Agent": "Tretlager"})
+    try:
+        with opener(req, timeout=30):  # noqa: S310 (feste https-URL)
+            pass
+    except urllib.error.HTTPError as e:
+        raise LoginError(f"Abmelden bei Zwift fehlgeschlagen (HTTP {e.code}).") from None
+    except (urllib.error.URLError, TimeoutError):
+        raise LoginError("Zwift-Anmeldung nicht erreichbar; lokal abgemeldet.") from None
 
 
 def lifetimes(token: dict, now: float | None = None) -> tuple[int, int]:

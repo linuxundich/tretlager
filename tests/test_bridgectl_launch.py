@@ -72,3 +72,27 @@ def test_kwin_script_targets_zwift_window():
 
 def test_bundled_runfromprocess_source():
     assert "PROC_THREAD_ATTRIBUTE_PARENT_PROCESS" in launch.RFP_SRC.read_text()
+
+
+def test_runfromprocess_expands_file_argument():
+    src = launch.RFP_SRC.read_text()
+    assert "ExpandFileArg" in src and '"=@"' in src
+
+
+def test_start_never_puts_token_on_command_line():
+    import inspect
+    code = inspect.getsource(launch.Launcher.start)
+    assert "--token=@" in code and "json.dumps(token)" in code
+    call = code[code.index('"--token=@"'):]
+    assert "stdout=subprocess.DEVNULL" in call[:400]  # Zwift erbt sonst die Pipe
+
+
+def test_logout_remote_posts_refresh_token():
+    from tretlager.core import login
+    seen = []
+
+    def opener(req, timeout=0):
+        seen.append((req.full_url, req.data.decode()))
+        return FakeResponse(b"")
+    login.logout_remote({"refresh_token": "r1"}, opener)
+    assert seen[0][0].endswith("/logout") and "refresh_token=r1" in seen[0][1]
