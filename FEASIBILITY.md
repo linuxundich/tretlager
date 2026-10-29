@@ -328,7 +328,19 @@ smokki hat nur Intel-Grafik; die VM `tuxedo-os-forky` hat keine NVIDIA-Karte.
 | PackageKit | 1.4.0 installiert |
 | Platz/RAM | 920 GB frei, 31 GB RAM |
 
-Folgen:
+Geräte: **Wahoo KICKR V4** (Smart-Trainer) und **Garmin HRM-Pro Plus** (Pulsgurt, BLE und ANT+),
+verbunden über den eingebauten AX201.
+
+Folgen für die Geräte [S], vor T5 auf der Hardware zu prüfen:
+- Ein KICKR V4 hat kein eingebautes Direct Connect (das kam mit späteren Modellen). Die Bridge
+  ist also ohnehin der Weg, ein echtes DIRCON-Gerät gibt es nicht als Vergleich.
+- Welche GATT-Dienste der V4 mit seiner Firmware anbietet, ist offen: FTMS (0x1826) oder nur
+  Cycling Power (0x1818) mit Wahoos eigener Erweiterung für ERG. Das entscheidet, was die
+  Bridge weiterreicht. Erster Schritt von T5: Dienste per BlueZ auslesen.
+- Der HRM-Pro Plus erlaubt mehrere BLE-Verbindungen gleichzeitig. Die Bridge kann ihn also
+  halten, während eine Uhr mitläuft.
+
+Folgen für den Rechner:
 - Auf dem Hybrid-Notebook läuft die Plasma-Sitzung auf der Intel-GPU. Zwift muss mit
   **PRIME-Offload** auf die NVIDIA-Karte: `__NV_PRIME_RENDER_OFFLOAD=1` und
   `__GLX_VENDOR_LIBRARY_NAME=nvidia` für GLX bzw. `__EGL_VENDOR_LIBRARY_FILENAMES` mit

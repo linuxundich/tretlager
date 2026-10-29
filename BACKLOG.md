@@ -16,8 +16,8 @@
   GNOME. Empfehlung: bei GTK4/libadwaita bleiben (läuft unter Plasma, Hauptziel bleibt GNOME),
   unter Plasma testen; eine eigene Kirigami-Oberfläche erst bei Bedarf.
 - [ ] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
-  mit PRIME-Offload, Treiber 580, AX201). Offen: welcher Trainer (mit Direct Connect?), welcher
-  Pulsgurt, weitere Sensoren.
+  mit PRIME-Offload, Treiber 580, AX201). Geräte: Wahoo KICKR V4, Garmin HRM-Pro Plus
+  (BLE + ANT+), eingebauter Adapter. Keine weiteren Sensoren.
 - [ ] **E6 Sprache.** Empfehlung Python + PyGObject (Auftrag bevorzugt es; Bridge mit bleak in
   derselben Sprache), Meson, Debian-Paket.
 - [ ] **E7 Name.** Arbeitstitel „Tretlager“.
