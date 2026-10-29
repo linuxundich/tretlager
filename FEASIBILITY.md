@@ -93,6 +93,10 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
 - [Q] **WineHQ** hat eine Suite `forky`: `winehq-stable 11.0.0.0~forky-1`, `winehq-devel` und
   `winehq-staging` 11.20. Für amd64 ist Wine 11 ein einzelnes Paket ohne i386-Abhängigkeit
   (neuer WoW64-Modus). `dpkg --add-architecture i386` entfällt damit.
+  **Auf tinytin bestätigt (2026-10-29):** Quelle nur mit `Architectures: amd64`, dann
+  `apt-get install --install-recommends winehq-devel` → 6 neue Pakete (wine-devel, winehq-devel,
+  libasound2-plugins, libodbc2, libodbccr2, dazu osslsigncode), 289 MB Download, 1,8 GB belegt,
+  **kein i386-Paket**, `wine --version` = wine-11.20.
   https://dl.winehq.org/wine-builds/debian/dists/forky/
 - [Q] TUXEDO-Repo `deb.tuxedocomputers.com/debian`:
   - Suite `forky` mit `tuxedo-drivers`, `tuxedo-control-center` und `nvidia-driver-assistant`
@@ -134,8 +138,14 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
       Microsoft-CA-Datei ist also nicht nötig.
     - Der selbst berechnete Authenticode-Hash (SHA-256 über die Datei ohne Prüfsumme und
       Signaturtabelle) steht in der Signatur, die Datei ist also unverändert signiert.
-    - Noch nicht geprüft: kryptografische Prüfung der Signatur über die signierten Attribute
-      und den Zeitstempel. Das folgt mit `osslsigncode verify` auf tinytin.
+    - `osslsigncode 2.14 verify -CAfile /etc/ssl/certs/ca-certificates.crt -TSA-CAfile …` auf
+      tinytin: Signatur ok, CRL ok (crls.ssl.com), „Succeeded“. Signiert und zeitgestempelt am
+      2026-10-15 23:21 UTC von der TSA SSL.com Timestamping Unit 2025 E1 (Kette bis SSL.com
+      Root Certification Authority RSA, ebenfalls im System-CA-Speicher).
+    - Gegenprobe: In einer Kopie wurde 1 Byte geändert, `verify` meldet „Failed“.
+    - **T1 erledigt.** Die App kann `osslsigncode` (Debian-Paket) nutzen; die CRL-Abfrage geht
+      über HTTP an SSL.com und muss in der Datenschutz-Übersicht stehen (abschaltbar per
+      `-ignore-crl`).
     - Folge für die App: Das Blatt-Zertifikat **nicht** per Fingerprint festnageln, es läuft
       2027 ab. Stattdessen Kette gegen den System-CA-Speicher prüfen und dazu Subject-Felder
       (CN, O, Registriernummer) sowie Code-Signing-EKU verlangen.
@@ -301,7 +311,7 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
 
 | Test | Wo | Frage |
 |---|---|---|
-| T1 | beliebig | Authenticode von `ZwiftSetup.exe`: Signierer, Kette, Zeitstempel |
+| T1 ✔ | beliebig | Authenticode von `ZwiftSetup.exe`: Signierer, Kette, Zeitstempel |
 | T2 | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: rendert die Anmeldung im Launcher 1.2.x? startet er das Spiel selbst? |
 | T3 | Forky + NVIDIA | OpenGL-Renderer in Wine = NVIDIA? EGL oder GLX nötig? fps auf Watopia |
 | T4 | Forky-VM | Prefix-Einrichtung idempotent, Abbruch/Wiederaufnahme |
