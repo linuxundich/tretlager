@@ -12,7 +12,7 @@ from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID
-from ..core import prepare, systemcheck
+from ..core import prepare, setup, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
 
@@ -30,6 +30,7 @@ class Backend(QObject):
         self._busy = False
         self._checksDone.connect(self._set_checks)  # Thread → Hauptthread (queued)
         self._init_prepare()
+        self._init_setup()
 
     @Property(list, notify=checksChanged)
     def checks(self) -> list:
@@ -141,6 +142,72 @@ class Backend(QObject):
                 p.update(result="error", error=p["error"] or f"Helfer beendet mit Code {ev['code']}")
         self._prep = p
         self.prepareChanged.emit()
+
+
+    # --- Schritt „Zwift einrichten“ ---
+
+    setupChanged = Signal()
+    _setupEvent = Signal(dict)
+
+    def _init_setup(self) -> None:
+        self._setup = self._fresh_setup()
+        self._setup_ctx: setup.Context | None = None
+        self._setupEvent.connect(self._on_setup_event)
+
+    @staticmethod
+    def _fresh_setup() -> dict:
+        return {"running": False, "result": "", "error": "", "current": "", "percent": 0.0, "text": "",
+                "log": "", "steps": [{"id": s.id, "title": s.title, "status": "pending", "detail": ""}
+                                     for s in setup.STEPS]}
+
+    @Property("QVariantMap", notify=setupChanged)
+    def zwiftSetup(self) -> dict:
+        return self._setup
+
+    @Slot()
+    def runSetup(self) -> None:
+        if self._setup["running"]:
+            return
+        self._setup = dict(self._fresh_setup(), running=True)
+        self.setupChanged.emit()
+        ctx = setup.Context(
+            progress=lambda step, pct, text: self._setupEvent.emit({"k": "progress", "step": step, "pct": pct, "text": text}),
+            log=lambda text: self._setupEvent.emit({"k": "log", "text": text}))
+        self._setup_ctx = ctx
+
+        def work():
+            ok = setup.run_setup(ctx, lambda i, st, t: self._setupEvent.emit({"k": "step", "id": i, "status": st, "text": t}))
+            self._setupEvent.emit({"k": "end", "ok": ok})
+        threading.Thread(target=work, daemon=True).start()
+
+    @Slot()
+    def cancelSetup(self) -> None:
+        if self._setup_ctx:
+            self._setup_ctx.cancel.set()
+
+    def _on_setup_event(self, ev: dict) -> None:
+        s = dict(self._setup)
+        kind = ev["k"]
+        if kind == "progress":
+            s.update(current=ev["step"], percent=float(ev["pct"]), text=ev["text"])
+        elif kind == "log":
+            s["log"] = (s["log"] + ev["text"] + "\n")[-30000:]
+        elif kind == "step":
+            steps = [dict(x) for x in s["steps"]]
+            for x in steps:
+                if x["id"] == ev["id"]:
+                    x["status"], x["detail"] = ev["status"], ev["text"]
+            s["steps"] = steps
+            if ev["status"] == "running":
+                s.update(current=ev["id"], percent=0.0, text="")
+            elif ev["status"] == "error":
+                s.update(result="error", error=ev["text"])
+        elif kind == "end":
+            s["running"] = False
+            if ev["ok"]:
+                s.update(result="done", current="", text="")
+        self._setup = s
+        self.setupChanged.emit()
 
 
 def main() -> int:
