@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import threading
 from pathlib import Path
@@ -11,7 +12,7 @@ from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID
-from ..core import systemcheck
+from ..core import prepare, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
 
@@ -28,6 +29,7 @@ class Backend(QObject):
         self._checks: list[dict] = []
         self._busy = False
         self._checksDone.connect(self._set_checks)  # Thread → Hauptthread (queued)
+        self._init_prepare()
 
     @Property(list, notify=checksChanged)
     def checks(self) -> list:
@@ -57,6 +59,88 @@ class Backend(QObject):
         self._busy = False
         self.checksChanged.emit()
         self.busyChanged.emit()
+
+    # --- Schritt „System vorbereiten“ ---
+
+    planChanged = Signal()
+    prepareChanged = Signal()
+    _planDone = Signal(dict)
+    _prepareEvent = Signal(dict)
+
+    def _init_prepare(self) -> None:
+        self._plan: dict = {}
+        self._plan_busy = False
+        self._prep = {"running": False, "percent": 0.0, "step": "", "log": "", "result": "", "error": ""}
+        self._planDone.connect(self._set_plan)
+        self._prepareEvent.connect(self._on_prepare_event)
+
+    @Property("QVariantMap", notify=planChanged)
+    def plan(self) -> dict:
+        return self._plan
+
+    @Property(bool, notify=planChanged)
+    def planBusy(self) -> bool:
+        return self._plan_busy
+
+    @Property("QVariantMap", notify=prepareChanged)
+    def prepare(self) -> dict:
+        return self._prep
+
+    @Slot()
+    def loadPlan(self) -> None:
+        if self._plan_busy:
+            return
+        self._plan_busy = True
+        self.planChanged.emit()
+
+        def work():
+            try:
+                # Testschalter: so tun, als fehle die WineHQ-Quelle (Ablauf auf fertigen Systemen prüfen).
+                force = os.environ.get("TRETLAGER_TEST_FORCE_SOURCE") == "1"
+                result = prepare.plan(force_temp_source=force).to_dict()
+            except Exception as e:  # Planung darf die Oberfläche nie mitreißen
+                result = {"error": str(e), "packages": [], "removals": [], "nothing_to_do": False}
+            self._planDone.emit(result)
+        threading.Thread(target=work, daemon=True).start()
+
+    def _set_plan(self, plan: dict) -> None:
+        self._plan = plan
+        self._plan_busy = False
+        self.planChanged.emit()
+
+    @Slot()
+    def runPrepare(self) -> None:
+        if self._prep["running"]:
+            return
+        self._prep = {"running": True, "percent": 0.0, "step": "Berechtigung anfragen …", "log": "",
+                      "result": "", "error": ""}
+        self.prepareChanged.emit()
+
+        def work():
+            rc = prepare.run_helper(self._prepareEvent.emit)
+            self._prepareEvent.emit({"event": "exit", "code": rc})
+        threading.Thread(target=work, daemon=True).start()
+
+    def _on_prepare_event(self, ev: dict) -> None:
+        p = dict(self._prep)
+        kind = ev.get("event")
+        if kind == "step":
+            p["step"] = ev.get("text", "")
+        elif kind == "progress":
+            p["percent"] = float(ev.get("percent", p["percent"]))
+            p["step"] = ev.get("text") or p["step"]
+        elif kind == "log":
+            p["log"] = (p["log"] + ev.get("text", "") + "\n")[-20000:]
+        elif kind == "done":
+            p.update(result="done", percent=100.0, step=f"Fertig: {ev.get('wine', '')}".strip())
+        elif kind == "error":
+            p.update(result="error", error=ev.get("text", "Unbekannter Fehler"))
+        elif kind == "exit":
+            p["running"] = False
+            if ev.get("code") and not p["result"]:
+                p.update(result="error", error=p["error"] or f"Helfer beendet mit Code {ev['code']}")
+        self._prep = p
+        self.prepareChanged.emit()
 
 
 def main() -> int:

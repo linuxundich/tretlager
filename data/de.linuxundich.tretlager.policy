@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>Tretlager</vendor>
+  <action id="de.linuxundich.tretlager.setup">
+    <description>Prepare the system for Zwift (WineHQ package source and Wine)</description>
+    <description xml:lang="de">System für Zwift vorbereiten (WineHQ-Paketquelle und Wine)</description>
+    <message>Tretlager wants to add the WineHQ package source and install Wine</message>
+    <message xml:lang="de">Tretlager möchte die WineHQ-Paketquelle einrichten und Wine installieren</message>
+    <icon_name>applications-games</icon_name>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/tretlager/setup-system</annotate>
+  </action>
+</policyconfig>
