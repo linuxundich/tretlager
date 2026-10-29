@@ -12,10 +12,12 @@
 - [ ] **E3 Sensoren.** Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
   DIRCON statt qdomyos-zwift. Projekt-Lizenz GPL-3, damit qdomyos-Protokollcode als Referenz
   übernommen werden darf.
-- [ ] **E4 Desktop des Zielrechners.** TUXEDO OS Forky bringt Plasma mit; der Auftrag nennt GNOME.
-  Läuft auf dem Zielrechner GNOME, oder soll libadwaita auch unter Plasma gut aussehen?
-- [ ] **E5 Testhardware.** Welcher Rechner mit NVIDIA-Karte, welcher Trainer, welcher Pulsgurt,
-  welcher BLE-Adapter? (smokki: Intel-Grafik, AX200.)
+- [ ] **E4 Desktop.** Zielrechner tinytin läuft mit Plasma 6.7.4 (Wayland), der Auftrag nennt
+  GNOME. Empfehlung: bei GTK4/libadwaita bleiben (läuft unter Plasma, Hauptziel bleibt GNOME),
+  unter Plasma testen; eine eigene Kirigami-Oberfläche erst bei Bedarf.
+- [ ] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
+  mit PRIME-Offload, Treiber 580, AX201). Offen: welcher Trainer (mit Direct Connect?), welcher
+  Pulsgurt, weitere Sensoren.
 - [ ] **E6 Sprache.** Empfehlung Python + PyGObject (Auftrag bevorzugt es; Bridge mit bleak in
   derselben Sprache), Meson, Debian-Paket.
 - [ ] **E7 Name.** Arbeitstitel „Tretlager“.
@@ -23,7 +25,7 @@
 ## Phasen
 
 - [x] A Machbarkeit (Recherche) – [FEASIBILITY.md](FEASIBILITY.md)
-- [ ] D' Machbarkeitstests T1–T7 vor der Installationslogik (siehe FEASIBILITY.md, Abschnitt 9)
+- [ ] D' Machbarkeitstests T1–T7 (T1 Signatur weitgehend erledigt 2026-10-29) vor der Installationslogik (siehe FEASIBILITY.md, Abschnitt 9)
 - [ ] B Systemdiagnose rein lesend (os-release, sysfs/DRM, nvidia-smi, EGL-Test, BlueZ per D-Bus,
   Wine-Version + Stub-Prüfung, Platz, vorhandene Prefixe)
 - [ ] C GTK4-Prototyp: Hauptfenster, Assistent, Diagnose; Platzhalter klar erkennbar

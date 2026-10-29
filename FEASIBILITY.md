@@ -125,8 +125,20 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
   - mit eigener CA-Datei der Microsoft-Code-Signing-Wurzeln, denn Debians CA-Bündel enthält sie
     nicht
   - zusätzlich den Signierer (Subject) festnageln
-  - **Offen:** Signierer und Zertifikatskette sind noch nicht geprüft. Dafür muss der Installer
-    einmal heruntergeladen werden (Phase D, Test T1).
+  - **Test T1 vom 2026-10-29:** Installer mit 34 028 992 Byte, SHA-256 `dd10bb62…333f9d`
+    - Signatur: Authenticode (PKCS#7, Revision 2.0) mit **EV-Code-Signing-Zertifikat**
+    - Signierer: `CN=Zwift, Inc.`, `O=Zwift, Inc.`, Delaware, Registriernummer `5463328`,
+      Long Beach CA. Gültig 2024-03-16 bis **2027-03-16**.
+    - Kette: SSL.com EV Code Signing Intermediate CA RSA R3 → SSL.com EV Root Certification
+      Authority RSA R2. Die Wurzel **steht im normalen System-CA-Speicher** (Mozilla); eine eigene
+      Microsoft-CA-Datei ist also nicht nötig.
+    - Der selbst berechnete Authenticode-Hash (SHA-256 über die Datei ohne Prüfsumme und
+      Signaturtabelle) steht in der Signatur, die Datei ist also unverändert signiert.
+    - Noch nicht geprüft: kryptografische Prüfung der Signatur über die signierten Attribute
+      und den Zeitstempel. Das folgt mit `osslsigncode verify` auf tinytin.
+    - Folge für die App: Das Blatt-Zertifikat **nicht** per Fingerprint festnageln, es läuft
+      2027 ab. Stattdessen Kette gegen den System-CA-Speicher prüfen und dazu Subject-Felder
+      (CN, O, Registriernummer) sowie Code-Signing-EKU verlangen.
 - [Q] Für Spiel-Updates gibt es `https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml`
   mit `sversion` (derzeit 1.124.0), `manifest_checksum` und `ver_cur_checksum`. Damit lässt sich
   die installierte Version gegen den Stand des Anbieters vergleichen.
@@ -299,6 +311,31 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
 
 T2, T3, T5 und T6 brauchen den Zielrechner mit NVIDIA, einen BLE-Adapter und echte Geräte.
 smokki hat nur Intel-Grafik; die VM `tuxedo-os-forky` hat keine NVIDIA-Karte.
+
+### Zielrechner tinytin (`testt@tinytin`, lesend geprüft am 2026-10-29)
+
+| Punkt | Befund |
+|---|---|
+| System | TUXEDO OS (Debian base), `VERSION_CODENAME=forky`, Kernel 7.2.7.1-tuxedo |
+| Desktop | **KDE Plasma 6.7.4, Wayland**; libadwaita 1.10 ist installiert, GNOME nicht |
+| Grafik | **Hybrid:** Intel Iris Xe (Alder Lake-P) + NVIDIA GeForce RTX 3050 Ti Laptop, 4 GB |
+| NVIDIA-Treiber | 580.178.04 geladen; `nvidia-driver-libs 580.178.04-1tux1` aus `txos.tuxedocomputers.com/debian` (dort auch 595 und 610), Runtime-D3 an |
+| GL/Vulkan | EGL-Hersteller nvidia + mesa, Vulkan-ICD nvidia + intel |
+| Secure Boot | aus |
+| Bluetooth | Intel AX201, Adapter `tinytin` bei BlueZ 5.87 |
+| ANT+ | kein Stick |
+| Wine | nicht installiert; i386 ist als Fremdarchitektur schon aktiv |
+| PackageKit | 1.4.0 installiert |
+| Platz/RAM | 920 GB frei, 31 GB RAM |
+
+Folgen:
+- Auf dem Hybrid-Notebook läuft die Plasma-Sitzung auf der Intel-GPU. Zwift muss mit
+  **PRIME-Offload** auf die NVIDIA-Karte: `__NV_PRIME_RENDER_OFFLOAD=1` und
+  `__GLX_VENDOR_LIBRARY_NAME=nvidia` für GLX bzw. `__EGL_VENDOR_LIBRARY_FILENAMES` mit
+  `10_nvidia.json` für EGL.
+- Die Grafikdiagnose muss deshalb melden, *welche* GPU den OpenGL-Kontext von Wine tatsächlich
+  bekommt. „NVIDIA-Treiber geladen“ reicht nicht. Das gehört zu T3.
+- Die Oberfläche läuft unter Plasma; libadwaita funktioniert dort, sieht aber nach GNOME aus (E4).
 
 ## 10. Lizenzen der Fremdkomponenten
 
