@@ -27,6 +27,9 @@ class FakeBackend:
 
     async def write(self, uuid, data):
         self.written.append((uuid, data))
+        return self.answer
+
+    answer = None
 
     async def set_notify(self, uuid, enabled):
         self.notify.append((uuid, enabled))
@@ -94,6 +97,26 @@ def test_write_control_point_echoes_data():
     assert backend.written == [(CP, cmd)]
 
 
+def test_write_control_point_returns_device_answer():
+    backend = FakeBackend()
+    backend.answer = bytes([0x80, 0x05, 0x01])  # FTMS-Antwort: Zielleistung, Erfolg
+    r = run(Session(backend, None).handle(Packet(dircon.MSG_WRITE_CHARACTERISTIC, 9, 0,
+                                                 uuid_bytes(CP) + bytes([0x05, 0xC8, 0x00]))))
+    assert r.payload == uuid_bytes(CP) + bytes([0x80, 0x05, 0x01])
+
+
+def test_notifications_reach_unsubscribed_clients_by_default():
+    class Writer:
+        data = b""
+
+        def write(self, d):
+            self.data += d
+
+    w = Writer()
+    Session(FakeBackend(), w).notify(CP, b"\x80\x00\x01")
+    assert parse_packets(bytearray(w.data))[0].payload.endswith(b"\x80\x00\x01")
+
+
 def test_enable_notifications_and_filtering():
     class Writer:
         def __init__(self):
@@ -105,8 +128,8 @@ def test_enable_notifications_and_filtering():
     backend = FakeBackend()
     w = Writer()
     s = Session(backend, w)
-    s.notify(BIKE_DATA, b"\x44\x00")
-    assert w.data == b""  # nicht abonniert → nichts senden
+    s.notify(BIKE_DATA, b"\x44\x00", strict=True)
+    assert w.data == b""  # streng und nicht abonniert → nichts senden
     r = run(s.handle(Packet(dircon.MSG_ENABLE_NOTIFICATIONS, 10, 0, uuid_bytes(BIKE_DATA) + b"\x01")))
     assert r.response == 0 and r.payload == uuid_bytes(BIKE_DATA)
     assert backend.notify == [(BIKE_DATA, True)]

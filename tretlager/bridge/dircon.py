@@ -132,7 +132,9 @@ class GattBackend(Protocol):
 
     async def read(self, char_uuid: str) -> bytes: ...
 
-    async def write(self, char_uuid: str, data: bytes) -> None: ...
+    async def write(self, char_uuid: str, data: bytes) -> bytes | None:
+        """Schreiben; bei Control Points die Antwort des Geräts (Indication) zurückgeben."""
+        ...
 
     async def set_notify(self, char_uuid: str, enabled: bool) -> None: ...
 
@@ -202,10 +204,11 @@ class Session:
                 reply.response = RESP_OPERATION_NOT_SUPPORTED
                 return reply
             try:
-                await self.backend.write(target, data)
-                # Echte Geräte bestätigen mit der UUID und den geschriebenen Daten; die Antwort
-                # eines Control Points kommt danach als Benachrichtigung (Indication).
-                reply.payload = uuid_bytes(target) + data
+                answer = await self.backend.write(target, data)
+                # Bei Control Points erwartet Zwift die Antwort des Geräts (z. B. FTMS 0x80,
+                # Befehl, Ergebnis) direkt in der Schreib-Antwort, wie bei qdomyos-zwift; sonst
+                # wiederholt Zwift den Befehl und setzt den Trainer zurück. Ohne Antwort: Echo.
+                reply.payload = uuid_bytes(target) + (answer if answer is not None else data)
             except Exception as e:
                 log.warning("Schreiben %s fehlgeschlagen: %s", target, e)
                 reply.response = RESP_WRITE_FAILED
@@ -233,8 +236,10 @@ class Session:
         reply.payload = b""
         return reply
 
-    def notify(self, char_uuid: str, value: bytes) -> None:
-        if self.writer is None or char_uuid not in self.subscribed:
+    def notify(self, char_uuid: str, value: bytes, strict: bool = False) -> None:
+        # Wie qdomyos-zwift (Standard): Benachrichtigungen gehen an jeden Client, auch ohne
+        # Abo. Zwift verlässt sich darauf, z. B. für die Antworten des Control Points.
+        if self.writer is None or (strict and char_uuid not in self.subscribed):
             return
         self.writer.write(Packet(MSG_NOTIFICATION, 0, RESP_SUCCESS, uuid_bytes(char_uuid) + value).encode())
 

@@ -19,6 +19,8 @@ from .mdns import Announcer
 log = logging.getLogger(__name__)
 
 RECONNECT_DELAY = 5.0
+# Wie lange auf die Indication eines Control Points gewartet wird.
+CONTROL_POINT_TIMEOUT = 3.0
 MAX_RECONNECT_DELAY = 60.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
@@ -74,6 +76,7 @@ class BridgedDevice:
         self._task: asyncio.Task | None = None
         self._disconnected = asyncio.Event()
         self._was_connected = False
+        self._pending: dict[str, asyncio.Future] = {}
 
     # --- GattBackend für den DIRCON-Server ---
 
@@ -84,10 +87,25 @@ class BridgedDevice:
         client = self._require_client()
         return bytes(await client.read_gatt_char(char_uuid))
 
-    async def write(self, char_uuid: str, data: bytes) -> None:
+    async def write(self, char_uuid: str, data: bytes) -> bytes | None:
         client = self._require_client()
         props = self._char_props(char_uuid)
-        await client.write_gatt_char(char_uuid, data, response="write" in props)
+        if "indicate" not in props:
+            await client.write_gatt_char(char_uuid, data, response="write" in props)
+            return None
+        # Control Point: Die Antwort kommt als Indication; Zwift will sie in der Schreib-Antwort.
+        await self.set_notify(char_uuid, True)
+        answer = asyncio.get_running_loop().create_future()
+        self._pending[char_uuid] = answer
+        try:
+            await client.write_gatt_char(char_uuid, data, response=True)
+            return await asyncio.wait_for(answer, CONTROL_POINT_TIMEOUT)
+        except asyncio.TimeoutError:
+            log.warning("%s: keine Antwort des Control Points %s auf %s", self.cfg.address, char_uuid[4:8],
+                        data.hex(" "))
+            return None
+        finally:
+            self._pending.pop(char_uuid, None)
 
     async def set_notify(self, char_uuid: str, enabled: bool) -> None:
         # BLE-Benachrichtigungen bleiben an, sobald sie einmal laufen; die DIRCON-Sitzungen
@@ -220,6 +238,10 @@ class BridgedDevice:
 
     def _notified(self, char_uuid: str, data: bytearray) -> None:
         value = bytes(data)
+        pending = self._pending.get(char_uuid)
+        if pending and not pending.done():
+            pending.set_result(value)
+            log.info("%s: Control Point %s antwortet %s", self.cfg.address, char_uuid[4:8], value.hex(" "))
         self._server.notify(char_uuid, value)
         decoder = gatt.DECODERS.get(char_uuid)
         if decoder:
