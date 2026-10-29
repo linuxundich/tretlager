@@ -1,0 +1,15 @@
+[Unit]
+Description=Tretlager-Bridge: BLE-Sensoren als Wahoo Direct Connect für Zwift
+Documentation=file://@DOCDIR@/BLUETOOTH.md
+After=bluetooth.target
+
+[Service]
+Type=dbus
+BusName=de.linuxundich.Tretlager.Bridge
+Environment=PYTHONPATH=@LIBDIR@
+ExecStart=/usr/bin/python3 -m tretlager.bridge
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

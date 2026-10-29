@@ -1,0 +1,61 @@
+"""DIRCON-Geräte per mDNS ankündigen, über avahi-daemon (System-D-Bus).
+
+Nur IPv4, wie bei qdomyos-zwift: Der TCP-Server lauscht auf 0.0.0.0, und ein AAAA-Eintrag mit
+Link-Local-Adresse lässt manche Clients ins Leere verbinden.
+"""
+
+from __future__ import annotations
+
+import logging
+
+from dbus_fast import BusType, Message, MessageType
+from dbus_fast.aio import MessageBus
+
+log = logging.getLogger(__name__)
+
+AVAHI = "org.freedesktop.Avahi"
+IF_UNSPEC = -1
+PROTO_INET = 0
+SERVICE_TYPE = "_wahoo-fitness-tnp._tcp"
+
+
+class Announcer:
+    def __init__(self) -> None:
+        self._bus: MessageBus | None = None
+        self._groups: dict[int, str] = {}  # Port → EntryGroup-Pfad
+
+    async def _call(self, path: str, interface: str, member: str, signature: str = "", body=None):
+        if self._bus is None:
+            self._bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+        reply = await self._bus.call(Message(destination=AVAHI, path=path, interface=interface,
+                                             member=member, signature=signature, body=body or []))
+        if reply.message_type == MessageType.ERROR:
+            raise RuntimeError(f"avahi {member}: {reply.error_name} {reply.body}")
+        return reply.body
+
+    async def publish(self, name: str, port: int, service_uuids: list[str], mac: str, serial: str) -> None:
+        await self.withdraw(port)
+        (group,) = await self._call("/", f"{AVAHI}.Server", "EntryGroupNew")
+        txt = [f"ble-service-uuids={','.join(u.upper() for u in service_uuids)}".encode(),
+               f"mac-address={mac}".encode(),
+               f"serial-number={serial}".encode()]
+        await self._call(group, f"{AVAHI}.EntryGroup", "AddService", "iiussssqaay",
+                         [IF_UNSPEC, PROTO_INET, 0, name, SERVICE_TYPE, "", "", port, txt])
+        await self._call(group, f"{AVAHI}.EntryGroup", "Commit")
+        self._groups[port] = group
+        log.info("mDNS: „%s“ auf Port %d angekündigt", name, port)
+
+    async def withdraw(self, port: int) -> None:
+        group = self._groups.pop(port, None)
+        if group:
+            try:
+                await self._call(group, f"{AVAHI}.EntryGroup", "Free")
+            except Exception as e:
+                log.debug("mDNS-Rückzug Port %d: %s", port, e)
+
+    async def close(self) -> None:
+        for port in list(self._groups):
+            await self.withdraw(port)
+        if self._bus:
+            self._bus.disconnect()
+            self._bus = None
