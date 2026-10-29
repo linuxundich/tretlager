@@ -462,3 +462,28 @@ Mögliche nächste Schritte:
 3. nachgebauter Token-Login (netbrain): technisch erprobt, aber AGB-Risiko → nur auf
    ausdrückliche Entscheidung (E2)
 4. abwarten: App installiert und aktualisiert, meldet Start ehrlich als „derzeit nicht möglich“
+
+### T2 (Teil 4): Proton per umu-launcher, tinytin, 2026-10-29
+
+- umu-launcher **1.4.4** als Zipapp (SHA-256 aus dem Release geprüft) und **GE-Proton11-11**
+  (SHA-512 geprüft, basiert auf Wine 11.0 Staging). Beides liegt in
+  `~/.local/share/tretlager/runtimes/`, ohne root.
+- `GAMEID=umu-zwift`: Der protonfix installiert `corefonts dotnet48 d3dcompiler_47 webview2`
+  selbst, mit winetricks 20260125-next. Prefix plus Setup dauern **250 s**, dazu kommt beim
+  ersten Mal der Download der Steam Runtime.
+- Das Spiel wurde per Reflink aus `prefix-t2` übernommen; nichts neu geladen.
+- Launcher unter Proton mit WebView2 109/Win7: **endet still nach ~20 s, rc 0**, kein
+  WebView2-Datenordner.
+- Mit WebView2 156 Fixed Version und Win10: dasselbe.
+
+**Gesamtergebnis T2 (sechs Kombinationen):**
+
+| Laufzeit | WebView2 109 (Win7) | WebView2 156 (Win10) |
+|---|---|---|
+| WineHQ wine-devel 11.20 | ✗ | ✗ |
+| WineHQ wine-staging 11.20 | – | ✗ |
+| GE-Proton11-11 (umu) | ✗ | ✗ |
+
+In keiner Kombination startet der Launcher 1.2 einen WebView2-Browser-Prozess; er endet ohne
+Fehlermeldung. **Die offizielle Anmeldung ist unter Wine derzeit nicht möglich.**
+Installieren und Aktualisieren funktionieren in allen Laufzeiten.
