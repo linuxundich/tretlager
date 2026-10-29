@@ -34,6 +34,9 @@ VERB_WEIGHT = {"corefonts": 15, "dotnet48": 60, "d3dcompiler_47": 5, "webview2":
 
 GAME_SIZE_BYTES = 4_900_000_000  # Zwift 1.124 auf tinytin
 GAME_TIMEOUT = 45 * 60
+# Zwift im Vollbild stellte trotz UseXRandR=N die Panel-Auflösung um (tinytin, M5); XVidMode
+# ist der zweite Weg, über den Wine Modi wechselt.
+WINE_DISPLAY_KEYS = ["UseXRandR", "UseXVidMode"]
 GLTEST_SRC = Path(__file__).resolve().parent.parent / "data" / "gltest" / "GLTest.cs"
 CSC = r"C:\windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
@@ -311,8 +314,9 @@ class Graphics(Step):
         # T3: Mit NVIDIA unter XWayland liefert nur GLX einen Kontext auf der NVIDIA-Karte.
         if nvidia:
             ctx.run(["wine", "reg", "add", reg, "/v", "UseEGL", "/t", "REG_SZ", "/d", "N", "/f"])
-        # Zwift soll die Auflösung des Desktops nicht umstellen.
-        ctx.run(["wine", "reg", "add", reg, "/v", "UseXRandR", "/t", "REG_SZ", "/d", "N", "/f"])
+        # Zwift soll die Auflösung des Desktops nicht umstellen (weder per XRandR noch per XVidMode).
+        for value in WINE_DISPLAY_KEYS:
+            ctx.run(["wine", "reg", "add", reg, "/v", value, "/t", "REG_SZ", "/d", "N", "/f"])
         ctx.progress(self.id, 40, "Grafiktest übersetzen")
         work = paths.CACHE / "gltest"
         work.mkdir(parents=True, exist_ok=True)

@@ -182,8 +182,16 @@ class Launcher:
                 raise LaunchError("Hilfsprogramm zum Starten ließ sich nicht übersetzen.")
         return exe
 
+    def ensure_display_settings(self) -> None:
+        """Auflösungswechsel bei jedem Start sperren, auch für Prefixe aus älteren Tretlager-Versionen."""
+        reg = r"HKCU\Software\Wine\X11 Driver"
+        for value in setup.WINE_DISPLAY_KEYS:
+            subprocess.run(["wine", "reg", "add", reg, "/v", value, "/t", "REG_SZ", "/d", "N", "/f"],
+                           env=self.env, capture_output=True, timeout=60)
+
     def start(self, token: dict) -> None:
         rfp = self.run_from_process()
+        self.ensure_display_settings()
         self.ctx.wineserver_kill()
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
