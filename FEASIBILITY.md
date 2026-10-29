@@ -408,3 +408,31 @@ Nächste Varianten für T2:
 2. `wine-staging` 11.20
 3. umu-launcher + Proton/GE-Proton, das eigene WebView2-Fixes mitbringt
 4. Wine-Trace (`+loaddll,+combase`) zur Ursache
+
+### T2 (Teil 2): neueres WebView2, tinytin, 2026-10-29
+
+Wine-Bug 58921: WebView2 nutzt ab Windows 8.1 DirectComposition. Vanilla Wine liefert
+`DCompositionCreateDevice` → `E_NOTIMPL` (Stand 11.18), deshalb der Win7-Zwang in winetricks.
+wine-staging hat einen DComp-Patchsatz, mit dem ähnliche WebView2-Apps wieder rendern.
+https://bugs.winehq.org/show_bug.cgi?id=58921
+
+| Versuch (Klon `prefix-t2b`, per Btrfs-Reflink in 0,4 s) | Ergebnis |
+|---|---|
+| Win7-Override entfernt, Bootstrapper erneut | installiert wieder 109 |
+| 109 entfernt, Evergreen-Standalone x64 (215 MB, signiert „Microsoft Corporation“) | EdgeUpdate bricht ab mit `0x80040902`, 109 bleibt |
+| Fixed-Version-CAB **156.0.4314.50 x64** (offizielles CDN, cabextract), `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER`, Win10, wine-devel 11.20 | Launcher endet wie vorher still nach ~20 s, rc 0 |
+
+Trace (`+seh,+loaddll,+process`):
+- `WebView2Loader.dll` und `EmbeddedBrowserWebView.dll` aus 156 werden geladen.
+- **Es wird nie ein `msedgewebview2.exe` gestartet.**
+- Es gibt mehrere .NET-Ausnahmen (`e0434352`), danach endet der Launcher ohne eigene Logzeile.
+
+Folge: Am Alter der Runtime liegt es nicht. WebView2 kommt unter vanilla Wine 11.20 gar nicht
+bis zum Browser-Prozess.
+
+Nebenbefund: Microsofts Code-Signing-Wurzeln stehen nicht im System-CA-Speicher. Prüft die App
+WebView2-Downloads selbst, braucht sie eine eigene Microsoft-CA-Datei; bei Zwift reicht der
+System-Speicher.
+
+Nächster Schritt: derselbe Test mit `wine-staging` 11.20 (`/opt/wine-staging`, parallel zu
+wine-devel installierbar).
