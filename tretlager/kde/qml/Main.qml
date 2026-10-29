@@ -12,5 +12,6 @@ Kirigami.ApplicationWindow {
     readonly property var steps: ["Prüfen", "Vorbereiten", "Zwift", "Anmeldung", "Sensoren", "Fertig"]
 
     // Seiten erst nach dem Aufbau auf den Stapel legen (Kirigami-Falle aus Stafette).
-    Component.onCompleted: pageStack.push(Qt.resolvedUrl("WelcomePage.qml"))
+    // Nach abgeschlossener Einrichtung gleich das Hauptfenster, sonst der Assistent.
+    Component.onCompleted: pageStack.push(Qt.resolvedUrl(backend.setupComplete ? "MainPage.qml" : "WelcomePage.qml"))
 }

@@ -5,14 +5,15 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import time
 from pathlib import Path
 
-from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
+from PySide6.QtCore import Property, QObject, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID
-from ..core import login, prepare, setup, systemcheck
+from ..core import bridgectl, launch, login, prepare, setup, state, systemcheck
 
 QML_DIR = Path(__file__).parent / "qml"
 
@@ -32,6 +33,8 @@ class Backend(QObject):
         self._init_prepare()
         self._init_setup()
         self._init_login()
+        self._init_sensors()
+        self._init_launch()
 
     @Property(list, notify=checksChanged)
     def checks(self) -> list:
@@ -295,6 +298,161 @@ class Backend(QObject):
             self._login_update(error=str(e))
             return
         self._login_update(state="none", access_left=0, refresh_left=0)
+
+
+    # --- Sensoren (Bridge) ---
+
+    sensorsChanged = Signal()
+    _sensorsEvent = Signal(dict)
+
+    def _init_sensors(self) -> None:
+        self._sensors = {"installed": True, "running": False, "autostart": False, "devices": [], "scanning": False,
+                         "found": [], "scanned": False, "error": ""}
+        self._sensorsEvent.connect(self._on_sensors_event)
+        self._poll = QTimer(self)
+        self._poll.setInterval(1500)
+        self._poll.timeout.connect(self.refreshSensors)
+        self._poll_busy = False
+
+    @Property("QVariantMap", notify=sensorsChanged)
+    def sensors(self) -> dict:
+        return self._sensors
+
+    def _on_sensors_event(self, ev: dict) -> None:
+        self._sensors = dict(self._sensors, **ev)
+        self.sensorsChanged.emit()
+
+    def _bg(self, fn) -> None:
+        def work():
+            try:
+                fn()
+            except (bridgectl.BridgeError, OSError, ValueError) as e:
+                self._sensorsEvent.emit({"error": str(e), "scanning": False})
+        threading.Thread(target=work, daemon=True).start()
+
+    @Slot(bool)
+    def setSensorPolling(self, on: bool) -> None:
+        if on:
+            self.refreshSensors()
+            self._poll.start()
+        else:
+            self._poll.stop()
+
+    @Slot()
+    def refreshSensors(self) -> None:
+        if self._poll_busy:
+            return
+        self._poll_busy = True
+
+        def work():
+            try:
+                st = bridgectl.status()
+                self._sensorsEvent.emit({
+                    "installed": bridgectl.unit_installed(), "running": st is not None,
+                    "autostart": bridgectl.autostart(), "devices": (st or {}).get("devices", [])})
+            finally:
+                self._poll_busy = False
+        self._bg(work)
+
+    @Slot(bool)
+    def setBridgeRunning(self, on: bool) -> None:
+        self._bg(lambda: (bridgectl.set_running(on), self.refreshSensors()))
+
+    @Slot(bool)
+    def setBridgeAutostart(self, on: bool) -> None:
+        self._bg(lambda: (bridgectl.set_autostart(on), self.refreshSensors()))
+
+    @Slot()
+    def scanDevices(self) -> None:
+        self._on_sensors_event({"scanning": True, "found": [], "error": ""})
+
+        def work():
+            found = bridgectl.scan(10)
+            self._sensorsEvent.emit({"scanning": False, "found": found, "scanned": True})
+        self._bg(work)
+
+    @Slot(str, str, str)
+    def addDevice(self, address: str, name: str, role: str) -> None:
+        self._bg(lambda: (bridgectl.add_device(address, name, role), self.refreshSensors()))
+        self._on_sensors_event({"found": [dict(d, configured=d["configured"] or d["address"] == address)
+                                          for d in self._sensors["found"]]})
+
+    @Slot(str)
+    def removeDevice(self, address: str) -> None:
+        self._bg(lambda: (bridgectl.remove_device(address), self.refreshSensors()))
+
+    # --- Hauptfenster: Zwift starten ---
+
+    launchChanged = Signal()
+    _launchEvent = Signal(dict)
+
+    def _init_launch(self) -> None:
+        self._launch = {"busy": False, "zwiftRunning": False, "text": "", "error": "", "needLogin": False,
+                        "log": "", "version": "", "remote": "", "renderer": "", "login": ""}
+        self._launchEvent.connect(self._on_launch_event)
+
+    @Property("QVariantMap", notify=launchChanged)
+    def launchInfo(self) -> dict:
+        return self._launch
+
+    @Property(bool, constant=True)
+    def setupComplete(self) -> bool:
+        return state.load().get("setup", {}).get("complete") is True
+
+    @Slot()
+    def markSetupComplete(self) -> None:
+        state.update("setup", complete=True)
+
+    def _on_launch_event(self, ev: dict) -> None:
+        if "logline" in ev:
+            ev = dict(ev, log=(self._launch["log"] + ev.pop("logline") + "\n")[-20000:])
+        self._launch = dict(self._launch, **ev)
+        self.launchChanged.emit()
+
+    @Slot()
+    def refreshOverview(self) -> None:
+        def work():
+            st = state.load()
+            info = {"version": setup.game_version(), "remote": st.get("game", {}).get("remote", ""),
+                    "renderer": st.get("graphics", {}).get("gl_renderer", "")}
+            try:
+                tok = login.Keyring().load()
+                ls = login.status(tok)
+                info["login"] = {"valid": "gültig", "refreshable": "wird beim Start erneuert",
+                                 "expired": "abgelaufen – bitte neu anmelden",
+                                 "none": "nicht angemeldet"}[ls["state"]]
+                if ls["state"] in ("valid", "refreshable"):
+                    info["login"] += f", Erneuerung noch {ls['refresh_left'] // 86400} Tage"
+            except login.LoginError as e:
+                info["login"] = str(e)
+            self._launchEvent.emit(info)
+        threading.Thread(target=work, daemon=True).start()
+
+    @Slot()
+    def startZwift(self) -> None:
+        if self._launch["busy"] or self._launch["zwiftRunning"]:
+            return
+        self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": "Start vorbereiten"})
+        launcher = launch.Launcher(progress=lambda t: self._launchEvent.emit({"text": t}),
+                                   log=lambda t: self._launchEvent.emit({"logline": t}))
+
+        def work():
+            try:
+                launcher.run()
+            except launch.NeedLogin:
+                self._launchEvent.emit({"busy": False, "needLogin": True, "text": ""})
+                return
+            except (launch.LaunchError, bridgectl.BridgeError, login.LoginError, setup.SetupError) as e:
+                self._launchEvent.emit({"busy": False, "error": str(e), "text": ""})
+                launcher.after_exit()
+                return
+            self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": "Zwift läuft"})
+            while launcher.running():
+                time.sleep(5)
+            launcher.after_exit()
+            self._launchEvent.emit({"zwiftRunning": False, "text": "Zwift beendet"})
+            self.refreshOverview()
+        threading.Thread(target=work, daemon=True).start()
 
 
 def main() -> int:

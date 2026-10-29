@@ -22,6 +22,7 @@ RECONNECT_DELAY = 5.0
 # Wie lange auf die Indication eines Control Points gewartet wird.
 CONTROL_POINT_TIMEOUT = 3.0
 MAX_RECONNECT_DELAY = 60.0
+NOT_FOUND_DELAY = 10.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
 # BlueZ baut pro Adapter nur eine Verbindung gleichzeitig auf („Operation already in progress“).
@@ -153,6 +154,7 @@ class BridgedDevice:
     async def _run(self) -> None:
         failures = 0
         while True:
+            not_found = False
             try:
                 await self._connect_and_serve()
             except asyncio.CancelledError:
@@ -162,6 +164,7 @@ class BridgedDevice:
                     text = "Zeitüberschreitung beim Verbinden, neuer Versuch folgt"
                 elif "was not found" in str(e):
                     text = "Nicht in Reichweite oder schläft"
+                    not_found = True
                 else:
                     text = str(e) or type(e).__name__
                 self._set_state("fehler", text)
@@ -171,6 +174,11 @@ class BridgedDevice:
             failures = 0 if self._was_connected else failures + 1
             self._was_connected = False
             await self._teardown()
+            if not_found:
+                # Schlafende Geräte (Gurt ohne Hautkontakt) schnell wiederfinden: Die Suche belegt
+                # BlueZ nur kurz, anders als ein hängender Verbindungsaufbau.
+                await asyncio.sleep(NOT_FOUND_DELAY)
+                continue
             await asyncio.sleep(min(RECONNECT_DELAY * 2 ** max(failures - 1, 0), MAX_RECONNECT_DELAY))
 
     async def _connect_and_serve(self) -> None:
