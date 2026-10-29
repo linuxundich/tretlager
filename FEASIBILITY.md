@@ -644,3 +644,20 @@ Befunde:
   lokale Adresse weg ist (Prüfung alle 3 s); Zwift verbindet sich dann über die neue Adresse.
 - Noch offen: steuerbarer Trainer (Steigung, ERG über FTMS Control Point 0x2AD9), längere
   Fahrt, Verhalten ohne jede Netzverbindung.
+
+### T6: Steigung und ERG über die Bridge, tinytin, 2026-10-29 21:05–21:15 — funktioniert
+
+- Fehler vorher: Zwift wartete auf die Antwort des FTMS Control Points und setzte den Trainer
+  immer wieder zurück (`[FTMS] Request took too long, resetting trainer`). Ursache: Die Bridge
+  schickte in der DIRCON-Schreib-Antwort nur ein Echo des Befehls. Zwift erwartet dort die
+  Antwort des Geräts (`0x80, Opcode, Ergebnis`), wie qdomyos-zwift sie liefert. Behoben: Die
+  Bridge wartet bis 3 s auf die Indication des KICKR und gibt sie in der Schreib-Antwort zurück;
+  Benachrichtigungen gehen an alle DIRCON-Clients (qdomyos-Standard).
+- Fahrt (Christoph): Fahrten, Steigung und ERG-Modus fühlten sich richtig an.
+- Control Point in 15 min: `80 11 01` (Steigungssimulation) 75×, `80 05 01` (ERG-Zielleistung)
+  3×, dazu `80 00 01` (Steuerung), `80 01 01` (Reset), `80 07 01` (Start); keine fehlende
+  Antwort, kein „took too long“ mehr nach der Korrektur.
+- Herzfrequenz fiel einmal aus: Beim Umstecken des Netzwerkkabels riss Zwifts Verbindung zur
+  Kabel-Adresse ab (`Error connecting … 192.168.0.55:36867 [995]`); Zwift verband sich nach
+  wenigen Sekunden neu. Der TICKR selbst blieb per Bluetooth verbunden. Bei zwei Adressen
+  bindet Zwift Geräte an unterschiedliche Adressen (Trainer per WLAN, Gurt per Kabel).

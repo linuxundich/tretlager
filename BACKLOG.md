@@ -44,9 +44,10 @@
 - [ ] HRM-Pro Plus auf tinytin: LE-1M-Gegenprobe (`btmgmt phy`), sonst USB-Bluetooth-Stick testen
 - [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)
 - [x] Zwift koppelt KICKR (Leistung, Trittfrequenz) und Pulsgurt über DIRCON, Werte realistisch (2026-10-29)
-- [ ] ERG und Steigungssimulation über FTMS-Control-Point prüfen
+- [x] ERG und Steigungssimulation über FTMS-Control-Point (Antwort in der Schreib-Antwort, 2026-10-29)
 - [ ] Oberfläche: Hinweis bei hängender Dienstsuche („Gurt kurz abklipsen“) statt endlos „Verbinde …“
 - [ ] Oberfläche: Plasma-Feinschliff (Symbole geprüft, Entfernen-Knopf neu)
 - [x] Netzwechsel: Verbindungen mit verschwundener lokaler Adresse schließen
 - [ ] Ohne Netzverbindung: Findet Zwift die Bridge? Sonst Ankündigung auf Loopback
 - [ ] Längere Fahrt (≥ 30 min) auf Stabilität prüfen
+- [ ] Netzwechsel während der Fahrt: nur die Adresse der Hauptverbindung ankündigen und bei Wechsel neu ankündigen (Zwift band Gurt und Trainer an verschiedene Adressen)
