@@ -60,7 +60,7 @@ Kirigami.ScrollablePage {
                     Layout.leftMargin: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.largeSpacing
                     from: 0; to: 100
                     value: page.st.current === stepRow.modelData.id ? page.st.percent : 0
-                    indeterminate: page.st.percent <= 0
+                    indeterminate: visible && page.st.percent <= 0
                 }
                 Controls.Label {
                     visible: stepRow.active && page.st.text !== ""

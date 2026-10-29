@@ -123,7 +123,7 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 from: 0; to: 100
                 value: page.prep.percent
-                indeterminate: page.prep.running && page.prep.percent === 0
+                indeterminate: visible && page.prep.running && page.prep.percent === 0
             }
             Kirigami.InlineMessage {
                 Layout.fillWidth: true
