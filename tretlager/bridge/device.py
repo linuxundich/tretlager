@@ -223,6 +223,7 @@ class BridgedDevice:
         self._server.notify(char_uuid, value)
         decoder = gatt.DECODERS.get(char_uuid)
         if decoder:
+            log.debug("%s %s: %s", self.cfg.address, char_uuid[4:8], value.hex(" "))
             try:
                 self.values.update(decoder(value))
                 self.values_at = time.monotonic()
