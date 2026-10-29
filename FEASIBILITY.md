@@ -344,9 +344,7 @@ verbunden über den eingebauten AX201.
 Folgen für die Geräte [S], vor T5 auf der Hardware zu prüfen:
 - Ein KICKR V4 hat kein eingebautes Direct Connect (das kam mit späteren Modellen). Die Bridge
   ist also ohnehin der Weg, ein echtes DIRCON-Gerät gibt es nicht als Vergleich.
-- Welche GATT-Dienste der V4 mit seiner Firmware anbietet, ist offen: FTMS (0x1826) oder nur
-  Cycling Power (0x1818) mit Wahoos eigener Erweiterung für ERG. Das entscheidet, was die
-  Bridge weiterreicht. Erster Schritt von T5: Dienste per BlueZ auslesen.
+- Der V4 bietet FTMS mit Control Point (geprüft, siehe T5-Vorbereitung unten).
 - Der HRM-Pro Plus erlaubt mehrere BLE-Verbindungen gleichzeitig. Die Bridge kann ihn also
   halten, während eine Uhr mitläuft.
 
@@ -557,3 +555,48 @@ Nebenbefunde:
   Datenschutz-Übersicht; es stammt von Zwift, nicht von Tretlager.
 - Beim ersten Start fehlen Welten-Daten („Watopia not found“). Das Spiel lief trotzdem; ob es
   sie nachlädt, ist noch zu prüfen.
+
+### Fenster und Auflösung, tinytin, 2026-10-29
+
+- Zwift im Vollbild hat über Wine/XRandR den **Modus des Panels umgestellt** (2880×1800 →
+  2560×1600). Zusammen mit Plasmas X11-Skalierung (1,6) war das Bild verzerrt. Abhilfe im
+  Prefix: `HKCU\Software\Wine\X11 Driver\UseXRandR=N`. Den Modus stellt man mit
+  `kscreen-doctor output.eDP-1.mode.1` zurück.
+- Danach war das Bild in Ordnung, aber das Fenster (2872×1766 bei y=44) lag unter der
+  Plasma-Leiste, und die unteren Knöpfe waren verdeckt. Ein Doppelklick auf die Titelleiste
+  (KWin maximiert) behebt das. Die App muss Zwift maximiert oder im Vollbild starten.
+- Für ein scharfes Bild unter Plasma mit Skalierung braucht es *Legacy-Anwendungen (X11) →
+  Skalierung selbst anwenden*. Das ist eine Desktop-Einstellung; die App weist nur darauf hin.
+
+### T5 Vorbereitung: GATT-Inventar der Testgeräte, tinytin, 2026-10-29
+
+BlueZ 5.87 ohne root (`bluetoothctl`, `busctl`). Kurz verbunden, ausgelesen, getrennt.
+
+**Wahoo KICKR V4** (`Wahoo KICKR C058`, kündigt 0x1818 und 0x1826 an):
+
+| Dienst | Charakteristik | Eigenschaften |
+|---|---|---|
+| FTMS 0x1826 | 0x2ACC Fitness Machine Feature | read |
+| | 0x2AD2 Indoor Bike Data | notify |
+| | 0x2AD3 Training Status | read, notify |
+| | 0x2AD6 Supported Resistance Level Range | read |
+| | 0x2AD8 Supported Power Range | read |
+| | **0x2AD9 Fitness Machine Control Point** | write, indicate |
+| | 0x2ADA Fitness Machine Status | notify |
+| Cycling Power 0x1818 | 0x2A63 Measurement | notify |
+| | 0x2A65 Feature, 0x2A5D Sensor Location | read |
+| | 0x2A66 Control Point | write, indicate |
+| | `A026E005` Wahoo-ERG-Erweiterung | write, indicate |
+| User Data 0x181C | 0x2A98 Weight | read, write |
+| Wahoo-eigen `EE01/EE03/EE06/EE0B` | `A026E002/04/0A/23/37` | notify, write-without-response |
+
+Der V4 kann also **FTMS mit Control Point**. ERG und Steigungssimulation gehen über den
+Standard und brauchen nicht Wahoos eigene Erweiterung.
+
+**Garmin HRM-Pro Plus** (`HRMPro+:462237`): Heart Rate 0x180D (0x2A37 notify, 0x2A38 read),
+Battery 0x180F, Running Speed and Cadence 0x1814, Garmin-eigen `2401`. Er nimmt mehrere
+Verbindungen an (nach erneutem Scan verbunden).
+
+Folge für die Bridge: Sie muss für FTMS, Cycling Power und Heart Rate die Charakteristika 1:1
+über DIRCON weiterreichen, einschließlich Indications des Control Points. Wahoo-eigene Dienste
+braucht Zwift über FTMS nicht (zu prüfen, ob Zwift sie bevorzugt, wenn sie sichtbar sind).
