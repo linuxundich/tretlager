@@ -188,7 +188,7 @@ Das Menü ☰ enthält: *Sensoren verwalten*, *Diagnose*, *Protokolle*, *Einstel
 |---|---|---|
 | Zwift-Spiel | beim Start über den offiziellen Launcher | Statuszeile „Zwift wird aktualisiert (1.125.0)“ |
 | Zwift-Launcher | ebenso; danach automatischer Test, ob die offizielle Anmeldung wieder geht | ggf. Hinweis „Offizielle Anmeldung funktioniert wieder“ |
-| Wine | APT-Pinning auf die getestete Version; neue Versionen erst nach Freigabe in Tretlagers Versionsliste | „Wine 11.21 ist getestet, jetzt aktualisieren?“ |
+| Wine | immer die neueste `winehq-devel` über die Systemupdates; Tretlager erkennt die neue Version beim nächsten Start und prüft GL-Weg und Zwift-Start | bei Problemen: „Seit Wine 11.21 startet Zwift nicht“ + Diagnose |
 | Tretlager | Debian-Paket über Discover | – |
 
 Bei einem fehlgeschlagenen Update: **Zurück zum letzten funktionierenden Stand** (Reflink-
@@ -223,11 +223,11 @@ die GTK-Oberfläche danach. Das entspricht E4 und dem Vorgehen bei Stafette.
   getestet ist; unbekannte Kombinationen zeigt Tretlager als „ungetestet“ an.
 - **Start-Logik:** aus `poc/token-login/start.sh` in den Kern (Python) übernehmen.
 
-## 10. Offene Entscheidungen
+## 10. Entscheidungen (Christoph, 2026-10-29)
 
-- **E2 Anmeldung:** Browser-Anmeldung als ausdrückliche Option für Nutzer (mit Hinweis) – ja
-  oder nein? Ohne sie endet die Einrichtung vor dem Start.
-- **Bezug:** eigenes Debian-Paket mit eigener Quelle oder Anfrage bei TUXEDO?
-- **Oberfläche zuerst:** Kirigami (Ziel Plasma) oder GTK (Auftrag)?
-- **Wine-Politik:** feste getestete Version (Pinning) oder immer die aktuelle `winehq-devel`?
-- **Name:** Arbeitstitel „Tretlager“.
+- **E2 Anmeldung:** Browser-Anmeldung wird als Option mit Hinweis angeboten.
+- **Bezug:** vorerst lokal gebautes Debian-Paket; später Paketquelle auf bender.
+- **Oberfläche zuerst:** Kirigami.
+- **Wine-Politik:** immer die neueste `winehq-devel`. Statt Pinning prüft Tretlager nach einem
+  Wine-Update GL-Weg und Start und meldet Brüche (Abschnitt 6 entsprechend: kein Pinning).
+- **Name:** weiter Arbeitstitel „Tretlager“.

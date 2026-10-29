@@ -6,9 +6,9 @@
   Suite forky) über einen pkexec-Helfer mit fester Aktion, festgenageltem Schlüssel und
   ausdrücklicher Zustimmung. Alternative: umu-launcher + Proton im Benutzerverzeichnis (kein
   root, aber Steam-Runtime-Container und weniger erprobt mit Zwift).
-- [ ] **E2 Anmeldung.** Kein nachgebauter OAuth-Login (AGB §5, Grundsatz 7). Nur die offizielle
-  WebView2-Anmeldung im Launcher. Offen: Ist der Start per `runfromprocess` (Spiel als Kind des
-  Launchers) vertretbar, falls der Launcher das Spiel unter Wine nicht selbst startet?
+- [x] **E2 Anmeldung.** Christoph 2026-10-29: Browser-Anmeldung wird als ausdrückliche Option mit
+  Hinweis auf AGB §5 angeboten (offizielle Anmeldung geht unter Wine nicht, siehe T2). Start per
+  `RunFromProcess` (Spiel als Kind des Launchers) gehört dazu.
 - [ ] **E3 Sensoren.** Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
   DIRCON statt qdomyos-zwift. Projekt-Lizenz GPL-3, damit qdomyos-Protokollcode als Referenz
   übernommen werden darf.
@@ -19,8 +19,13 @@
 - [ ] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
   mit PRIME-Offload, Treiber 580, AX201). Geräte: Wahoo KICKR V4, Garmin HRM-Pro Plus
   (BLE + ANT+), eingebauter Adapter. Keine weiteren Sensoren.
-- [ ] **E6 Sprache.** Empfehlung Python + PyGObject (Auftrag bevorzugt es; Bridge mit bleak in
-  derselben Sprache), Meson, Debian-Paket.
+- [x] **E6 Sprache.** Python (Kern, Bridge), Debian-Paket.
+- [x] **E8 Bezug.** Christoph 2026-10-29: vorerst nur ein lokal gebautes Debian-Paket; später eine
+  Paketquelle auf bender (dort läuft schon das Arch-Repo `pacman-repo`).
+- [x] **E9 Oberfläche zuerst.** Christoph 2026-10-29: Kirigami (Ziel Plasma). Die GTK-Oberfläche der
+  Bridge bleibt bestehen und wird später an den Kern angepasst.
+- [x] **E10 Wine-Politik.** Christoph 2026-10-29: immer die neueste `winehq-devel`, kein Pinning.
+  Folge: Tretlager prüft nach jedem Wine-Update selbst (GL-Test, Start-Test) und meldet Brüche.
 - [ ] **E7 Name.** Arbeitstitel „Tretlager“.
 
 ## Phasen
@@ -56,7 +61,7 @@
 
 ## Bedienung (Konzept: docs/bedienkonzept.md)
 
-- [ ] Entscheidungen: E2 Browser-Anmeldung als Nutzeroption, Bezugsweg (eigenes Paket/TUXEDO-Repo), Oberfläche zuerst (Kirigami/GTK), Wine-Pinning
+- [x] Entscheidungen: E2 ja, lokales .deb (später bender), Kirigami zuerst, neueste Wine (2026-10-29)
 - [ ] Kern: Zustandsautomat der Einrichtung mit Wiederaufnahme (`~/.local/state/tretlager/state.json`)
 - [ ] Polkit-Helfer `setup-system` (WineHQ-Quelle + feste Paketliste, APT-Simulation vorab)
 - [ ] Assistent: Prüfen → Vorbereiten → Zwift → Anmeldung → Sensoren → Fertig
