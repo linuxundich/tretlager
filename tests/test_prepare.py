@@ -83,3 +83,13 @@ def test_winehq_source_detection(tmp_path):
     assert not prepare.winehq_source_present(tmp_path)
     (tmp_path / "other.sources").write_text(f"URIs: {prepare.WINEHQ_URI}\n")
     assert prepare.winehq_source_present(tmp_path)
+
+
+def test_helper_fingerprint_of_bundled_key():
+    import importlib.machinery
+    import importlib.util
+    loader = importlib.machinery.SourceFileLoader("setup_system", str(ROOT / "helper/setup-system"))
+    spec = importlib.util.spec_from_loader("setup_system", loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    assert mod.fingerprint(str(prepare.KEY_PATH)) == prepare.WINEHQ_FPR

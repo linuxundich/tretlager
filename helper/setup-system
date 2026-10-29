@@ -14,6 +14,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 WINEHQ_FPR = "D43F640145369C51D786DDEA76F1A20FF987672F"
 WINEHQ_URI = "https://dl.winehq.org/wine-builds/debian"
@@ -35,8 +36,11 @@ def fail(text):
 
 
 def fingerprint(path):
-    r = subprocess.run(["gpg", "--batch", "--show-keys", "--with-colons", path],
-                       capture_output=True, text=True, env={"PATH": "/usr/bin:/bin", "GNUPGHOME": "/nonexistent"})
+    # Eigenes leeres GnuPG-Verzeichnis: nichts unter /root anlegen; ein nicht existierendes
+    # Verzeichnis lässt gpg dagegen abbrechen.
+    with tempfile.TemporaryDirectory(prefix="tretlager-gpg-") as home:
+        r = subprocess.run(["gpg", "--batch", "--show-keys", "--with-colons", path],
+                           capture_output=True, text=True, env={"PATH": "/usr/bin:/bin", "GNUPGHOME": home})
     for line in r.stdout.splitlines():
         parts = line.split(":")
         if parts[0] == "fpr":
