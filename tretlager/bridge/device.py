@@ -19,6 +19,7 @@ from .mdns import Announcer
 log = logging.getLogger(__name__)
 
 RECONNECT_DELAY = 5.0
+MAX_RECONNECT_DELAY = 60.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
 # BlueZ baut pro Adapter nur eine Verbindung gleichzeitig auf („Operation already in progress“).
@@ -72,6 +73,7 @@ class BridgedDevice:
         self._server = dircon.Server(self, port=cfg.port)
         self._task: asyncio.Task | None = None
         self._disconnected = asyncio.Event()
+        self._was_connected = False
 
     # --- GattBackend für den DIRCON-Server ---
 
@@ -127,6 +129,7 @@ class BridgedDevice:
         }
 
     async def _run(self) -> None:
+        failures = 0
         while True:
             try:
                 await self._connect_and_serve()
@@ -141,8 +144,12 @@ class BridgedDevice:
                     text = str(e) or type(e).__name__
                 self._set_state("fehler", text)
                 log.warning("%s: %s (%s)", self.cfg.address, text, type(e).__name__)
+            # Nach einer stehenden Verbindung gleich wieder versuchen; ein Gerät, das immer wieder
+            # scheitert, seltener probieren, damit es die BlueZ-Sperre nicht dauernd belegt.
+            failures = 0 if self._was_connected else failures + 1
+            self._was_connected = False
             await self._teardown()
-            await asyncio.sleep(RECONNECT_DELAY)
+            await asyncio.sleep(min(RECONNECT_DELAY * 2 ** max(failures - 1, 0), MAX_RECONNECT_DELAY))
 
     async def _connect_and_serve(self) -> None:
         self._set_state("verbinde")
@@ -165,6 +172,7 @@ class BridgedDevice:
         for uuid in gatt.DECODERS:
             if self._char_props(uuid) & {"notify", "indicate"}:
                 await self.set_notify(uuid, True)
+        self._was_connected = True
         self._set_state("verbunden")
         await self._disconnected.wait()
         raise RuntimeError("Verbindung zum Gerät verloren")
