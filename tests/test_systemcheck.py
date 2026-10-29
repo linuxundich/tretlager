@@ -1,0 +1,112 @@
+import json
+import subprocess
+from pathlib import Path
+
+from tretlager.core import systemcheck as sc
+
+
+def make_root(tmp_path: Path, os_release: str, gpus: list[tuple], nvidia_version: str = "",
+              secure_boot: int | None = None, rfkill_soft: str | None = None) -> Path:
+    (tmp_path / "etc").mkdir()
+    (tmp_path / "etc/os-release").write_text(os_release)
+    drm = tmp_path / "sys/class/drm"
+    drivers = tmp_path / "sys/bus/pci/drivers"
+    for i, (vendor, device, driver, boot) in enumerate(gpus):
+        dev = tmp_path / f"sys/devices/pci/{i}"
+        dev.mkdir(parents=True)
+        (dev / "vendor").write_text(vendor + "\n")
+        (dev / "device").write_text(device + "\n")
+        (dev / "boot_vga").write_text("1\n" if boot else "0\n")
+        if driver:
+            (drivers / driver).mkdir(parents=True, exist_ok=True)
+            (dev / "driver").symlink_to(drivers / driver)
+        (drm / f"card{i}").mkdir(parents=True)
+        (drm / f"card{i}" / "device").symlink_to(dev)
+        (drm / f"card{i}-eDP-1").mkdir()
+    if nvidia_version:
+        (tmp_path / "sys/module/nvidia").mkdir(parents=True)
+        (tmp_path / "sys/module/nvidia/version").write_text(nvidia_version + "\n")
+    if secure_boot is not None:
+        efi = tmp_path / "sys/firmware/efi/efivars"
+        efi.mkdir(parents=True)
+        (efi / sc.SECURE_BOOT_VAR).write_bytes(bytes([6, 0, 0, 0, secure_boot]))
+    if rfkill_soft is not None:
+        rf = tmp_path / "sys/class/rfkill/rfkill0"
+        rf.mkdir(parents=True)
+        (rf / "type").write_text("bluetooth\n")
+        (rf / "soft").write_text(rfkill_soft + "\n")
+    return tmp_path
+
+
+TUXEDO_FORKY = 'NAME="TUXEDO OS"\nID=tuxedo\nID_LIKE="debian"\nPRETTY_NAME="TUXEDO OS (Debian base)"\nVERSION_CODENAME=forky\n'
+TINYTIN_GPUS = [("0x8086", "0x46a6", "i915", True), ("0x10de", "0x25a0", "nvidia", False)]
+
+
+def test_tinytin_like_system(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, TINYTIN_GPUS, nvidia_version="580.178.04", secure_boot=0)
+    assert sc.check_system(root, "x86_64").status == sc.OK
+    checks = sc.check_graphics(root)
+    assert [c.id for c in checks] == ["graphics", "hybrid"]
+    assert checks[0].status == sc.OK and "580.178.04" in checks[0].summary
+    assert "Intel" in checks[1].details[0]
+
+
+def test_nvidia_without_driver_and_secure_boot(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, [("0x10de", "0x25a0", "nouveau", True)], secure_boot=1)
+    (c,) = sc.check_graphics(root)
+    assert c.status == sc.FAIL and "Secure Boot" in c.summary and c.action == "nvidia-help"
+
+
+def test_intel_only_is_warning(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, [("0x8086", "0x9a49", "i915", True)])
+    (c,) = sc.check_graphics(root)
+    assert c.status == sc.WARN and "Intel" in c.summary
+
+
+def test_other_systems(tmp_path):
+    root = make_root(tmp_path, 'ID=debian\nPRETTY_NAME="Debian forky"\nVERSION_CODENAME=forky\n', [])
+    assert sc.check_system(root, "x86_64").status == sc.WARN
+    assert sc.check_system(root, "aarch64").status == sc.FAIL
+
+
+def fake_busctl(powered=True, missing=False):
+    def run(cmd, **_kw):
+        prop = cmd[-1]
+        if missing:
+            return subprocess.CompletedProcess(cmd, 1, "", "no adapter")
+        data = {"Powered": powered, "Name": "tinytin", "Address": "68:54:5A:AC:2E:15"}[prop]
+        return subprocess.CompletedProcess(cmd, 0, json.dumps({"type": "b", "data": data}), "")
+    return run
+
+
+def test_bluetooth_states(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, [], rfkill_soft="0")
+    assert sc.check_bluetooth(root, fake_busctl()).status == sc.OK
+    off = sc.check_bluetooth(root, fake_busctl(powered=False))
+    assert off.status == sc.WARN and off.action == "bluetooth-on"
+    assert sc.check_bluetooth(root, fake_busctl(missing=True)).status == sc.WARN
+
+
+def test_rfkill_soft_block_counts_as_off(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, [], rfkill_soft="1")
+    assert sc.check_bluetooth(root, fake_busctl()).action == "bluetooth-on"
+
+
+def test_existing_installation(tmp_path):
+    assert "Noch nicht" in sc.check_existing(tmp_path).summary
+    (tmp_path / "ZwiftLauncher.exe").touch()
+    assert "Spiel fehlt" in sc.check_existing(tmp_path).summary
+    (tmp_path / "ZwiftApp.exe").touch()
+    assert "schon eingerichtet" in sc.check_existing(tmp_path).summary
+
+
+def test_network_unreachable_host():
+    c = sc.check_network([("127.0.0.1", 9)], timeout=0.5)
+    assert c.status == sc.FAIL
+
+
+def test_overall():
+    mk = lambda s: sc.Check("x", "x", s, "")  # noqa: E731
+    assert sc.overall([mk(sc.OK), mk(sc.WARN)]) == sc.WARN
+    assert sc.overall([mk(sc.OK), mk(sc.FAIL), mk(sc.WARN)]) == sc.FAIL
+    assert sc.overall([mk(sc.OK)]) == sc.OK
