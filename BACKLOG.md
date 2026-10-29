@@ -48,6 +48,8 @@
 - [ ] Oberfläche: Hinweis bei hängender Dienstsuche („Gurt kurz abklipsen“) statt endlos „Verbinde …“
 - [ ] Oberfläche: Plasma-Feinschliff (Symbole geprüft, Entfernen-Knopf neu)
 - [x] Netzwechsel: Verbindungen mit verschwundener lokaler Adresse schließen
-- [ ] Ohne Netzverbindung: Findet Zwift die Bridge? Sonst Ankündigung auf Loopback
+- [ ] Ohne jede Netzverbindung testen (Ankündigung auf lo vorhanden)
 - [ ] Längere Fahrt (≥ 30 min) auf Stabilität prüfen
-- [ ] Netzwechsel während der Fahrt: nur die Adresse der Hauptverbindung ankündigen und bei Wechsel neu ankündigen (Zwift band Gurt und Trainer an verschiedene Adressen)
+- [x] Netzwechsel während der Fahrt: Ankündigung auf 127.0.0.1, Lauschen nur auf Loopback (2026-10-29)
+- [ ] Oberfläche: Schalter „Auch für Zwift auf anderen Geräten im Netz anbieten“ (local_only)
+- [ ] Netzwechsel-Test wiederholen: Kabel ab/an während der Fahrt

@@ -17,6 +17,8 @@ AVAHI = "org.freedesktop.Avahi"
 IF_UNSPEC = -1
 PROTO_INET = 0
 SERVICE_TYPE = "_wahoo-fitness-tnp._tcp"
+PUBLISH_NO_REVERSE = 16  # kein PTR-Eintrag für 127.0.0.1
+LOOPBACK = "127.0.0.1"
 
 
 class Announcer:
@@ -33,17 +35,30 @@ class Announcer:
             raise RuntimeError(f"avahi {member}: {reply.error_name} {reply.body}")
         return reply.body
 
-    async def publish(self, name: str, port: int, service_uuids: list[str], mac: str, serial: str) -> None:
+    async def publish(self, name: str, port: int, service_uuids: list[str], mac: str, serial: str,
+                      local_only: bool = True) -> None:
+        """Gerät ankündigen.
+
+        local_only: Zwift läuft auf demselben Rechner. Dann zeigt die Ankündigung auf 127.0.0.1;
+        diese Adresse verschwindet nie, auch nicht beim Wechsel zwischen Kabel und WLAN. Mit einer
+        LAN-Adresse merkt sich Zwift sonst die alte Adresse und findet das Gerät nicht wieder.
+        """
         await self.withdraw(port)
         (group,) = await self._call("/", f"{AVAHI}.Server", "EntryGroupNew")
         txt = [f"ble-service-uuids={','.join(u.upper() for u in service_uuids)}".encode(),
                f"mac-address={mac}".encode(),
                f"serial-number={serial}".encode()]
+        host = ""
+        if local_only:
+            host = f"tretlager-{port}.local"
+            await self._call(group, f"{AVAHI}.EntryGroup", "AddAddress", "iiuss",
+                             [IF_UNSPEC, PROTO_INET, PUBLISH_NO_REVERSE, host, LOOPBACK])
         await self._call(group, f"{AVAHI}.EntryGroup", "AddService", "iiussssqaay",
-                         [IF_UNSPEC, PROTO_INET, 0, name, SERVICE_TYPE, "", "", port, txt])
+                         [IF_UNSPEC, PROTO_INET, 0, name, SERVICE_TYPE, "", host, port, txt])
         await self._call(group, f"{AVAHI}.EntryGroup", "Commit")
         self._groups[port] = group
-        log.info("mDNS: „%s“ auf Port %d angekündigt", name, port)
+        log.info("mDNS: „%s“ auf Port %d angekündigt (%s)", name, port,
+                 f"{host} → {LOOPBACK}" if local_only else "LAN-Adressen")
 
     async def withdraw(self, port: int) -> None:
         group = self._groups.pop(port, None)

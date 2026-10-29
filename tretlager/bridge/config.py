@@ -27,6 +27,9 @@ class DeviceConfig:
 @dataclass
 class BridgeConfig:
     devices: list[DeviceConfig] = field(default_factory=list)
+    # True: nur für Zwift auf diesem Rechner (Ankündigung auf 127.0.0.1, robust bei Netzwechsel).
+    # False: auch für Zwift auf anderen Geräten im Netz (Apple TV, iPad, zweiter Rechner).
+    local_only: bool = True
 
     @classmethod
     def load(cls, path: Path | None = None) -> "BridgeConfig":
@@ -35,13 +38,15 @@ class BridgeConfig:
             raw = json.loads(path.read_text())
         except FileNotFoundError:
             return cls()
-        return cls(devices=[DeviceConfig(**d) for d in raw.get("devices", [])])
+        return cls(devices=[DeviceConfig(**d) for d in raw.get("devices", [])],
+                   local_only=raw.get("local_only", True))
 
     def save(self, path: Path | None = None) -> None:
         path = path or config_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
-        tmp.write_text(json.dumps({"devices": [asdict(d) for d in self.devices]}, indent=2) + "\n")
+        tmp.write_text(json.dumps({"local_only": self.local_only,
+                                   "devices": [asdict(d) for d in self.devices]}, indent=2) + "\n")
         tmp.replace(path)
 
     def find(self, address: str) -> DeviceConfig | None:

@@ -47,7 +47,7 @@ class Bridge(ServiceInterface):
     def _start(self, address: str) -> None:
         cfg = self.config.find(address)
         if cfg and address not in self.devices:
-            dev = BridgedDevice(cfg, self.announcer, self._mark_dirty)
+            dev = BridgedDevice(cfg, self.announcer, self._mark_dirty, local_only=self.config.local_only)
             self.devices[address] = dev
             dev.start()
 

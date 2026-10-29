@@ -61,8 +61,10 @@ def dircon_name(cfg: DeviceConfig) -> str:
 class BridgedDevice:
     """Verbindet ein BLE-Gerät und spiegelt dessen Standarddienste über DIRCON."""
 
-    def __init__(self, cfg: DeviceConfig, announcer: Announcer, on_change: Callable[[], None]):
+    def __init__(self, cfg: DeviceConfig, announcer: Announcer, on_change: Callable[[], None],
+                 local_only: bool = True):
         self.cfg = cfg
+        self.local_only = local_only
         self.announcer = announcer
         self.on_change = on_change
         self.state = "getrennt"  # getrennt, verbinde, verbunden, fehler
@@ -72,7 +74,9 @@ class BridgedDevice:
         self._services: list[dircon.Service] = []
         self._client: BleakClient | None = None
         self._notifying: set[str] = set()
-        self._server = dircon.Server(self, port=cfg.port)
+        # Nur für Zwift auf diesem Rechner: nur auf Loopback lauschen, damit niemand im Netz den
+        # Trainer steuern kann.
+        self._server = dircon.Server(self, host="127.0.0.1" if local_only else "0.0.0.0", port=cfg.port)
         self._task: asyncio.Task | None = None
         self._disconnected = asyncio.Event()
         self._was_connected = False
@@ -185,7 +189,8 @@ class BridgedDevice:
             raise RuntimeError("Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, Herzfrequenz)")
         await self._server.start()
         await self.announcer.publish(dircon_name(self.cfg), self.cfg.port, [s.uuid for s in self._services],
-                                     mac=self.cfg.address, serial=self.cfg.address.replace(":", ""))
+                                     mac=self.cfg.address, serial=self.cfg.address.replace(":", ""),
+                                     local_only=self.local_only)
         # Für die Live-Anzeige schon vor Zwift die Messwerte abonnieren.
         for uuid in gatt.DECODERS:
             if self._char_props(uuid) & {"notify", "indicate"}:

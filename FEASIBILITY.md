@@ -661,3 +661,9 @@ Befunde:
   Kabel-Adresse ab (`Error connecting … 192.168.0.55:36867 [995]`); Zwift verband sich nach
   wenigen Sekunden neu. Der TICKR selbst blieb per Bluetooth verbunden. Bei zwei Adressen
   bindet Zwift Geräte an unterschiedliche Adressen (Trainer per WLAN, Gurt per Kabel).
+- **Behoben (21:25):** Standardmäßig kündigt die Bridge ihre Geräte jetzt unter 127.0.0.1 an
+  (avahi `AddAddress` für `tretlager-<port>.local` mit `NO_REVERSE`, Dienst mit diesem Host) und
+  lauscht nur auf Loopback. Zwift unter Wine verbindet sich darüber (`127.0.0.1:36866/36867`).
+  Kabel/WLAN-Wechsel betreffen die Verbindung Zwift–Bridge nicht mehr, und der Trainer ist im
+  LAN nicht steuerbar. Für Zwift auf anderen Geräten gibt es `"local_only": false` in
+  `~/.config/tretlager/bridge.json` (noch ohne Schalter in der Oberfläche).
