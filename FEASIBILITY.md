@@ -628,3 +628,19 @@ Befunde:
   gleichzeitig („Operation already in progress“) → gemeinsame Sperre. Eine abgebrochene
   Verbindung muss getrennt werden, sonst wirbt das Gerät nicht mehr. Scheiternde Geräte werden
   mit wachsender Pause (bis 60 s) erneut versucht.
+
+### T5/T6: Zwift über die Bridge, tinytin, 2026-10-29 abends — funktioniert
+
+- Zwift findet die Bridge-Geräte per mDNS (`[WFTNP] CreateWFTNPDevice for "Wahoo HRM 2C8D"`,
+  `found service UUID 0x180D`) und verbindet sich per TCP mit der Bridge **auf demselben
+  Rechner**. Damit sind die Risiken R4 (gleicher Host) und R3 (Puls über DIRCON) ausgeräumt.
+- Gekoppelt und bestätigt: **Leistungsquelle = Wahoo KICKR FE2E**, **Herzfrequenz = Wahoo HRM
+  2C8D** (TICKR), Trittfrequenz über den KICKR. Christoph auf dem Trainer: Watt und
+  Trittfrequenz realistisch.
+- Aufzeichnung der Bridge (5-s-Raster): beim Treten 40–51 W, 39–44 U/min, 10–13 km/h, in den
+  Pausen 0; Puls 73–96 bpm; beide Geräte durchgehend verbunden, je ein Zwift-Client.
+- Netzwechsel (Kabel → WLAN): Zwifts TCP-Verbindungen hingen an der verschwundenen Adresse
+  und stauten sich, Zwift verlor die Geräte. Behoben: Die Bridge schließt Verbindungen, deren
+  lokale Adresse weg ist (Prüfung alle 3 s); Zwift verbindet sich dann über die neue Adresse.
+- Noch offen: steuerbarer Trainer (Steigung, ERG über FTMS Control Point 0x2AD9), längere
+  Fahrt, Verhalten ohne jede Netzverbindung.

@@ -4,7 +4,9 @@ Native GTK4-/libadwaita-Anwendung, die den offiziellen Windows-Client von **Zwif
 **TUXEDO OS Forky** (Debian testing) einrichtet, startet und aktuell hält: Wine, Laufzeit,
 Grafikdiagnose (NVIDIA), Sensoren über Bluetooth LE ohne Zwift Companion App.
 
-**Stand:** Phase A (Machbarkeit) liegt als Entwurf vor, noch kein Code.
+**Stand (2026-10-29):** Machbarkeit geprüft, Zwift läuft auf dem Testrechner tinytin (Opt-in-
+Token-Login, NVIDIA per GLX + PRIME-Offload). Die **Sensor-Bridge** mit Oberfläche funktioniert:
+Zwift koppelt Trainer und Pulsgurt über Wahoo Direct Connect, ohne Companion App.
 Ergebnis in [FEASIBILITY.md](FEASIBILITY.md), offene Entscheidungen und Phasen in
 [BACKLOG.md](BACKLOG.md).
 
@@ -19,3 +21,12 @@ Kernbefunde:
 
 Keine Umgehung von Anmeldung, DRM oder Lizenzprüfung, keine veränderten Zwift-Dateien, keine
 Telemetrie, keine stillen Systemänderungen. Nicht Funktionierendes wird als solches angezeigt.
+
+## Bridge ausprobieren (Benutzerinstallation)
+
+    build-aux/install-user.sh          # nach ~/.local, systemd-Benutzerdienst tretlager-bridge
+    systemctl --user start tretlager-bridge
+    PYTHONPATH=~/.local/lib/tretlager python3 -m tretlager.ui
+
+Abhängigkeiten (Debian forky): `python3-bleak`, `python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`,
+laufender `avahi-daemon` und BlueZ. Tests: `python -m pytest tests`.
