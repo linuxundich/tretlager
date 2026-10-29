@@ -487,3 +487,29 @@ Mögliche nächste Schritte:
 In keiner Kombination startet der Launcher 1.2 einen WebView2-Browser-Prozess; er endet ohne
 Fehlermeldung. **Die offizielle Anmeldung ist unter Wine derzeit nicht möglich.**
 Installieren und Aktualisieren funktionieren in allen Laufzeiten.
+
+### T2 (Teil 5): WebView2 getrennt vom Launcher, tinytin, 2026-10-29
+
+Test-Apps in `poc/wv2test/` (C#, kompiliert mit `csc.exe` aus .NET 4.8 im Prefix, NuGet
+`Microsoft.Web.WebView2` 1.0.4314.35), wine-devel 11.20, WebView2 109:
+
+| Test | Ergebnis |
+|---|---|
+| WinForms `WebView2` | Init OK, Browser-Prozess läuft, `example.com` geladen und **sichtbar gerendert** |
+| WPF `WebView2` (HWND-basiert) | Init OK, Navigation OK |
+| WPF **`WebView2CompositionControl`** | Absturz: `TypeLoadException: Could not find Windows Runtime type 'Windows.UI.Composition.ContainerVisual'` in `TryInitializeD3DImage()` |
+
+`ZwiftLauncher.exe` ist eine WPF-App (.NET Framework 4.7.2) und enthält
+`WebView2CompositionControl`. Es gibt keinen Schalter in `ZwiftLauncher.exe.config`; der Launcher
+versucht es zweimal („deleting user data and retrying“) und gibt dann auf.
+
+**Ursache T2:** Ab Launcher 1.2 zeichnet Zwift die Anmeldeseite mit dem
+`WebView2CompositionControl`. Das braucht die WinRT-API `Windows.UI.Composition`, die Wine
+(vanilla, Staging, Proton) nicht hat. WebView2 selbst läuft unter Wine. Das passt zu den
+früheren Meldungen „webview2 in zwift launcher works“ (Januar 2026, älterer Launcher).
+
+Folgen:
+- Eine Lösung über die offizielle Anmeldung bräuchte entweder `Windows.UI.Composition` in Wine
+  (groß, Fehlerbericht lohnt sich mit diesem Minimalbeispiel) oder dass Zwift zum klassischen
+  Steuerelement zurückkehrt bzw. darauf ausweicht (Rückmeldung an Zwift möglich).
+- Einen Launcher-Patch baut Tretlager nicht (Grundsatz: Zwift-Dateien bleiben unverändert).
