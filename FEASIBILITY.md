@@ -312,7 +312,7 @@ https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-um
 | Test | Wo | Frage |
 |---|---|---|
 | T1 ✔ | beliebig | Authenticode von `ZwiftSetup.exe`: Signierer, Kette, Zeitstempel |
-| T2 | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: rendert die Anmeldung im Launcher 1.2.x? startet er das Spiel selbst? |
+| T2 ◐ | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: rendert die Anmeldung im Launcher 1.2.x? startet er das Spiel selbst? |
 | T3 | Forky + NVIDIA | OpenGL-Renderer in Wine = NVIDIA? EGL oder GLX nötig? fps auf Watopia |
 | T4 | Forky-VM | Prefix-Einrichtung idempotent, Abbruch/Wiederaufnahme |
 | T5 | Forky + BLE | Bridge-Prototyp (FTMS) auf demselben Host: findet Zwift das Gerät? |
@@ -370,3 +370,41 @@ Folgen für den Rechner:
 | qdomyos-zwift | GPL-3.0 | Protokollreferenz; Übernahme nur bei GPL-3 |
 | bleak | MIT | BLE in der Bridge (python3-bleak 3.0.2 in forky) |
 | Zwift | proprietär | wird nur über den offiziellen Weg geladen und nie verändert |
+
+## 11. Ergebnisse der Machbarkeitstests
+
+### T2 (Teil 1), tinytin, 2026-10-29
+
+Aufbau:
+- WineHQ `wine-devel 11.20~forky-1`, nur amd64 (WoW64)
+- Prefix `~/.local/share/tretlager/prefix-t2`, ohne Mono und Gecko
+- winetricks `20260125-next` (Commit f3890f6) mit `corefonts dotnet48 d3dcompiler_47 webview2`.
+  Zusätzlich nötig war das Paket **`cabextract`**, das winetricks voraussetzt.
+- Skripte in `~/tretlager-t2/` auf tinytin, jeweils als eigene `systemd-run --user`-Unit
+
+| Schritt | Ergebnis |
+|---|---|
+| Prefix + winetricks | ok, **297 s** |
+| `ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL` | ok, rc 0 |
+| `ZwiftLauncher.exe SilentLaunch` (ohne Anmeldung) | lädt das Spiel: **Zwift 1.124.0 (167761)**, 4,9 GB, in etwa 1–2 min; der Launcher bleibt danach untätig im Hintergrund |
+| Versionsdatei | `Zwift_ver_cur.xml` wird zu `Zwift_ver_cur.<build>.xml` umbenannt, der Name steht in `Zwift_ver_cur_filename.txt` (UTF-16/NUL) |
+| WebView2-Runtime | **109.0.1518.140**, die letzte Win7-Version; winetricks setzt `msedgewebview2.exe` auf Win7 (Wine-Bug 58921) |
+| Launcher normal starten (Anmeldung) | **scheitert.** Log: „EnsureCoreWebView2Async“ → „Main Window Visible: True“ → Prozess endet nach etwa 20 s mit rc 0. Es erscheint kein Fenster und kein WebView2-Datenordner. Mit `--no-sandbox --disable-gpu` dasselbe |
+
+Am Binary bestätigt:
+- `BleWin10Lib.dll` nutzt **WinRT-BLE** (`BluetoothLEAdvertisementWatcher`,
+  `GattDeviceServicesResult`, `GattReadClientCharacteristicConfigurationDescriptorResult`).
+  Das sind genau die Teile, die in Wine `E_NOTIMPL` liefern.
+- `ZwiftApp.exe` enthält `_wahoo-fitness-tnp._tcp.local.` (DIRCON) und
+  `_zwift-protocol._tcp.local.`.
+- Daneben liegen `ANT_DLL.dll` und ein „Windows ANT Dongle Driver“.
+
+Zwischenstand: Installieren und Aktualisieren funktionieren ohne Anmeldung über den offiziellen
+Weg. **Die offizielle Anmeldung im Launcher funktioniert mit dieser Kombination nicht.** Das
+deckt sich mit netbrain (#420/#421).
+
+Nächste Varianten für T2:
+1. neuere WebView2-Runtime (Fixed Version) im Win10-Modus
+2. `wine-staging` 11.20
+3. umu-launcher + Proton/GE-Proton, das eigene WebView2-Fixes mitbringt
+4. Wine-Trace (`+loaddll,+combase`) zur Ursache
