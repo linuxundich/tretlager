@@ -600,3 +600,31 @@ Verbindungen an (nach erneutem Scan verbunden).
 Folge für die Bridge: Sie muss für FTMS, Cycling Power und Heart Rate die Charakteristika 1:1
 über DIRCON weiterreichen, einschließlich Indications des Control Points. Wahoo-eigene Dienste
 braucht Zwift über FTMS nicht (zu prüfen, ob Zwift sie bevorzugt, wenn sie sichtbar sind).
+
+### T5/T6: Bridge mit echten Geräten, tinytin, 2026-10-29
+
+Bridge (`tretlager/bridge`) und Oberfläche (`tretlager/ui`) als Benutzerinstallation
+(`build-aux/install-user.sh`), Dienst `tretlager-bridge.service`.
+
+| Gerät | Ergebnis |
+|---|---|
+| Wahoo KICKR V4 | stabil verbunden, FTMS und Cycling Power gespiegelt, mDNS „Wahoo KICKR FE2E“ auf 36866, Live-Werte in der Oberfläche |
+| Wahoo TICKR (`DC:1E:D3:39:2C:8D`) | verbindet, gelegentliche Abbrüche mit Wiederverbindung; **Werte zu hoch** (88–133 statt 54–66 laut Uhr) |
+| Garmin HRM-Pro Plus | auf tinytin **keine Dienstsuche** (verbunden, `ServicesResolved` bleibt aus), danach kündigt sich der Gurt bis zum Neuanlegen nicht mehr an |
+
+Befunde:
+- **TICKR:** Die Rohdaten (0x2A37) zeigen, dass der Gurt selbst falsch zählt. Neben plausiblen
+  RR-Intervallen von 0,7–1,0 s kommen immer wieder 0,17–0,31 s vor, oft ist ein Schlag in zwei
+  geteilt (0,48 + 0,21 s). Das spricht für ein gestörtes Signal (Elektrodenkontakt, Sitz,
+  zweiter Gurt). Die Bridge reicht die Bytes unverändert weiter; ihr Decoder ist korrekt.
+- **HRM-Pro Plus:** Von smokki aus (AX200, Firmware 193-33.24, Arch-Kernel 7.2.11) ist er in 3 s
+  verbunden und aufgelöst (31 GATT-Objekte). Auf tinytin (AX201 `ibt-0040-4150`, Firmware
+  202-5.26 vom Mai 2026, Kernel 7.2.7.1-tuxedo) hängt die Dienstsuche, auch ohne Bridge, nach
+  einem Reset des Adapters und mit gelöschtem BlueZ-Cache. Im Kernel-Log steht mehrfach
+  `Bluetooth: hci0: ACL packet for unknown connection handle`. Vermutung: Nach dem Verbinden
+  aushandeln von LE 2M oder größeren Datenpaketen verträgt der Gurt nicht. Gegenprobe:
+  `btmgmt phy` auf LE 1M begrenzen (braucht root).
+- **Bridge-Fehler, die dabei behoben wurden:** BlueZ verbindet bzw. scannt pro Adapter nur eines
+  gleichzeitig („Operation already in progress“) → gemeinsame Sperre. Eine abgebrochene
+  Verbindung muss getrennt werden, sonst wirbt das Gerät nicht mehr. Scheiternde Geräte werden
+  mit wachsender Pause (bis 60 s) erneut versucht.

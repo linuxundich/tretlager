@@ -36,3 +36,14 @@
 - [ ] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Prefix-Schnappschuss, Versionsmatrix)
 - [ ] G Ende-zu-Ende auf frischem TUXEDO OS Forky
 - [ ] später: ANT+ nativ in der Bridge (openant/libusb)
+
+## Bridge (T5/T6)
+
+- [x] Bridge-Kern (DIRCON, GATT-Proxy, avahi, D-Bus, systemd-Benutzerdienst)
+- [x] Oberfläche: Dienst an/aus, Autostart, Geräte suchen/hinzufügen/entfernen, Live-Werte
+- [ ] HRM-Pro Plus auf tinytin: LE-1M-Gegenprobe (`btmgmt phy`), sonst USB-Bluetooth-Stick testen
+- [ ] TICKR mit sauberem Signal prüfen (Elektroden anfeuchten, nur ein Gurt)
+- [ ] Zwift koppelt KICKR (Leistung, Trittfrequenz, steuerbarer Trainer) und Pulsgurt über DIRCON
+- [ ] ERG und Steigungssimulation über FTMS-Control-Point prüfen
+- [ ] Oberfläche: Hinweis bei hängender Dienstsuche („Gurt kurz abklipsen“) statt endlos „Verbinde …“
+- [ ] Oberfläche: Plasma-Feinschliff (Symbole geprüft, Entfernen-Knopf neu)
