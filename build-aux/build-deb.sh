@@ -11,6 +11,9 @@ STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 R="$STAGE/root"
 
+# Übersetzungen: po/*.po → tretlager/data/locale (reines Python, auf tinytin fehlt gettext)
+"$SRC/po/update.sh" --build
+
 # Python-Paket (ohne Tests und Bytecode)
 install -d "$R/usr/lib/python3/dist-packages"
 cp -r "$SRC/tretlager" "$R/usr/lib/python3/dist-packages/"

@@ -6,7 +6,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
     id: page
-    title: "Zwift einrichten"
+    title: i18n("Zwift einrichten")
 
     readonly property var st: backend.zwiftSetup
     readonly property var stepIcon: ({
@@ -16,31 +16,29 @@ ColumnsPage {
 
     Component.onCompleted: if (!st.running && st.result !== "done") backend.runSetup()
 
-    header: WizardHeader { step: 3; text: "Läuft von selbst, etwa zehn Minuten." }
+    header: WizardHeader { step: 3; text: i18n("Läuft von selbst, etwa zehn Minuten.") }
 
     LogDialog { id: logDialog; text: page.st.log }
 
     PageMessage {
         visible: page.st.result === "error"
         type: Kirigami.MessageType.Error
-        text: page.st.error + " Bereits Erledigtes bleibt erhalten."
+        text: i18n("%1 Bereits Erledigtes bleibt erhalten.", page.st.error)
         actions: [
-            Kirigami.Action { text: "Erneut versuchen"; icon.name: "view-refresh"; onTriggered: backend.runSetup() },
-            Kirigami.Action { text: "Protokoll"; icon.name: "view-list-text"; onTriggered: logDialog.open() }
+            Kirigami.Action { text: i18n("Erneut versuchen"); icon.name: "view-refresh"; onTriggered: backend.runSetup() },
+            Kirigami.Action { text: i18n("Protokoll"); icon.name: "view-list-text"; onTriggered: logDialog.open() }
         ]
     }
     PageMessage {
         visible: page.st.result === "done"
         type: Kirigami.MessageType.Positive
-        text: "Zwift ist eingerichtet."
+        text: i18n("Zwift ist eingerichtet.")
     }
 
     FormCard.FormHeader {
-        title: "Schritte"
+        title: i18n("Schritte")
         trailing: Kirigami.ContextualHelpButton {
-            toolTipText: "Das Fenster darf geschlossen werden; beim nächsten Start macht Tretlager an derselben "
-                + "Stelle weiter. Die Komponenten von Microsoft (.NET, WebView2, Schriften) unterliegen den "
-                + "Lizenzbedingungen von Microsoft."
+            toolTipText: i18n("Das Fenster darf geschlossen werden; beim nächsten Start macht Tretlager an derselben Stelle weiter. Die Komponenten von Microsoft (.NET, WebView2, Schriften) unterliegen den Lizenzbedingungen von Microsoft.")
         }
     }
     FormCard.FormCard {
@@ -72,7 +70,7 @@ ColumnsPage {
                         }
                         Controls.Label {
                             visible: stepRow.modelData.status === "skipped"
-                            text: "schon erledigt"
+                            text: i18n("schon erledigt")
                             color: Kirigami.Theme.disabledTextColor
                         }
                     }
@@ -99,14 +97,14 @@ ColumnsPage {
         FormCard.FormDelegateSeparator { visible: page.st.log !== "" }
         FormCard.FormButtonDelegate {
             visible: page.st.log !== ""
-            text: "Protokoll …"
+            text: i18n("Protokoll …")
             icon.name: "view-list-text"
             onClicked: logDialog.open()
         }
     }
 
     footer: WizardFooter {
-        skipText: page.st.running ? "Abbrechen" : ""
+        skipText: page.st.running ? i18n("Abbrechen") : ""
         onSkip: backend.cancelSetup()
         nextEnabled: page.st.result === "done"
         onNext: applicationWindow().pageStack.push(Qt.resolvedUrl("LoginPage.qml"))

@@ -6,7 +6,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
     id: page
-    title: "System vorbereiten"
+    title: i18n("System vorbereiten")
 
     readonly property var plan: backend.plan
     readonly property var prep: backend.prepare
@@ -14,49 +14,49 @@ ColumnsPage {
     readonly property bool blocked: (plan.removals || []).length > 0 || (plan.error || "") !== ""
     readonly property bool showPlan: !backend.planBusy && plan.nothing_to_do === false && !blocked
 
-    function mb(bytes) { return Math.round(bytes / 1e6) + " MB" }
+    function mb(bytes) { return i18n("%1 MB", Math.round(bytes / 1e6)) }
     function groups(fpr) { return (fpr || "").replace(/(.{4})/g, "$1 ").trim() }
 
     Component.onCompleted: backend.loadPlan()
 
-    header: WizardHeader { step: 2; text: "Eine Passwortabfrage für alle Änderungen." }
+    header: WizardHeader { step: 2; text: i18n("Eine Passwortabfrage für alle Änderungen.") }
 
     LogDialog { id: logDialog; text: page.prep.log }
 
     PageMessage {
         visible: !backend.planBusy && page.plan.nothing_to_do === true
         type: Kirigami.MessageType.Positive
-        text: "WineHQ-Quelle und alle Pakete sind schon vorhanden. Hier gibt es nichts zu tun."
+        text: i18n("WineHQ-Quelle und alle Pakete sind schon vorhanden. Hier gibt es nichts zu tun.")
     }
     PageMessage {
         visible: (page.plan.error || "") !== ""
         type: Kirigami.MessageType.Error
         text: page.plan.error || ""
-        actions: [Kirigami.Action { text: "Erneut versuchen"; icon.name: "view-refresh"; onTriggered: backend.loadPlan() }]
+        actions: [Kirigami.Action { text: i18n("Erneut versuchen"); icon.name: "view-refresh"; onTriggered: backend.loadPlan() }]
     }
     PageMessage {
         visible: (page.plan.removals || []).length > 0
         type: Kirigami.MessageType.Error
-        text: "APT müsste dafür Pakete entfernen (" + (page.plan.removals || []).join(", ") + "). Das macht Tretlager nicht. Die Ursache steht im Protokoll."
+        text: i18n("APT müsste dafür Pakete entfernen (%1). Das macht Tretlager nicht. Die Ursache steht im Protokoll.", (page.plan.removals || []).join(", "))
     }
     PageMessage {
         visible: page.prep.result === "error"
         type: Kirigami.MessageType.Error
         text: page.prep.error
-        actions: [Kirigami.Action { text: "Protokoll"; icon.name: "view-list-text"; onTriggered: logDialog.open() }]
+        actions: [Kirigami.Action { text: i18n("Protokoll"); icon.name: "view-list-text"; onTriggered: logDialog.open() }]
     }
     PageMessage {
         visible: page.prep.result === "done"
         type: Kirigami.MessageType.Positive
-        text: "System vorbereitet."
+        text: i18n("System vorbereitet.")
     }
 
     FormCard.FormCard {
         visible: backend.planBusy
         FormCard.FormPlaceholderMessageDelegate {
             icon.name: "system-search"
-            text: "Nötige Änderungen werden ermittelt …"
-            explanation: "APT rechnet die Installation probeweise durch, ohne etwas zu verändern."
+            text: i18n("Nötige Änderungen werden ermittelt …")
+            explanation: i18n("APT rechnet die Installation probeweise durch, ohne etwas zu verändern.")
         }
     }
 
@@ -64,31 +64,29 @@ ColumnsPage {
         // --- Plan ---
         FormCard.FormHeader {
             visible: page.showPlan
-            title: "Änderungen am System"
+            title: i18n("Änderungen am System")
             trailing: Kirigami.ContextualHelpButton {
-                toolTipText: "Unverändert bleiben: keine 32-Bit-Architektur, kein Systemupgrade, keine Grafiktreiber, "
-                    + "nichts wird entfernt. TUXEDO OS legt vor und nach der Installation automatisch einen "
-                    + "Schnappschuss an."
+                toolTipText: i18n("Unverändert bleiben: keine 32-Bit-Architektur, kein Systemupgrade, keine Grafiktreiber, nichts wird entfernt. TUXEDO OS legt vor und nach der Installation automatisch einen Schnappschuss an.")
             }
         },
         FormCard.FormCard {
             visible: page.showPlan
             FormCard.FormTextDelegate {
                 visible: page.plan.add_source === true
-                text: "Paketquelle WineHQ"
-                description: (page.plan.uri || "") + "\nSchlüssel " + page.groups(page.plan.fingerprint)
+                text: i18n("Paketquelle WineHQ")
+                description: (page.plan.uri || "") + "\n" + i18n("Schlüssel %1", page.groups(page.plan.fingerprint))
                 icon.name: "repository"
             }
             FormCard.FormDelegateSeparator { visible: page.plan.add_source === true }
             FormCard.FormTextDelegate {
-                text: "Download"
-                description: page.mb(page.plan.download_bytes || 0) + " für " + (page.plan.packages || []).length + " Pakete"
+                text: i18n("Download")
+                description: i18n("%1 für %2 Pakete", page.mb(page.plan.download_bytes || 0), (page.plan.packages || []).length)
                 icon.name: "download"
             }
         },
 
         // --- Fortschritt ---
-        FormCard.FormHeader { visible: page.prep.running || page.prep.result !== ""; title: "Fortschritt" },
+        FormCard.FormHeader { visible: page.prep.running || page.prep.result !== ""; title: i18n("Fortschritt") },
         FormCard.FormCard {
             visible: page.prep.running || page.prep.result !== ""
             FormCard.AbstractFormDelegate {
@@ -108,7 +106,7 @@ ColumnsPage {
             FormCard.FormDelegateSeparator { visible: page.prep.log !== "" }
             FormCard.FormButtonDelegate {
                 visible: page.prep.log !== ""
-                text: "Protokoll …"
+                text: i18n("Protokoll …")
                 icon.name: "view-list-text"
                 onClicked: logDialog.open()
             }
@@ -116,7 +114,7 @@ ColumnsPage {
     ]
 
     rightCards: [
-        FormCard.FormHeader { visible: page.showPlan; title: "Pakete" },
+        FormCard.FormHeader { visible: page.showPlan; title: i18n("Pakete") },
         FormCard.FormCard {
             visible: page.showPlan
             Repeater {
@@ -136,7 +134,7 @@ ColumnsPage {
     ]
 
     footer: WizardFooter {
-        nextText: page.done ? "Weiter" : "Änderungen vornehmen …"
+        nextText: page.done ? i18n("Weiter") : i18n("Änderungen vornehmen …")
         nextIcon: page.done ? "go-next" : "dialog-password"
         nextVisible: page.done || !page.blocked
         nextEnabled: page.done || (!backend.planBusy && !page.prep.running

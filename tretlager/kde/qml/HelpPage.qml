@@ -10,7 +10,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 // Einträge dort in zwei Spalten.
 ColumnsPage {
     id: page
-    title: "Hilfe"
+    title: i18n("Hilfe")
 
     readonly property var sections: backend.helpSections
     function inColumn(c) { return sections.filter(function (s) { return s.column === c }) }

@@ -15,6 +15,7 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
+from ..i18n import _
 
 WINEHQ_FPR = "D43F640145369C51D786DDEA76F1A20FF987672F"
 WINEHQ_URI = "https://dl.winehq.org/wine-builds/debian"
@@ -122,7 +123,7 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
             (tmp / "all" / "winehq.sources").write_text(text)
             r = _run(["apt-get", "-q", *_apt_opts(tmp, tmp / "wine-only"), "update"])
             if r.returncode != 0:
-                return Plan(add_source, error="WineHQ-Paketliste nicht ladbar: " + (r.stderr.strip()[-300:] or r.stdout[-300:]))
+                return Plan(add_source, error=_("WineHQ-Paketliste nicht ladbar: {error}").format(error=r.stderr.strip()[-300:] or r.stdout[-300:]))
         # Systemquellen und -listen dazu, nur verlinkt.
         for src in SYSTEM_SOURCES.glob("*"):
             if src.suffix not in (".sources", ".list") or (tmp / "all" / src.name).exists():
@@ -136,7 +137,7 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
         opts = _apt_opts(tmp, tmp / "all")
         r = _run(["apt-get", "-s", *opts, "install", "--install-recommends", *packages])
         if r.returncode != 0:
-            return Plan(add_source, error="Paketplanung fehlgeschlagen: " + r.stderr.strip()[-300:])
+            return Plan(add_source, error=_("Paketplanung fehlgeschlagen: {error}").format(error=r.stderr.strip()[-300:]))
         result = parse_simulation(r.stdout)
         if result:
             show = _run(["apt-cache", *opts, "show", "--no-all-versions", *[p.name for p in result]])
@@ -161,5 +162,5 @@ def run_helper(on_event: Callable[[dict], None], cmd: list[str] | None = None) -
             on_event({"event": "log", "text": line})
     rc = proc.wait()
     if rc in (126, 127):  # pkexec: abgelehnt bzw. nicht autorisiert
-        on_event({"event": "error", "text": "Abgebrochen oder keine Berechtigung erteilt"})
+        on_event({"event": "error", "text": _("Abgebrochen oder keine Berechtigung erteilt")})
     return rc

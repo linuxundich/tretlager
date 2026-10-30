@@ -2,7 +2,8 @@
 
 In C++-Programmen setzt KI18n diese Funktionen als Kontextobjekt der QML-Engine. PySide hat dafür
 keine Bindung; ohne sie bleiben z. B. auf der Infoseite die Beschriftungen leer. Die Übersetzungen
-liest gettext aus den Katalogen der jeweiligen Domain (etwa kirigami-addons6).
+liest gettext aus den Katalogen der jeweiligen Domain (etwa kirigami-addons6); i18n() ohne Domain
+nutzt Tretlagers eigenen Katalog.
 """
 
 from __future__ import annotations
@@ -11,6 +12,8 @@ import gettext
 from functools import lru_cache
 
 from PySide6.QtCore import QObject, Slot
+
+from ..i18n import _t as own
 
 
 @lru_cache(maxsize=None)
@@ -59,19 +62,21 @@ class LocalizedContext(QObject):
         count = int(n) if n is not None else 0
         return _fill(_catalog(domain).npgettext(context, singular, plural, count), _args(n, a1))
 
-    # --- ohne Domain (unübersetzt, nur Platzhalter) ---
+    # --- ohne Domain: Texte von Tretlager selbst (Domain „tretlager“, siehe tretlager/i18n.py) ---
     @Slot(str, result=str)
     @Slot(str, "QVariant", result=str)
     @Slot(str, "QVariant", "QVariant", result=str)
-    def i18n(self, text, a1=None, a2=None):
-        return _fill(text, _args(a1, a2))
+    @Slot(str, "QVariant", "QVariant", "QVariant", result=str)
+    def i18n(self, text, a1=None, a2=None, a3=None):
+        return _fill(own.gettext(text), _args(a1, a2, a3))
 
     @Slot(str, str, result=str)
     @Slot(str, str, "QVariant", result=str)
-    def i18nc(self, context, text, a1=None):
-        return _fill(text, _args(a1))
+    @Slot(str, str, "QVariant", "QVariant", result=str)
+    def i18nc(self, context, text, a1=None, a2=None):
+        return _fill(own.pgettext(context, text), _args(a1, a2))
 
     @Slot(str, str, "QVariant", result=str)
     @Slot(str, str, "QVariant", "QVariant", result=str)
     def i18np(self, singular, plural, n, a1=None):
-        return _fill(singular if int(n) == 1 else plural, _args(n, a1))
+        return _fill(own.ngettext(singular, plural, int(n)), _args(n, a1))

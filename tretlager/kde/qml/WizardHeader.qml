@@ -17,7 +17,7 @@ Controls.Control {
         RowLayout {
             spacing: Kirigami.Units.largeSpacing
             Controls.Label {
-                text: "Schritt " + header.step + " von " + applicationWindow().steps.length
+                text: i18n("Schritt %1 von %2", header.step, applicationWindow().steps.length)
                 font.bold: true
             }
             Controls.Label {

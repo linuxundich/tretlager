@@ -26,6 +26,12 @@ KEY_DST = "/etc/apt/keyrings/winehq-archive.key"
 SOURCES_DST = "/etc/apt/sources.list.d/winehq-forky.sources"
 
 
+def N_(text):
+    """Nur Markierung für die Übersetzung; Tretlager übersetzt die Texte beim Anzeigen (root hat
+    nicht die Sprache des Benutzers)."""
+    return text
+
+
 def emit(event, **kw):
     print(json.dumps({"event": event, **kw}, ensure_ascii=False), flush=True)
 
@@ -101,26 +107,26 @@ def main():
     if os.geteuid() != 0:
         fail("Muss als root laufen (über pkexec)")
 
-    emit("step", text="WineHQ-Schlüssel prüfen")
+    emit("step", text=N_("WineHQ-Schlüssel prüfen"))
     if fingerprint(KEY_SRC) != WINEHQ_FPR:
-        fail("WineHQ-Schlüssel stimmt nicht mit dem erwarteten Fingerabdruck überein")
+        fail(N_("WineHQ-Schlüssel stimmt nicht mit dem erwarteten Fingerabdruck überein"))
     with open(KEY_SRC, "rb") as f:
         key = f.read()
     os.makedirs(os.path.dirname(KEY_DST), mode=0o755, exist_ok=True)
     write_file(KEY_DST, key)
 
-    emit("step", text="Paketquelle einrichten")
+    emit("step", text=N_("Paketquelle einrichten"))
     write_file(SOURCES_DST, (f"Types: deb\nURIs: {WINEHQ_URI}\nSuites: {WINEHQ_SUITE}\nComponents: main\n"
                              f"Architectures: amd64\nSigned-By: {KEY_DST}\n").encode())
-    emit("progress", percent=5, text="Paketquelle eingerichtet")
+    emit("progress", percent=5, text=N_("Paketquelle eingerichtet"))
 
-    apt(["update"], "Paketlisten aktualisieren", 5, 15)
+    apt(["update"], N_("Paketlisten aktualisieren"), 5, 15)
     apt(["install", "-y", "--install-recommends", "--no-remove", *PACKAGES],
-        "Wine und Werkzeuge installieren", 20, 80)
+        N_("Wine und Werkzeuge installieren"), 20, 80)
 
     r = subprocess.run(["wine", "--version"], capture_output=True, text=True,
                        env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent"})
-    emit("done", text="System vorbereitet", wine=r.stdout.strip())
+    emit("done", text=N_("System vorbereitet"), wine=r.stdout.strip())
 
 
 if __name__ == "__main__":

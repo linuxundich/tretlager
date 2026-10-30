@@ -4,7 +4,7 @@ import org.kde.kirigami as Kirigami
 
 Kirigami.ApplicationWindow {
     id: root
-    title: "Tretlager"
+    title: i18n("Tretlager")
     // Seitenleiste plus Übersicht mit zwei Spalten; auf kleinen Bildschirmen höchstens 90 % der Fläche.
     width: Math.min(Kirigami.Units.gridUnit * 64, Screen.desktopAvailableWidth * 0.9)
     height: Math.min(Kirigami.Units.gridUnit * 46, Screen.desktopAvailableHeight * 0.9)
@@ -15,7 +15,7 @@ Kirigami.ApplicationWindow {
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
 
     // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
-    readonly property var steps: ["Prüfen", "Vorbereiten", "Zwift", "Anmeldung", "Sensoren", "Fertig"]
+    readonly property var steps: [i18n("Prüfen"), i18n("Vorbereiten"), i18n("Zwift"), i18n("Anmeldung"), i18n("Sensoren"), i18n("Fertig")]
 
     // Assistent: linearer Ablauf mit Schrittanzeige. Bei der ersten Einrichtung ohne Seitenleiste
     // (nichts außer dem Assistenten ergibt dann Sinn); über „Einrichtung prüfen“ nach der
@@ -45,21 +45,21 @@ Kirigami.ApplicationWindow {
 
         actions: [
             Kirigami.Action {
-                text: "Übersicht"
+                text: i18n("Übersicht")
                 icon.name: "go-home"
                 checkable: true
                 checked: root.current === "overview"
                 onTriggered: root.show("overview")
             },
             Kirigami.Action {
-                text: "Sensoren"
+                text: i18n("Sensoren")
                 icon.name: "network-bluetooth"
                 checkable: true
                 checked: root.current === "sensors"
                 onTriggered: root.show("sensors", { wizard: false })
             },
             Kirigami.Action {
-                text: "Hilfe"
+                text: i18n("Hilfe")
                 icon.name: "help-contents"
                 checkable: true
                 checked: root.current === "help"
@@ -67,14 +67,14 @@ Kirigami.ApplicationWindow {
             },
             Kirigami.Action { separator: true },
             Kirigami.Action {
-                text: "Einrichtung prüfen"
+                text: i18n("Einrichtung prüfen")
                 icon.name: "tools-wizard"
                 checkable: true
                 checked: root.inWizard
                 onTriggered: root.show("setup")
             },
             Kirigami.Action {
-                text: "Über Tretlager"
+                text: i18n("Über Tretlager")
                 icon.name: "help-about"
                 checkable: true
                 checked: root.current === "about"

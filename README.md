@@ -43,6 +43,19 @@ KDE Human Interface Guidelines: Seitenleiste nach der Einrichtung, FormCards, Hi
 Assistent als linearer Ablauf. `TRETLAGER_INSTANCE=test` startet eine zweite Instanz neben der
 laufenden, etwa zum Testen aus dem Quellbaum.
 
+### Sprachen
+
+Quellsprache ist Deutsch, dazu gibt es Englisch (`po/en.po`, Hilfe in
+`tretlager/data/hilfe.en.md`). Ohne deutsche Systemsprache zeigt Tretlager Englisch;
+`TRETLAGER_LANG=en` bzw. `de` erzwingt eine Sprache. QML-Texte stehen in `i18n()`, Python-Texte
+in `_()` (Texte der Bridge in `N_()`, übersetzt erst in der Oberfläche).
+
+    po/update.sh          # Texte sammeln (po/tretlager.pot), Kataloge abgleichen; braucht gettext
+    po/update.sh --build  # po/*.po → tretlager/data/locale/*.mo, reines Python (auch auf tinytin)
+
+`build-deb.sh` übersetzt die Kataloge selbst. `tests/test_i18n.py` schlägt fehl, wenn ein Text
+keine englische Übersetzung hat oder Platzhalter nicht übereinstimmen.
+
 ## Debian-Paket
 
     build-aux/build-deb.sh            # → dist/tretlager_<Version>_all.deb (braucht dpkg-deb)

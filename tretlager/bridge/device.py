@@ -15,6 +15,7 @@ from dbus_fast.aio import MessageBus
 from . import dircon, gatt
 from .config import DeviceConfig
 from .mdns import Announcer
+from ..i18n import N_
 
 log = logging.getLogger(__name__)
 
@@ -176,13 +177,13 @@ class BridgedDevice:
                 raise
             except (BleakError, OSError, asyncio.TimeoutError, RuntimeError) as e:
                 if isinstance(e, (asyncio.TimeoutError, TimeoutError)):
-                    text = "Zeitüberschreitung beim Verbinden, neuer Versuch folgt"
+                    text = N_("Zeitüberschreitung beim Verbinden, neuer Versuch folgt")
                 elif "was not found" in str(e):
-                    text = "Nicht in Reichweite oder schläft"
+                    text = N_("Nicht in Reichweite oder schläft")
                     not_found = True
                 elif "failed to discover services" in str(e):
                     # Gerät ist beim Verbinden wieder eingeschlafen (KICKR nach Pause): bald erneut.
-                    text = "Gerät schläft – kurz treten bzw. Gurt anlegen"
+                    text = N_("Gerät schläft – kurz treten bzw. Gurt anlegen")
                     not_found = True
                 else:
                     text = str(e) or type(e).__name__
@@ -215,7 +216,7 @@ class BridgedDevice:
             await client.connect()
         self._services = self._collect_services(client)
         if not self._services:
-            raise RuntimeError("Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, Herzfrequenz)")
+            raise RuntimeError(N_("Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, Herzfrequenz)"))
         await self._server.start()
         await self.announcer.publish(dircon_name(self.cfg), self.cfg.port, [s.uuid for s in self._services],
                                      mac=self.cfg.address, serial=self.cfg.address.replace(":", ""),
@@ -227,7 +228,7 @@ class BridgedDevice:
         self._was_connected = True
         self._set_state("verbunden")
         await self._disconnected.wait()
-        raise RuntimeError("Verbindung zum Gerät verloren")
+        raise RuntimeError(N_("Verbindung zum Gerät verloren"))
 
     async def _teardown(self) -> None:
         await self.announcer.withdraw(self.cfg.port)
@@ -267,7 +268,7 @@ class BridgedDevice:
 
     def _require_client(self) -> BleakClient:
         if not self._client or not self._client.is_connected:
-            raise RuntimeError("Gerät nicht verbunden")
+            raise RuntimeError(N_("Gerät nicht verbunden"))
         return self._client
 
     def _notified(self, char_uuid: str, data: bytearray) -> None:

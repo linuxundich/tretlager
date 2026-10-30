@@ -93,3 +93,9 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] Reichweite: Hinweis in der Oberfläche bei häufigen Abbrüchen (≥ 3 in 10 min) mit Abhilfe (0.3.0)
 - [x] Oberfläche: Schalter „Im Netz anbieten“ (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
 - [x] ~~GTK-Oberfläche der Bridge nachziehen~~ entfällt: GTK-Oberfläche in 0.5.1 entfernt (Christoph 2026-10-30)
+
+## Sprachen
+
+- [x] Englische Oberfläche (0.7.0, gettext, `po/en.po`)
+- [ ] Neue Texte: `po/update.sh` (auf dem Arch-Rechner mit gettext), Übersetzung in `po/en.po`
+  ergänzen; `tests/test_i18n.py` meldet Lücken

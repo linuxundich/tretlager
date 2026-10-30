@@ -26,6 +26,7 @@ import urllib.parse
 import urllib.request
 
 from . import state
+from ..i18n import _
 
 REALM = "https://secure.zwift.com/auth/realms/zwift/protocol/openid-connect"
 CLIENT_ID = "Game_Launcher"
@@ -54,16 +55,16 @@ def auth_url(state_value: str, language: str = "") -> str:
 
 # Fehlercodes aus OAuth/OpenID Connect als Satz für den Nutzer
 ERROR_TEXT = {
-    "access_denied": "Die Anmeldung wurde abgebrochen.",
-    "login_required": "Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden.",
-    "interaction_required": "Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden.",
-    "temporarily_unavailable": "Die Zwift-Anmeldung ist gerade nicht erreichbar. Bitte später erneut versuchen.",
-    "server_error": "Bei der Zwift-Anmeldung ist ein Fehler aufgetreten. Bitte später erneut versuchen.",
+    "access_denied": _("Die Anmeldung wurde abgebrochen."),
+    "login_required": _("Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden."),
+    "interaction_required": _("Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden."),
+    "temporarily_unavailable": _("Die Zwift-Anmeldung ist gerade nicht erreichbar. Bitte später erneut versuchen."),
+    "server_error": _("Bei der Zwift-Anmeldung ist ein Fehler aufgetreten. Bitte später erneut versuchen."),
 }
 
 
 def _error_text(code: str) -> str:
-    return ERROR_TEXT.get(code, f"Zwift hat die Anmeldung nicht abgeschlossen (Fehler „{code}“). Bitte erneut anmelden.")
+    return ERROR_TEXT.get(code, _("Zwift hat die Anmeldung nicht abgeschlossen (Fehler „{code}“). Bitte erneut anmelden.").format(code=code))
 
 
 def parse_redirect(url: str, expected_state: str | None = None) -> str:
@@ -71,15 +72,15 @@ def parse_redirect(url: str, expected_state: str | None = None) -> str:
     url = url.strip()
     parsed = urllib.parse.urlparse(url)
     if parsed.netloc != "launcher.zwift.com" or not parsed.path.startswith("/launcher"):
-        raise LoginError("Das ist nicht die Adresse nach der Zwift-Anmeldung (launcher.zwift.com/launcher?…).")
+        raise LoginError(_("Das ist nicht die Adresse nach der Zwift-Anmeldung (launcher.zwift.com/launcher?…)."))
     q = urllib.parse.parse_qs(parsed.query)
     if "error" in q:
         raise LoginError(_error_text(q["error"][0]))
     code = (q.get("code") or [""])[0]
     if not code:
-        raise LoginError("In der Adresse fehlt der Anmeldecode (code=…).")
+        raise LoginError(_("In der Adresse fehlt der Anmeldecode (code=…)."))
     if expected_state and (q.get("state") or [""])[0] != expected_state:
-        raise LoginError("Die Adresse gehört zu einer älteren Anmeldung. Bitte erneut im Browser anmelden.")
+        raise LoginError(_("Die Adresse gehört zu einer älteren Anmeldung. Bitte erneut im Browser anmelden."))
     return code
 
 
@@ -91,12 +92,12 @@ def _post(form: dict, opener=urllib.request.urlopen) -> dict:
             token = json.loads(r.read())
     except urllib.error.HTTPError as e:
         if e.code in (400, 401):
-            raise LoginError("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).") from None
-        raise LoginError(f"Zwift-Anmeldung nicht erreichbar (HTTP {e.code}).") from None
+            raise LoginError(_("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).")) from None
+        raise LoginError(_("Zwift-Anmeldung nicht erreichbar (HTTP {code}).").format(code=e.code)) from None
     except (urllib.error.URLError, TimeoutError):
-        raise LoginError("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?") from None
+        raise LoginError(_("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?")) from None
     if "access_token" not in token:
-        raise LoginError("Unerwartete Antwort von Zwift.")
+        raise LoginError(_("Unerwartete Antwort von Zwift."))
     token["obtained_at"] = int(time.time())
     return token
 
@@ -119,9 +120,9 @@ def logout_remote(token: dict, opener=urllib.request.urlopen) -> None:
         with opener(req, timeout=30):  # noqa: S310 (feste https-URL)
             pass
     except urllib.error.HTTPError as e:
-        raise LoginError(f"Abmelden bei Zwift fehlgeschlagen (HTTP {e.code}).") from None
+        raise LoginError(_("Abmelden bei Zwift fehlgeschlagen (HTTP {code}).").format(code=e.code)) from None
     except (urllib.error.URLError, TimeoutError):
-        raise LoginError("Zwift-Anmeldung nicht erreichbar; lokal abgemeldet.") from None
+        raise LoginError(_("Zwift-Anmeldung nicht erreichbar; lokal abgemeldet.")) from None
 
 
 def lifetimes(token: dict, now: float | None = None) -> tuple[int, int]:

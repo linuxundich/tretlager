@@ -19,14 +19,14 @@ FormCard.AbstractFormDelegate {
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
-    readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",
-        "cadence": "Trittfrequenzsensor", "heartrate": "Pulsgurt", "other": "Sensor" })
+    readonly property var roleText: ({ "trainer": i18n("Smart-Trainer"), "power": i18n("Leistungsmesser"),
+        "cadence": i18n("Trittfrequenzsensor"), "heartrate": i18n("Pulsgurt"), "other": i18n("Sensor") })
     // Messwerte je Rolle: [Schlüssel, Einheit]
     readonly property var valueRows: ({
-        "trainer": [["power", "Watt"], ["cadence", "U/min"]],
-        "power": [["power", "Watt"], ["cadence", "U/min"]],
-        "cadence": [["cadence", "U/min"]],
-        "heartrate": [["heart_rate", "Schläge/min"]],
+        "trainer": [["power", i18n("Watt")], ["cadence", i18n("U/min")]],
+        "power": [["power", i18n("Watt")], ["cadence", i18n("U/min")]],
+        "cadence": [["cadence", i18n("U/min")]],
+        "heartrate": [["heart_rate", i18n("Schläge/min")]],
         "other": [] })
     readonly property string iconDir: Qt.resolvedUrl("../../data/icons/")
     readonly property var values: device.values || {}
@@ -39,20 +39,20 @@ FormCard.AbstractFormDelegate {
     }
     function stateLine(d) {
         switch (d.state) {
-        case "verbunden": return d.zwift_clients > 0 ? "Mit Zwift verbunden" : "Verbunden, wartet auf Zwift"
-        case "verbinde": return "Sucht das Gerät …"
-        case "getrennt": return "Getrennt, neuer Versuch folgt"
-        case "fehler": return d.error || "Nicht erreichbar"
-        case "aus": return "Pausiert"
+        case "verbunden": return d.zwift_clients > 0 ? i18n("Mit Zwift verbunden") : i18n("Verbunden, wartet auf Zwift")
+        case "verbinde": return i18n("Sucht das Gerät …")
+        case "getrennt": return i18n("Getrennt, neuer Versuch folgt")
+        case "fehler": return d.error || i18n("Nicht erreichbar")
+        case "aus": return i18n("Pausiert")
         }
         return d.state
     }
     function stateHelp(d) {
         switch (d.state) {
-        case "verbunden": return "Die Bridge empfängt Daten und bietet das Gerät Zwift an."
-        case "verbinde": return "Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein Gurt nicht."
-        case "fehler": return (d.error ? d.error + ". " : "") + "Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät verbunden. Wird es gerade nicht genutzt: pausieren."
-        case "aus": return "Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. Fortsetzen, sobald es wieder gebraucht wird."
+        case "verbunden": return i18n("Die Bridge empfängt Daten und bietet das Gerät Zwift an.")
+        case "verbinde": return i18n("Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein Gurt nicht.")
+        case "fehler": return (d.error ? d.error + ". " : "") + i18n("Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät verbunden. Wird es gerade nicht genutzt: pausieren.")
+        case "aus": return i18n("Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. Fortsetzen, sobald es wieder gebraucht wird.")
         }
         return ""
     }
@@ -117,8 +117,8 @@ FormCard.AbstractFormDelegate {
                     visible: row.detailed
                     Layout.fillWidth: true
                     // Die Rolle zeigt schon das Symbol; der Zwift-Name ist der Name zum Koppeln in Zwift.
-                    text: row.device.dircon_name ? "In Zwift: " + row.device.dircon_name
-                                                 : (row.roleText[row.device.role] || "Sensor")
+                    text: row.device.dircon_name ? i18n("In Zwift: %1", row.device.dircon_name)
+                                                 : (row.roleText[row.device.role] || i18n("Sensor"))
                     color: Kirigami.Theme.disabledTextColor
                     font: Kirigami.Theme.smallFont
                     elide: Text.ElideRight
@@ -167,10 +167,10 @@ FormCard.AbstractFormDelegate {
                 visible: row.detailed
                 Layout.alignment: Qt.AlignVCenter
                 icon.name: row.paused ? "media-playback-start" : "media-playback-pause"
-                text: row.paused ? "Fortsetzen" : "Pausieren"
+                text: row.paused ? i18n("Fortsetzen") : i18n("Pausieren")
                 display: Controls.AbstractButton.IconOnly
-                Controls.ToolTip.text: row.paused ? "Fortsetzen: wieder suchen und Zwift anbieten"
-                                                  : "Pausieren: nicht mehr suchen, bis zum Fortsetzen"
+                Controls.ToolTip.text: row.paused ? i18n("Fortsetzen: wieder suchen und Zwift anbieten")
+                                                  : i18n("Pausieren: nicht mehr suchen, bis zum Fortsetzen")
                 Controls.ToolTip.visible: hovered
                 Controls.ToolTip.delay: Kirigami.Units.toolTipDelay
                 onClicked: row.pauseRequested(!row.paused)
@@ -179,7 +179,7 @@ FormCard.AbstractFormDelegate {
                 visible: row.detailed
                 Layout.alignment: Qt.AlignVCenter
                 icon.name: "edit-delete-remove"
-                text: "Gerät entfernen"
+                text: i18n("Gerät entfernen")
                 display: Controls.AbstractButton.IconOnly
                 Controls.ToolTip.text: text
                 Controls.ToolTip.visible: hovered

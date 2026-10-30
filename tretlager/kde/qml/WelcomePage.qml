@@ -6,50 +6,47 @@ import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
     id: page
-    title: "Willkommen"
+    title: i18n("Willkommen")
 
     PageHero {
-        title: "Zwift unter Linux"
-        text: "Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. "
-            + "Die Einrichtung führt in sechs Schritten durch alles."
+        title: i18n("Zwift unter Linux")
+        text: i18n("Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. Die Einrichtung führt in sechs Schritten durch alles.")
     }
 
     leftCards: [
-        FormCard.FormHeader { title: "Voraussetzungen" },
+        FormCard.FormHeader { title: i18n("Voraussetzungen") },
         FormCard.FormCard {
-            FormCard.FormTextDelegate { text: "Zwift-Konto mit Abo"; icon.name: "user-identity" }
+            FormCard.FormTextDelegate { text: i18n("Zwift-Konto mit Abo"); icon.name: "user-identity" }
             FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate { text: "Etwa 11 GB freier Speicher"; icon.name: "drive-harddisk" }
+            FormCard.FormTextDelegate { text: i18n("Etwa 11 GB freier Speicher"); icon.name: "drive-harddisk" }
             FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate { text: "Internetzugang für etwa 5 GB Download"; icon.name: "network-wired" }
+            FormCard.FormTextDelegate { text: i18n("Internetzugang für etwa 5 GB Download"); icon.name: "network-wired" }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: "Smart-Trainer und Pulsgurt mit Bluetooth"
-                description: "Erst im fünften Schritt nötig"
+                text: i18n("Smart-Trainer und Pulsgurt mit Bluetooth")
+                description: i18n("Erst im fünften Schritt nötig")
                 icon.name: "network-bluetooth"
             }
         }
     ]
 
     rightCards: [
-        FormCard.FormHeader { title: "Wichtig" },
+        FormCard.FormHeader { title: i18n("Wichtig") },
         FormCard.FormCard {
             FormCard.FormTextDelegate {
-                text: "Kein offizielles Zwift-Programm"
-                description: "Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen "
-                    + "Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser widerspricht den "
-                    + "Zwift-Nutzungsbedingungen. Benutzung auf eigene Gefahr."
+                text: i18n("Kein offizielles Zwift-Programm")
+                description: i18n("Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser widerspricht den Zwift-Nutzungsbedingungen. Benutzung auf eigene Gefahr.")
                 icon.name: "dialog-warning"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: "Über Tretlager und Lizenzen"
+                text: i18n("Über Tretlager und Lizenzen")
                 icon.name: "help-about"
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: "Hilfe lesen"
+                text: i18n("Hilfe lesen")
                 icon.name: "help-contents"
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("HelpPage.qml"))
             }
@@ -57,7 +54,7 @@ ColumnsPage {
     ]
 
     footer: WizardFooter {
-        nextText: "Einrichtung beginnen"
+        nextText: i18n("Einrichtung beginnen")
         onNext: {
             backend.runChecks()
             applicationWindow().pageStack.push(Qt.resolvedUrl("CheckPage.qml"))

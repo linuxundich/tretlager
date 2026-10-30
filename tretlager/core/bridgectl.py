@@ -10,6 +10,7 @@ import json
 import subprocess
 
 from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH, BRIDGE_UNIT
+from ..i18n import _
 
 
 class BridgeError(Exception):
@@ -23,7 +24,7 @@ def _busctl(method: str, signature: str = "", *args, timeout: int = 10, run=subp
         cmd += [signature, *[str(a).lower() if isinstance(a, bool) else str(a) for a in args]]
     r = run(cmd, capture_output=True, text=True, timeout=timeout + 5)
     if r.returncode != 0:
-        raise BridgeError(r.stderr.strip() or "Bridge antwortet nicht")
+        raise BridgeError(r.stderr.strip() or _("Bridge antwortet nicht"))
     return json.loads(r.stdout)["data"][0]
 
 

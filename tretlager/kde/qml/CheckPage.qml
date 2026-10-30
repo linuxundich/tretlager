@@ -6,13 +6,13 @@ import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
     id: page
-    title: "System prüfen"
+    title: i18n("System prüfen")
 
     readonly property var statusIcon: ({ "ok": "data-success", "warn": "data-warning", "fail": "data-error" })
 
     actions: [
         Kirigami.Action {
-            text: "Erneut prüfen"
+            text: i18n("Erneut prüfen")
             icon.name: "view-refresh"
             enabled: !backend.busy
             onTriggered: backend.runChecks()
@@ -22,24 +22,24 @@ ColumnsPage {
     // Direkt geöffnet (Seitenleiste → Einrichtung prüfen) ohne laufende Prüfung: gleich prüfen.
     Component.onCompleted: if (!backend.busy && backend.checks.length === 0) backend.runChecks()
 
-    header: WizardHeader { step: 1; text: "Nur lesend, am System ändert sich nichts." }
+    header: WizardHeader { step: 1; text: i18n("Nur lesend, am System ändert sich nichts.") }
 
     PageMessage {
         visible: !backend.busy && backend.overall !== ""
         type: backend.overall === "fail" ? Kirigami.MessageType.Error
             : backend.overall === "warn" ? Kirigami.MessageType.Warning
             : Kirigami.MessageType.Positive
-        text: backend.overall === "fail" ? "Mindestens ein Punkt verhindert die Einrichtung. Details per Klick auf den Punkt."
-            : backend.overall === "warn" ? "Die Einrichtung ist möglich. Die gelb markierten Punkte vorher ansehen."
-            : "Alles bereit."
+        text: backend.overall === "fail" ? i18n("Mindestens ein Punkt verhindert die Einrichtung. Details per Klick auf den Punkt.")
+            : backend.overall === "warn" ? i18n("Die Einrichtung ist möglich. Die gelb markierten Punkte vorher ansehen.")
+            : i18n("Alles bereit.")
     }
 
-    FormCard.FormHeader { title: "Ergebnis" }
+    FormCard.FormHeader { title: i18n("Ergebnis") }
     FormCard.FormCard {
         FormCard.FormPlaceholderMessageDelegate {
             visible: backend.busy
             icon.name: "system-search"
-            text: "System wird geprüft …"
+            text: i18n("System wird geprüft …")
         }
         Repeater {
             model: backend.busy ? [] : backend.checks

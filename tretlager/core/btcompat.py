@@ -18,6 +18,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from ..i18n import _
 
 BLUETOOTH = Path("/sys/class/bluetooth")
 
@@ -57,12 +58,12 @@ KNOWN_ISSUES = [
         chips=frozenset({"8087:0026"}),
         device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # „HRM-Pro:…“, „HRMPro+:…“
         device_name="Garmin HRM-Pro",
-        text="Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}). "
-             "Er wird zwar gefunden, die Verbindung kommt aber nie zustande; an Reichweite oder "
-             "Batterie liegt das nicht. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter "
-             "Sensoren als Bluetooth-Adapter wählen (getestet: TP-Link UB500) oder einen anderen "
-             "Pulsgurt nutzen, etwa einen Wahoo TICKR.",
-        short="Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-Bluetooth-Stick",
+        text=_("Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}). "
+               "Er wird zwar gefunden, die Verbindung kommt aber nie zustande; an Reichweite oder "
+               "Batterie liegt das nicht. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter "
+               "Sensoren als Bluetooth-Adapter wählen (getestet: TP-Link UB500) oder einen anderen "
+               "Pulsgurt nutzen, etwa einen Wahoo TICKR."),
+        short=_("Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-Bluetooth-Stick"),
     ),
 ]
 
@@ -80,7 +81,7 @@ def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:
             break
         except OSError:
             continue
-    return Chip(usb_id, CHIP_NAMES.get(usb_id, f"USB {usb_id}" if usb_id else "unbekannter Chip"))
+    return Chip(usb_id, CHIP_NAMES.get(usb_id, f"USB {usb_id}" if usb_id else _("unbekannter Chip")))
 
 
 def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:
@@ -120,4 +121,6 @@ def issue_for(chip: Chip | None, device_name: str, short: bool = False) -> str:
 def annotate(devices: list[dict], chip: Chip | None) -> list[dict]:
     """Gerätelisten der Bridge (eingerichtet oder gefunden) um `compat` und `compat_short` ergänzen."""
     return [dict(d, compat=issue_for(chip, d.get("name", "")),
-                 compat_short=issue_for(chip, d.get("name", ""), short=True)) for d in devices]
+                 compat_short=issue_for(chip, d.get("name", ""), short=True),
+                 # Fehlertexte der Bridge kommen deutsch (N_) und werden hier übersetzt
+                 **({"error": _(d["error"])} if d.get("error") else {})) for d in devices]

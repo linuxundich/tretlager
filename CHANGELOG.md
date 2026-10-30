@@ -4,6 +4,26 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-30
+
+### Hinzugefügt
+- Englische Oberfläche. Übersetzung per gettext (Domain `tretlager`, `tretlager/i18n.py`):
+  Deutsch bleibt Quellsprache, ohne deutsche Systemsprache erscheint Englisch;
+  `TRETLAGER_LANG` erzwingt eine Sprache. Alle 382 Texte aus QML (`i18n()`, verkettete Texte als
+  Platzhalter `%1`) und Python (`_()`, Statusmeldungen, Fehler, Systemprüfung, Einrichtung,
+  Anmeldung, Bridge-Zustände) sind übersetzt, dazu die Hilfe (`hilfe.en.md`) und die
+  Desktop-Dateien. Die Zwift-Anmeldeseite erscheint in der Sprache der Oberfläche.
+- `build-aux/msgfmt.py`: übersetzt Kataloge ohne gettext (fehlt auf tinytin); `po/update.sh`
+  sammelt Texte und gleicht Kataloge ab; Test auf Vollständigkeit und Platzhalter.
+
+### Geändert
+- Anmeldeseite: Der Satz, Tretlager prüfe nach jedem Launcher-Update die offizielle Anmeldung,
+  ist gestrichen – diese Prüfung gibt es nicht. Der Hilfetext zur Anmeldung in der Übersicht
+  nennt das eigene Anmeldefenster statt des Browsers.
+
+### Geprüft
+- Eingebettete Anmeldung mit echten Zugangsdaten (Christoph, 30.10.).
+
 ## [0.6.10] - 2026-10-30
 
 ### Behoben

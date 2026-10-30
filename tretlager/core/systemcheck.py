@@ -17,6 +17,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from . import btcompat, paths
+from ..i18n import _
 
 OK, WARN, FAIL = "ok", "warn", "fail"
 
@@ -53,18 +54,18 @@ def check_system(root: Path = Path("/"), machine: str | None = None) -> Check:
     try:
         osr = read_os_release(root)
     except OSError:
-        return Check("system", "System", FAIL, "Betriebssystem nicht erkannt")
+        return Check("system", _("System"), FAIL, _("Betriebssystem nicht erkannt"))
     name = osr.get("PRETTY_NAME", "Linux")
     codename = osr.get("VERSION_CODENAME", "")
-    details = [f"{name}, {codename or 'ohne Codename'}, {machine}"]
+    details = [f"{name}, {codename or _('ohne Codename')}, {machine}"]
     if machine != "x86_64":
-        return Check("system", "System", FAIL, f"{machine} wird nicht unterstützt (Zwift braucht x86-64)", details)
+        return Check("system", _("System"), FAIL, _("{machine} wird nicht unterstützt (Zwift braucht x86-64)").format(machine=machine), details)
     is_debian = osr.get("ID") == "debian" or "debian" in osr.get("ID_LIKE", "")
     if osr.get("ID") == "tuxedo" and codename == "forky":
-        return Check("system", "System", OK, f"{name}, forky", details)
+        return Check("system", _("System"), OK, f"{name}, forky", details)
     if is_debian and codename == "forky":
-        return Check("system", "System", WARN, f"{name}: Debian testing, nicht TUXEDO OS – nicht getestet", details)
-    return Check("system", "System", WARN, f"{name} ist nicht das Zielsystem (TUXEDO OS forky)", details)
+        return Check("system", _("System"), WARN, _("{name}: Debian testing, nicht TUXEDO OS – nicht getestet").format(name=name), details)
+    return Check("system", _("System"), WARN, _("{name} ist nicht das Zielsystem (TUXEDO OS forky)").format(name=name), details)
 
 
 @dataclass
@@ -113,8 +114,9 @@ def secure_boot_enabled(root: Path = Path("/")) -> bool | None:
 def check_graphics(root: Path = Path("/")) -> list[Check]:
     gpus = list_gpus(root)
     if not gpus:
-        return [Check("graphics", "Grafik", FAIL, "Keine Grafikkarte gefunden")]
-    details = [f"{g.vendor} {g.device} (Treiber {g.driver or 'keiner'}){' – Anzeige' if g.boot_vga else ''}"
+        return [Check("graphics", _("Grafik"), FAIL, _("Keine Grafikkarte gefunden"))]
+    details = [_("{vendor} {device} (Treiber {driver})").format(vendor=g.vendor, device=g.device, driver=g.driver or _("keiner"))
+               + (_(" – Anzeige") if g.boot_vga else "")
                for g in gpus]
     nvidia = [g for g in gpus if g.vendor == "NVIDIA"]
     others = [g for g in gpus if g.vendor != "NVIDIA"]
@@ -122,23 +124,23 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
     if nvidia:
         version = nvidia_driver_version(root)
         if nvidia[0].driver == "nvidia" and version:
-            checks.append(Check("graphics", "Grafik", OK, f"NVIDIA-Treiber {version} geladen", details))
+            checks.append(Check("graphics", _("Grafik"), OK, _("NVIDIA-Treiber {version} geladen").format(version=version), details))
         else:
             sb = secure_boot_enabled(root)
-            hint = (" Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung)."
+            hint = (" " + _("Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung).")
                     if sb else "")
-            checks.append(Check("graphics", "Grafik", FAIL,
-                                "NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen." + hint,
+            checks.append(Check("graphics", _("Grafik"), FAIL,
+                                _("NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen.") + hint,
                                 details, action="nvidia-help"))
         if others:
-            checks.append(Check("hybrid", "Hybrid-Grafik", OK,
-                                "Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt",
-                                [f"Anzeige über {next((g.vendor for g in gpus if g.boot_vga), others[0].vendor)}, "
-                                 "Zwift per PRIME-Offload (GLX)"]))
+            checks.append(Check("hybrid", _("Hybrid-Grafik"), OK,
+                                _("Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"),
+                                [_("Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)").format(
+                                    vendor=next((g.vendor for g in gpus if g.boot_vga), others[0].vendor))]))
     else:
         g = gpus[0]
-        checks.append(Check("graphics", "Grafik", WARN,
-                            f"{g.vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA",
+        checks.append(Check("graphics", _("Grafik"), WARN,
+                            _("{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA").format(vendor=g.vendor),
                             details))
     return checks
 
@@ -171,28 +173,28 @@ def check_bluetooth(root: Path = Path("/"), run=subprocess.run) -> Check:
     except (OSError, subprocess.TimeoutExpired, ValueError):
         adapter = None
     if adapter is None:
-        return Check("bluetooth", "Bluetooth", WARN,
-                     "Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter verbinden")
+        return Check("bluetooth", _("Bluetooth"), WARN,
+                     _("Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter verbinden"))
     details = [f"{adapter['Name']} ({adapter['Address']})"]
     chip = btcompat.adapter_chip(root=root / "sys/class/bluetooth")
     if chip:
-        details.append(f"Chip: {chip.name}")
+        details.append(_("Chip: {name}").format(name=chip.name))
     if rfkill_blocked(root) or not adapter["Powered"]:
-        return Check("bluetooth", "Bluetooth", WARN, "Bluetooth ist ausgeschaltet", details,
+        return Check("bluetooth", _("Bluetooth"), WARN, _("Bluetooth ist ausgeschaltet"), details,
                      action="bluetooth-on")
-    return Check("bluetooth", "Bluetooth", OK, "Bluetooth bereit für Trainer und Pulsgurt", details)
+    return Check("bluetooth", _("Bluetooth"), OK, _("Bluetooth bereit für Trainer und Pulsgurt"), details)
 
 
 def check_disk(path: Path | None = None) -> Check:
     path = path or Path.home()
     free = shutil.disk_usage(path).free
     gb = free / 10**9
-    details = [f"{gb:.0f} GB frei in {path}", "Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)"]
+    details = [_("{gb} GB frei in {path}").format(gb=f"{gb:.0f}", path=path), _("Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)")]
     if free >= paths.RECOMMENDED_BYTES:
-        return Check("disk", "Speicherplatz", OK, f"{gb:.0f} GB frei", details)
+        return Check("disk", _("Speicherplatz"), OK, _("{gb} GB frei").format(gb=f"{gb:.0f}"), details)
     if free >= paths.REQUIRED_BYTES:
-        return Check("disk", "Speicherplatz", WARN, f"Nur {gb:.0f} GB frei – reicht knapp", details)
-    return Check("disk", "Speicherplatz", FAIL, f"Nur {gb:.0f} GB frei, nötig sind etwa 11 GB", details)
+        return Check("disk", _("Speicherplatz"), WARN, _("Nur {gb} GB frei – reicht knapp").format(gb=f"{gb:.0f}"), details)
+    return Check("disk", _("Speicherplatz"), FAIL, _("Nur {gb} GB frei, nötig sind etwa 11 GB").format(gb=f"{gb:.0f}"), details)
 
 
 NETWORK_HOSTS = [("cdn.zwift.com", 443), ("dl.winehq.org", 443)]
@@ -207,10 +209,10 @@ def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
                 pass
         except OSError:
             bad.append(host)
-    details = [f"{h}: {'nicht erreichbar' if h in bad else 'erreichbar'}" for h, _ in hosts]
+    details = [f"{h}: {_('nicht erreichbar') if h in bad else _('erreichbar')}" for h, _port in hosts]
     if bad:
-        return Check("network", "Internet", FAIL, "Download-Quellen nicht erreichbar", details)
-    return Check("network", "Internet", OK, "Zwift und WineHQ erreichbar", details)
+        return Check("network", _("Internet"), FAIL, _("Download-Quellen nicht erreichbar"), details)
+    return Check("network", _("Internet"), OK, _("Zwift und WineHQ erreichbar"), details)
 
 
 def wine_version(run=subprocess.run) -> str:
@@ -225,11 +227,11 @@ def wine_version(run=subprocess.run) -> str:
 def check_wine(root: Path = Path("/"), run=subprocess.run) -> Check:
     version = wine_version(run)
     source = any((root / "etc/apt/sources.list.d").glob("winehq-*.sources"))
-    details = [f"WineHQ-Paketquelle: {'eingerichtet' if source else 'fehlt'}",
-               f"Wine: {version or 'nicht installiert'}"]
+    details = [_("WineHQ-Paketquelle: {state}").format(state=_("eingerichtet") if source else _("fehlt")),
+               _("Wine: {version}").format(version=version or _("nicht installiert"))]
     if version:
-        return Check("wine", "Wine", OK, f"{version} installiert", details)
-    return Check("wine", "Wine", WARN, "Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)", details)
+        return Check("wine", "Wine", OK, _("{version} installiert").format(version=version), details)
+    return Check("wine", "Wine", WARN, _("Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)"), details)
 
 
 def check_existing(zwift_dir: Path | None = None) -> Check:
@@ -237,9 +239,9 @@ def check_existing(zwift_dir: Path | None = None) -> Check:
     if (zwift_dir / "ZwiftLauncher.exe").exists():
         game = (zwift_dir / "ZwiftApp.exe").exists()
         return Check("existing", "Zwift", OK,
-                     "Zwift ist schon eingerichtet" if game else "Launcher vorhanden, Spiel fehlt noch",
+                     _("Zwift ist schon eingerichtet") if game else _("Launcher vorhanden, Spiel fehlt noch"),
                      [str(zwift_dir)])
-    return Check("existing", "Zwift", OK, "Noch nicht eingerichtet – das übernimmt Tretlager", [])
+    return Check("existing", "Zwift", OK, _("Noch nicht eingerichtet – das übernimmt Tretlager"), [])
 
 
 def run_all() -> list[Check]:

@@ -1,0 +1,90 @@
+## Overview
+<!-- icon: help-about -->
+
+Tretlager sets up Zwift on Linux, starts it with one click and connects your trainer and heart
+rate strap.
+
+- **Zwift under Wine**: The official Zwift Windows client runs under Wine. Tretlager downloads it
+  from Zwift, verifies the signature and does not modify it.
+- **Sensor bridge**: Zwift cannot use Bluetooth under Wine. The bridge connects the trainer and
+  heart rate strap and offers them to Zwift as Wahoo devices; the Companion app is not needed.
+- **Not a Zwift program**: Zwift does not support Linux. Use at your own risk.
+
+## Riding
+<!-- icon: media-playback-start -->
+
+- **Starting Zwift**: From the overview or from the application menu under *Zwift (Tretlager)*.
+- **Before the start**: Tretlager checks for Zwift updates and backs up the Zwift environment
+  first.
+- **During the ride**: Tretlager waits minimised and tidies up after Zwift closes.
+- **On a laptop**: Connect the power adapter before starting and keep it connected. Switching
+  between AC and battery can crash the NVIDIA driver.
+
+## Sensors
+<!-- icon: network-bluetooth -->
+
+- **Pairing in Tretlager**: Search and add under *Sensors*. Pedal briefly beforehand; a heart
+  rate strap only transmits with skin contact.
+- **Pairing in Zwift**: Once under *Paired Devices*, select “Wahoo KICKR …” for power, cadence
+  and resistance and “Wahoo HRM …” for heart rate. The warning icons for Bluetooth and ANT+ are
+  normal.
+- **Pausing**: Pause sensors that are not in use instead of removing them. Tretlager then stops
+  searching for them, and the pairing is kept.
+- **Bluetooth adapter**: A USB dongle on an extension cable next to the trainer helps with dead
+  spots and with chips that do not get along with a sensor.
+
+## Sign-in
+<!-- icon: user-identity -->
+
+The Zwift launcher cannot sign in on Linux at the moment. Tretlager therefore opens Zwift's
+sign-in page in a window of its own. **Zwift does not allow this (terms of service, section 5);
+using it is at your own risk.**
+
+- **Password**: Only enter it on Zwift's page. Tretlager neither reads nor stores it.
+- **Your own browser**: For password managers or signing in with Google or Apple. The browser
+  then shows “Bad Request”; copy the address and Tretlager picks it up.
+- **Session**: Stored in the keyring and renewed automatically. After a week without riding,
+  signing in again is required.
+- **Signing out**: Overview → *Sign in again…* → *Sign out*. This also ends the session at Zwift.
+
+## Privacy and storage locations
+<!-- icon: security-high -->
+
+- **No usage data**: Tretlager only connects to Zwift, WineHQ and Microsoft (components via
+  winetricks). Zwift itself sends crash reports to Sentry.
+- **Zwift environment**: `~/.local/share/tretlager/prefix`
+- **Backups before updates**: `~/.local/share/tretlager/snapshots`
+- **Cache**: `~/.cache/tretlager`
+- **Bridge settings**: `~/.config/tretlager/bridge.json`
+- **Setup state**: `~/.local/state/tretlager/state.json`
+
+## Setup
+<!-- icon: configure -->
+
+- **1. Check**: Graphics, Bluetooth, disk space and internet. Nothing on the system changes.
+- **2. Prepare**: WineHQ package source and Wine. All changes are listed beforehand; the
+  password is needed only once.
+- **3. Zwift**: Download and installation, about ten minutes. You can cancel at any time; the
+  next start continues where it left off.
+- **4.–6. Sign-in, sensors, done**: See the sections above.
+
+## Troubleshooting
+<!-- icon: help-hint; wide -->
+
+- [emblem-important] **Heart rate far too high**: Moisten the electrodes, tighten the strap and
+  wear only one strap.
+- [view-refresh] **Sensor stays at “Searching for the device…”**: Pedal briefly or unclip the
+  strap for a moment; the bridge searches every ten seconds.
+- [data-warning] **Sensor is found but never connects**: It does not get along with the
+  Bluetooth chip; Tretlager reports known cases on the sensor. Remedy: USB Bluetooth dongle.
+- [network-wireless-disconnected] **Connection drops often**: Move the computer closer to the
+  trainer or place a USB Bluetooth dongle on an extension cable next to the trainer.
+- [network-bluetooth] **Zwift does not find the sensors**: Check under *Sensors* that the bridge
+  is running and the sensors are connected.
+- [battery-low] **Zwift hangs after plugging or unplugging the power adapter**: Close it with
+  Alt+F4 and restart it with the power adapter connected; if that does not help, restart the
+  computer.
+- [video-display] **Blurry picture on Plasma**: *System Settings* → *Display* → *Legacy
+  Applications (X11)* → *Apply scaling themselves*.
+- [update-none] **Zwift does not start after an update**: Sidebar → *Check setup*. The backup
+  taken before the update is kept.

@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Callable
 
 from . import bridgectl, login, paths, setup, state
+from ..i18n import _
 
 VER_CUR_URL = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml"
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
@@ -63,7 +64,7 @@ def snapshot_prefix(log: Callable[[str], None]) -> Path | None:
     dest = paths.SNAPSHOTS / datetime.now().strftime("prefix-%Y%m%d-%H%M%S")
     r = subprocess.run(["cp", "-a", "--reflink=auto", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
     if r.returncode != 0:
-        log("Schnappschuss fehlgeschlagen: " + r.stderr.strip())
+        log(_("Schnappschuss fehlgeschlagen: {error}").format(error=r.stderr.strip()))
         shutil.rmtree(dest, ignore_errors=True)
         return None
     for old in sorted(paths.SNAPSHOTS.glob("prefix-*"))[:-KEEP_SNAPSHOTS]:
@@ -96,7 +97,7 @@ def maximize_window_kde(log: Callable[[str], None]) -> bool:
                                    script, name], capture_output=True, text=True, timeout=10)
         sid = r.stdout.strip().strip("(),")
         if not sid.lstrip("-").isdigit() or int(sid) < 0:
-            log("KWin-Skript ließ sich nicht laden")
+            log(_("KWin-Skript ließ sich nicht laden"))
             return False
         subprocess.run(call + ["--object-path", f"/Scripting/Script{sid}", "--method", "org.kde.kwin.Script.run"],
                        capture_output=True, timeout=10)
@@ -117,41 +118,41 @@ class Launcher:
         self.env = self.ctx.wine_env
 
     def run(self) -> None:
-        self.progress("Sensor-Bridge prüfen")
+        self.progress(_("Sensor-Bridge prüfen"))
         self.ensure_bridge()
-        self.progress("Anmeldung prüfen")
+        self.progress(_("Anmeldung prüfen"))
         token = login.valid_token()
         if token is None:
             raise NeedLogin()
         self.update_if_needed()
-        self.progress("Zwift starten")
+        self.progress(_("Zwift starten"))
         self.start(token)
-        self.progress("Fenster anpassen")
+        self.progress(_("Fenster anpassen"))
         self.wait_and_maximize()
-        self.progress("Zwift läuft")
+        self.progress(_("Zwift läuft"))
 
     def ensure_bridge(self) -> None:
         if not bridgectl.unit_installed():
-            self.log("Sensor-Bridge nicht installiert, Start ohne Sensoren")
+            self.log(_("Sensor-Bridge nicht installiert, Start ohne Sensoren"))
             return
         if not bridgectl.is_running():
             bridgectl.set_running(True)
-            self.log("Sensor-Bridge gestartet")
+            self.log(_("Sensor-Bridge gestartet"))
 
     def update_if_needed(self) -> None:
         local = setup.game_version()
         try:
             remote = remote_version()
         except OSError as e:
-            self.log(f"Update-Prüfung nicht möglich: {e}")
+            self.log(_("Update-Prüfung nicht möglich: {error}").format(error=e))
             return
         state.update("game", local=local, remote=remote, checked=int(time.time()))
         if not remote or remote == local:
             return
-        self.progress(f"Zwift wird aktualisiert ({local} → {remote})")
+        self.progress(_("Zwift wird aktualisiert ({old} → {new})").format(old=local, new=remote))
         snap = snapshot_prefix(self.log)
         if snap:
-            self.log(f"Schnappschuss vor dem Update: {snap}")
+            self.log(_("Schnappschuss vor dem Update: {path}").format(path=snap))
         self.ctx.wineserver_kill()
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -160,10 +161,10 @@ class Launcher:
             while time.monotonic() < deadline:
                 time.sleep(5)
                 if setup.game_version() == remote:
-                    self.log(f"Zwift aktualisiert auf {remote}")
+                    self.log(_("Zwift aktualisiert auf {version}").format(version=remote))
                     time.sleep(10)
                     return
-            raise LaunchError("Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten.")
+            raise LaunchError(_("Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."))
         finally:
             self.ctx.wineserver_kill()
 
@@ -179,7 +180,7 @@ class Launcher:
             self.ctx.run(["wine", setup.CSC, "/nologo", "/target:exe", "/platform:x64", "/out:RunFromProcess.exe",
                           "RunFromProcess.cs"], cwd=work)
             if not exe.exists():
-                raise LaunchError("Hilfsprogramm zum Starten ließ sich nicht übersetzen.")
+                raise LaunchError(_("Hilfsprogramm zum Starten ließ sich nicht übersetzen."))
         return exe
 
     def ensure_display_settings(self) -> None:
@@ -196,13 +197,13 @@ class Launcher:
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         pid = None
-        for _ in range(30):
+        for _attempt in range(30):
             time.sleep(1)
             pid = wine_tasks(self.env).get("ZwiftLauncher.exe")
             if pid:
                 break
         if not pid:
-            raise LaunchError("Der Zwift-Launcher startet nicht.")
+            raise LaunchError(_("Der Zwift-Launcher startet nicht."))
         time.sleep(5)
         gfx = state.load().get("graphics", {})
         env = dict(self.env, **setup.graphics_env(gfx))
@@ -219,10 +220,10 @@ class Launcher:
                                   cwd=paths.ZWIFT_DIR, env=env, stdout=subprocess.DEVNULL,
                                   stderr=subprocess.DEVNULL, timeout=60, check=False)
             if proc.returncode != 0:
-                raise LaunchError(f"Zwift ließ sich nicht starten (RunFromProcess, Code {proc.returncode}).")
+                raise LaunchError(_("Zwift ließ sich nicht starten (RunFromProcess, Code {code}).").format(code=proc.returncode))
             time.sleep(15)
         except subprocess.TimeoutExpired:
-            raise LaunchError("Zwift ließ sich nicht starten (Zeitüberschreitung).") from None
+            raise LaunchError(_("Zwift ließ sich nicht starten (Zeitüberschreitung).")) from None
         finally:
             tok_file.unlink(missing_ok=True)
         for name in ("ZwiftLauncher.exe", "ZwiftWindowsCrashHandler.exe"):
@@ -230,7 +231,7 @@ class Launcher:
 
     def wait_and_maximize(self) -> None:
         # Das Skript weiß nicht, ob das Fenster schon da ist; mehrfaches Maximieren schadet nicht.
-        for _ in range(3):
+        for _attempt in range(3):
             if not maximize_window_kde(self.log):
                 return
             time.sleep(4)
@@ -244,6 +245,6 @@ class Launcher:
         try:
             if bridgectl.is_running() and not bridgectl.autostart():
                 bridgectl.set_running(False)
-                self.log("Sensor-Bridge gestoppt")
+                self.log(_("Sensor-Bridge gestoppt"))
         except bridgectl.BridgeError as e:
             self.log(str(e))
