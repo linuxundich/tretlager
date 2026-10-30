@@ -4,6 +4,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+### Behoben
+- Systemprüfung im Flatpak meldete zu wenig freien Speicher (17 statt 900 GB auf tinytin): Sie maß
+  `~`, das in der Sandbox ohne Freigabe nur ein kleines tmpfs ist. Gemessen wird jetzt der
+  Datenordner (`XDG_DATA_HOME`), in dem die Zwift-Umgebung liegt.
+
 ## [0.8.0] - 2026-10-30
 
 Erste Version als Flatpak (`build-aux/flatpak/de.linuxundich.Tretlager.yml`); das Debian-Paket ist

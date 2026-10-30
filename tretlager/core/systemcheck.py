@@ -189,7 +189,12 @@ def check_bluetooth(root: Path = Path("/"), run=subprocess.run) -> Check:
 
 
 def check_disk(path: Path | None = None) -> Check:
-    path = path or Path.home()
+    # Dort messen, wo die Zwift-Umgebung landet: im Flatpak ist ~ nur ein kleines tmpfs, die Daten
+    # liegen unter ~/.var/app/<ID>/data (XDG_DATA_HOME).
+    if path is None:
+        path = paths.DATA
+        while not path.exists() and path != path.parent:
+            path = path.parent
     free = shutil.disk_usage(path).free
     gb = free / 10**9
     details = [_("{gb} GB frei in {path}").format(gb=f"{gb:.0f}", path=path), _("Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)")]
