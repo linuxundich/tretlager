@@ -41,6 +41,12 @@ ColumnsPage {
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
+                text: i18n("Auf eigene Gefahr")
+                description: i18n("Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die sich manipulieren ließen. Einschränkungen bis hin zur Sperre des Kontos lassen sich nicht ausschließen – samt der mühsam erstrampelten XP und Drops.")
+                icon.name: "emblem-warning"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
                 text: i18n("Nicht für Rennen")
                 description: i18n("Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")
                 icon.name: "flag"

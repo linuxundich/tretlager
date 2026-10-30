@@ -79,9 +79,22 @@ ColumnsPage {
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
+                text: i18n("Auf eigene Gefahr")
+                description: i18n("Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die sich manipulieren ließen. Einschränkungen bis hin zur Sperre des Kontos lassen sich nicht ausschließen – samt der mühsam erstrampelten XP und Drops.")
+                icon.name: "emblem-warning"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
                 text: i18n("Nicht für Rennen")
                 description: i18n("Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls vollständig und korrekt an Zwift weitergibt; Übertragungsfehler und Aussetzer sind möglich. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")
                 icon.name: "flag"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormButtonDelegate {
+                text: i18n("Warnhinweise anzeigen")
+                description: i18n("Die Hinweise vom ersten Start")
+                icon.source: Qt.resolvedUrl("../../data/icons/tretlager-warning.svg")
+                onClicked: applicationWindow().showWarnings()
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {

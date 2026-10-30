@@ -5,6 +5,15 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 ## [Unreleased]
 
 ### Hinzugefügt
+- Warnhinweise beim ersten Start, die bestätigt werden müssen (sonst *Beenden*): keine offizielle
+  Zwift-App; auf eigene Gefahr – Zwift ist womöglich nicht glücklich über eine Software-Bridge,
+  deren Daten sich manipulieren ließen, Sperre samt XP und Drops nicht ausgeschlossen; nicht für
+  Rennen; Anmeldung außerhalb des Launchers. Mit stilisiertem Warnzeichen „Steigung 12 %“
+  (`data/icons/tretlager-warning.svg`). Erneut, wenn sich der Text ändert (`DISCLAIMER_VERSION`);
+  jederzeit unter *Über Tretlager → Warnhinweise anzeigen*. Bis zur Bestätigung startet Zwift
+  nicht automatisch.
+- Hinweis „Auf eigene Gefahr“ (XP und Drops) auch in Übersicht, Willkommen, Über Tretlager, Hilfe,
+  README und Metainfo.
 - Dezente Silhouette einer Radgruppe hinter dem Seitenkopf von Übersicht und Willkommensseite:
   drei Tonstufen aus einem Foto (`build-aux/make-backdrop.py`), in der Textfarbe des Farbschemas
   mit 7–9 % Deckkraft, passt zu Hell und Dunkel.

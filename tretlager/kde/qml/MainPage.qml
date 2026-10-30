@@ -151,7 +151,7 @@ ColumnsPage {
             wrapMode: Text.WordWrap
             color: Kirigami.Theme.disabledTextColor
             font: Kirigami.Theme.smallFont
-            text: i18n("Nicht für Rennen: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt.")
+            text: i18n("Keine offizielle Zwift-App, Nutzung auf eigene Gefahr. Nicht für Rennen: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt.")
         }
     }
 

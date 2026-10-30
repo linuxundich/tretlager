@@ -25,6 +25,8 @@ except ImportError:  # python3-pyside6.qtwebenginequick nicht installiert
     QtWebEngineQuick = None
 
 QML_DIR = Path(__file__).parent / "qml"
+# Fassung der Warnhinweise (WarningDialog.qml); erhöhen, wenn sich ihr Inhalt ändert
+DISCLAIMER_VERSION = 1
 POLL_VISIBLE_MS = 1500  # Live-Werte der Sensoren bei sichtbarem Fenster
 POLL_HIDDEN_MS = 15000
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -526,7 +528,7 @@ class Backend(QObject):
     @Property(bool, constant=True)
     def autoStart(self) -> bool:
         """Mit `tretlager --start` aufgerufen: Zwift gleich starten, danach Tretlager beenden."""
-        return self._auto_start and self.setupComplete
+        return self._auto_start and self.setupComplete and self.disclaimerAccepted
 
     @Property(str, constant=True)
     def version(self) -> str:
@@ -565,6 +567,19 @@ class Backend(QObject):
     @Slot()
     def markSetupComplete(self) -> None:
         state.update("setup", complete=True)
+
+    disclaimerChanged = Signal()
+
+    @Property(bool, notify=disclaimerChanged)
+    def disclaimerAccepted(self) -> bool:
+        """Warnhinweise beim ersten Start bestätigt? Neu fragen, wenn sich ihr Text ändert."""
+        return state.load().get("disclaimer", {}).get("accepted") == DISCLAIMER_VERSION
+
+    @Slot()
+    def acceptDisclaimer(self) -> None:
+        state.update("disclaimer", accepted=DISCLAIMER_VERSION)
+        applog.info("Warnhinweise bestätigt (Fassung %s)", DISCLAIMER_VERSION)
+        self.disclaimerChanged.emit()
 
     def _on_launch_event(self, ev: dict) -> None:
         if "logline" in ev:

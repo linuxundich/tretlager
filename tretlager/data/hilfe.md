@@ -10,6 +10,9 @@ Pulsgurt.
   Pulsgurt und bietet sie Zwift als Wahoo-Geräte an; die Companion App ist nicht nötig.
 - **Kein Programm von Zwift**: Zwift unterstützt Linux nicht. Die Benutzung erfolgt auf eigene
   Gefahr.
+- **XP und Drops**: Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten
+  übermittelt, die sich manipulieren ließen. Einschränkungen bis hin zur Sperre des Kontos lassen
+  sich nicht ausschließen. Die Warnhinweise vom ersten Start stehen unter *Über Tretlager*.
 
 ## Fahren
 <!-- icon: media-playback-start -->

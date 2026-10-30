@@ -126,7 +126,7 @@ Kirigami.ApplicationWindow {
             root.showNormal()
             root.raise()
             root.requestActivate()
-            if (cmd === "start" && backend.setupComplete) backend.startZwift()
+            if (cmd === "start" && backend.setupComplete && backend.disclaimerAccepted) backend.startZwift()
         }
         function onLaunchChanged() {
             const running = backend.launchInfo.zwiftRunning
@@ -147,5 +147,12 @@ Kirigami.ApplicationWindow {
 
     // Seiten erst nach dem Aufbau auf den Stapel legen (Kirigami-Falle aus Stafette).
     // Nach abgeschlossener Einrichtung gleich die Übersicht, sonst der Assistent.
-    Component.onCompleted: show(backend.setupComplete ? "overview" : "setup")
+    Component.onCompleted: {
+        show(backend.setupComplete ? "overview" : "setup")
+        if (!backend.disclaimerAccepted) warningDialog.open()
+    }
+
+    // Warnhinweise: beim ersten Start zum Bestätigen, später aus „Über Tretlager“ zum Nachlesen
+    WarningDialog { id: warningDialog }
+    function showWarnings() { warningDialog.open() }
 }

@@ -9,6 +9,9 @@ rate strap.
 - **Sensor bridge**: Zwift cannot use Bluetooth under Wine. The bridge connects the trainer and
   heart rate strap and offers them to Zwift as Wahoo devices; the Companion app is not needed.
 - **Not a Zwift program**: Zwift does not support Linux. Use at your own risk.
+- **XP and drops**: Zwift may not be happy that a software bridge sends data that could be
+  manipulated. Restrictions up to a suspended account cannot be ruled out. The warnings from the
+  first start are under *About Tretlager*.
 
 ## Riding
 <!-- icon: media-playback-start -->
