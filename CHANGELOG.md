@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-10-30
+
+### Geändert
+- Ein ausgeschalteter Bluetooth-Adapter gilt wie ein abgezogener als fehlend: Die Bridge
+  weicht auf den Standardadapter aus und kehrt zurück, sobald er wieder an ist. Ist ein Adapter
+  gewählt, prüft sie das alle zehn Sekunden (bisher nur, solange er fehlte).
+- Lesbare Namen für Realtek-RTL8761B-Sticks, darunter TP-Link UB500.
+
+### Geprüft
+- Auf tinytin mit TP-Link UB500 (RTL8761BU) als zweitem Adapter: Umschalten im laufenden
+  Betrieb, Ausschalten des Sticks (Rückfall auf AX201 nach etwa zehn Sekunden) und
+  Wiedereinschalten. Der Garmin HRM-Pro Plus verbindet sich über den Stick und liefert Puls,
+  am eingebauten AX201 hängt er weiter.
+
 ## [0.6.4] - 2026-10-30
 
 ### Geändert

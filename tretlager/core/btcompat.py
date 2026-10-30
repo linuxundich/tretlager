@@ -3,7 +3,8 @@
 Manche Sensoren vertragen sich mit bestimmten Bluetooth-Chips nicht, ohne dass Reichweite oder
 Batterie schuld sind. Befund auf tinytin (2026-10-29): Der Garmin HRM-Pro Plus wird am
 eingebauten Intel AX201 (Firmware 202-5.26) gefunden, die GATT-Dienstsuche nach dem Verbinden
-hängt aber jedes Mal; am Intel AX200 (smokki) läuft derselbe Gurt. Vermutet wird ein Problem mit
+hängt aber jedes Mal; am Intel AX200 (smokki) und am USB-Stick
+TP-Link UB500 (Realtek RTL8761BU, tinytin, 30.10.) läuft derselbe Gurt. Vermutet wird ein Problem mit
 LE 2M. Tretlager erkennt den Chip an der USB-Kennung und warnt beim Hinzufügen und in der
 Übersicht, statt den Gurt endlos „Verbindet …“ zeigen zu lassen.
 
@@ -29,6 +30,10 @@ CHIP_NAMES = {
     "8087:0033": "Intel Wi-Fi 6E AX211",
     "8087:0036": "Intel Wi-Fi 7 BE200",
     "8087:0aaa": "Intel Wireless-AC 9560",
+    # Realtek RTL8761B(U): Chip der meisten günstigen Bluetooth-5-Sticks
+    "0bda:8771": "Realtek RTL8761B",
+    "2357:0604": "TP-Link UB500 (Realtek RTL8761BU)",
+    "2550:8761": "Realtek RTL8761BU",
 }
 
 
@@ -55,7 +60,7 @@ KNOWN_ISSUES = [
              "Er wird gefunden, aber die Verbindung kommt nie zustande. Das liegt nicht an Reichweite "
              "oder Batterie. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter Sensoren als "
              "Bluetooth-Adapter wählen oder einen anderen Pulsgurt nutzen, zum Beispiel einen Wahoo "
-             "TICKR. Mit anderen Chips (getestet: Intel AX200) funktioniert der Gurt.",
+             "TICKR. Mit anderen Chips funktioniert der Gurt (getestet: Intel AX200, TP-Link UB500).",
     ),
 ]
 

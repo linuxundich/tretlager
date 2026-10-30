@@ -4,7 +4,7 @@ Gespeichert wird die Adresse des Adapters, nicht der Name hciN: Die Nummer häng
 Reihenfolge ab, in der die Adapter erscheinen, und ändert sich etwa beim Umstecken eines
 USB-Sticks. Beim Start und bei jeder Änderung wird die Adresse auf den aktuellen hciN-Namen
 aufgelöst. Ohne Auswahl oder wenn der gewählte Adapter fehlt, nutzt die Bridge den
-Standardadapter von BlueZ.
+Standardadapter von BlueZ. Ausgeschaltete Adapter gelten als fehlend.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from dbus_fast.aio import MessageBus
 
 
 async def bluez_adapters() -> dict[str, str]:
-    """Adapter laut BlueZ als {"hci0": "AA:BB:…"}; leer, wenn BlueZ nicht antwortet."""
+    """Eingeschaltete Adapter laut BlueZ als {"hci0": "AA:BB:…"}; leer, wenn BlueZ nicht antwortet."""
     try:
         bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
     except Exception:
@@ -28,7 +28,8 @@ async def bluez_adapters() -> dict[str, str]:
         out = {}
         for path, ifaces in reply.body[0].items():
             adapter = ifaces.get("org.bluez.Adapter1")
-            if adapter and "Address" in adapter:
+            # Ausgeschaltete Adapter zählen wie fehlende: Über sie kommt keine Verbindung zustande.
+            if adapter and "Address" in adapter and adapter.get("Powered") and adapter["Powered"].value:
                 out[path.rsplit("/", 1)[-1]] = adapter["Address"].value.upper()
         return dict(sorted(out.items()))
     finally:

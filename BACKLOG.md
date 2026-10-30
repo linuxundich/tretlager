@@ -50,7 +50,13 @@
   (Warnung seit 0.6.2 über `core/btcompat.py`; bei neuen Befunden dort ergänzen)
 - [x] Bridge auf wählbaren Adapter umstellen (0.6.3; Umschalten, fehlender Adapter und Rückfall
   auf tinytin geprüft, mit echtem USB-Stick noch nicht)
-- [ ] Mit echtem USB-Bluetooth-Stick testen: HRM-Pro Plus über den Stick, Umstecken während der Fahrt
+- [x] Mit echtem USB-Bluetooth-Stick testen (30.10., TP-Link UB500): HRM-Pro Plus über den Stick ok,
+  Umschalten, Aus- und Einschalten des Sticks ok
+- [ ] Stick während einer Fahrt in Zwift abziehen (echtes Abziehen statt Ausschalten)
+- [ ] Nach dem Umschalten braucht der erste Verbindungsversuch des HRM-Pro manchmal eine Runde
+  mehr (unvollständige Dienstsuche → Wartezeit wächst); ggf. Wartezeit nach Adapterwechsel zurücksetzen
+- [ ] Paket-Update startet die laufende Bridge nicht neu (alte Version läuft weiter bis zum
+  Neustart); postinst oder Hinweis in Tretlager
 - [ ] Sensorseite: Schalter *Sensor-Bridge* sah unter Plasma ausgeschaltet aus, obwohl `checked` true war
   (30.10., noch FormCardPage); seit dem neuen Seitengerüst (0.6.4) richtig dargestellt, beobachten
 - [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)

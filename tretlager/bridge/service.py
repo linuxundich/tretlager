@@ -88,9 +88,10 @@ class Bridge(ServiceInterface):
     async def tick(self) -> None:
         while True:
             await asyncio.sleep(TICK)
-            # Fehlt der gewählte Adapter (USB-Stick abgezogen), regelmäßig nachsehen, ob er wieder da ist.
+            # Ist ein Adapter gewählt, alle zehn Sekunden nachsehen, ob er noch da und eingeschaltet ist
+            # (USB-Stick abgezogen oder ausgeschaltet) bzw. wieder da ist.
             self._adapter_check += 1
-            if self.adapter_missing and self._adapter_check % 10 == 0:
+            if self.config.adapter and self._adapter_check % 10 == 0:
                 if await self.resolve_adapter():
                     await self.restart_devices()
             live = any(d.state == "verbunden" for d in self.devices.values())
