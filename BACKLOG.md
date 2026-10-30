@@ -60,7 +60,11 @@
   Nach Neustart von tinytin sofort wieder verbunden (30 s, 62 Schläge/min) → hängender Zustand in BlueZ
   oder im Controller (Stick-Neustart per Powered reichte nicht). Beim nächsten Mal zuerst
   `systemctl restart bluetooth` probieren; ggf. Tretlager-Hinweis „Bluetooth neu starten“ bei Gerät, das
-  gefunden wird, aber dauerhaft nicht verbindet
+  gefunden wird, aber dauerhaft nicht verbindet.
+  Live-Test 30.10. 12:3x (Flatpak): wieder hängend, BlueZ meldet am UB500 `Connected=true`,
+  `ServicesResolved=false` → die GATT-Dienstsuche hängt wie am AX201, auch nach RemoveDevice und
+  Stick-Neustecken. Nächster Schritt: btmon-Mitschnitt und LE-1M erzwingen (`btmgmt --index 1 phy`,
+  root); Bridge könnte bei hängender Dienstsuche gezielt Disconnect + Cache leeren
 - [ ] Nach dem Umschalten braucht der erste Verbindungsversuch des HRM-Pro manchmal eine Runde
   mehr (unvollständige Dienstsuche → Wartezeit wächst); ggf. Wartezeit nach Adapterwechsel zurücksetzen
 - [ ] Paket-Update startet die laufende Bridge nicht neu (alte Version läuft weiter bis zum
