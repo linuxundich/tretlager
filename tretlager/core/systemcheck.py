@@ -17,7 +17,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from . import btcompat, dbusutil, paths
+from . import btcompat, dbusutil, paths, wine
 from ..i18n import _
 
 OK, WARN, FAIL = "ok", "warn", "fail"
@@ -225,10 +225,12 @@ def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
 
 
 def wine_version(run=subprocess.run) -> str:
-    if not shutil.which("wine"):
+    """Version des Wine, mit dem Tretlager Zwift startet (mitgeliefert oder vorige, core/wine.py)."""
+    exe = shutil.which("wine", path=wine.env_path())
+    if not exe:
         return ""
     try:
-        return run(["wine", "--version"], capture_output=True, text=True, timeout=10).stdout.strip()
+        return run([exe, "--version"], capture_output=True, text=True, timeout=10).stdout.strip()
     except (OSError, subprocess.TimeoutExpired):
         return ""
 

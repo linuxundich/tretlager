@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
+from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
@@ -490,7 +490,8 @@ class Backend(QObject):
     _launchEvent = Signal(dict)
 
     def _init_launch(self) -> None:
-        self._launch = {"busy": False, "zwiftRunning": False, "text": "", "error": "", "needLogin": False,
+        self._launch = {"busy": False, "zwiftRunning": False, "text": "", "percent": -1, "error": "", "needLogin": False,
+                        "wine": {"bundled": "", "kept": "", "useKept": False, "active": ""},
                         "log": "", "version": "", "remote": "", "renderer": "", "login": "",
                         "onBattery": power.on_ac() is False, "powerChanged": False, "gpuErrors": ""}
         self._launchEvent.connect(self._on_launch_event)
@@ -576,7 +577,9 @@ class Backend(QObject):
         def work():
             st = state.load()
             info = {"version": setup.game_version(), "remote": st.get("game", {}).get("remote", ""),
-                    "renderer": st.get("graphics", {}).get("gl_renderer", "")}
+                    "renderer": st.get("graphics", {}).get("gl_renderer", ""),
+                    "wine": {"bundled": wine.bundled_version(), "kept": wine.kept_version(),
+                             "useKept": wine.use_kept(), "active": systemcheck.wine_version()}}
             try:  # Update-Prüfung im Hintergrund, damit das Hauptfenster es vor dem Start zeigt
                 info["remote"] = launch.remote_version()
                 state.update("game", remote=info["remote"], checked=int(time.time()))
@@ -596,6 +599,13 @@ class Backend(QObject):
             self._launchEvent.emit(info)
         threading.Thread(target=work, daemon=True).start()
 
+    @Slot(bool)
+    def setUseKeptWine(self, on: bool) -> None:
+        """Zwift mit der aufbewahrten, vorigen Wine-Version starten (Rückweg nach einem Update)."""
+        wine.set_use_kept(on)
+        applog.info("Vorige Wine-Version %s", "an" if on else "aus")
+        self.refreshOverview()
+
     @Slot()
     def startZwift(self) -> None:
         if self._launch["busy"] or self._launch["zwiftRunning"]:
@@ -604,7 +614,7 @@ class Backend(QObject):
         started_at = time.time()
         self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": _("Start vorbereiten"),
                                "powerChanged": False, "gpuErrors": ""})
-        launcher = launch.Launcher(progress=lambda t: self._launchEvent.emit({"text": t}),
+        launcher = launch.Launcher(progress=lambda t, p=-1: self._launchEvent.emit({"text": t, "percent": float(p)}),
                                    log=lambda t: self._launchEvent.emit({"logline": t}))
 
         def work():
@@ -623,8 +633,9 @@ class Backend(QObject):
                 self._launchEvent.emit({"busy": False, "error": _("Unerwarteter Fehler ({name})").format(name=type(e).__name__), "text": ""})
                 self._after_exit_quietly(launcher)
                 return
-            self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift läuft")})
-            applog.info("Zwift läuft")
+            self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift läuft"), "percent": -1})
+            applog.info("Zwift läuft (%s)", systemcheck.wine_version())
+            ride_start = time.monotonic()
             # Ein Fehler beim Nachsehen darf die Überwachung nicht beenden: Sonst bliebe die
             # Oberfläche für immer bei „Zwift läuft“, und niemand räumte auf.
             misses = 0
@@ -636,6 +647,13 @@ class Backend(QObject):
                     pass
             applog.info("Zwift beendet, räume auf")
             self._after_exit_quietly(launcher)
+            try:  # Hat sich das mitgelieferte Wine bewährt, wird es zur aufbewahrten Version
+                kept = wine.record_ride(time.monotonic() - ride_start)
+                if kept:
+                    applog.info("Wine %s als bewährte Version aufbewahrt", kept)
+                    self._launchEvent.emit({"logline": _("{version} als bewährte Wine-Version aufbewahrt").format(version=kept)})
+            except OSError as e:
+                applog.warning("Wine aufbewahren: %s", e)
             self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift beendet")})
             self._report_gpu_errors(started_at)
             self.refreshOverview()

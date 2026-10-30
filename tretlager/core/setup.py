@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import display, paths, state, systemcheck
+from . import display, paths, state, systemcheck, wine
 from ..i18n import _
 
 INSTALLER_URL = "https://cdn.zwift.com/app/ZwiftSetup.exe"
@@ -57,7 +57,8 @@ class Context:
 
     @property
     def wine_env(self) -> dict:
-        return dict(os.environ, WINEPREFIX=str(paths.PREFIX), WINEDEBUG="-all")
+        # PATH: mitgeliefertes Wine oder die aufbewahrte vorige Version (core/wine.py)
+        return dict(os.environ, WINEPREFIX=str(paths.PREFIX), WINEDEBUG="-all", PATH=wine.env_path())
 
     def run(self, cmd: list[str], env: dict | None = None, cwd: Path | None = None, timeout: int = 3600) -> int:
         """Befehl ausführen, Ausgabe zeilenweise ins Protokoll."""

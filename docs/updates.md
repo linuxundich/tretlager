@@ -16,7 +16,7 @@ Tretlager passt. Zurück geht es über Flatpak, nicht über Kopien.
 | NVIDIA-Treiber in der Sandbox (`GL.nvidia-…`) | Flathub | Flatpak installiert die zum Systemtreiber passende Erweiterung selbst | – |
 | winetricks | GitHub, fester Commit + SHA-256 im Code | nur mit einer neuen Tretlager-Version | – |
 | Windows-Komponenten (.NET 4.8, WebView2, Schriften, d3dcompiler_47) | Microsoft u. a. über winetricks | neue oder andere Komponenten nur mit einer neuen Tretlager-Version (`VERBS`) | Abgleich installiert fehlende Komponenten |
-| Zwift-Launcher und Spiel | Zwift | Zwift selbst: Tretlager startet vor jeder Fahrt den Launcher unsichtbar (`SilentLaunch`), wenn `Zwift_ver_cur.xml` eine neuere Version meldet | wartet bis zu 15 min, bis die Version auf der Platte steht, startet dann |
+| Zwift-Launcher und Spiel | Zwift | Zwift selbst: Tretlager startet vor jeder Fahrt den Launcher unsichtbar (`SilentLaunch`), wenn `Zwift_ver_cur.xml` eine neuere Version meldet | zeigt den Fortschritt (siehe unten), wartet bis zu 15 min, bis die Version auf der Platte steht, startet dann |
 | Zwift-Sitzung (Token) | Zwift | Tretlager erneuert sie selbst (6 h Zugriff, 8 Tage Erneuerung) | sonst Anmeldung |
 
 Wine und alles andere im Flatpak wird also **nie** hinter Tretlagers Rücken aktualisiert. Eine neue
@@ -49,6 +49,17 @@ Grafiktest, dann Zwift nach 47 s; normaler Start ohne Änderung: Zwift nach 16 s
 
 ## Zurück, wenn ein Update etwas kaputt macht
 
+- **Wine (in Tretlager):** Tretlager hebt genau eine Wine-Version auf, die zuletzt bewährte
+  (`~/.var/app/de.linuxundich.Tretlager/data/tretlager/wine-bewaehrt`, gut 500 MB, `core/wine.py`).
+  - Nach der ersten Fahrt (≥ 5 min) wird das mitgelieferte Wine kopiert.
+  - Bringt ein Tretlager-Update ein neues Wine, bleibt die Kopie der alten Version stehen. In der
+    Übersicht erscheint unter *Zwift* der Schalter *Vorige Wine-Version nutzen*; der Abgleich passt
+    die Zwift-Umgebung dann an die alte Version an (`wineboot -u`, Grafiktest).
+  - Nach zwei Fahrten mit dem neuen Wine gilt es als bewährt und ersetzt die Kopie. Fahrten mit der
+    alten Version zählen dafür nicht.
+  - Kommt mit dem nächsten Tretlager-Update wieder ein anderes Wine, schaltet Tretlager zurück auf
+    das mitgelieferte (es kann das Problem beheben).
+
 - **Tretlager/Wine:** `flatpak remote-info --log tretlager-origin de.linuxundich.Tretlager` zeigt die
   Versionen, `flatpak update --commit=<ältere> de.linuxundich.Tretlager` holt die vorige zurück
   (mit ihrem Wine), `flatpak mask de.linuxundich.Tretlager` hält sie fest. Der Abgleich passt die
@@ -56,6 +67,19 @@ Grafiktest, dann Zwift nach 47 s; normaler Start ohne Änderung: Zwift nach 16 s
 - **Zwift:** Ein Zurück gibt es nicht und braucht es nicht – Zwift lässt nur mit der aktuellen
   Version fahren. Ist die Zwift-Umgebung kaputt, legt *Einrichtung prüfen* sie neu an; nur das
   Spiel (≈ 5 GB) wird dann erneut geladen.
+
+## Fortschritt beim Zwift-Update
+
+`Zwift_ver_cur.xml` nennt das Manifest der neuen Version (`Zwift_<Version>_<Hash>_manifest.xml`,
+gleicher Ordner beim CDN, ≈ 5 MB, ≈ 20 000 Dateien mit Pfad und Größe). Tretlager vergleicht es
+mit dem Zwift-Ordner: Fehlende oder anders große Dateien ergeben die Menge, die zu laden ist.
+Während der Launcher lädt, zählt Tretlager alle 3 s, wie viel davon in voller Größe angekommen
+ist, und zeigt „… 1,2 von 3,4 GB“ mit Fortschrittsbalken (höchstens 99 %, bis die Versionsdatei
+wechselt). Ohne Manifest (offline, anderes Format) bleibt es bei der Zeit: „seit 3 Minuten“.
+Gleich große, geänderte Dateien zählt das nicht mit; die Anzeige ist ein Richtwert.
+
+Auf tinytin mit der aktuellen Version geprüft: 0 von 19 903 Dateien fehlen, Abgleich 1 s. Mit
+einem echten Zwift-Update noch nicht gesehen (keins erschienen).
 
 ## Ablauf für eine neue Tretlager-Version
 
@@ -68,9 +92,10 @@ Grafiktest, dann Zwift nach 47 s; normaler Start ohne Änderung: Zwift nach 16 s
 
 ## Offen
 
-- [ ] Tretlager meldet selbst, wenn eine neue Version bereitsteht, und spielt sie auf Wunsch ein
-  (Flatpak-Portal `org.freedesktop.portal.Flatpak`, `CreateUpdateMonitor` / `Update`).
-- [ ] Fortschritt beim Zwift-Update (geladene GB wie bei der Einrichtung) statt nur Text.
+- [ ] Tretlager meldet selbst, wenn eine neue Version bereitsteht (Flatpak-Portal
+  `CreateUpdateMonitor` / `Update`) – bewusst offen, Verteilung über Flathub ist nicht geplant.
+- [x] Fortschritt beim Zwift-Update aus dem Manifest (bei einem echten Update beobachten).
+- [x] Vorige Wine-Version aufbewahren (eine) und wählbar.
 - [ ] Eine Windows-Komponente gezielt erneuern (z. B. neuere WebView2), wenn Zwift sie verlangt:
   Revisionsmarke je Verb, dann `winetricks --force <verb>` im Abgleich.
 - [ ] Flatpak-Quelle auf bender mit GPG (F4), erst dann gibt es `flatpak update` für Tretlager.

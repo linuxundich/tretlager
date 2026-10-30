@@ -13,6 +13,11 @@ ColumnsPage {
     readonly property var la: backend.launchInfo
     readonly property var se: backend.sensors
     readonly property var incompatible: se.devices.filter(function (d) { return d.enabled && d.compat })
+    readonly property string wineText: !la.wine.active ? "…"
+        : la.wine.useKept ? i18n("%1, vorige Version (mitgeliefert: %2)", la.wine.active, la.wine.bundled)
+        : la.wine.kept && la.wine.kept !== la.wine.bundled ? i18n("%1, neu mit Tretlager; %2 aufgehoben", la.wine.active, la.wine.kept)
+        : la.wine.kept ? i18n("%1, bewährt und aufgehoben", la.wine.active)
+        : i18n("%1, mit Tretlager", la.wine.active)
     readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable && !d.compat })
     // Startbereitschaft auf einen Blick: Welche eingeschalteten Sensoren sind verbunden?
     readonly property var activeDevices: se.devices.filter(function (d) { return d.enabled })
@@ -129,6 +134,15 @@ ColumnsPage {
                 toolTipText: i18n("Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-Sitzung. Nach einem Tretlager-Update passt es die Zwift-Umgebung an, und eine neue Zwift-Version spielt es über den Zwift-Launcher ein. Zwift läuft auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms.")
             }
         }
+        // Fortschritt langer Schritte (Zwift-Update, Nachinstallieren), sonst unsichtbar
+        Controls.ProgressBar {
+            visible: page.la.busy && page.la.percent >= 0
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.smallSpacing
+            from: 0
+            to: 100
+            value: page.la.percent
+        }
         // Haftungshinweis direkt an der Hauptaktion: Die Werte der Bridge sind nicht abgesichert.
         Controls.Label {
             Layout.fillWidth: true
@@ -198,6 +212,26 @@ ColumnsPage {
                 trailing: Kirigami.ContextualHelpButton {
                     toolTipText: i18n("Den Grafikweg hat Tretlager bei der Einrichtung getestet. Auf Notebooks mit zwei Grafikchips läuft Zwift auf der NVIDIA-Karte, der Desktop bleibt auf dem sparsamen Chip. Die Bildschirmauflösung bleibt unverändert.")
                 }
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
+                text: i18n("Wine")
+                description: page.wineText
+                icon.name: "system-run"
+                trailing: Kirigami.ContextualHelpButton {
+                    toolTipText: i18n("Wine kommt mit Tretlager und wird mit Tretlager aktualisiert. Die zuletzt bewährte Version hebt Tretlager auf: Läuft Zwift nach einem Update schlechter, startet der Schalter darunter Zwift wieder mit ihr. Ein neues Wine gilt nach zwei Fahrten als bewährt und ersetzt dann die aufgehobene Version.")
+                }
+            }
+            FormCard.FormDelegateSeparator { visible: rollback.visible }
+            FormCard.FormSwitchDelegate {
+                id: rollback
+                visible: page.la.wine.kept !== "" && page.la.wine.kept !== page.la.wine.bundled
+                text: i18n("Vorige Wine-Version nutzen")
+                description: i18n("%1 statt %2. Nur nötig, wenn Zwift seit dem letzten Tretlager-Update nicht mehr richtig läuft.",
+                                  page.la.wine.kept, page.la.wine.bundled)
+                checked: page.la.wine.useKept
+                enabled: !page.la.busy && !page.la.zwiftRunning
+                onToggled: backend.setUseKeptWine(checked)
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {

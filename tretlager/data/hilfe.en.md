@@ -18,8 +18,8 @@ rate strap.
   a Tretlager update, for example, against a new Wine) and installs Zwift updates through the Zwift
   launcher.
 - **Tretlager updates**: Wine and everything else come with Tretlager itself, through the software
-  centre or `flatpak update`. Back to the previous version:
-  `flatpak update --commit=… de.linuxundich.Tretlager`.
+  centre or `flatpak update`. Tretlager keeps the last proven Wine version; if Zwift runs worse after
+  an update, switch on *Use previous Wine version* in the overview.
 - **During the ride**: Tretlager waits minimised and tidies up after Zwift closes.
 - **Not for races**: Tretlager does not guarantee that the sensor bridge passes power, cadence
   and heart rate to Zwift correctly. Do not use Tretlager for races or competitions with results.

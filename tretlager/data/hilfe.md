@@ -18,8 +18,8 @@ Pulsgurt.
 - **Vor dem Start**: Tretlager gleicht die Zwift-Umgebung mit der installierten Version ab (nach
   einem Tretlager-Update etwa an ein neues Wine) und spielt Zwift-Updates über den Zwift-Launcher ein.
 - **Updates von Tretlager**: Wine und alles Übrige kommen mit Tretlager selbst, über die
-  Softwareverwaltung bzw. `flatpak update`. Zurück zur vorigen Version:
-  `flatpak update --commit=… de.linuxundich.Tretlager`.
+  Softwareverwaltung bzw. `flatpak update`. Die zuletzt bewährte Wine-Version hebt Tretlager auf;
+  läuft Zwift nach einem Update schlechter, in der Übersicht *Vorige Wine-Version nutzen* einschalten.
 - **Während der Fahrt**: Tretlager wartet minimiert und räumt nach dem Beenden auf.
 - **Nicht für Rennen**: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung,
   Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher

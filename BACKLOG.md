@@ -149,7 +149,9 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 ## Updates (docs/updates.md)
 
 - [x] Keine Schnappschüsse; Einrichtung vor jedem Start abgleichen (Wine-Wechsel → `wineboot -u` + Grafiktest)
-- [ ] Neue Tretlager-Version im Programm melden und einspielen (Flatpak-Portal UpdateMonitor)
-- [ ] Fortschritt beim Zwift-Update (GB) statt nur Text
+- [ ] Neue Tretlager-Version im Programm melden (Flatpak-Portal) – bewusst offen, kein Flathub geplant (Christoph 30.10.)
+- [x] Fortschritt beim Zwift-Update aus dem Zwift-Manifest
+- [ ] Fortschritt bei einem echten Zwift-Update beobachten
+- [x] Vorige Wine-Version aufbewahren (eine) und in der Übersicht wählbar
 - [ ] Windows-Komponente gezielt erneuern (Revisionsmarke je Verb, `winetricks --force`)
 - [ ] Echten Wine-Wechsel auf tinytin durchspielen (Tretlager mit anderer Wine-Version bauen)
