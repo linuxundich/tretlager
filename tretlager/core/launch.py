@@ -16,7 +16,6 @@ import subprocess
 import tempfile
 import time
 import urllib.request
-from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
@@ -26,9 +25,6 @@ from ..i18n import _
 VER_CUR_URL = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml"
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
-KEEP_SNAPSHOTS = 2
-# Was nach einer vollen Kopie (ohne Reflink) mindestens frei bleiben muss: Platz für das Update.
-SNAPSHOT_RESERVE = 5 * 10**9
 
 
 class NeedLogin(Exception):
@@ -79,41 +75,6 @@ def process_running(name: str, proc: Path = Path("/proc")) -> bool:
         if re.split(r"[\\/]", argv0)[-1].lower() == want:
             return True
     return False
-
-
-def snapshot_prefix(log: Callable[[str], None], free=None, size=None) -> Path | None:
-    """Kopie des Prefix vor einem Update.
-
-    Auf Btrfs/XFS per Reflink in Sekundenbruchteilen und fast ohne Platz. Auf ext4 (Ubuntu, Debian)
-    wäre es eine volle Kopie von 7–9 GB: dann nur, wenn danach noch genug frei bleibt, und nur
-    eine Kopie behalten; sonst ohne Schnappschuss weiter (das Update selbst braucht auch Platz).
-    """
-    if not paths.PREFIX.exists():
-        return None
-    paths.SNAPSHOTS.mkdir(parents=True, exist_ok=True)
-    dest = paths.SNAPSHOTS / datetime.now().strftime("prefix-%Y%m%d-%H%M%S")
-    keep = KEEP_SNAPSHOTS
-    r = subprocess.run(["cp", "-a", "--reflink=always", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
-    if r.returncode != 0:
-        shutil.rmtree(dest, ignore_errors=True)
-        # Kein Reflink: alte volle Kopien zuerst weg, dann Platz prüfen
-        for old in sorted(paths.SNAPSHOTS.glob("prefix-*")):
-            shutil.rmtree(old, ignore_errors=True)
-        need = (size if size is not None else setup.dir_size(paths.PREFIX)) + SNAPSHOT_RESERVE
-        have = free if free is not None else shutil.disk_usage(paths.SNAPSHOTS).free
-        if have < need:
-            log(_("Kein Schnappschuss vor dem Update: zu wenig Platz für eine volle Kopie ({gb} GB nötig).")
-                .format(gb=round(need / 10**9)))
-            return None
-        r = subprocess.run(["cp", "-a", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
-        keep = 1
-    if r.returncode != 0:
-        log(_("Schnappschuss fehlgeschlagen: {error}").format(error=r.stderr.strip()))
-        shutil.rmtree(dest, ignore_errors=True)
-        return None
-    for old in sorted(paths.SNAPSHOTS.glob("prefix-*"))[:-keep]:
-        shutil.rmtree(old, ignore_errors=True)
-    return dest
 
 
 KWIN_SCRIPT = """
@@ -170,7 +131,7 @@ class Launcher:
     def __init__(self, progress: Callable[[str], None], log: Callable[[str], None]):
         self.progress = progress
         self.log = log
-        self.ctx = setup.Context(log=log)
+        self.ctx = setup.Context(log=log, progress=lambda _step, _pct, text: progress(text) if text else None)
         self.env = self.ctx.wine_env
 
     def run(self) -> None:
@@ -180,6 +141,7 @@ class Launcher:
         token = login.valid_token()
         if token is None:
             raise NeedLogin()
+        self.reconcile()
         self.update_if_needed()
         dpi = display.ensure_dpi(paths.PREFIX, self.ctx.run)
         if dpi:
@@ -198,6 +160,29 @@ class Launcher:
             bridgectl.set_running(True)
             self.log(_("Sensor-Bridge gestartet"))
 
+    def reconcile(self) -> None:
+        """Einrichtung mit diesem Tretlager abgleichen (docs/updates.md).
+
+        Jeder Schritt prüft am echten System, ob er erledigt ist; im Normalfall dauert das unter
+        einer Sekunde. Nach einem Tretlager-Update mit neuem Wine passt das die Zwift-Umgebung an
+        (`wineboot -u`) und wiederholt den Grafiktest; verlangt eine neue Tretlager-Version
+        weitere Windows-Komponenten, kommen sie hier dazu; fehlt etwas, wird es repariert.
+        """
+        shutil.rmtree(paths.DATA / "snapshots", ignore_errors=True)  # Schnappschüsse bis 0.8.x
+        titles = {s.id: s.title for s in setup.STEPS}
+        errors: list[str] = []
+
+        def on_step(step_id: str, status: str, text: str) -> None:
+            if status == "running":
+                self.progress(_("Einrichtung ergänzen: {step}").format(step=titles.get(step_id, step_id)))
+                self.log(_("Einrichtung ergänzen: {step}").format(step=titles.get(step_id, step_id)))
+            elif status == "error":
+                errors.append(text)
+
+        self.progress(_("Einrichtung prüfen"))
+        if not setup.run_setup(self.ctx, on_step):
+            raise LaunchError(errors[0] if errors else _("Die Einrichtung ließ sich nicht abgleichen."))
+
     def update_if_needed(self) -> None:
         local = setup.game_version()
         try:
@@ -208,10 +193,9 @@ class Launcher:
         state.update("game", local=local, remote=remote, checked=int(time.time()))
         if not remote or remote == local:
             return
+        # Zwift aktualisiert sich über den eigenen Launcher; Tretlager startet ihn nur unsichtbar und
+        # wartet, bis die neue Version auf der Platte steht.
         self.progress(_("Zwift wird aktualisiert ({old} → {new})").format(old=local, new=remote))
-        snap = snapshot_prefix(self.log)
-        if snap:
-            self.log(_("Schnappschuss vor dem Update: {path}").format(path=snap))
         self.ctx.wineserver_kill()
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -223,7 +207,7 @@ class Launcher:
                     self.log(_("Zwift aktualisiert auf {version}").format(version=remote))
                     time.sleep(10)
                     return
-            raise LaunchError(_("Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."))
+            raise LaunchError(_("Das Zwift-Update wurde nicht fertig. Beim nächsten Start setzt Tretlager es fort."))
         finally:
             self.ctx.wineserver_kill()
 

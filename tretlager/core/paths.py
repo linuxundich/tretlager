@@ -15,7 +15,6 @@ STATE = _xdg("XDG_STATE_HOME", ".local/state") / "tretlager"
 CACHE = _xdg("XDG_CACHE_HOME", ".cache") / "tretlager"
 
 PREFIX = DATA / "prefix"
-SNAPSHOTS = DATA / "snapshots"
 ZWIFT_DIR = PREFIX / "drive_c" / "Program Files (x86)" / "Zwift"
 
 # Ablagebedarf laut Messung auf tinytin: 1,8 GB System (Wine) + 8,6 GB Prefix mit Spiel.

@@ -114,25 +114,3 @@ def test_dircon_drops_when_buffer_full():
     transport.get_write_buffer_size = lambda: 0
     dircon.Session(None, writer).notify("00002a37-0000-1000-8000-00805f9b34fb", b"\x00\x40")
     assert len(written) == 1
-
-
-# --- Schnappschuss vor dem Update: ohne Reflink nur mit genug Platz ---
-
-def test_snapshot_skipped_without_space(tmp_path, monkeypatch):
-    import subprocess as sp
-    from tretlager.core import paths
-    monkeypatch.setattr(paths, "PREFIX", tmp_path / "prefix")
-    monkeypatch.setattr(paths, "SNAPSHOTS", tmp_path / "snapshots")
-    (tmp_path / "prefix").mkdir()
-    (tmp_path / "prefix" / "system.reg").write_text("x")
-    calls = []
-
-    def fake_run(cmd, **_kw):
-        calls.append(cmd)
-        return sp.CompletedProcess(cmd, 1 if "--reflink=always" in cmd else 0, "", "Operation not supported")
-    monkeypatch.setattr(launch.subprocess, "run", fake_run)
-    logs = []
-    assert launch.snapshot_prefix(logs.append, free=10**9, size=8 * 10**9) is None
-    assert "zu wenig Platz" in logs[0] and len(calls) == 1  # keine volle Kopie versucht
-    assert launch.snapshot_prefix(logs.append, free=20 * 10**9, size=8 * 10**9) is not None
-    assert calls[-1][:2] == ["cp", "-a"] and "--reflink=always" not in calls[-1]

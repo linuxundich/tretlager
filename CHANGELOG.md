@@ -9,6 +9,14 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   auf einem dunklen Plasma-Panel kaum zu erkennen.
 
 ### Geändert
+- Updates ohne Schnappschüsse (Plan in `docs/updates.md`): Vor jedem Start gleicht Tretlager die
+  Einrichtung ab. Nach einem Tretlager-Update mit neuem Wine passt `wineboot -u` die
+  Zwift-Umgebung an, und der Grafiktest läuft erneut; fehlende Windows-Komponenten oder Teile von
+  Zwift werden nachinstalliert. Der Schnappschuss vor Zwift-Updates entfällt (kostete ohne Btrfs
+  eine volle Kopie von 7–9 GB), alte Schnappschüsse werden gelöscht. Den Installer lädt Tretlager
+  nicht mehr erneut, wenn der Zwift-Launcher schon installiert ist; installierte Komponenten liest
+  es direkt aus `winetricks.log` (2 s schneller).
+- Hilfe „Puls viel zu hoch“: zusätzlich der Tipp, die Batterie des Gurts zu wechseln.
 - Hinweis „Nicht für Rennen“: Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz
   und Puls korrekt an Zwift weitergibt; an Rennen und Wettbewerben mit Wertung nicht mit Tretlager
   teilnehmen. Steht in der Übersicht unter *Zwift starten*, auf der Willkommensseite, unter
@@ -36,8 +44,6 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   Verbindung zu Zwift offen; nach dem Wiederverbinden fließen die Daten weiter, ohne dass Zwift das
   Gerät neu suchen muss (auf tinytin mit künstlich getrenntem KICKR geprüft: 17 s Pause, Verbindung
   blieb). Vorher verschwand das Gerät bei jedem Abbruch aus Zwift.
-- Schnappschuss vor einem Zwift-Update ohne Reflink (ext4): nur noch, wenn genug Platz frei bleibt,
-  und nur eine volle Kopie statt zwei; sonst Update ohne Schnappschuss mit Hinweis im Protokoll.
 - Einrichtung: Abbrechen und Zeitlimit greifen auch, wenn ein Programm stumm hängt.
 - Bridge: Liest Zwift nicht mehr, verwirft sie Messwerte, statt den Sendepuffer wachsen zu lassen.
 - Ein abwesender Sensor (Gurt nicht angelegt) blockierte Bluetooth bis zu 40 s pro Versuch: Die

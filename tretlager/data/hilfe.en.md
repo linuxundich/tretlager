@@ -14,8 +14,12 @@ rate strap.
 <!-- icon: media-playback-start -->
 
 - **Starting Zwift**: From the overview or from the application menu under *Zwift (Tretlager)*.
-- **Before the start**: Tretlager checks for Zwift updates and backs up the Zwift environment
-  first.
+- **Before the start**: Tretlager checks the Zwift environment against the installed version (after
+  a Tretlager update, for example, against a new Wine) and installs Zwift updates through the Zwift
+  launcher.
+- **Tretlager updates**: Wine and everything else come with Tretlager itself, through the software
+  centre or `flatpak update`. Back to the previous version:
+  `flatpak update --commit=… de.linuxundich.Tretlager`.
 - **During the ride**: Tretlager waits minimised and tidies up after Zwift closes.
 - **Not for races**: Tretlager does not guarantee that the sensor bridge passes power, cadence
   and heart rate to Zwift correctly. Do not use Tretlager for races or competitions with results.
@@ -72,7 +76,8 @@ using it is at your own risk.**
 <!-- icon: help-hint; wide -->
 
 - [emblem-important] **Heart rate far too high**: Moisten the electrodes, tighten the strap and
-  wear only one strap.
+  wear only one strap. If that does not help, replace the strap's battery: a weak battery often
+  gives erratic or too high readings.
 - [view-refresh] **Sensor stays at “Searching for the device…”**: Pedal briefly or unclip the
   strap for a moment; the bridge searches every ten seconds.
 - [data-warning] **Sensor is found but never connects**: It does not get along with the

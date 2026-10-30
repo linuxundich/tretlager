@@ -35,6 +35,7 @@ VERB_WEIGHT = {"corefonts": 15, "dotnet48": 60, "d3dcompiler_47": 5, "webview2":
 
 GAME_SIZE_BYTES = 4_900_000_000  # Zwift 1.124 auf tinytin
 GAME_TIMEOUT = 45 * 60
+WINEBOOT_TIMEOUT = 5 * 60  # Anlegen ≈ 30 s, Anpassen an neues Wine kürzer
 # Zwift im Vollbild stellte trotz UseXRandR=N die Panel-Auflösung um (tinytin, M5); XVidMode
 # ist der zweite Weg, über den Wine Modi wechselt.
 WINE_DISPLAY_KEYS = ["UseXRandR", "UseXVidMode"]
@@ -141,6 +142,9 @@ class Installer(Step):
     path = paths.CACHE / "ZwiftSetup.exe"
 
     def done(self, ctx: Context) -> bool:
+        # Den Installer braucht nur der Schritt „Launcher“; ist der da, nicht erneut laden.
+        if (paths.ZWIFT_DIR / "ZwiftLauncher.exe").exists():
+            return True
         info = state.load().get("installer", {})
         return self.path.exists() and info.get("sha256") == sha256(self.path) and info.get("verified") is True
 
@@ -164,18 +168,35 @@ class Prefix(Step):
     id = "prefix"
     title = _("Wine-Umgebung anlegen")
 
-    def done(self, ctx: Context) -> bool:
+    @staticmethod
+    def exists() -> bool:
         return (paths.PREFIX / "system.reg").exists() and (paths.PREFIX / "drive_c").is_dir()
+
+    @staticmethod
+    def wine_of_prefix() -> str:
+        """Wine-Version, mit der die Umgebung zuletzt angelegt bzw. angepasst wurde."""
+        st = state.load()
+        # Umgebungen bis 0.8.x haben keinen eigenen Eintrag; der Grafiktest lief mit derselben Wine.
+        return st.get("prefix", {}).get("wine") or st.get("graphics", {}).get("wine", "")
+
+    def done(self, ctx: Context) -> bool:
+        return self.exists() and self.wine_of_prefix() == systemcheck.wine_version()
 
     def run(self, ctx: Context) -> None:
         paths.PREFIX.parent.mkdir(parents=True, exist_ok=True)
-        ctx.progress(self.id, 0, _("Wine richtet die Umgebung ein"))
-        # Nur hier: Mono und Gecko nicht nachladen, .NET und WebView2 kommen über winetricks.
-        # Später gesetzt würde die Variable .NET abschalten (winetricks dotnet48, csc.exe).
+        # Neues Wine (Tretlager-Update): Umgebung an die neue Version anpassen, wie es Wine sonst
+        # beim nächsten Programmstart unaufgefordert und mitten im Zwift-Start täte.
+        ctx.progress(self.id, 0, _("Wine passt die Umgebung an die neue Version an") if self.exists()
+                     else _("Wine richtet die Umgebung ein"))
+        # Nur für wineboot: Mono und Gecko nicht nachladen. Ohne die Variable öffnet wineboot einen
+        # Installationsdialog und wartet (auf tinytin hing `wineboot -u` daran über 10 min). .NET und
+        # WebView2 kommen über winetricks; dauerhaft gesetzt würde die Variable .NET abschalten.
         env = dict(ctx.wine_env, WINEDLLOVERRIDES="mscoree,mshtml=")
-        if ctx.run(["wine", "wineboot", "-u"], env=env) != 0:
-            raise SetupError(_("Wine konnte die Umgebung nicht anlegen."))
+        if ctx.run(["wine", "wineboot", "-u"], env=env, timeout=WINEBOOT_TIMEOUT) != 0:
+            raise SetupError(_("Wine konnte die Umgebung nicht anpassen.") if self.exists()
+                             else _("Wine konnte die Umgebung nicht anlegen."))
         ctx.wineserver_wait()
+        state.update("prefix", wine=systemcheck.wine_version())
         # Ab jetzt in Bildschirmgröße: Installer und .NET-Einrichtung sonst winzig auf HiDPI
         display.ensure_dpi(paths.PREFIX, ctx.run)
 
@@ -192,12 +213,14 @@ class Winetricks:
             self.path.chmod(0o755)
         return self.path
 
-    def installed(self, ctx: Context) -> set[str]:
-        if not self.path.exists():
+    @staticmethod
+    def installed(ctx: Context) -> set[str]:
+        """Eingerichtete Verben. winetricks führt sie in winetricks.log im Präfix; das direkt zu lesen
+        ist dasselbe wie `winetricks list-installed`, nur ohne 2 s Startzeit (Abgleich vor jedem Start)."""
+        try:
+            return set((paths.PREFIX / "winetricks.log").read_text(errors="ignore").split())
+        except OSError:
             return set()
-        r = subprocess.run([str(self.path), "list-installed"], capture_output=True, text=True,
-                           env=ctx.wine_env, timeout=120)
-        return set(r.stdout.split())
 
 
 class Components(Step):

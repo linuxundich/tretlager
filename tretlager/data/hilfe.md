@@ -15,7 +15,11 @@ Pulsgurt.
 <!-- icon: media-playback-start -->
 
 - **Zwift starten**: In der Übersicht oder im Startmenü unter *Zwift (Tretlager)*.
-- **Vor dem Start**: Tretlager sucht nach Zwift-Updates und sichert vorher die Zwift-Umgebung.
+- **Vor dem Start**: Tretlager gleicht die Zwift-Umgebung mit der installierten Version ab (nach
+  einem Tretlager-Update etwa an ein neues Wine) und spielt Zwift-Updates über den Zwift-Launcher ein.
+- **Updates von Tretlager**: Wine und alles Übrige kommen mit Tretlager selbst, über die
+  Softwareverwaltung bzw. `flatpak update`. Zurück zur vorigen Version:
+  `flatpak update --commit=… de.linuxundich.Tretlager`.
 - **Während der Fahrt**: Tretlager wartet minimiert und räumt nach dem Beenden auf.
 - **Nicht für Rennen**: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung,
   Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher
@@ -74,7 +78,8 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
 <!-- icon: help-hint; wide -->
 
 - [emblem-important] **Puls viel zu hoch**: Elektroden anfeuchten, Gurt enger stellen und nur
-  einen Gurt tragen.
+  einen Gurt tragen. Hilft das nicht, die Batterie des Gurts wechseln: Eine schwache Batterie
+  liefert oft sprunghafte oder zu hohe Werte.
 - [view-refresh] **Sensor bleibt bei „Sucht das Gerät …“**: Kurz in die Pedale treten oder den
   Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden.
 - [data-warning] **Sensor wird gefunden, verbindet sich aber nie**: Er verträgt den

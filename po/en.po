@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 14:27+0100\n"
+"POT-Creation-Date: 2026-10-30 15:00+0100\n"
 "PO-Revision-Date: 2026-10-30 09:30+0100\n"
 "Last-Translator: Christoph Langner\n"
 "Language-Team: English\n"
@@ -128,99 +128,96 @@ msgstr ""
 msgid "unbekannter Chip"
 msgstr "unknown chip"
 
-#: tretlager/core/launch.py:105
-#, python-brace-format
-msgid ""
-"Kein Schnappschuss vor dem Update: zu wenig Platz für eine volle Kopie ({gb} "
-"GB nötig)."
-msgstr "No snapshot before the update: not enough space for a full copy ({gb} GB needed)."
-
-#: tretlager/core/launch.py:111
-#, python-brace-format
-msgid "Schnappschuss fehlgeschlagen: {error}"
-msgstr "Snapshot failed: {error}"
-
-#: tretlager/core/launch.py:156
+#: tretlager/core/launch.py:117
 msgid "KWin-Skript ließ sich nicht laden"
 msgstr "Could not load the KWin script"
 
-#: tretlager/core/launch.py:177
+#: tretlager/core/launch.py:138
 msgid "Sensor-Bridge prüfen"
 msgstr "Checking the sensor bridge"
 
-#: tretlager/core/launch.py:179
+#: tretlager/core/launch.py:140
 msgid "Anmeldung prüfen"
 msgstr "Checking the sign-in"
 
-#: tretlager/core/launch.py:186
+#: tretlager/core/launch.py:148
 #, python-brace-format
 msgid "Wine-DPI an den Bildschirm angepasst: {dpi}"
 msgstr "Wine DPI adjusted to the screen: {dpi}"
 
-#: tretlager/core/launch.py:187
+#: tretlager/core/launch.py:149
 msgid "Zwift starten"
 msgstr "Start Zwift"
 
-#: tretlager/core/launch.py:189
+#: tretlager/core/launch.py:151
 msgid "Fenster anpassen"
 msgstr "Adjusting the window"
 
-#: tretlager/core/launch.py:191 tretlager/kde/app.py:626
+#: tretlager/core/launch.py:153 tretlager/kde/app.py:626
 msgid "Zwift läuft"
 msgstr "Zwift is running"
 
-#: tretlager/core/launch.py:195
+#: tretlager/core/launch.py:157
 msgid "Sensor-Bridge nicht installiert, Start ohne Sensoren"
 msgstr "Sensor bridge not installed, starting without sensors"
 
-#: tretlager/core/launch.py:199
+#: tretlager/core/launch.py:161
 msgid "Sensor-Bridge gestartet"
 msgstr "Sensor bridge started"
 
-#: tretlager/core/launch.py:206
+#: tretlager/core/launch.py:177 tretlager/core/launch.py:178
+#, python-brace-format
+msgid "Einrichtung ergänzen: {step}"
+msgstr "Completing setup: {step}"
+
+#: tretlager/core/launch.py:182
+msgid "Einrichtung prüfen"
+msgstr "Check setup"
+
+#: tretlager/core/launch.py:184
+msgid "Die Einrichtung ließ sich nicht abgleichen."
+msgstr "The setup could not be checked."
+
+#: tretlager/core/launch.py:191
 #, python-brace-format
 msgid "Update-Prüfung nicht möglich: {error}"
 msgstr "Could not check for updates: {error}"
 
-#: tretlager/core/launch.py:211
+#: tretlager/core/launch.py:198
 #, python-brace-format
 msgid "Zwift wird aktualisiert ({old} → {new})"
 msgstr "Updating Zwift ({old} → {new})"
 
-#: tretlager/core/launch.py:214
-#, python-brace-format
-msgid "Schnappschuss vor dem Update: {path}"
-msgstr "Snapshot before the update: {path}"
-
-#: tretlager/core/launch.py:223
+#: tretlager/core/launch.py:207
 #, python-brace-format
 msgid "Zwift aktualisiert auf {version}"
 msgstr "Zwift updated to {version}"
 
-#: tretlager/core/launch.py:226
+#: tretlager/core/launch.py:210
 msgid ""
-"Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."
+"Das Zwift-Update wurde nicht fertig. Beim nächsten Start setzt Tretlager es "
+"fort."
 msgstr ""
-"The Zwift update did not finish. The snapshot taken before it has been kept."
+"The Zwift update did not finish. Tretlager continues it on the next start."
 
-#: tretlager/core/launch.py:242
+#: tretlager/core/launch.py:226
 msgid "Hilfsprogramm zum Starten ließ sich nicht übersetzen."
 msgstr "Could not compile the start helper."
 
-#: tretlager/core/launch.py:265
+#: tretlager/core/launch.py:249
 msgid "Der Zwift-Launcher startet nicht."
 msgstr "The Zwift launcher does not start."
 
-#: tretlager/core/launch.py:282
+#: tretlager/core/launch.py:266
 #, python-brace-format
 msgid "Zwift ließ sich nicht starten (RunFromProcess, Code {code})."
 msgstr "Could not start Zwift (RunFromProcess, code {code})."
 
-#: tretlager/core/launch.py:285
+#: tretlager/core/launch.py:269
 msgid "Zwift ließ sich nicht starten (Zeitüberschreitung)."
 msgstr "Could not start Zwift (timed out)."
 
-#: tretlager/core/launch.py:307
+#: tretlager/core/launch.py:291
 msgid "Sensor-Bridge gestoppt"
 msgstr "Sensor bridge stopped"
 
@@ -338,130 +335,138 @@ msgstr "Package planning failed: {error}"
 msgid "Abgebrochen oder keine Berechtigung erteilt"
 msgstr "Cancelled or permission not granted"
 
-#: tretlager/core/setup.py:111 tretlager/core/setup.py:282
+#: tretlager/core/setup.py:112 tretlager/core/setup.py:305
 msgid "Abgebrochen"
 msgstr "Cancelled"
 
-#: tretlager/core/setup.py:115
+#: tretlager/core/setup.py:116
 #, python-brace-format
 msgid "{text} ({done} von {total} MB)"
 msgstr "{text} ({done} of {total} MB)"
 
-#: tretlager/core/setup.py:140
+#: tretlager/core/setup.py:141
 msgid "Zwift-Installer laden und Signatur prüfen"
 msgstr "Download the Zwift installer and verify its signature"
 
-#: tretlager/core/setup.py:148
+#: tretlager/core/setup.py:152
 msgid "Installer laden"
 msgstr "Downloading the installer"
 
-#: tretlager/core/setup.py:149
+#: tretlager/core/setup.py:153
 msgid "Signatur prüfen"
 msgstr "Verifying the signature"
 
-#: tretlager/core/setup.py:156
+#: tretlager/core/setup.py:160
 msgid ""
 "Die Signatur des Zwift-Installers ist ungültig; die Datei wurde verworfen."
 msgstr "The Zwift installer's signature is invalid; the file was discarded."
 
-#: tretlager/core/setup.py:159
+#: tretlager/core/setup.py:163
 #, python-brace-format
 msgid "Der Installer ist nicht von Zwift, Inc. signiert ({signer})."
 msgstr "The installer is not signed by Zwift, Inc. ({signer})."
 
-#: tretlager/core/setup.py:159
+#: tretlager/core/setup.py:163
 msgid "unbekannt"
 msgstr "unknown"
 
-#: tretlager/core/setup.py:165
+#: tretlager/core/setup.py:169
 msgid "Wine-Umgebung anlegen"
 msgstr "Create the Wine environment"
 
-#: tretlager/core/setup.py:172
+#: tretlager/core/setup.py:189
+msgid "Wine passt die Umgebung an die neue Version an"
+msgstr "Wine is adapting the environment to the new version"
+
+#: tretlager/core/setup.py:190
 msgid "Wine richtet die Umgebung ein"
 msgstr "Wine is setting up the environment"
 
-#: tretlager/core/setup.py:177
+#: tretlager/core/setup.py:196
+msgid "Wine konnte die Umgebung nicht anpassen."
+msgstr "Wine could not adapt the environment."
+
+#: tretlager/core/setup.py:197
 msgid "Wine konnte die Umgebung nicht anlegen."
 msgstr "Wine could not create the environment."
 
-#: tretlager/core/setup.py:188
+#: tretlager/core/setup.py:209
 msgid "winetricks laden"
 msgstr "Downloading winetricks"
 
-#: tretlager/core/setup.py:191
+#: tretlager/core/setup.py:212
 msgid "winetricks hat nicht die erwartete Prüfsumme; Download verworfen."
 msgstr "winetricks does not have the expected checksum; download discarded."
 
-#: tretlager/core/setup.py:205
+#: tretlager/core/setup.py:228
 msgid "Komponenten von Microsoft (Schriften, .NET 4.8, WebView2)"
 msgstr "Microsoft components (fonts, .NET 4.8, WebView2)"
 
-#: tretlager/core/setup.py:217
+#: tretlager/core/setup.py:240
 #, python-brace-format
 msgid "{verb} installieren"
 msgstr "Installing {verb}"
 
-#: tretlager/core/setup.py:219
+#: tretlager/core/setup.py:242
 #, python-brace-format
 msgid "winetricks konnte „{verb}“ nicht installieren."
 msgstr "winetricks could not install “{verb}”."
 
-#: tretlager/core/setup.py:226
+#: tretlager/core/setup.py:249
 msgid "Zwift-Launcher installieren"
 msgstr "Install the Zwift launcher"
 
-#: tretlager/core/setup.py:232
+#: tretlager/core/setup.py:255
 msgid "Installer läuft unbeaufsichtigt"
 msgstr "Installer is running unattended"
 
-#: tretlager/core/setup.py:238
+#: tretlager/core/setup.py:261
 msgid "Der Zwift-Launcher wurde nicht installiert."
 msgstr "The Zwift launcher was not installed."
 
-#: tretlager/core/setup.py:267
+#: tretlager/core/setup.py:290
 msgid "Zwift laden (etwa 5 GB)"
 msgstr "Download Zwift (about 5 GB)"
 
-#: tretlager/core/setup.py:287
+#: tretlager/core/setup.py:310
 #, python-brace-format
 msgid "{loaded} von etwa {total} GB"
 msgstr "{loaded} of about {total} GB"
 
-#: tretlager/core/setup.py:291
+#: tretlager/core/setup.py:314
 #, python-brace-format
 msgid "Zwift {version} geladen"
 msgstr "Zwift {version} downloaded"
 
-#: tretlager/core/setup.py:293
+#: tretlager/core/setup.py:316
 msgid "Zwift wurde nicht vollständig geladen (Zeitüberschreitung)."
 msgstr "Zwift was not fully downloaded (timed out)."
 
-#: tretlager/core/setup.py:316
+#: tretlager/core/setup.py:339
 msgid "Grafik einrichten"
 msgstr "Set up graphics"
 
-#: tretlager/core/setup.py:333
+#: tretlager/core/setup.py:356
 msgid "Grafiktest übersetzen"
 msgstr "Compiling the graphics test"
 
-#: tretlager/core/setup.py:339
+#: tretlager/core/setup.py:362
 msgid "Grafiktest ausführen"
 msgstr "Running the graphics test"
 
-#: tretlager/core/setup.py:347
+#: tretlager/core/setup.py:370
 msgid "Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."
 msgstr "Wine gets no OpenGL context; Zwift would not start."
 
-#: tretlager/core/setup.py:349
+#: tretlager/core/setup.py:372
 msgid "Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"
 msgstr "Warning: NVIDIA present, but OpenGL does not run on it"
 
-#: tretlager/core/setup.py:365
+#: tretlager/core/setup.py:388
 msgid "schon erledigt"
 msgstr "already done"
 
-#: tretlager/core/setup.py:375
+#: tretlager/core/setup.py:398
 #, python-brace-format
 msgid "Unerwarteter Fehler: {error}"
 msgstr "Unexpected error: {error}"
@@ -1545,14 +1550,14 @@ msgstr "Tretlager waits minimised and tidies up after the ride."
 #: tretlager/kde/qml/MainPage.qml:129
 msgid ""
 "Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-"
-"Sitzung. Gibt es eine neue Zwift-Version, sichert Tretlager die alte und "
-"spielt das Update ein. Zwift läuft auf der leistungsstärksten Grafikkarte "
-"und in der Auflösung des Bildschirms."
+"Sitzung. Nach einem Tretlager-Update passt es die Zwift-Umgebung an, und "
+"eine neue Zwift-Version spielt es über den Zwift-Launcher ein. Zwift läuft "
+"auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms."
 msgstr ""
 "Before starting, Tretlager checks the sensor bridge and renews the Zwift "
-"session. If there is a new Zwift version, Tretlager backs up the old one and "
-"installs the update. Zwift runs on the most powerful graphics card and at "
-"the screen's resolution."
+"session. After a Tretlager update it adapts the Zwift environment, and it "
+"installs a new Zwift version through the Zwift launcher. Zwift runs on the "
+"most powerful graphics card and at the screen's resolution."
 
 #: tretlager/kde/qml/MainPage.qml:139
 msgid ""
@@ -1642,10 +1647,6 @@ msgstr "Log of the last start…"
 #: tretlager/kde/qml/Main.qml:7
 msgid "Tretlager"
 msgstr "Tretlager"
-
-#: tretlager/kde/qml/Main.qml:73
-msgid "Einrichtung prüfen"
-msgstr "Check setup"
 
 #: tretlager/kde/qml/Main.qml:106
 msgid "Zwift läuft noch"
@@ -1955,8 +1956,10 @@ msgid "Puls viel zu hoch"
 msgstr "Heart rate far too high"
 
 #: tretlager/kde/qml/SensorsPage.qml:201
-msgid "Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen."
-msgstr "Moisten the electrodes, tighten the strap and wear only one strap."
+msgid ""
+"Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen. Hilft "
+"das nicht, die Batterie des Gurts wechseln."
+msgstr "Moisten the electrodes, tighten the strap and wear only one strap. If that does not help, replace the strap's battery."
 
 #: tretlager/kde/qml/SensorsPage.qml:202
 msgid "Gerät bleibt bei „Sucht das Gerät …“"
@@ -2122,6 +2125,42 @@ msgstr ""
 #: tretlager/kde/qml/ZwiftPage.qml:107
 msgid "Abbrechen"
 msgstr "Cancel"
+
+#~ msgid "Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen."
+#~ msgstr "Moisten the electrodes, tighten the strap and wear only one strap."
+
+#, python-brace-format
+#~ msgid ""
+#~ "Kein Schnappschuss vor dem Update: zu wenig Platz für eine volle Kopie "
+#~ "({gb} GB nötig)."
+#~ msgstr ""
+#~ "No snapshot before the update: not enough space for a full copy ({gb} GB "
+#~ "needed)."
+
+#, python-brace-format
+#~ msgid "Schnappschuss fehlgeschlagen: {error}"
+#~ msgstr "Snapshot failed: {error}"
+
+#, python-brace-format
+#~ msgid "Schnappschuss vor dem Update: {path}"
+#~ msgstr "Snapshot before the update: {path}"
+
+#~ msgid ""
+#~ "Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."
+#~ msgstr ""
+#~ "The Zwift update did not finish. The snapshot taken before it has been "
+#~ "kept."
+
+#~ msgid ""
+#~ "Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-"
+#~ "Sitzung. Gibt es eine neue Zwift-Version, sichert Tretlager die alte und "
+#~ "spielt das Update ein. Zwift läuft auf der leistungsstärksten Grafikkarte "
+#~ "und in der Auflösung des Bildschirms."
+#~ msgstr ""
+#~ "Before starting, Tretlager checks the sensor bridge and renews the Zwift "
+#~ "session. If there is a new Zwift version, Tretlager backs up the old one "
+#~ "and installs the update. Zwift runs on the most powerful graphics card "
+#~ "and at the screen's resolution."
 
 #~ msgid ""
 #~ "Gibt sich gegenüber Zwift als Wahoo-Gerät mit „Direct Connect“ aus. Werte "

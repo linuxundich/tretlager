@@ -126,7 +126,7 @@ ColumnsPage {
                 Layout.preferredWidth: Layout.preferredHeight
             }
             Kirigami.ContextualHelpButton {
-                toolTipText: i18n("Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-Sitzung. Gibt es eine neue Zwift-Version, sichert Tretlager die alte und spielt das Update ein. Zwift läuft auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms.")
+                toolTipText: i18n("Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-Sitzung. Nach einem Tretlager-Update passt es die Zwift-Umgebung an, und eine neue Zwift-Version spielt es über den Zwift-Launcher ein. Zwift läuft auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms.")
             }
         }
         // Haftungshinweis direkt an der Hauptaktion: Die Werte der Bridge sind nicht abgesichert.

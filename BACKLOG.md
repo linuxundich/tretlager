@@ -26,6 +26,9 @@
   Bridge bleibt bestehen und wird später an den Kern angepasst.
 - [x] **E10 Wine-Politik.** Christoph 2026-10-29: immer die neueste `winehq-devel`, kein Pinning.
   Folge: Tretlager prüft nach jedem Wine-Update selbst (GL-Test, Start-Test) und meldet Brüche.
+  Im Flatpak (seit 0.8.0) kommt Wine mit der Tretlager-Version; „neueste Wine“ heißt dort: Wine im
+  Manifest mit jeder Tretlager-Version anheben und vorher testen. Nach dem Wechsel gleicht Tretlager
+  die Umgebung selbst ab (docs/updates.md).
 - [ ] **E7 Name.** Arbeitstitel „Tretlager“.
 
 ## Phasen
@@ -38,7 +41,7 @@
 - [ ] D Installation: PackageKit (Simulation + Installation), pkexec-Helfer für WineHQ-Quelle,
   Download + Authenticode, Prefix, Launcher, Zustandsautomat mit Wiederaufnahme
 - [ ] E Bridge BLE → DIRCON mit echter Hardware (Leistung, Kadenz, ERG, Puls)
-- [ ] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Prefix-Schnappschuss, Versionsmatrix)
+- [ ] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Abgleich vor dem Start; Plan docs/updates.md)
 - [ ] G Ende-zu-Ende auf frischem TUXEDO OS Forky
 - [ ] später: ANT+ nativ in der Bridge (openant/libusb)
 
@@ -142,5 +145,11 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
 - [x] U-03 Startknopf größer, Live-Werte als Kennzahlen (im HIG-Rahmen); Hervorhebung unter echtem Plasma noch ansehen (Bildschirm war gesperrt)
 - [ ] Metainfo: Screenshots und Release-Beschreibungen
-- [x] Schnappschuss vor Updates ohne Reflink (ext4) nur mit genug Platz, eine Kopie
-- [ ] Zwift-Update: Fortschritt (GB) statt nur Text, Schnappschuss in der Oberfläche wiederherstellen
+
+## Updates (docs/updates.md)
+
+- [x] Keine Schnappschüsse; Einrichtung vor jedem Start abgleichen (Wine-Wechsel → `wineboot -u` + Grafiktest)
+- [ ] Neue Tretlager-Version im Programm melden und einspielen (Flatpak-Portal UpdateMonitor)
+- [ ] Fortschritt beim Zwift-Update (GB) statt nur Text
+- [ ] Windows-Komponente gezielt erneuern (Revisionsmarke je Verb, `winetricks --force`)
+- [ ] Echten Wine-Wechsel auf tinytin durchspielen (Tretlager mit anderer Wine-Version bauen)

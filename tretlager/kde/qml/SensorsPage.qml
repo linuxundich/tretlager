@@ -198,7 +198,7 @@ ColumnsPage {
                         [i18n("Zwift findet die Sensoren nicht"), "network-bluetooth",
                          i18n("Die Bridge muss laufen. In Zwift unter Gekoppelte Geräte „Wahoo KICKR …“ bzw. „Wahoo HRM …“ wählen.")],
                         [i18n("Puls viel zu hoch"), "emblem-important",
-                         i18n("Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen.")],
+                         i18n("Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen. Hilft das nicht, die Batterie des Gurts wechseln.")],
                         [i18n("Gerät bleibt bei „Sucht das Gerät …“"), "view-refresh",
                          i18n("Kurz in die Pedale treten oder den Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden.")],
                         [i18n("Gerät verbindet sich nie"), "data-warning",

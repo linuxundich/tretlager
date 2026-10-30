@@ -45,8 +45,10 @@ und GNOME sind Ziel, aber ungeprüft (Phase F5 in [docs/flatpak.md](docs/flatpak
 
 ## Alltag mit dem Flatpak
 
-- **Aktualisieren:** `flatpak update de.linuxundich.Tretlager`. Läuft noch eine Bridge der alten
-  Version, startet Tretlager sie beim nächsten Öffnen neu (nicht während einer Fahrt).
+- **Aktualisieren:** `flatpak update de.linuxundich.Tretlager`; Wine und alle übrigen Bausteine
+  kommen mit Tretlager. Vor jedem Start gleicht Tretlager die Zwift-Umgebung ab (neues Wine →
+  `wineboot -u` und Grafiktest) und spielt Zwift-Updates über den Zwift-Launcher ein. Keine
+  Schnappschüsse; zurück geht es mit `flatpak update --commit=…`. Plan: [docs/updates.md](docs/updates.md).
 - **Deinstallieren:** `flatpak uninstall de.linuxundich.Tretlager`; Zwift-Umgebung (gut 10 GB),
   Einstellungen und Protokolle löscht `flatpak uninstall --delete-data de.linuxundich.Tretlager`.
   Die Zwift-Sitzung im Schlüsselbund entfernt *Abmelden* in Tretlager vorher.
