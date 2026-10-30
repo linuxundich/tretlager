@@ -135,6 +135,11 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
   erstrampelten XP und Drops verliert (Kontosperre bzw. Zurücksetzen nicht ausgeschlossen).
   Ergänzt den Hinweis „Nicht für Rennen“ (Willkommen, Übersicht, Über Tretlager, Hilfe, README,
   Metainfo); Ton locker, aber eindeutig.
+- [ ] Beim ersten Start eine Warnung, die man bestätigen muss (Christoph 30.10.), mit allen
+  Haftungshinweisen zusammen: Tretlager ist keine offizielle Zwift-App und wird von Zwift nicht
+  unterstützt; Nutzung auf eigene Gefahr (XP und Drops); nicht für Rennen, keine Garantie für die
+  Werte der Sensor-Bridge; Anmeldung über eigenes Fenster widerspricht den Zwift-Nutzungsbedingungen.
+  Bestätigung im Zustand merken; erneut zeigen, wenn sich der Hinweistext ändert (Versionsmarke).
 
 ## Sicherheit
 
