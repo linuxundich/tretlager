@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.7] - 2026-10-30
+
+### Geändert
+- Sensoren: links oben die Suche (*Sensoren in der Nähe*), darunter *Gekoppelte Sensoren*.
+- Gerätezeilen mit festen Maßen (Übersicht und Sensoren): Name, Zustand und Rolle mit Zwift-Name
+  je einzeilig, lange Fehlermeldungen gekürzt (vollständig im Tooltip zusammen mit einer
+  Erklärung des Zustands); Messwerte in einer Spalte fester Breite mit zwei reservierten Zeilen,
+  Zahl fett mit Einheit daneben, ohne Wert ein Strich. Vorher änderte sich die Höhe, sobald Werte
+  kamen oder gingen oder der Zustand wechselte.
+- Suchergebnisse: Signal als „stark/mittel/schwach“ mit dBm; bekannte Chip-Probleme als eine Zeile
+  (`compat_short`), die ausführliche Warnung erscheint am gekoppelten Gerät.
+- Texte der Sensorseite gestrafft (Bridge, Bluetooth-Adapter, Netz, Meldungen, Bei Problemen);
+  die Adapterauswahl zeigt nur noch den Chip, die Adresse nur bei zwei gleichen Sticks.
+
 ## [0.6.6] - 2026-10-30
 
 ### Geändert

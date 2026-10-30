@@ -15,6 +15,10 @@ ColumnsPage {
     readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",
         "cadence": "Trittfrequenzsensor", "heartrate": "Pulsgurt", "other": "Sensor" })
 
+    function signalText(rssi) {
+        return (rssi >= -65 ? "stark" : rssi >= -80 ? "mittel" : "schwach") + " (" + rssi + " dBm)"
+    }
+
     Component.onCompleted: backend.setSensorPolling(true)
 
     header: WizardHeader {
@@ -27,7 +31,7 @@ ColumnsPage {
     PageMessage {
         visible: !page.se.installed
         type: Kirigami.MessageType.Error
-        text: "Die Sensor-Bridge ist nicht installiert (Dienst tretlager-bridge fehlt). Das Paket tretlager neu installieren."
+        text: "Die Sensor-Bridge fehlt (Dienst tretlager-bridge). Abhilfe: das Paket tretlager neu installieren."
     }
     PageMessage {
         visible: page.se.error !== ""
@@ -37,28 +41,76 @@ ColumnsPage {
     PageMessage {
         visible: page.se.running && page.se.adapterMissing
         type: Kirigami.MessageType.Warning
-        text: "Der gewählte Bluetooth-Adapter ist nicht angeschlossen. Bis er wieder da ist, nutzt die "
-              + "Bridge den Standardadapter und wechselt danach von selbst zurück."
+        text: "Der gewählte Bluetooth-Adapter ist abgezogen oder ausgeschaltet. Bis dahin nutzt die Bridge "
+              + "den eingebauten Adapter und wechselt danach von selbst zurück."
     }
     PageMessage {
         visible: page.unstable.length > 0
         type: Kirigami.MessageType.Warning
         text: "Die Verbindung zu " + page.unstable.map(function (d) { return d.name }).join(", ")
-              + " bricht oft ab. Meist ist der Funkweg zu lang: Rechner näher an den Trainer stellen, "
-              + "einen USB-Bluetooth-Stick mit Verlängerung nutzen oder die Bridge auf einem Rechner "
-              + "neben dem Trainer betreiben (Im Netz anbieten)."
+              + " bricht oft ab. Meist ist der Funkweg zu lang. Abhilfe: Rechner näher an den Trainer "
+              + "stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen."
     }
 
-    // --- Geräte und Suche ---
+    // --- Suche oben, darunter die gekoppelten Sensoren ---
     leftCards: [
-        FormCard.FormHeader { title: "Geräte" },
+        FormCard.FormHeader {
+            title: "Sensoren in der Nähe"
+            trailing: Kirigami.ContextualHelpButton {
+                toolTipText: "Die Suche dauert etwa zehn Sekunden und findet Smart-Trainer, Leistungsmesser, "
+                    + "Trittfrequenzsensoren und Pulsgurte. Vorher kurz in die Pedale treten, damit der "
+                    + "Trainer aufwacht; ein Pulsgurt sendet nur mit Hautkontakt."
+            }
+        },
+        FormCard.FormCard {
+            FormCard.FormButtonDelegate {
+                text: page.se.scanning ? "Suche läuft …" : "Nach Sensoren suchen"
+                description: page.se.running ? "" : "Dazu die Sensor-Bridge einschalten."
+                icon.name: "system-search"
+                enabled: page.se.running && !page.se.scanning
+                onClicked: backend.scanDevices()
+            }
+            FormCard.FormDelegateSeparator { visible: page.se.scanned && !page.se.scanning }
+            FormCard.FormPlaceholderMessageDelegate {
+                visible: page.se.scanned && !page.se.scanning && page.se.found.length === 0
+                icon.name: "edit-none"
+                text: "Nichts gefunden"
+                explanation: "Trainer aufwecken, Gurt anlegen und erneut suchen."
+            }
+            Repeater {
+                model: page.se.scanning ? [] : page.se.found
+                delegate: ColumnLayout {
+                    required property var modelData
+                    required property int index
+                    Layout.fillWidth: true
+                    spacing: 0
+                    FormCard.FormDelegateSeparator { visible: index > 0 }
+                    FormCard.FormTextDelegate {
+                        Layout.fillWidth: true
+                        text: modelData.name
+                        description: (page.roleText[modelData.role] || "Sensor") + " · Signal "
+                            + page.signalText(modelData.rssi)
+                            + (modelData.compat_short ? "\n" + modelData.compat_short : "")
+                        icon.name: modelData.compat ? "data-warning" : "network-bluetooth"
+                        trailing: Controls.Button {
+                            text: modelData.configured ? "Gekoppelt" : "Hinzufügen"
+                            icon.name: modelData.configured ? "dialog-ok" : "list-add"
+                            enabled: !modelData.configured
+                            onClicked: backend.addDevice(modelData.address, modelData.name, modelData.role)
+                        }
+                    }
+                }
+            }
+        },
+
+        FormCard.FormHeader { title: "Gekoppelte Sensoren" },
         FormCard.FormCard {
             FormCard.FormPlaceholderMessageDelegate {
                 visible: page.se.devices.length === 0
                 icon.name: "network-bluetooth"
-                text: page.se.running ? "Keine Geräte eingerichtet" : "Sensor-Bridge ist aus"
-                explanation: page.se.running ? "Unten nach Geräten in der Nähe suchen und hinzufügen."
-                                             : "Zum Verwalten der Geräte die Bridge einschalten."
+                text: page.se.running ? "Noch keine Sensoren gekoppelt" : "Sensor-Bridge ist aus"
+                explanation: page.se.running ? "Oben nach Sensoren suchen und hinzufügen."
+                                             : "Zum Verwalten der Sensoren die Bridge einschalten."
             }
             Repeater {
                 model: page.se.devices
@@ -76,46 +128,6 @@ ColumnsPage {
                     }
                 }
             }
-        },
-
-        FormCard.FormHeader {
-            title: "Geräte in der Nähe"
-            trailing: Kirigami.ContextualHelpButton {
-                toolTipText: "Die Suche dauert etwa zehn Sekunden und findet Smart-Trainer, Leistungsmesser, "
-                    + "Trittfrequenzsensoren und Pulsgurte. Vorher kurz in die Pedale treten, damit der Trainer "
-                    + "aufwacht. Ein Pulsgurt sendet nur mit Hautkontakt."
-            }
-        },
-        FormCard.FormCard {
-            FormCard.FormButtonDelegate {
-                text: page.se.scanning ? "Suche läuft …" : "Nach Geräten suchen"
-                icon.name: "system-search"
-                enabled: page.se.running && !page.se.scanning
-                onClicked: backend.scanDevices()
-            }
-            FormCard.FormDelegateSeparator { visible: page.se.scanned && !page.se.scanning }
-            FormCard.FormPlaceholderMessageDelegate {
-                visible: page.se.scanned && !page.se.scanning && page.se.found.length === 0
-                icon.name: "edit-none"
-                text: "Nichts gefunden"
-                explanation: "Trainer aufwecken, Gurt anlegen und erneut suchen."
-            }
-            Repeater {
-                model: page.se.scanning ? [] : page.se.found
-                delegate: FormCard.FormTextDelegate {
-                    required property var modelData
-                    text: modelData.name
-                    description: (page.roleText[modelData.role] || "Sensor") + ", Signal " + modelData.rssi + " dBm"
-                        + (modelData.compat ? "\n" + modelData.compat : "")
-                    icon.name: modelData.compat ? "data-warning" : "network-bluetooth"
-                    trailing: Controls.Button {
-                        text: modelData.configured ? "Hinzugefügt" : "Hinzufügen"
-                        icon.name: modelData.configured ? "dialog-ok" : "list-add"
-                        enabled: !modelData.configured
-                        onClicked: backend.addDevice(modelData.address, modelData.name, modelData.role)
-                    }
-                }
-            }
         }
     ]
 
@@ -125,14 +137,14 @@ ColumnsPage {
             title: "Sensor-Bridge"
             trailing: Kirigami.ContextualHelpButton {
                 toolTipText: "Zwift kann unter Linux kein Bluetooth nutzen. Die Sensor-Bridge verbindet sich mit "
-                    + "Trainer und Pulsgurt und bietet sie Zwift als Wahoo-Geräte mit „Direct Connect“ an. "
-                    + "Die Zwift Companion App ist dafür nicht nötig."
+                    + "Trainer und Pulsgurt und bietet sie Zwift als Wahoo-Geräte mit „Direct Connect“ an; "
+                    + "die Zwift Companion App ist dafür nicht nötig."
             }
         },
         FormCard.FormCard {
             FormCard.FormSwitchDelegate {
                 text: "Sensor-Bridge"
-                description: page.se.running ? "Läuft und reicht die Geräte an Zwift weiter" : "Aus"
+                description: page.se.running ? "Läuft und bietet die Sensoren Zwift an" : "Aus – Zwift sieht keine Sensoren"
                 checked: page.se.running
                 enabled: page.se.installed
                 onToggled: backend.setBridgeRunning(checked)
@@ -142,10 +154,13 @@ ColumnsPage {
                 id: adapterBox
                 visible: page.se.adapters.length > 1
                 text: "Bluetooth-Adapter"
-                description: "Die Bridge verbindet alle Geräte über diesen Adapter. Ein USB-Stick mit "
-                    + "Verlängerung neben dem Trainer hilft bei Funklöchern und bei Chips, die einen Sensor nicht vertragen."
+                description: "Über diesen Adapter verbindet die Bridge alle Sensoren."
                 enabled: page.se.running
-                model: page.se.adapters.map(function (a) { return a.chip + " (" + a.hci + ")" })
+                // Gleiche Chips (zwei gleiche Sticks) anhand der Adresse unterscheiden
+                model: page.se.adapters.map(function (a) {
+                    const twins = page.se.adapters.filter(function (b) { return b.chip === a.chip }).length > 1
+                    return twins ? a.chip + " (" + a.address + ")" : a.chip
+                })
                 currentIndex: page.se.adapters.findIndex(function (a) { return a.hci === page.se.adapterHci })
                 onActivated: function (index) { backend.setBridgeAdapter(page.se.adapters[index].address) }
             }
@@ -154,14 +169,15 @@ ColumnsPage {
                 text: "Bluetooth-Adapter"
                 description: page.se.adapters.length ? page.se.adapters[0].chip : ""
                 trailing: Kirigami.ContextualHelpButton {
-                    toolTipText: "Bei Funklöchern oder einem Chip, der einen Sensor nicht verträgt, hilft ein "
-                        + "USB-Bluetooth-Stick. Ist er angeschlossen, lässt er sich hier auswählen."
+                    toolTipText: "Ein USB-Bluetooth-Stick hilft, wenn der Rechner weit vom Trainer steht (mit "
+                        + "Verlängerung neben den Trainer legen) oder der eingebaute Chip einen Sensor nicht "
+                        + "verträgt. Angeschlossen lässt er sich hier auswählen."
                 }
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormSwitchDelegate {
                 text: "Beim Anmelden starten"
-                description: "Sonst startet Tretlager die Bridge beim Öffnen und vor jeder Fahrt."
+                description: "Sonst startet sie mit Tretlager und vor jeder Fahrt."
                 checked: page.se.autostart
                 enabled: page.se.installed
                 onToggled: backend.setBridgeAutostart(checked)
@@ -170,8 +186,8 @@ ColumnsPage {
             FormCard.FormSwitchDelegate {
                 text: "Im Netz anbieten"
                 description: page.se.network
-                    ? "Die Geräte sind im lokalen Netz sichtbar. Jedes Gerät im Netz kann damit den Trainer steuern."
-                    : "Nur nötig, wenn Zwift auf einem anderen Gerät läuft als die Bridge."
+                    ? "Im lokalen Netz sichtbar; jedes Gerät im Netz kann damit den Trainer steuern."
+                    : "Nur nötig, wenn Zwift auf einem anderen Gerät läuft (Apple TV, iPad, zweiter Rechner)."
                 checked: page.se.network
                 enabled: page.se.installed && page.se.running
                 onToggled: backend.setBridgeNetwork(checked)
@@ -191,12 +207,12 @@ ColumnsPage {
                 Repeater {
                     model: [
                         ["Puls viel zu hoch", "emblem-important",
-                         "Elektroden des Gurts anfeuchten, Gurt enger stellen und nur einen Gurt tragen."],
+                         "Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen."],
                         ["Gerät bleibt bei „Verbindet …“", "view-refresh",
-                         "Kurz in die Pedale treten oder den Gurt kurz abklipsen. Die Bridge sucht alle zehn Sekunden erneut."],
+                         "Kurz in die Pedale treten oder den Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden."],
                         ["Gerät verbindet sich nie", "data-warning",
-                         "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager direkt "
-                         + "am Gerät; Abhilfe ist dann ein USB-Bluetooth-Stick, oben als Bluetooth-Adapter gewählt."],
+                         "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager "
+                         + "am Gerät; dann hilft ein USB-Bluetooth-Stick, gewählt als Bluetooth-Adapter."],
                         ["Verbindung bricht oft ab", "network-wireless-disconnected",
                          "Bluetooth reicht schlecht durch Wände. Rechner näher an den Trainer stellen oder einen "
                          + "USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen."]

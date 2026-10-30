@@ -48,7 +48,8 @@ class Issue:
     chips: frozenset[str]  # USB-Kennungen
     device: re.Pattern  # passt auf den BLE-Namen des Sensors
     device_name: str
-    text: str
+    text: str  # Warnung am eingerichteten Gerät
+    short: str  # eine Zeile in den Suchergebnissen
 
 
 KNOWN_ISSUES = [
@@ -56,11 +57,12 @@ KNOWN_ISSUES = [
         chips=frozenset({"8087:0026"}),
         device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # „HRM-Pro:…“, „HRMPro+:…“
         device_name="Garmin HRM-Pro",
-        text="Der Garmin HRM-Pro verträgt sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}): "
-             "Er wird gefunden, aber die Verbindung kommt nie zustande. Das liegt nicht an Reichweite "
-             "oder Batterie. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter Sensoren als "
-             "Bluetooth-Adapter wählen oder einen anderen Pulsgurt nutzen, zum Beispiel einen Wahoo "
-             "TICKR. Mit anderen Chips funktioniert der Gurt (getestet: Intel AX200, TP-Link UB500).",
+        text="Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}). "
+             "Er wird zwar gefunden, die Verbindung kommt aber nie zustande; an Reichweite oder "
+             "Batterie liegt das nicht. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter "
+             "Sensoren als Bluetooth-Adapter wählen (getestet: TP-Link UB500) oder einen anderen "
+             "Pulsgurt nutzen, etwa einen Wahoo TICKR.",
+        short="Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-Bluetooth-Stick",
     ),
 ]
 
@@ -98,16 +100,24 @@ def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:
     return out
 
 
-def issue_for(chip: Chip | None, device_name: str) -> str:
-    """Warntext für eine bekannte Problemkombination, sonst leer."""
+def find_issue(chip: Chip | None, device_name: str) -> Issue | None:
     if chip is None or not chip.usb_id:
-        return ""
+        return None
     for issue in KNOWN_ISSUES:
         if chip.usb_id in issue.chips and issue.device.search(device_name or ""):
-            return issue.text.format(chip=chip.name)
-    return ""
+            return issue
+    return None
+
+
+def issue_for(chip: Chip | None, device_name: str, short: bool = False) -> str:
+    """Warntext für eine bekannte Problemkombination, sonst leer."""
+    issue = find_issue(chip, device_name)
+    if issue is None:
+        return ""
+    return (issue.short if short else issue.text).format(chip=chip.name)
 
 
 def annotate(devices: list[dict], chip: Chip | None) -> list[dict]:
-    """Gerätelisten der Bridge (eingerichtet oder gefunden) um das Feld `compat` ergänzen."""
-    return [dict(d, compat=issue_for(chip, d.get("name", ""))) for d in devices]
+    """Gerätelisten der Bridge (eingerichtet oder gefunden) um `compat` und `compat_short` ergänzen."""
+    return [dict(d, compat=issue_for(chip, d.get("name", "")),
+                 compat_short=issue_for(chip, d.get("name", ""), short=True)) for d in devices]

@@ -27,6 +27,7 @@ def test_hrm_pro_on_ax201_warns():
     for name in ("HRMPro+:462237", "HRM-Pro:123456"):
         text = btcompat.issue_for(ax201, name)
         assert "Garmin HRM-Pro" in text and "AX201" in text
+        assert "AX201" in btcompat.issue_for(ax201, name, short=True)
     assert btcompat.issue_for(ax201, "TICKR 9029") == ""
 
 
@@ -38,7 +39,7 @@ def test_hrm_pro_on_other_chip_is_fine():
 def test_annotate_adds_field():
     ax201 = btcompat.Chip("8087:0026", "Intel Wi-Fi 6 AX201")
     out = btcompat.annotate([{"name": "HRMPro+:1"}, {"name": "Wahoo KICKR C058"}], ax201)
-    assert out[0]["compat"] and out[1]["compat"] == ""
+    assert out[0]["compat"] and out[0]["compat_short"] and out[1]["compat"] == ""
 
 
 def test_list_adapters(tmp_path):
