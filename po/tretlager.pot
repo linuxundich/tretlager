@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 12:17+0100\n"
+"POT-Creation-Date: 2026-10-30 13:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -112,7 +112,7 @@ msgstr ""
 msgid "Fenster anpassen"
 msgstr ""
 
-#: tretlager/core/launch.py:147 tretlager/kde/app.py:596
+#: tretlager/core/launch.py:147 tretlager/kde/app.py:616
 msgid "Zwift läuft"
 msgstr ""
 
@@ -457,116 +457,116 @@ msgstr ""
 msgid "Bluetooth bereit für Trainer und Pulsgurt"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:195
+#: tretlager/core/systemcheck.py:200
 #, python-brace-format
 msgid "{gb} GB frei in {path}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:195
+#: tretlager/core/systemcheck.py:200
 msgid "Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:197 tretlager/core/systemcheck.py:199
-#: tretlager/core/systemcheck.py:200
+#: tretlager/core/systemcheck.py:202 tretlager/core/systemcheck.py:204
+#: tretlager/core/systemcheck.py:205
 msgid "Speicherplatz"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:197
+#: tretlager/core/systemcheck.py:202
 #, python-brace-format
 msgid "{gb} GB frei"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:199
+#: tretlager/core/systemcheck.py:204
 #, python-brace-format
 msgid "Nur {gb} GB frei – reicht knapp"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:200
+#: tretlager/core/systemcheck.py:205
 #, python-brace-format
 msgid "Nur {gb} GB frei, nötig sind etwa 11 GB"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:216
+#: tretlager/core/systemcheck.py:221
 msgid "nicht erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:216
+#: tretlager/core/systemcheck.py:221
 msgid "erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:218 tretlager/core/systemcheck.py:219
+#: tretlager/core/systemcheck.py:223 tretlager/core/systemcheck.py:224
 msgid "Internet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:218
+#: tretlager/core/systemcheck.py:223
 msgid "Download-Quellen nicht erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:219
+#: tretlager/core/systemcheck.py:224
 msgid "Zwift und GitHub erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:235
+#: tretlager/core/systemcheck.py:240
 #, python-brace-format
 msgid "{version}, im Flatpak enthalten"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:236
+#: tretlager/core/systemcheck.py:241
 msgid "Wine fehlt im Flatpak – Tretlager neu installieren"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:238
+#: tretlager/core/systemcheck.py:243
 #, python-brace-format
 msgid "WineHQ-Paketquelle: {state}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:238
+#: tretlager/core/systemcheck.py:243
 msgid "eingerichtet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:238
+#: tretlager/core/systemcheck.py:243
 msgid "fehlt"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:239
+#: tretlager/core/systemcheck.py:244
 #, python-brace-format
 msgid "Wine: {version}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:239
+#: tretlager/core/systemcheck.py:244
 msgid "nicht installiert"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:241
+#: tretlager/core/systemcheck.py:246
 #, python-brace-format
 msgid "{version} installiert"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:242
+#: tretlager/core/systemcheck.py:247
 msgid "Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:250
+#: tretlager/core/systemcheck.py:255
 msgid "Zwift ist schon eingerichtet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:250
+#: tretlager/core/systemcheck.py:255
 msgid "Launcher vorhanden, Spiel fehlt noch"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:252
+#: tretlager/core/systemcheck.py:257
 msgid "Noch nicht eingerichtet – das übernimmt Tretlager"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:259 tretlager/core/systemcheck.py:260
+#: tretlager/core/systemcheck.py:264 tretlager/core/systemcheck.py:265
 msgid "Geräte-Ankündigung"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:259
+#: tretlager/core/systemcheck.py:264
 msgid "Avahi läuft, Zwift kann die Sensoren finden"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:261
+#: tretlager/core/systemcheck.py:266
 msgid ""
 "Avahi läuft nicht – Zwift findet die Sensoren dann nicht. Abhilfe: Paket "
 "avahi installieren und den Dienst avahi-daemon starten."
@@ -590,71 +590,71 @@ msgstr ""
 msgid "Helfer beendet mit Code {code}"
 msgstr ""
 
-#: tretlager/kde/app.py:485
+#: tretlager/kde/app.py:505
 msgid "Stromversorgung gewechselt: Netz"
 msgstr ""
 
-#: tretlager/kde/app.py:485
+#: tretlager/kde/app.py:505
 msgid "Stromversorgung gewechselt: Akku"
 msgstr ""
 
-#: tretlager/kde/app.py:487
+#: tretlager/kde/app.py:507
 msgid "Stromversorgung gewechselt"
 msgstr ""
 
-#: tretlager/kde/app.py:488
+#: tretlager/kde/app.py:508
 msgid ""
 "Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt "
 "Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
 msgstr ""
 
-#: tretlager/kde/app.py:512
+#: tretlager/kde/app.py:532
 msgid ""
 "GNU General Public License, Version 3 oder später: https://www.gnu.org/"
 "licenses/gpl-3.0.html"
 msgstr ""
 
-#: tretlager/kde/app.py:526
+#: tretlager/kde/app.py:546
 msgid "Sensor-Bridge nach Update neu gestartet"
 msgstr ""
 
-#: tretlager/kde/app.py:560
+#: tretlager/kde/app.py:580
 msgid "gültig"
 msgstr ""
 
-#: tretlager/kde/app.py:560
+#: tretlager/kde/app.py:580
 msgid "wird beim Start erneuert"
 msgstr ""
 
-#: tretlager/kde/app.py:561
+#: tretlager/kde/app.py:581
 msgid "abgelaufen – bitte neu anmelden"
 msgstr ""
 
-#: tretlager/kde/app.py:562
+#: tretlager/kde/app.py:582
 msgid "nicht angemeldet"
 msgstr ""
 
-#: tretlager/kde/app.py:565
+#: tretlager/kde/app.py:585
 #, python-brace-format
 msgid ", Erneuerung noch {n} Tag"
 msgid_plural ", Erneuerung noch {n} Tage"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/kde/app.py:577
+#: tretlager/kde/app.py:597
 msgid "Start vorbereiten"
 msgstr ""
 
-#: tretlager/kde/app.py:594
+#: tretlager/kde/app.py:614
 #, python-brace-format
 msgid "Unerwarteter Fehler ({name})"
 msgstr ""
 
-#: tretlager/kde/app.py:600
+#: tretlager/kde/app.py:622
 msgid "Zwift beendet"
 msgstr ""
 
-#: tretlager/kde/app.py:611
+#: tretlager/kde/app.py:633
 #, python-brace-format
 msgid "NVIDIA-Treiber meldete {errors}"
 msgstr ""
@@ -1396,6 +1396,27 @@ msgstr ""
 
 #: tretlager/kde/qml/Main.qml:73
 msgid "Einrichtung prüfen"
+msgstr ""
+
+#: tretlager/kde/qml/Main.qml:100
+msgid "Zwift läuft noch"
+msgstr ""
+
+#: tretlager/kde/qml/Main.qml:102
+msgid ""
+"Wird Tretlager jetzt beendet, endet auch Zwift. Die Fahrt am besten zuerst "
+"in Zwift speichern und beenden; Tretlager minimiert sich während der Fahrt "
+"nur."
+msgstr ""
+
+#: tretlager/kde/qml/Main.qml:103
+msgid ""
+"Tretlager räumt dann nach der Fahrt nicht auf. Die Fahrt am besten zuerst in "
+"Zwift beenden; Tretlager minimiert sich während der Fahrt nur."
+msgstr ""
+
+#: tretlager/kde/qml/Main.qml:107
+msgid "Trotzdem beenden"
 msgstr ""
 
 #: tretlager/kde/qml/PreparePage.qml:9

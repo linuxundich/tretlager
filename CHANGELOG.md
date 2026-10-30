@@ -4,7 +4,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+### Geändert
+- Programmsymbol mit silbernen Kettenblättern und dunkler Kante: Das frühere, ganz dunkle Symbol war
+  auf einem dunklen Plasma-Panel kaum zu erkennen.
+
+### Hinzugefügt
+- Kurzes Protokoll der Oberfläche (`core/applog.py`, `$XDG_STATE_HOME/tretlager/tretlager.log`):
+  Start, zweite Aufrufe, Zwift läuft/beendet, Schließen, Beenden – für die Fehlersuche, ohne Token.
+- Schließen während einer Fahrt nur nach Rückfrage: Im Flatpak läuft Zwift in derselben Instanz und
+  endet mit dem Fenster.
+
 ### Behoben
+- Bridge lief nach dem Schließen weiter, wenn das Fenster vor dem Aufräumen nach der Fahrt zuging:
+  Tretlager stoppt sie jetzt auch beim Beenden (außer im Autostart oder während Zwift läuft).
 - Systemprüfung im Flatpak meldete zu wenig freien Speicher (17 statt 900 GB auf tinytin): Sie maß
   `~`, das in der Sandbox ohne Freigabe nur ein kleines tmpfs ist. Gemessen wird jetzt der
   Datenordner (`XDG_DATA_HOME`), in dem die Zwift-Umgebung liegt.

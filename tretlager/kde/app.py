@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
+from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
 from ..i18n import LANGUAGE, _, ngettext
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
@@ -275,6 +275,26 @@ class Backend(QObject):
     def _ui_language() -> str:
         """Sprache der Zwift-Anmeldeseite: dieselbe wie die Oberfläche von Tretlager."""
         return LANGUAGE
+
+    def on_quit(self) -> None:
+        """Beim Beenden aufräumen: Läuft Zwift nicht mehr, die Bridge stoppen (außer im Autostart).
+        Sonst bliebe sie laufen, wenn das Fenster vor dem Aufräumen nach der Fahrt zuging."""
+        zwift = self._launch.get("zwiftRunning", False)
+        applog.info("Fenster geschlossen, Zwift läuft: %s", zwift)
+        if zwift:
+            return
+        try:
+            if bridgectl.is_running() and not bridgectl.autostart():
+                bridgectl.set_running(False)
+                applog.info("Sensor-Bridge beim Beenden gestoppt")
+        except bridgectl.BridgeError as e:
+            applog.warning("Bridge beim Beenden: %s", e)
+
+    @Slot()
+    def quitNow(self) -> None:
+        """Nach Rückfrage auch während einer Fahrt beenden."""
+        applog.info("Beenden während der Fahrt bestätigt")
+        QGuiApplication.quit()
 
     @Property(bool, constant=True)
     def flatpak(self) -> bool:
@@ -594,8 +614,10 @@ class Backend(QObject):
                 self._launchEvent.emit({"busy": False, "error": _("Unerwarteter Fehler ({name})").format(name=type(e).__name__), "text": ""})
                 return
             self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift läuft")})
+            applog.info("Zwift läuft")
             while launcher.running():
                 time.sleep(5)
+            applog.info("Zwift beendet, räume auf")
             launcher.after_exit()
             self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift beendet")})
             self._report_gpu_errors(started_at)
@@ -614,7 +636,10 @@ class Backend(QObject):
 
     def listen_for_instances(self) -> None:
         """Weitere Aufrufe nicht als zweites Fenster starten, sondern an dieses weitergeben."""
-        self._instance_socket = instance.listen(self.remoteCommand.emit)
+        def on_command(cmd: str) -> None:
+            applog.info("Zweiter Aufruf: %s", cmd)
+            self.remoteCommand.emit(cmd)
+        self._instance_socket = instance.listen(on_command)
 
 
 def main() -> int:
@@ -642,4 +667,8 @@ def main() -> int:
         window.screenChanged.connect(lambda _s, w=window: display.set_scale(w.devicePixelRatio()))
     if not engine.rootObjects():
         return 1
-    return app.exec()
+    applog.info("Start %s%s%s", __version__, " (Flatpak)" if bridgectl.IN_FLATPAK else "", " --start" if start else "")
+    app.aboutToQuit.connect(backend.on_quit)
+    code = app.exec()
+    applog.info("Beendet (Code %s)", code)
+    return code

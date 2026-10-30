@@ -86,6 +86,31 @@ Kirigami.ApplicationWindow {
         ]
     }
 
+    // Schließen während einer Fahrt nur nach Rückfrage: Im Flatpak läuft Zwift in derselben Instanz
+    // und endet mit dem Fenster; außerdem räumt Tretlager sonst nach der Fahrt nicht auf.
+    onClosing: function (close) {
+        if (backend.launchInfo.zwiftRunning && !quitDialog.confirmed) {
+            close.accepted = false
+            quitDialog.open()
+        }
+    }
+    Kirigami.PromptDialog {
+        id: quitDialog
+        property bool confirmed: false
+        title: i18n("Zwift läuft noch")
+        subtitle: backend.flatpak
+            ? i18n("Wird Tretlager jetzt beendet, endet auch Zwift. Die Fahrt am besten zuerst in Zwift speichern und beenden; Tretlager minimiert sich während der Fahrt nur.")
+            : i18n("Tretlager räumt dann nach der Fahrt nicht auf. Die Fahrt am besten zuerst in Zwift beenden; Tretlager minimiert sich während der Fahrt nur.")
+        standardButtons: Kirigami.Dialog.Cancel
+        customFooterActions: [
+            Kirigami.Action {
+                text: i18n("Trotzdem beenden")
+                icon.name: "application-exit"
+                onTriggered: { quitDialog.confirmed = true; backend.quitNow() }
+            }
+        ]
+    }
+
     // Während der Fahrt aus dem Weg gehen, danach zurückkommen bzw. beim Direktstart beenden.
     property bool zwiftWasRunning: false
     Connections {

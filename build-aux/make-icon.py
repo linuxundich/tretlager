@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Erzeugt tretlager/data/icons/de.linuxundich.Tretlager.svg.
 
-Motiv: moderne Rennrad-Kurbel von der Antriebsseite (Vorbild Straßen-Kurbeln mit asymmetrischer
+Motiv: moderne Rennrad-Kurbel von der Antriebsseite, silberne Kettenblätter mit dunkler Kante (auf dunklem
+Panel kaum sichtbar war die frühere, ganz dunkle Fassung), (Vorbild Straßen-Kurbeln mit asymmetrischer
 Vierarm-Spinne, zwei Kettenblättern und Klickpedalen). Reine Seitenansicht: Die Pedale stehen waagrecht und sitzen
 mittig auf dem Auge ihres Kurbelarms; das hintere liegt hinter Arm und Kettenblatt.
 """
@@ -63,7 +64,7 @@ def build():
            '    <linearGradient id="crank" x1="0" y1="0" x2="1" y2="1">'
            '<stop offset="0" stop-color="#5d6268"/><stop offset="1" stop-color="#2a2e32"/></linearGradient>',
            '    <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">'
-           '<stop offset="0" stop-color="#454b51"/><stop offset="1" stop-color="#2a2e32"/></linearGradient>',
+           '<stop offset="0" stop-color="#e3e6e9"/><stop offset="1" stop-color="#a7aeb5"/></linearGradient>',
            '  </defs>']
 
     # hinteres Pedal und hinterer Arm (Nicht-Antriebsseite), alles hinter den Kettenblättern
@@ -79,9 +80,12 @@ def build():
     out.append('  <!-- großes Kettenblatt mit Schatten, kleines Blatt innen -->')
     ring = gear(16.0, 15.0, 46) + " " + circle_path(10.7)
     out.append(f'  <path transform="translate(0.5 1)" d="{ring}" fill="#000" opacity="0.15" fill-rule="evenodd"/>')
-    out.append(f'  <path d="{ring}" fill="url(#ring)" fill-rule="evenodd"/>')
+    # Silberne Blätter mit dunkler Kante: auf dunklem wie hellem Panel gut zu erkennen
+    out.append(f'  <path d="{ring}" fill="url(#ring)" stroke="#31363b" stroke-width="0.7" '
+               'stroke-linejoin="round" fill-rule="evenodd"/>')
     out.append(f'  <path d="{circle_path(15.0)}" fill="none" stroke="#7f8c8d" stroke-width="0.8" opacity="0.6"/>')
-    out.append(f'  <path d="{gear(11.4, 10.6, 34, 0.05)} {circle_path(8.4)}" fill="#3a3f44" fill-rule="evenodd"/>')
+    out.append(f'  <path d="{gear(11.4, 10.6, 34, 0.05)} {circle_path(8.4)}" fill="#c9ced3" stroke="#31363b" stroke-width="0.5" '
+               'fill-rule="evenodd"/>')
     out.append(f'  <path d="{circle_path(10.6)}" fill="none" stroke="#7f8c8d" stroke-width="0.5" opacity="0.5"/>')
 
     # Spinne: vier breite Arme; einer liegt unter dem Kurbelarm
