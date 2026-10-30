@@ -27,6 +27,8 @@ VER_CUR_URL = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
 KEEP_SNAPSHOTS = 2
+# Was nach einer vollen Kopie (ohne Reflink) mindestens frei bleiben muss: Platz für das Update.
+SNAPSHOT_RESERVE = 5 * 10**9
 
 
 class NeedLogin(Exception):
@@ -79,18 +81,37 @@ def process_running(name: str, proc: Path = Path("/proc")) -> bool:
     return False
 
 
-def snapshot_prefix(log: Callable[[str], None]) -> Path | None:
-    """Kopie des Prefix vor einem Update; auf Btrfs per Reflink in Sekundenbruchteilen."""
+def snapshot_prefix(log: Callable[[str], None], free=None, size=None) -> Path | None:
+    """Kopie des Prefix vor einem Update.
+
+    Auf Btrfs/XFS per Reflink in Sekundenbruchteilen und fast ohne Platz. Auf ext4 (Ubuntu, Debian)
+    wäre es eine volle Kopie von 7–9 GB: dann nur, wenn danach noch genug frei bleibt, und nur
+    eine Kopie behalten; sonst ohne Schnappschuss weiter (das Update selbst braucht auch Platz).
+    """
     if not paths.PREFIX.exists():
         return None
     paths.SNAPSHOTS.mkdir(parents=True, exist_ok=True)
     dest = paths.SNAPSHOTS / datetime.now().strftime("prefix-%Y%m%d-%H%M%S")
-    r = subprocess.run(["cp", "-a", "--reflink=auto", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
+    keep = KEEP_SNAPSHOTS
+    r = subprocess.run(["cp", "-a", "--reflink=always", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
+    if r.returncode != 0:
+        shutil.rmtree(dest, ignore_errors=True)
+        # Kein Reflink: alte volle Kopien zuerst weg, dann Platz prüfen
+        for old in sorted(paths.SNAPSHOTS.glob("prefix-*")):
+            shutil.rmtree(old, ignore_errors=True)
+        need = (size if size is not None else setup.dir_size(paths.PREFIX)) + SNAPSHOT_RESERVE
+        have = free if free is not None else shutil.disk_usage(paths.SNAPSHOTS).free
+        if have < need:
+            log(_("Kein Schnappschuss vor dem Update: zu wenig Platz für eine volle Kopie ({gb} GB nötig).")
+                .format(gb=round(need / 10**9)))
+            return None
+        r = subprocess.run(["cp", "-a", str(paths.PREFIX), str(dest)], capture_output=True, text=True)
+        keep = 1
     if r.returncode != 0:
         log(_("Schnappschuss fehlgeschlagen: {error}").format(error=r.stderr.strip()))
         shutil.rmtree(dest, ignore_errors=True)
         return None
-    for old in sorted(paths.SNAPSHOTS.glob("prefix-*"))[:-KEEP_SNAPSHOTS]:
+    for old in sorted(paths.SNAPSHOTS.glob("prefix-*"))[:-keep]:
         shutil.rmtree(old, ignore_errors=True)
     return dest
 

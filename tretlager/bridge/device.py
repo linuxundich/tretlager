@@ -29,6 +29,10 @@ UNSTABLE_EVENTS = 3
 UNSTABLE_WINDOW = 600.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
+# So lange bleibt ein Gerät nach einem Abbruch für Zwift angekündigt und der DIRCON-Server offen.
+# Zwift behält die Kopplung und bekommt nach dem Wiederverbinden einfach wieder Daten; sonst
+# verschwindet das Gerät aus Zwift und muss neu gefunden werden (QA-Audit B-04).
+GRACE = 45.0
 # Suche nach der Adresse vor dem Verbinden. Getrennt vom Verbindungs-Timeout: bleak sucht sonst
 # 40 s nach einem abwesenden Gerät und hält so lange die Sperre; ein Trainer, der neu verbinden
 # will, und die Suche in der Oberfläche warteten dann bis zu einer Minute (gemessen 30.10.).
@@ -120,6 +124,8 @@ class BridgedDevice:
         self._was_connected = False
         self._pending: dict[str, asyncio.Future] = {}
         self._trouble: list[float] = []  # Zeitpunkte von Abbrüchen und Fehlversuchen
+        self._grace: asyncio.Task | None = None  # Schonfrist nach einem Abbruch
+        self._announced: list[str] = []  # bei Zwift angekündigte Dienste
 
     # --- GattBackend für den DIRCON-Server ---
 
@@ -172,6 +178,7 @@ class BridgedDevice:
             except asyncio.CancelledError:
                 pass
         await self._teardown()
+        await self._withdraw()
 
     def _note_trouble(self) -> None:
         now = time.monotonic()
@@ -218,6 +225,7 @@ class BridgedDevice:
             failures = 0 if self._was_connected else failures + 1
             self._was_connected = False
             await self._teardown()
+            self._start_grace()
             if not_found:
                 # Schlafende Geräte (Gurt ohne Hautkontakt) schnell wiederfinden: Die Suche belegt
                 # BlueZ nur kurz, anders als ein hängender Verbindungsaufbau.
@@ -240,25 +248,57 @@ class BridgedDevice:
                                  timeout=CONNECT_TIMEOUT, bluez=bluez)
             self._client = client  # auch bei Fehlschlag in _teardown trennen
             await client.connect()
-        self._services = self._collect_services(client)
-        if not self._services:
+        services = self._collect_services(client)
+        if not services:
             raise RuntimeError(N_("Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, Herzfrequenz)"))
-        await self._server.start()
-        await self.announcer.publish(dircon_name(self.cfg), self.cfg.port, [s.uuid for s in self._services],
-                                     mac=self.cfg.address, serial=self.cfg.address.replace(":", ""),
-                                     local_only=self.local_only)
-        # Für die Live-Anzeige schon vor Zwift die Messwerte abonnieren.
-        for uuid in gatt.DECODERS:
-            if self._char_props(uuid) & {"notify", "indicate"}:
-                await self.set_notify(uuid, True)
+        self._cancel_grace()
+        if self._server.running and [s.uuid for s in services] != self._announced:
+            await self._withdraw()  # anderes Dienstangebot als vor dem Abbruch: neu ankündigen
+        self._services = services
+        if not self._server.running:
+            await self._server.start()
+            self._announced = [s.uuid for s in services]
+            await self.announcer.publish(dircon_name(self.cfg), self.cfg.port, self._announced,
+                                         mac=self.cfg.address, serial=self.cfg.address.replace(":", ""),
+                                         local_only=self.local_only)
+        else:
+            log.info("%s: wieder verbunden, Zwift-Verbindung blieb bestehen", self.cfg.address)
+        # Für die Live-Anzeige schon vor Zwift die Messwerte abonnieren, dazu alles, was Zwift
+        # vor einem Abbruch abonniert hatte.
+        wanted = [u for u in gatt.DECODERS if self._char_props(u) & {"notify", "indicate"}]
+        wanted += [u for u in self._server.subscribed() if u not in wanted]
+        for uuid in wanted:
+            await self.set_notify(uuid, True)
         self._was_connected = True
         self._set_state("verbunden")
         await self._disconnected.wait()
         raise RuntimeError(N_("Verbindung zum Gerät verloren"))
 
-    async def _teardown(self) -> None:
+    def _start_grace(self) -> None:
+        if self._server.running and (self._grace is None or self._grace.done()):
+            self._grace = asyncio.create_task(self._grace_expiry(), name=f"grace {self.cfg.address}")
+
+    def _cancel_grace(self) -> None:
+        if self._grace and not self._grace.done():
+            self._grace.cancel()
+        self._grace = None
+
+    async def _grace_expiry(self) -> None:
+        await asyncio.sleep(GRACE)
+        log.info("%s: Schonfrist abgelaufen, Gerät wird für Zwift zurückgezogen", self.cfg.address)
+        self._grace = None
+        await self._withdraw()
+
+    async def _withdraw(self) -> None:
+        """Ankündigung zurückziehen und DIRCON-Server schließen (Zwift verliert das Gerät)."""
+        self._cancel_grace()
         await self.announcer.withdraw(self.cfg.port)
         await self._server.stop()
+        self._announced = []
+        self.on_change()
+
+    async def _teardown(self) -> None:
+        """Nur die BLE-Seite abbauen; Ankündigung und DIRCON-Server bleiben (Schonfrist)."""
         self._notifying.clear()
         if self._client:
             try:

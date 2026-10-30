@@ -50,6 +50,7 @@ PROP_INDICATE = 0x08
 BLUETOOTH_BASE = "0000{:04x}-0000-1000-8000-00805f9b34fb"
 
 ADDRESS_CHECK_INTERVAL = 3.0
+MAX_SEND_BUFFER = 64 * 1024  # Bytes; Messwert-Pakete sind 20–30 Bytes groß
 SIOCGIFADDR = 0x8915
 
 
@@ -241,6 +242,11 @@ class Session:
         # Abo. Zwift verlässt sich darauf, z. B. für die Antworten des Control Points.
         if self.writer is None or (strict and char_uuid not in self.subscribed):
             return
+        # Liest der Client nicht mehr (Zwift hängt), Messwerte verwerfen statt den Puffer
+        # unbegrenzt wachsen zu lassen; veraltete Werte nützen ohnehin niemandem.
+        transport = getattr(self.writer, "transport", None)
+        if transport is not None and transport.get_write_buffer_size() > MAX_SEND_BUFFER:
+            return
         self.writer.write(Packet(MSG_NOTIFICATION, 0, RESP_SUCCESS, uuid_bytes(char_uuid) + value).encode())
 
 
@@ -290,6 +296,14 @@ class Server:
     def notify(self, char_uuid: str, value: bytes) -> None:
         for s in list(self.sessions):
             s.notify(char_uuid, value)
+
+    @property
+    def running(self) -> bool:
+        return self._server is not None
+
+    def subscribed(self) -> set[str]:
+        """Merkmale, die mindestens ein Client abonniert hat."""
+        return set().union(*(s.subscribed for s in self.sessions)) if self.sessions else set()
 
     @property
     def client_count(self) -> int:

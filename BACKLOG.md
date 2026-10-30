@@ -134,11 +134,13 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 
 - [x] B-01 abwesender Sensor blockierte Bluetooth 40 s (gemessen, behoben)
 - [x] Z-01/Z-02, L-01, L-02, B-02, B-03, U-01, U-02, S-01, I-01, I-02 behoben
-- [ ] B-04 Gerät bei kurzem BLE-Abbruch für Zwift halten (DIRCON-Server und mDNS 30–60 s Schonfrist)
+- [x] B-04 Gerät bei kurzem BLE-Abbruch 45 s für Zwift halten (live mit getrenntem KICKR geprüft)
 - [ ] B-05 Standby/Resume und Stick-Abziehen während der Fahrt testen
 - [ ] F-01 `--talk-name=org.kde.KWin` ersetzen oder begründen (nur zum Maximieren)
 - [ ] Bridge-Zustand per QtDBus-Signal `Changed` statt gdbus-Abfrage; `Backend` aufteilen
-- [ ] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
-- [ ] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
+- [x] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
+- [x] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
 - [x] U-03 Startknopf größer, Live-Werte als Kennzahlen (im HIG-Rahmen); Hervorhebung unter echtem Plasma noch ansehen (Bildschirm war gesperrt)
 - [ ] Metainfo: Screenshots und Release-Beschreibungen
+- [x] Schnappschuss vor Updates ohne Reflink (ext4) nur mit genug Platz, eine Kopie
+- [ ] Zwift-Update: Fortschritt (GB) statt nur Text, Schnappschuss in der Oberfläche wiederherstellen

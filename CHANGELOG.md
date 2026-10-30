@@ -32,6 +32,14 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   endet mit dem Fenster.
 
 ### Behoben
+- Kurze Bluetooth-Abbrüche: Die Bridge hält das Gerät 45 s lang für Zwift angekündigt und die
+  Verbindung zu Zwift offen; nach dem Wiederverbinden fließen die Daten weiter, ohne dass Zwift das
+  Gerät neu suchen muss (auf tinytin mit künstlich getrenntem KICKR geprüft: 17 s Pause, Verbindung
+  blieb). Vorher verschwand das Gerät bei jedem Abbruch aus Zwift.
+- Schnappschuss vor einem Zwift-Update ohne Reflink (ext4): nur noch, wenn genug Platz frei bleibt,
+  und nur eine volle Kopie statt zwei; sonst Update ohne Schnappschuss mit Hinweis im Protokoll.
+- Einrichtung: Abbrechen und Zeitlimit greifen auch, wenn ein Programm stumm hängt.
+- Bridge: Liest Zwift nicht mehr, verwirft sie Messwerte, statt den Sendepuffer wachsen zu lassen.
 - Ein abwesender Sensor (Gurt nicht angelegt) blockierte Bluetooth bis zu 40 s pro Versuch: Die
   Suche in der Oberfläche dauerte 40–63 s statt 3 s, und ein anderer Sensor, der neu verbinden
   wollte, fiel bis zu einer Minute aus. Die Bridge sucht die Adresse jetzt höchstens 8 s, getrennt

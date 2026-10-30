@@ -64,15 +64,25 @@ class Context:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                                 env=env or self.wine_env, cwd=cwd, errors="replace")
         assert proc.stdout
-        start = time.monotonic()
-        for line in proc.stdout:
-            line = line.rstrip()
-            if line and "libEGL warning" not in line and "pci id for fd" not in line:
-                self.log(line)
-            if self.cancel.is_set() or time.monotonic() - start > timeout:
-                proc.kill()
-                break
-        return proc.wait()
+        # Abbruch und Zeitlimit überwacht ein eigener Thread: Hängt ein Programm stumm (z. B.
+        # winetricks in einem Dialog), käme die Schleife unten nie zur nächsten Zeile.
+        done = threading.Event()
+
+        def watchdog() -> None:
+            deadline = time.monotonic() + timeout
+            while not done.wait(1):
+                if self.cancel.is_set() or time.monotonic() > deadline:
+                    proc.kill()
+                    return
+        threading.Thread(target=watchdog, daemon=True).start()
+        try:
+            for line in proc.stdout:
+                line = line.rstrip()
+                if line and "libEGL warning" not in line and "pci id for fd" not in line:
+                    self.log(line)
+            return proc.wait()
+        finally:
+            done.set()
 
     def wineserver_kill(self) -> None:
         subprocess.run(["wineserver", "-k"], env=self.wine_env, capture_output=True)
