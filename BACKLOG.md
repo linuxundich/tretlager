@@ -56,7 +56,11 @@
 - [ ] HRM-Pro Plus über UB500 unzuverlässig: am 30.10. vormittags zweimal verbunden (nach 40–120 s),
   mittags trotz Signal (−74 dBm), ohne Handy-Bluetooth, allein getragen und nach Neustart des Sticks
   nur Zeitüberschreitungen; KICKR am selben Stick sofort verbunden. Ansätze: btmon-Mitschnitt (root),
-  LE-1M erzwingen (`btmgmt phy`), Verbindungsparameter/Timeout der Bridge, zweiter Stick anderer Bauart
+  LE-1M erzwingen (`btmgmt phy`), Verbindungsparameter/Timeout der Bridge, zweiter Stick anderer Bauart.
+  Nach Neustart von tinytin sofort wieder verbunden (30 s, 62 Schläge/min) → hängender Zustand in BlueZ
+  oder im Controller (Stick-Neustart per Powered reichte nicht). Beim nächsten Mal zuerst
+  `systemctl restart bluetooth` probieren; ggf. Tretlager-Hinweis „Bluetooth neu starten“ bei Gerät, das
+  gefunden wird, aber dauerhaft nicht verbindet
 - [ ] Nach dem Umschalten braucht der erste Verbindungsversuch des HRM-Pro manchmal eine Runde
   mehr (unvollständige Dienstsuche → Wartezeit wächst); ggf. Wartezeit nach Adapterwechsel zurücksetzen
 - [ ] Paket-Update startet die laufende Bridge nicht neu (alte Version läuft weiter bis zum
