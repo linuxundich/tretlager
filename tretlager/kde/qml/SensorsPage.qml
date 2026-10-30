@@ -119,7 +119,7 @@ ColumnsPage {
         }
     ]
 
-    // --- Bridge und Hilfe ---
+    // --- Bridge ---
     rightCards: [
         FormCard.FormHeader {
             title: "Sensor-Bridge"
@@ -176,33 +176,41 @@ ColumnsPage {
                 enabled: page.se.installed && page.se.running
                 onToggled: backend.setBridgeNetwork(checked)
             }
-        },
+        }
+    ]
 
-
+    // --- Hilfe: über die volle Breite, die vier Fälle in zwei Spalten ---
+    bottomCards: [
         FormCard.FormHeader { title: "Bei Problemen" },
         FormCard.FormCard {
-            FormCard.FormTextDelegate {
-                text: "Puls viel zu hoch"
-                description: "Elektroden des Gurts anfeuchten, Gurt enger stellen und nur einen Gurt tragen."
-                icon.name: "emblem-important"
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate {
-                text: "Gerät bleibt bei „Verbindet …“"
-                description: "Kurz in die Pedale treten oder den Gurt kurz abklipsen. Die Bridge sucht alle zehn Sekunden erneut."
-                icon.name: "view-refresh"
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate {
-                text: "Gerät verbindet sich nie"
-                description: "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager direkt am Gerät; sonst den Sensor an einem anderen Rechner gegenprüfen."
-                icon.name: "data-warning"
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate {
-                text: "Verbindung bricht oft ab"
-                description: "Bluetooth reicht schlecht durch Wände. Rechner näher an den Trainer stellen oder einen USB-Bluetooth-Stick mit Verlängerung nutzen."
-                icon.name: "network-wireless-disconnected"
+            GridLayout {
+                Layout.fillWidth: true
+                columns: page.wide ? 2 : 1
+                columnSpacing: 0
+                rowSpacing: 0
+                Repeater {
+                    model: [
+                        ["Puls viel zu hoch", "emblem-important",
+                         "Elektroden des Gurts anfeuchten, Gurt enger stellen und nur einen Gurt tragen."],
+                        ["Gerät bleibt bei „Verbindet …“", "view-refresh",
+                         "Kurz in die Pedale treten oder den Gurt kurz abklipsen. Die Bridge sucht alle zehn Sekunden erneut."],
+                        ["Gerät verbindet sich nie", "data-warning",
+                         "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager direkt "
+                         + "am Gerät; Abhilfe ist dann ein USB-Bluetooth-Stick, oben als Bluetooth-Adapter gewählt."],
+                        ["Verbindung bricht oft ab", "network-wireless-disconnected",
+                         "Bluetooth reicht schlecht durch Wände. Rechner näher an den Trainer stellen oder einen "
+                         + "USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen."]
+                    ]
+                    delegate: FormCard.FormTextDelegate {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.alignment: Qt.AlignTop
+                        text: modelData[0]
+                        icon.name: modelData[1]
+                        description: modelData[2]
+                    }
+                }
             }
         }
     ]

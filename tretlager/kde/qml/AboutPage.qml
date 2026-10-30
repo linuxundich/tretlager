@@ -90,6 +90,26 @@ ColumnsPage {
                     + "Garmin sind Marken ihrer Inhaber; Tretlager steht mit keinem dieser Unternehmen in Verbindung."
                 icon.name: "emblem-important"
             }
+        },
+
+        FormCard.FormHeader { title: "Unfreie Software, die Tretlager herunterlädt" },
+        FormCard.FormCard {
+            FormCard.FormTextDelegate {
+                text: "Nicht im Paket enthalten"
+                description: "Die Einrichtung lädt diese Teile direkt beim Hersteller; es gelten dessen Lizenzbedingungen."
+                icon.name: "download"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormLinkDelegate {
+                text: "Zwift"
+                description: "Zwift-Nutzungsbedingungen · das Spiel selbst, lädt Tretlager von Zwift herunter"
+                url: "https://www.zwift.com/terms"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
+                text: ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
+                description: "Lizenzbedingungen von Microsoft · braucht der Zwift Launcher, lädt winetricks von Microsoft"
+            }
         }
     ]
 
@@ -110,26 +130,6 @@ ColumnsPage {
                 text: "qdomyos-zwift"
                 description: "Beschreibung des Protokolls Wahoo „Direct Connect“ (DIRCON), nach der die Bridge umgesetzt ist"
                 url: "https://github.com/cagnulein/qdomyos-zwift"
-            }
-        },
-
-        FormCard.FormHeader { title: "Unfreie Software, die Tretlager herunterlädt" },
-        FormCard.FormCard {
-            FormCard.FormTextDelegate {
-                text: "Nicht im Paket enthalten"
-                description: "Die Einrichtung lädt diese Teile direkt beim Hersteller; es gelten dessen Lizenzbedingungen."
-                icon.name: "download"
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormLinkDelegate {
-                text: "Zwift"
-                description: "Zwift-Nutzungsbedingungen · das Spiel selbst, lädt Tretlager von Zwift herunter"
-                url: "https://www.zwift.com/terms"
-            }
-            FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate {
-                text: ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
-                description: "Lizenzbedingungen von Microsoft · braucht der Zwift Launcher, lädt winetricks von Microsoft"
             }
         }
     ]

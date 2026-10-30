@@ -4,6 +4,14 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.6] - 2026-10-30
+
+### Geändert
+- Sensoren: *Bei Problemen* steht unter beiden Spalten über die volle Breite, die vier Fälle in
+  zwei Spalten. Vorher blieb links unter der Suche eine Lücke, während rechts gescrollt werden
+  musste.
+- Über Tretlager: *Unfreie Software* in die linke Spalte, damit beide Spalten ähnlich lang sind.
+
 ## [0.6.5] - 2026-10-30
 
 ### Geändert
