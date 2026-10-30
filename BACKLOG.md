@@ -127,6 +127,15 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
 - [ ] F5 Abnahme: frisches TUXEDO OS, Fedora KDE + GNOME, Arch, lange Fahrt; Debian-Quelle auf bender abschalten
 
+## Hinweise in der App
+
+- [ ] Haftungshinweis zur Sensor-Bridge ergänzen (Christoph 30.10.): Zwift ist womöglich nicht
+  glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die manipuliert werden
+  könnten. Deshalb klar: Nutzung auf eigene Gefahr – nicht dass jemand seine mit viel Schweiß
+  erstrampelten XP und Drops verliert (Kontosperre bzw. Zurücksetzen nicht ausgeschlossen).
+  Ergänzt den Hinweis „Nicht für Rennen“ (Willkommen, Übersicht, Über Tretlager, Hilfe, README,
+  Metainfo); Ton locker, aber eindeutig.
+
 ## Sicherheit
 
 - [ ] Zwift bekommt das Token als Befehlszeilenargument (`ZwiftApp.exe --token={…}`); es steht damit in der
