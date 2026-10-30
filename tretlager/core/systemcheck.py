@@ -16,7 +16,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from . import paths
+from . import btcompat, paths
 
 OK, WARN, FAIL = "ok", "warn", "fail"
 
@@ -174,6 +174,9 @@ def check_bluetooth(root: Path = Path("/"), run=subprocess.run) -> Check:
         return Check("bluetooth", "Bluetooth", WARN,
                      "Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter verbinden")
     details = [f"{adapter['Name']} ({adapter['Address']})"]
+    chip = btcompat.adapter_chip(root=root / "sys/class/bluetooth")
+    if chip:
+        details.append(f"Chip: {chip.name}")
     if rfkill_blocked(root) or not adapter["Powered"]:
         return Check("bluetooth", "Bluetooth", WARN, "Bluetooth ist ausgeschaltet", details,
                      action="bluetooth-on")

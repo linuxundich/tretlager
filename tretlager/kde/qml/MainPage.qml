@@ -12,7 +12,8 @@ Kirigami.ScrollablePage {
 
     readonly property var la: backend.launchInfo
     readonly property var se: backend.sensors
-    readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable })
+    readonly property var incompatible: se.devices.filter(function (d) { return d.enabled && d.compat })
+    readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable && !d.compat })
     readonly property bool wide: width > Kirigami.Units.gridUnit * 42
 
     Component.onCompleted: {
@@ -75,6 +76,18 @@ Kirigami.ScrollablePage {
             text: "Der Rechner läuft auf Akku. Zwift am besten mit angeschlossenem Netzteil starten und es während der "
                 + "Fahrt angeschlossen lassen: Ein Wechsel zwischen Netz und Akku kann den Grafiktreiber zum Absturz "
                 + "bringen, und auf Akku drosselt die Grafikkarte stark."
+        }
+        Repeater {
+            model: page.incompatible
+            delegate: Kirigami.InlineMessage {
+                required property var modelData
+                Layout.fillWidth: true
+                Layout.bottomMargin: Kirigami.Units.largeSpacing
+                visible: true
+                type: Kirigami.MessageType.Warning
+                text: modelData.compat
+                actions: [Kirigami.Action { text: "Sensoren"; icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
+            }
         }
         Kirigami.InlineMessage {
             Layout.fillWidth: true

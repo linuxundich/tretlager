@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import bridgectl, instance, launch, login, power, prepare, setup, state, systemcheck
+from ..core import bridgectl, btcompat, instance, launch, login, power, prepare, setup, state, systemcheck
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
 # bleibt nur der Weg über den eigenen Browser.
@@ -352,6 +352,7 @@ class Backend(QObject):
         self._poll.setInterval(1500)
         self._poll.timeout.connect(self.refreshSensors)
         self._poll_busy = False
+        self._chip = btcompat.adapter_chip()
 
     @Property("QVariantMap", notify=sensorsChanged)
     def sensors(self) -> dict:
@@ -388,7 +389,8 @@ class Backend(QObject):
                 st = bridgectl.status()
                 self._sensorsEvent.emit({
                     "installed": bridgectl.unit_installed(), "running": st is not None,
-                    "autostart": bridgectl.autostart(), "devices": (st or {}).get("devices", []),
+                    "autostart": bridgectl.autostart(),
+                    "devices": btcompat.annotate((st or {}).get("devices", []), self._chip),
                     "network": not (st or {}).get("local_only", True)})
             finally:
                 self._poll_busy = False
@@ -412,7 +414,7 @@ class Backend(QObject):
         self._on_sensors_event({"scanning": True, "found": [], "error": ""})
 
         def work():
-            found = bridgectl.scan(10)
+            found = btcompat.annotate(bridgectl.scan(10), self._chip)
             self._sensorsEvent.emit({"scanning": False, "found": found, "scanned": True})
         self._bg(work)
 

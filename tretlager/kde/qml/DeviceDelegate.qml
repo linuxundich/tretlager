@@ -78,6 +78,13 @@ FormCard.AbstractFormDelegate {
                     font: Kirigami.Theme.smallFont
                 }
             }
+            Kirigami.InlineMessage {
+                visible: row.detailed && !!row.device.compat
+                Layout.fillWidth: true
+                Layout.topMargin: Kirigami.Units.smallSpacing
+                type: Kirigami.MessageType.Warning
+                text: row.device.compat || ""
+            }
             Controls.Label {
                 visible: row.detailed
                 Layout.fillWidth: true
@@ -88,6 +95,13 @@ FormCard.AbstractFormDelegate {
                 text: (row.device.error ? row.device.error : (row.stateHelp[row.device.state] || ""))
                       + (row.device.dircon_name ? "\nIn Zwift: „" + row.device.dircon_name + "“" : "")
             }
+        }
+
+        Kirigami.Icon {
+            visible: !!row.device.compat && !row.detailed
+            source: "data-warning"
+            Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
+            Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
         }
 
         Controls.Label {

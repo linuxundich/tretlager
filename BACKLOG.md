@@ -47,6 +47,9 @@
 - [x] Bridge-Kern (DIRCON, GATT-Proxy, avahi, D-Bus, systemd-Benutzerdienst)
 - [x] Oberfläche: Dienst an/aus, Autostart, Geräte suchen/hinzufügen/entfernen, Live-Werte
 - [ ] HRM-Pro Plus auf tinytin: LE-1M-Gegenprobe (`btmgmt phy`), sonst USB-Bluetooth-Stick testen
+  (Warnung seit 0.6.2 über `core/btcompat.py`; bei neuen Befunden dort ergänzen)
+- [ ] Bridge auf wählbaren Adapter umstellen: nutzt fest `hci0`, ein USB-Stick (hci1) bleibt
+  deshalb ungenutzt, solange der eingebaute Chip an ist
 - [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)
 - [x] Zwift koppelt KICKR (Leistung, Trittfrequenz) und Pulsgurt über DIRCON, Werte realistisch (2026-10-29)
 - [x] ERG und Steigungssimulation über FTMS-Control-Point (Antwort in der Schreib-Antwort, 2026-10-29)

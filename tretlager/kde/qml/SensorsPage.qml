@@ -11,7 +11,7 @@ FormCard.FormCardPage {
 
     property bool wizard: !applicationWindow().navigation
     readonly property var se: backend.sensors
-    readonly property var unstable: se.devices.filter(function (d) { return d.unstable })
+    readonly property var unstable: se.devices.filter(function (d) { return d.unstable && !d.compat })
     readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",
         "cadence": "Trittfrequenzsensor", "heartrate": "Pulsgurt", "other": "Sensor" })
 
@@ -149,7 +149,8 @@ FormCard.FormCardPage {
                 required property var modelData
                 text: modelData.name
                 description: (page.roleText[modelData.role] || "Sensor") + ", Signal " + modelData.rssi + " dBm"
-                icon.name: "network-bluetooth"
+                    + (modelData.compat ? "\n" + modelData.compat : "")
+                icon.name: modelData.compat ? "data-warning" : "network-bluetooth"
                 trailing: Controls.Button {
                     text: modelData.configured ? "Hinzugefügt" : "Hinzufügen"
                     icon.name: modelData.configured ? "dialog-ok" : "list-add"
@@ -173,6 +174,12 @@ FormCard.FormCardPage {
             text: "Gerät bleibt bei „Verbindet …“"
             description: "Kurz in die Pedale treten oder den Gurt kurz abklipsen. Die Bridge sucht alle zehn Sekunden erneut."
             icon.name: "view-refresh"
+        }
+        FormCard.FormDelegateSeparator {}
+        FormCard.FormTextDelegate {
+            text: "Gerät verbindet sich nie"
+            description: "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager direkt am Gerät; sonst den Sensor an einem anderen Rechner gegenprüfen."
+            icon.name: "data-warning"
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {

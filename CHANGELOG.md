@@ -4,6 +4,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-10-30
+
+### Hinzugefügt
+- Warnung bei bekannten Problemkombinationen aus Bluetooth-Chip und Sensor
+  (`tretlager/core/btcompat.py`). Tretlager erkennt den Chip des Adapters an der USB-Kennung und
+  gleicht ihn mit einer Liste geprüfter Fälle ab. Erster Eintrag: Garmin HRM-Pro am Intel AX201
+  (auf tinytin hängt die Dienstsuche, am AX200 läuft der Gurt).
+  - Suche: Der Treffer trägt ein Warnsymbol und den Hinweis, bevor er hinzugefügt wird.
+  - Sensorseite: Warnung direkt am Gerät statt endlosem „Verbindet …“.
+  - Übersicht: Warnung für eingeschaltete Geräte mit bekanntem Problem.
+- Systemprüfung nennt den Bluetooth-Chip.
+- Hilfe und Sensorseite: Eintrag „Gerät verbindet sich nie“.
+
 ## [0.6.1] - 2026-10-30
 
 ### Hinzugefügt
