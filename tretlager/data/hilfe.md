@@ -1,90 +1,89 @@
-## Was Tretlager macht
+## Überblick
+<!-- icon: help-about -->
 
-Tretlager richtet den offiziellen Windows-Client von **Zwift** auf diesem Rechner ein und startet
-ihn mit einem Klick. Zwift läuft dabei unter **Wine**. Weil Zwift unter Wine kein Bluetooth
-nutzen kann, verbindet die **Sensor-Bridge** Smart-Trainer und Pulsgurt und bietet sie Zwift als
-Wahoo-Geräte mit „Direct Connect“ an. Die Zwift Companion App ist dafür nicht nötig.
+Tretlager richtet Zwift unter Linux ein, startet es mit einem Klick und verbindet Trainer und
+Pulsgurt.
 
-Zwift unterstützt Linux offiziell nicht. Tretlager lädt Zwift nur von der offiziellen Quelle,
-prüft die Signatur des Installers und verändert an Zwift selbst nichts.
+- **Zwift unter Wine**: Der offizielle Windows-Client von Zwift läuft unter Wine. Tretlager lädt
+  ihn von Zwift, prüft die Signatur und verändert nichts daran.
+- **Sensor-Bridge**: Zwift kann unter Wine kein Bluetooth. Die Bridge verbindet Trainer und
+  Pulsgurt und bietet sie Zwift als Wahoo-Geräte an; die Companion App ist nicht nötig.
+- **Kein Programm von Zwift**: Zwift unterstützt Linux nicht. Die Benutzung erfolgt auf eigene
+  Gefahr.
 
-## Einrichtung
+## Fahren
+<!-- icon: media-playback-start -->
 
-Der Assistent führt in sechs Schritten durch alles:
+- **Zwift starten**: In der Übersicht oder im Startmenü unter *Zwift (Tretlager)*.
+- **Vor dem Start**: Tretlager sucht nach Zwift-Updates und sichert vorher die Zwift-Umgebung.
+- **Während der Fahrt**: Tretlager wartet minimiert und räumt nach dem Beenden auf.
+- **Auf dem Notebook**: Netzteil vor dem Start anschließen und angeschlossen lassen. Ein Wechsel
+  zwischen Netz und Akku kann den NVIDIA-Treiber zum Absturz bringen.
 
-1. **Prüfen**: Grafik, Bluetooth, Speicher und Internet. Am System ändert sich nichts.
-2. **Vorbereiten**: richtet die WineHQ-Paketquelle ein und installiert Wine. Alle Änderungen
-   stehen vorher in einer Liste; das Passwort ist nur einmal nötig.
-3. **Zwift**: lädt und installiert Zwift samt den nötigen Microsoft-Komponenten. Das dauert etwa
-   zehn Minuten und läuft von selbst. Abbrechen ist jederzeit möglich, beim nächsten Start geht
-   es an derselben Stelle weiter.
-4. **Anmeldung**: siehe unten.
-5. **Sensoren**: Trainer aufwecken (kurz in die Pedale treten), Pulsgurt anlegen, Geräte
-   hinzufügen.
-6. **Fertig**.
+## Sensoren
+<!-- icon: network-bluetooth -->
 
-## Alltag
-
-- Im Startmenü startet *Zwift (Tretlager)* Zwift direkt, ohne Umweg über die Übersicht.
-- In der Übersicht startet *Zwift starten* dasselbe. Die Sensor-Bridge läuft schon an, sobald
-  Tretlager geöffnet ist, damit Trainer und Gurt beim Aufsteigen bereit sind.
-- Vor dem Start sucht Tretlager nach einem Zwift-Update und sichert vorher die Zwift-Umgebung.
-- Während Zwift läuft, ist Tretlager minimiert; nach dem Beenden räumt es auf.
-- Auf Notebooks das Netzteil vor dem Start anschließen und während der Fahrt angeschlossen
-  lassen. Ein Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber zum Absturz bringen, und auf
-  Akku drosselt die Grafikkarte stark. Tretlager weist darauf hin und meldet Treiberfehler nach
-  der Fahrt.
-
-## Sensoren in Zwift koppeln
-
-Einmalig in Zwift unter *Gekoppelte Geräte*:
-
-- *Leistungsquelle*, *Trittfrequenz* und *Widerstand*: „Wahoo KICKR …“
-- *Herzfrequenz*: „Wahoo HRM …“
-
-Die Warnsymbole für Bluetooth und ANT+ oben rechts in Zwift sind normal.
+- **In Tretlager koppeln**: Unter *Sensoren* suchen und hinzufügen. Vorher kurz in die Pedale
+  treten; ein Pulsgurt sendet nur mit Hautkontakt.
+- **In Zwift koppeln**: Einmalig unter *Gekoppelte Geräte* „Wahoo KICKR …“ für Leistung,
+  Trittfrequenz und Widerstand wählen, „Wahoo HRM …“ für den Puls. Die Warnsymbole für Bluetooth
+  und ANT+ sind normal.
+- **Pausieren**: Sensoren, die gerade nicht genutzt werden, pausieren statt entfernen. Tretlager
+  sucht dann nicht mehr danach, die Kopplung bleibt erhalten.
+- **Bluetooth-Adapter**: Ein USB-Stick mit Verlängerung neben dem Trainer hilft bei Funklöchern
+  und bei Chips, die einen Sensor nicht vertragen.
 
 ## Anmeldung
+<!-- icon: user-identity -->
 
-Die Anmeldung im Zwift Launcher funktioniert unter Linux derzeit nicht. Ersatzweise öffnet
-Tretlager die Anmeldeseite von Zwift in einem eigenen, privaten Fenster und übernimmt danach die
-Sitzung. **Zwift erlaubt keine fremden Programme an seiner Anmeldung (Nutzungsbedingungen,
-Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.**
+Der Zwift Launcher kann sich unter Linux derzeit nicht anmelden. Tretlager öffnet die
+Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nicht
+(Nutzungsbedingungen, Abschnitt 5); die Nutzung erfolgt auf eigenes Risiko.**
 
-- E-Mail und Passwort werden nur auf der Anmeldeseite von Zwift eingegeben. Tretlager liest
-  und speichert sie nicht; das Fenster vergisst alles beim Schließen.
-- Liegt das Passwort im Passwortmanager des Browsers oder läuft die Anmeldung über Google oder
-  Apple, gibt es *Im eigenen Browser anmelden*. Der Browser zeigt danach „Bad Request“; die
-  Adresse aus der Adresszeile kopieren, Tretlager übernimmt sie aus der Zwischenablage.
-- Die Sitzung liegt im Schlüsselbund des Benutzerkontos und erneuert sich selbst. Nach einer
-  Woche ohne Fahrt ist eine neue Anmeldung nötig.
-- *Abmelden* (Übersicht → *Neu anmelden …*) beendet die Sitzung auch bei Zwift.
+- **Passwort**: Nur auf der Seite von Zwift eingeben. Tretlager liest und speichert es nicht.
+- **Eigener Browser**: Für Passwortmanager oder die Anmeldung über Google oder Apple. Der Browser
+  zeigt danach „Bad Request“; die Adresse kopieren, Tretlager übernimmt sie.
+- **Sitzung**: Liegt im Schlüsselbund und erneuert sich selbst. Nach einer Woche ohne Fahrt ist
+  eine neue Anmeldung nötig.
+- **Abmelden**: Übersicht → *Neu anmelden …* → *Abmelden*. Das beendet die Sitzung auch bei Zwift.
+
+## Datenschutz und Speicherorte
+<!-- icon: security-high -->
+
+- **Keine Nutzungsdaten**: Tretlager verbindet sich nur mit Zwift, WineHQ und Microsoft
+  (Komponenten über winetricks). Zwift selbst sendet Absturzberichte an Sentry.
+- **Zwift-Umgebung**: `~/.local/share/tretlager/prefix`
+- **Sicherungen vor Updates**: `~/.local/share/tretlager/snapshots`
+- **Zwischenspeicher**: `~/.cache/tretlager`
+- **Einstellungen der Bridge**: `~/.config/tretlager/bridge.json`
+- **Zustand der Einrichtung**: `~/.local/state/tretlager/state.json`
+
+## Einrichtung
+<!-- icon: configure -->
+
+- **1. Prüfen**: Grafik, Bluetooth, Speicher und Internet. Am System ändert sich nichts.
+- **2. Vorbereiten**: WineHQ-Paketquelle und Wine. Alle Änderungen stehen vorher in einer Liste,
+  das Passwort ist nur einmal nötig.
+- **3. Zwift**: Download und Installation, etwa zehn Minuten. Abbrechen geht jederzeit, beim
+  nächsten Start geht es an derselben Stelle weiter.
+- **4.–6. Anmeldung, Sensoren, Fertig**: Siehe die Abschnitte oben.
 
 ## Wenn etwas nicht klappt
+<!-- icon: help-hint; wide -->
 
-| Problem | Abhilfe |
-|---|---|
-| Pulswerte viel zu hoch | Elektroden des Gurts anfeuchten, Gurt enger stellen, nur einen Gurt tragen |
-| Sensor wird gerade nicht genutzt | Unter *Sensoren* pausieren statt entfernen: Tretlager sucht dann nicht mehr danach und bietet ihn Zwift nicht an; die Kopplung bleibt erhalten |
-| Gerät bleibt bei „Sucht das Gerät …“ | Kurz in die Pedale treten, Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden |
-| Gerät verbindet sich nie, obwohl es gefunden wird | Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle zeigt Tretlager als Warnung am Gerät, etwa Garmin HRM-Pro mit Intel AX201; dann hilft ein USB-Bluetooth-Stick (unter *Sensoren* → *Bluetooth-Adapter* wählen) oder ein anderer Sensor. Sonst den Sensor an einem anderen Rechner oder Handy gegenprüfen |
-| Verbindung bricht oft ab | Rechner näher an den Trainer stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen und unter *Sensoren* → *Bluetooth-Adapter* wählen |
-| Zwift findet die Sensoren nicht | Seitenleiste → *Sensoren*: Läuft die Bridge, sind die Geräte verbunden? |
-| Bild unscharf unter Plasma | *Systemeinstellungen* → *Anzeige* → *Legacy-Anwendungen (X11)*: *Skalierung selbst anwenden* |
-| Zwift hängt nach dem Ab- oder Anstecken des Netzteils | Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten; hängt es weiter, Rechner neu starten. Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören (im Journal „NVRM: Xid“) |
-| Sitzung abgelaufen | In der Übersicht *Anmelden …* wählen und im Browser neu anmelden |
-| Zwift startet nach einem Update nicht | Seitenleiste → *Einrichtung prüfen*; die Sicherung vor dem Update bleibt erhalten |
-
-## Datenschutz
-
-Tretlager sendet keine Nutzungsdaten. Verbindungen gehen nur zu Zwift (Download, Anmeldung,
-Updates), zu WineHQ und zu Microsoft (Komponenten über winetricks). Zwift selbst schreibt
-Absturzberichte (Sentry); das liegt außerhalb von Tretlager.
-
-## Wo Tretlager Daten ablegt
-
-- Zwift-Umgebung: `~/.local/share/tretlager/prefix`
-- Sicherungen vor Updates: `~/.local/share/tretlager/snapshots`
-- Zwischenspeicher (Installer, winetricks): `~/.cache/tretlager`
-- Einstellungen der Bridge: `~/.config/tretlager/bridge.json`
-- Zustand der Einrichtung: `~/.local/state/tretlager/state.json`
+- [emblem-important] **Puls viel zu hoch**: Elektroden anfeuchten, Gurt enger stellen und nur
+  einen Gurt tragen.
+- [view-refresh] **Sensor bleibt bei „Sucht das Gerät …“**: Kurz in die Pedale treten oder den
+  Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden.
+- [data-warning] **Sensor wird gefunden, verbindet sich aber nie**: Er verträgt den
+  Bluetooth-Chip nicht; bekannte Fälle meldet Tretlager am Sensor. Abhilfe: USB-Bluetooth-Stick.
+- [network-wireless-disconnected] **Verbindung bricht oft ab**: Rechner näher an den Trainer
+  stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen.
+- [network-bluetooth] **Zwift findet die Sensoren nicht**: Unter *Sensoren* prüfen, ob die Bridge
+  läuft und die Sensoren verbunden sind.
+- [battery-low] **Zwift hängt nach dem Ab- oder Anstecken des Netzteils**: Mit Alt+F4 beenden und
+  mit Netzteil neu starten; hilft das nicht, den Rechner neu starten.
+- [video-display] **Bild unscharf unter Plasma**: *Systemeinstellungen* → *Anzeige* →
+  *Legacy-Anwendungen (X11)* → *Skalierung selbst anwenden*.
+- [update-none] **Zwift startet nach einem Update nicht**: Seitenleiste → *Einrichtung prüfen*.
+  Die Sicherung vor dem Update bleibt erhalten.

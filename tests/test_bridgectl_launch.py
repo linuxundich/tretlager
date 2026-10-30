@@ -101,7 +101,7 @@ def test_logout_remote_posts_refresh_token():
 def test_help_text_and_icon_are_bundled():
     from pathlib import Path
     data = Path(launch.__file__).resolve().parent.parent / "data"
-    assert "## Sensoren in Zwift koppeln" in (data / "hilfe.md").read_text()
+    assert "## Sensoren" in (data / "hilfe.md").read_text()
     assert (data / "icons" / "de.linuxundich.Tretlager.svg").read_text().startswith("<svg")
 
 

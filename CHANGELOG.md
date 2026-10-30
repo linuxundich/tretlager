@@ -4,6 +4,17 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.9] - 2026-10-30
+
+### Geändert
+- Hilfe ohne Fließtext: je Abschnitt eine Karte mit Einträgen aus fettem Stichwort und kurzem
+  Satz, Problemfälle mit Symbol unten über die volle Breite in zwei Spalten, Pfade in
+  Festbreitenschrift. Der Text ist neu gegliedert (Überblick, Fahren, Sensoren, Anmeldung,
+  Datenschutz und Speicherorte, Einrichtung, Wenn etwas nicht klappt) und deutlich kürzer.
+- `data/hilfe.md` hat ein einfaches Format (Abschnitt, optional Symbol und `wide`, Einleitung,
+  Einträge `- [symbol] **Stichwort**: Text`); `core/helpdoc.py` zerlegt es und verteilt die
+  Abschnitte nach geschätzter Höhe auf die beiden Spalten.
+
 ## [0.6.8] - 2026-10-30
 
 ### Hinzugefügt

@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import bridgectl, btcompat, instance, launch, login, power, prepare, setup, state, systemcheck
+from ..core import bridgectl, btcompat, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
 # bleibt nur der Weg über den eigenen Browser.
@@ -505,9 +505,10 @@ class Backend(QObject):
                 return path.read_text()
         return "GNU General Public License, Version 3 oder später: https://www.gnu.org/licenses/gpl-3.0.html"
 
-    @Property(str, constant=True)
-    def helpText(self) -> str:
-        return (DATA_DIR / "hilfe.md").read_text()
+    @Property(list, constant=True)
+    def helpSections(self) -> list:
+        """Hilfe als Abschnitte mit Einträgen und Spalte (siehe core/helpdoc.py)."""
+        return helpdoc.layout(helpdoc.parse((DATA_DIR / "hilfe.md").read_text()))
 
     @Slot()
     def prewarmBridge(self) -> None:
