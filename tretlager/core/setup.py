@@ -175,7 +175,7 @@ class Winetricks:
 
     def ensure(self, ctx: Context) -> Path:
         if not (self.path.exists() and sha256(self.path) == WINETRICKS_SHA256):
-            download(WINETRICKS_URL, self.path, ctx, Components.id, "winetricks laden")
+            download(WINETRICKS_URL, self.path, ctx, Components.id, _("winetricks laden"))
             if sha256(self.path) != WINETRICKS_SHA256:
                 self.path.unlink(missing_ok=True)
                 raise SetupError(_("winetricks hat nicht die erwartete Prüfsumme; Download verworfen."))
@@ -204,7 +204,7 @@ class Components(Step):
         base = 0.0
         for verb in VERBS:
             if verb not in have:
-                ctx.progress(self.id, base, f"{verb} installieren")
+                ctx.progress(self.id, base, _("{verb} installieren").format(verb=verb))
                 if ctx.run([str(tool), "-q", verb], cwd=paths.CACHE) != 0:
                     raise SetupError(_("winetricks konnte „{verb}“ nicht installieren.").format(verb=verb))
                 ctx.wineserver_wait()
@@ -274,7 +274,7 @@ class Game(Step):
                 size = dir_size(paths.ZWIFT_DIR)
                 loaded = max(size - start_size, 0)
                 ctx.progress(self.id, min(99, 100 * loaded / GAME_SIZE_BYTES),
-                             f"{loaded / 10**9:.1f} von etwa {GAME_SIZE_BYTES / 10**9:.1f} GB")
+                             _("{loaded} von etwa {total} GB").format(loaded=f"{loaded / 10**9:.1f}", total=f"{GAME_SIZE_BYTES / 10**9:.1f}"))
                 if size != last:
                     last, stable_since = size, time.monotonic()
                 if self.done(ctx) and time.monotonic() - stable_since > 15:
@@ -352,7 +352,7 @@ def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
             return False
         try:
             if step.done(ctx):
-                on_step(step.id, "skipped", "schon erledigt")
+                on_step(step.id, "skipped", _("schon erledigt"))
                 continue
             on_step(step.id, "running", "")
             step.run(ctx)
@@ -362,6 +362,6 @@ def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
             return False
         except Exception as e:  # unerwartet: trotzdem verständlich melden, Details ins Protokoll
             ctx.log(f"{type(e).__name__}: {e}")
-            on_step(step.id, "error", f"Unerwarteter Fehler: {e}")
+            on_step(step.id, "error", _("Unerwarteter Fehler: {error}").format(error=e))
             return False
     return True

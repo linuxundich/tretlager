@@ -39,6 +39,10 @@ class LoginError(Exception):
     """Fehler mit einem Satz für den Nutzer."""
 
 
+class LoginUnavailable(LoginError):
+    """Zwift-Anmeldung nicht erreichbar (offline, Serverfehler): kein Grund, sich neu anzumelden."""
+
+
 def new_state() -> str:
     return pysecrets.token_hex(16)
 
@@ -93,9 +97,9 @@ def _post(form: dict, opener=urllib.request.urlopen) -> dict:
     except urllib.error.HTTPError as e:
         if e.code in (400, 401):
             raise LoginError(_("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).")) from None
-        raise LoginError(_("Zwift-Anmeldung nicht erreichbar (HTTP {code}).").format(code=e.code)) from None
+        raise LoginUnavailable(_("Zwift-Anmeldung nicht erreichbar (HTTP {code}).").format(code=e.code)) from None
     except (urllib.error.URLError, TimeoutError):
-        raise LoginError(_("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?")) from None
+        raise LoginUnavailable(_("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?")) from None
     if "access_token" not in token:
         raise LoginError(_("Unerwartete Antwort von Zwift."))
     token["obtained_at"] = int(time.time())
@@ -154,11 +158,19 @@ class Keyring:
         try:
             import secretstorage
         except ImportError as e:
-            raise LoginError("python3-secretstorage fehlt; ohne Schlüsselbund speichert Tretlager kein Token.") from e
-        conn = secretstorage.dbus_init()
-        coll = secretstorage.get_default_collection(conn)
-        if coll.is_locked():
-            coll.unlock()
+            raise LoginError(_("python3-secretstorage fehlt; ohne Schlüsselbund speichert Tretlager kein Token.")) from e
+        try:
+            conn = secretstorage.dbus_init()
+            coll = secretstorage.get_default_collection(conn)
+            if coll.is_locked():
+                coll.unlock()
+                if coll.is_locked():
+                    raise LoginError(_("Der Schlüsselbund ist gesperrt. Zum Starten von Zwift den Schlüsselbund entsperren."))
+        except secretstorage.exceptions.SecretStorageException:
+            # Kein Secret Service (manche Desktops starten keinen) oder Entsperren abgelehnt
+            raise LoginError(_("Kein Schlüsselbund erreichbar. Tretlager speichert die Zwift-Sitzung im "
+                               "Schlüsselbund des Desktops (KWallet bzw. GNOME Schlüsselbund); dieser muss "
+                               "laufen und entsperrt sein.")) from None
         return coll
 
     def load(self) -> dict | None:
@@ -198,6 +210,8 @@ def valid_token(keyring: Keyring | None = None, opener=urllib.request.urlopen) -
     if st == "refreshable":
         try:
             token = refresh(token, opener)
+        except LoginUnavailable:
+            raise  # offline o. Ä.: melden statt zur Neuanmeldung schicken
         except LoginError:
             return None
         keyring.save(token)

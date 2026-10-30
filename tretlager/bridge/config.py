@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 BASE_PORT = 36866
+
+log = logging.getLogger(__name__)
 
 
 def config_path() -> Path:
@@ -38,10 +41,22 @@ class BridgeConfig:
         path = path or config_path()
         try:
             raw = json.loads(path.read_text())
+            fields = set(DeviceConfig.__dataclass_fields__)
+            return cls(devices=[DeviceConfig(**{k: v for k, v in d.items() if k in fields})
+                                for d in raw.get("devices", [])],
+                       local_only=raw.get("local_only", True), adapter=raw.get("adapter", ""))
         except FileNotFoundError:
             return cls()
-        return cls(devices=[DeviceConfig(**d) for d in raw.get("devices", [])],
-                   local_only=raw.get("local_only", True), adapter=raw.get("adapter", ""))
+        except (OSError, ValueError, TypeError, AttributeError) as e:
+            # Kaputte Datei (abgebrochenes Schreiben, Handarbeit): Ohne diesen Weg startete die Bridge
+            # gar nicht mehr. Datei beiseitelegen, damit nichts verloren geht, und leer beginnen.
+            backup = path.with_suffix(".defekt")
+            try:
+                path.replace(backup)
+            except OSError:
+                pass
+            log.error("%s unlesbar (%s), gesichert als %s", path, e, backup.name)
+            return cls()
 
     def save(self, path: Path | None = None) -> None:
         path = path or config_path()

@@ -8,6 +8,17 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 - Programmsymbol mit silbernen Kettenblättern und dunkler Kante: Das frühere, ganz dunkle Symbol war
   auf einem dunklen Plasma-Panel kaum zu erkennen.
 
+### Geändert
+- Übersicht: „Bereit zum Fahren“ nur, wenn alle eingeschalteten Sensoren verbunden sind, sonst
+  „Fast bereit“ mit den noch gesuchten Sensoren.
+- Verständliche Fehlertexte statt BlueZ-/D-Bus-Meldungen an Sensoren und Bridge; Rohtext ins
+  Protokoll.
+- Während der Fahrt und bei minimiertem Fenster fragt die Oberfläche die Bridge nur alle 15 s ab
+  (Oberfläche während der Fahrt 0,4 % CPU).
+- Übrige Texte der Einrichtung übersetzt; Debian-Hinweis auf der Sensorseite entfernt.
+- README: Voraussetzungen, Aktualisieren, Deinstallieren, Datenorte, Netzverbindungen,
+  Fehlerbehebung, bekannte Grenzen.
+
 ### Hinzugefügt
 - Kurzes Protokoll der Oberfläche (`core/applog.py`, `$XDG_STATE_HOME/tretlager/tretlager.log`):
   Start, zweite Aufrufe, Zwift läuft/beendet, Schließen, Beenden – für die Fehlersuche, ohne Token.
@@ -15,6 +26,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   endet mit dem Fenster.
 
 ### Behoben
+- Ein abwesender Sensor (Gurt nicht angelegt) blockierte Bluetooth bis zu 40 s pro Versuch: Die
+  Suche in der Oberfläche dauerte 40–63 s statt 3 s, und ein anderer Sensor, der neu verbinden
+  wollte, fiel bis zu einer Minute aus. Die Bridge sucht die Adresse jetzt höchstens 8 s, getrennt
+  vom Verbindungsaufbau (QA-Audit B-01, `docs/qa-audit-2026-10-30.md`).
+- Ende der Fahrt: Tretlager erkennt Zwift über `/proc` (argv[0]) statt alle 5 s `wine tasklist`
+  zu starten; ein Fehler beim Nachsehen beendet die Überwachung nicht mehr (sonst hing die
+  Oberfläche bei „Zwift läuft“). Auch bei unerwarteten Startfehlern wird aufgeräumt.
+- Ohne Internet und mit abgelaufenem Zugriffstoken verlangte Tretlager eine neue Anmeldung; jetzt
+  heißt es, dass die Zwift-Anmeldung nicht erreichbar ist.
+- Ohne laufenden Schlüsselbund blieb die Anmeldeseite beim Laden stehen; jetzt eine Meldung.
+- Eine beschädigte `bridge.json` verhinderte den Start der Bridge; sie wird als `bridge.defekt`
+  beiseitegelegt.
+- Einzelinstanz nimmt Befehle nur noch vom eigenen Benutzer an (`SO_PEERCRED`).
 - Bridge lief nach dem Schließen weiter, wenn das Fenster vor dem Aufräumen nach der Fahrt zuging:
   Tretlager stoppt sie jetzt auch beim Beenden (außer im Autostart oder während Zwift läuft).
 - Systemprüfung im Flatpak meldete zu wenig freien Speicher (17 statt 900 GB auf tinytin): Sie maß

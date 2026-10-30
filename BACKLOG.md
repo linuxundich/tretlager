@@ -129,3 +129,16 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
   Prozessliste und ist für jeden lokalen Benutzer lesbar (`ps`). Prüfen, ob RunFromProcess das Token
   anders übergeben kann (Datei/Pipe) oder ob Zwift es nur so annimmt; sonst in der Hilfe erwähnen.
   (Gesehen 30.10. beim Flatpak-Test; nie `pgrep -fa Zwift` o. Ä. ausgeben.)
+
+## QA-Audit 2026-10-30 (docs/qa-audit-2026-10-30.md)
+
+- [x] B-01 abwesender Sensor blockierte Bluetooth 40 s (gemessen, behoben)
+- [x] Z-01/Z-02, L-01, L-02, B-02, B-03, U-01, U-02, S-01, I-01, I-02 behoben
+- [ ] B-04 Gerät bei kurzem BLE-Abbruch für Zwift halten (DIRCON-Server und mDNS 30–60 s Schonfrist)
+- [ ] B-05 Standby/Resume und Stick-Abziehen während der Fahrt testen
+- [ ] F-01 `--talk-name=org.kde.KWin` ersetzen oder begründen (nur zum Maximieren)
+- [ ] Bridge-Zustand per QtDBus-Signal `Changed` statt gdbus-Abfrage; `Backend` aufteilen
+- [ ] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
+- [ ] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
+- [ ] U-03 Startknopf größer, Live-Werte als Kennzahlen gewichten (im HIG-Rahmen)
+- [ ] Metainfo: Screenshots und Release-Beschreibungen

@@ -14,6 +14,22 @@ ColumnsPage {
     readonly property var se: backend.sensors
     readonly property var incompatible: se.devices.filter(function (d) { return d.enabled && d.compat })
     readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable && !d.compat })
+    // Startbereitschaft auf einen Blick: Welche eingeschalteten Sensoren sind verbunden?
+    readonly property var activeDevices: se.devices.filter(function (d) { return d.enabled })
+    readonly property var waitingDevices: activeDevices.filter(function (d) { return d.state !== "verbunden" })
+    readonly property bool sensorsReady: se.running && waitingDevices.length === 0
+    readonly property string readinessText: {
+        if (!se.running)
+            return i18n("Die Sensor-Bridge startet …")
+        if (activeDevices.length === 0)
+            return i18n("Keine Sensoren eingerichtet. Zwift startet trotzdem; Sensoren lassen sich unter Sensoren hinzufügen.")
+        if (waitingDevices.length === 0)
+            return i18np("Sensor verbunden: %2", "Alle %1 Sensoren verbunden: %2", activeDevices.length,
+                         activeDevices.map(function (d) { return d.name }).join(", "))
+        return i18n("%1 von %2 Sensoren verbunden. Noch gesucht: %3 – kurz in die Pedale treten bzw. den Gurt anlegen.",
+                    activeDevices.length - waitingDevices.length, activeDevices.length,
+                    waitingDevices.map(function (d) { return d.name }).join(", "))
+    }
 
     Component.onCompleted: {
         backend.refreshOverview()
@@ -80,10 +96,11 @@ ColumnsPage {
 
     // --- Start (rahmenlos) ---
     PageHero {
-        title: page.la.zwiftRunning ? i18n("Gute Fahrt!") : page.la.busy ? i18n("Zwift startet …") : i18n("Bereit zum Fahren")
+        title: page.la.zwiftRunning ? i18n("Gute Fahrt!") : page.la.busy ? i18n("Zwift startet …")
+             : page.sensorsReady ? i18n("Bereit zum Fahren") : i18n("Fast bereit")
         text: page.la.zwiftRunning ? i18n("Tretlager wartet minimiert und räumt nach der Fahrt auf.")
             : page.la.busy && page.la.text !== "" ? page.la.text
-            : i18n("Ein Klick prüft Sensoren und Anmeldung, spielt Updates ein und startet Zwift.")
+            : page.readinessText
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing

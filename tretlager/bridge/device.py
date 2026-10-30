@@ -7,8 +7,8 @@ import logging
 import time
 from typing import Callable
 
-from bleak import BleakClient
-from bleak.exc import BleakError
+from bleak import BleakClient, BleakScanner
+from bleak.exc import BleakDeviceNotFoundError, BleakError
 from dbus_fast import BusType, Message, MessageType
 from dbus_fast.aio import MessageBus
 
@@ -29,6 +29,11 @@ UNSTABLE_EVENTS = 3
 UNSTABLE_WINDOW = 600.0
 # Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
 CONNECT_TIMEOUT = 40.0
+# Suche nach der Adresse vor dem Verbinden. Getrennt vom Verbindungs-Timeout: bleak sucht sonst
+# 40 s nach einem abwesenden Gerät und hält so lange die Sperre; ein Trainer, der neu verbinden
+# will, und die Suche in der Oberfläche warteten dann bis zu einer Minute (gemessen 30.10.).
+# Werbende Sensoren senden mehrmals pro Sekunde, 8 s reichen.
+FIND_TIMEOUT = 8.0
 # BlueZ baut pro Adapter nur eine Verbindung gleichzeitig auf („Operation already in progress“).
 connect_lock = asyncio.Lock()
 
@@ -53,6 +58,33 @@ async def bluez_disconnect(address: str, adapter: str = "") -> None:
                                    member="Disconnect"))
     finally:
         bus.disconnect()
+
+
+def describe_error(e: BaseException) -> tuple[str, bool]:
+    """Verständlicher Satz zu einem Verbindungsfehler und ob das Gerät nur nicht gefunden wurde.
+
+    BlueZ- und bleak-Meldungen wie „org.bluez.Error.NotReady“ sagen Nutzern nichts; die Rohmeldung
+    steht weiter im Protokoll der Bridge.
+    """
+    raw = str(e)
+    if isinstance(e, BleakDeviceNotFoundError) or "was not found" in raw:
+        return N_("Nicht in Reichweite oder schläft"), True
+    if "failed to discover services" in raw:
+        # Gerät ist beim Verbinden wieder eingeschlafen (KICKR nach Pause): bald erneut.
+        return N_("Gerät schläft – kurz treten bzw. Gurt anlegen"), True
+    if isinstance(e, (asyncio.TimeoutError, TimeoutError)):
+        return N_("Zeitüberschreitung beim Verbinden, neuer Versuch folgt"), False
+    if "NotReady" in raw or "not powered" in raw.lower() or ("adapter" in raw.lower() and "not found" in raw):
+        return N_("Bluetooth ist aus oder der Adapter fehlt"), False
+    if "InProgress" in raw or "in progress" in raw:
+        return N_("Bluetooth ist gerade beschäftigt, neuer Versuch folgt"), False
+    if "le-connection-abort" in raw or "ConnectionAttemptFailed" in raw or "Software caused connection abort" in raw:
+        return N_("Verbindungsaufbau abgebrochen, neuer Versuch folgt"), False
+    if "NotPermitted" in raw or "NotAuthorized" in raw or "AccessDenied" in raw:
+        return N_("Bluetooth verweigert den Zugriff auf das Gerät"), False
+    if isinstance(e, RuntimeError) and raw:
+        return raw, False  # eigene, schon verständliche Texte (N_)
+    return N_("Verbindung fehlgeschlagen, neuer Versuch folgt"), False
 
 
 def dircon_name(cfg: DeviceConfig) -> str:
@@ -176,21 +208,11 @@ class BridgedDevice:
             except asyncio.CancelledError:
                 raise
             except (BleakError, OSError, asyncio.TimeoutError, RuntimeError) as e:
-                if isinstance(e, (asyncio.TimeoutError, TimeoutError)):
-                    text = N_("Zeitüberschreitung beim Verbinden, neuer Versuch folgt")
-                elif "was not found" in str(e):
-                    text = N_("Nicht in Reichweite oder schläft")
-                    not_found = True
-                elif "failed to discover services" in str(e):
-                    # Gerät ist beim Verbinden wieder eingeschlafen (KICKR nach Pause): bald erneut.
-                    text = N_("Gerät schläft – kurz treten bzw. Gurt anlegen")
-                    not_found = True
-                else:
-                    text = str(e) or type(e).__name__
+                text, not_found = describe_error(e)
                 if not not_found or "failed to discover" in str(e):
                     self._note_trouble()
                 self._set_state("fehler", text)
-                log.warning("%s: %s (%s)", self.cfg.address, text, type(e).__name__)
+                log.warning("%s: %s (%s: %s)", self.cfg.address, text, type(e).__name__, e)
             # Nach einer stehenden Verbindung gleich wieder versuchen; ein Gerät, das immer wieder
             # scheitert, seltener probieren, damit es die BlueZ-Sperre nicht dauernd belegt.
             failures = 0 if self._was_connected else failures + 1
@@ -210,8 +232,12 @@ class BridgedDevice:
         # dass das Gerät wieder wirbt; dann findet bleak es nicht mehr.
         async with connect_lock:
             await bluez_disconnect(self.cfg.address, self.adapter)
-            client = BleakClient(self.cfg.address, disconnected_callback=lambda _c: self._disconnected.set(),
-                                 timeout=CONNECT_TIMEOUT, bluez={"adapter": self.adapter} if self.adapter else {})
+            bluez = {"adapter": self.adapter} if self.adapter else {}
+            device = await BleakScanner.find_device_by_address(self.cfg.address, timeout=FIND_TIMEOUT, bluez=bluez)
+            if device is None:
+                raise BleakDeviceNotFoundError(self.cfg.address, f"Device with address {self.cfg.address} was not found.")
+            client = BleakClient(device, disconnected_callback=lambda _c: self._disconnected.set(),
+                                 timeout=CONNECT_TIMEOUT, bluez=bluez)
             self._client = client  # auch bei Fehlschlag in _teardown trennen
             await client.connect()
         self._services = self._collect_services(client)

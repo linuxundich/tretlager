@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import socket
+import struct
 import threading
 from typing import Callable
 
@@ -32,6 +33,16 @@ def forward(command: str, name: str | None = None) -> bool:
         s.close()
 
 
+def peer_uid(conn: socket.socket) -> int:
+    """Benutzer-ID der Gegenseite (SO_PEERCRED); -1, wenn nicht ermittelbar."""
+    try:
+        _pid, uid, _gid = struct.unpack("3i", conn.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED,
+                                                              struct.calcsize("3i")))
+        return uid
+    except OSError:
+        return -1
+
+
 def listen(on_command: Callable[[str], None], name: str | None = None) -> socket.socket:
     """Auf Befehle weiterer Aufrufe warten (eigener Thread); Rückgabe hält den Socket am Leben."""
     srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -45,6 +56,10 @@ def listen(on_command: Callable[[str], None], name: str | None = None) -> socket
             except OSError:
                 return
             with conn:
+                # Abstrakte Sockets haben keine Dateirechte: Jeder Benutzer im selben Netz-Namensraum
+                # könnte sich verbinden. Nur Befehle vom eigenen Benutzer annehmen.
+                if peer_uid(conn) != os.getuid():
+                    continue
                 cmd = conn.recv(64).decode(errors="ignore").strip()
             if cmd in COMMANDS:
                 on_command(cmd)

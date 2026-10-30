@@ -56,6 +56,29 @@ def wine_tasks(env: dict) -> dict[str, int]:
     return out
 
 
+def process_running(name: str, proc: Path = Path("/proc")) -> bool:
+    """Läuft ein Windows-Programm dieses Namens? Billiger und robuster als `wine tasklist`, das
+    alle paar Sekunden ein Wine-Programm starten müsste und bei hängendem wineserver blockiert.
+
+    Maßgeblich ist argv[0]: Wine setzt dort den Windows-Pfad (`C:\\…\\ZwiftApp.exe`). Der
+    Prozessname (comm) taugt nicht – Zwift benennt seinen Hauptthread „main“, und comm ist auf
+    15 Zeichen gekürzt (gemessen auf tinytin, 30.10.). Gelesen wird nur bis zum ersten Nullbyte:
+    Die weiteren Argumente enthalten das Zwift-Token.
+    """
+    want = name.lower()
+    for entry in proc.iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            with open(entry / "cmdline", "rb") as f:
+                argv0 = f.read(4096).split(b"\0", 1)[0].decode(errors="replace")
+        except OSError:
+            continue  # Prozess inzwischen beendet
+        if re.split(r"[\\/]", argv0)[-1].lower() == want:
+            return True
+    return False
+
+
 def snapshot_prefix(log: Callable[[str], None]) -> Path | None:
     """Kopie des Prefix vor einem Update; auf Btrfs per Reflink in Sekundenbruchteilen."""
     if not paths.PREFIX.exists():
@@ -252,7 +275,7 @@ class Launcher:
             time.sleep(4)
 
     def running(self) -> bool:
-        return "ZwiftApp.exe" in wine_tasks(self.env)
+        return process_running("ZwiftApp.exe")
 
     def after_exit(self) -> None:
         """Nach dem Beenden: Reste beenden, Bridge stoppen, wenn sie nicht im Autostart ist."""

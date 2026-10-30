@@ -86,6 +86,12 @@ Kirigami.ApplicationWindow {
         ]
     }
 
+    // Während der Fahrt und minimiert seltener nach den Sensoren fragen. Unter Wayland meldet Qt
+    // das Minimieren nicht immer, deshalb zählt die laufende Fahrt mit.
+    readonly property bool quiet: visibility === Window.Minimized || visibility === Window.Hidden
+                                  || backend.launchInfo.zwiftRunning
+    onQuietChanged: backend.setWindowHidden(quiet)
+
     // Schließen während einer Fahrt nur nach Rückfrage: Im Flatpak läuft Zwift in derselben Instanz
     // und endet mit dem Fenster; außerdem räumt Tretlager sonst nach der Fahrt nicht auf.
     onClosing: function (close) {

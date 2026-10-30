@@ -20,7 +20,7 @@ from pathlib import Path
 
 from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH
 from ..i18n import _
-from . import state
+from . import applog, state
 
 IN_FLATPAK = Path("/.flatpak-info").exists()
 DBUS = ["--dest", "org.freedesktop.DBus", "--object-path", "/org/freedesktop/DBus", "--method"]
@@ -46,8 +46,22 @@ def _gdbus(args: list[str], timeout: int, run) -> str:
     except FileNotFoundError:
         raise BridgeError(_("gdbus fehlt (Paket libglib2.0-bin bzw. glib2)")) from None
     if r.returncode != 0:
-        raise BridgeError(r.stderr.strip() or _("Bridge antwortet nicht"))
+        applog.warning("gdbus %s: %s", args[-1] if args else "", r.stderr.strip())
+        raise BridgeError(describe_dbus_error(r.stderr))
     return r.stdout.strip()
+
+
+def describe_dbus_error(stderr: str) -> str:
+    """D-Bus-Fehler von gdbus als Satz für Nutzer; die Rohmeldung steht im Protokoll (applog)."""
+    if "org.bluez.Error.NotReady" in stderr or "not powered" in stderr.lower():
+        return _("Bluetooth ist ausgeschaltet. Bluetooth einschalten und erneut versuchen.")
+    if "org.bluez.Error.InProgress" in stderr:
+        return _("Bluetooth ist gerade beschäftigt. In ein paar Sekunden erneut versuchen.")
+    if "org.bluez" in stderr and ("NoSuchAdapter" in stderr or "UnknownObject" in stderr):
+        return _("Kein Bluetooth-Adapter gefunden. Adapter einstecken bzw. einschalten.")
+    if any(k in stderr for k in ("ServiceUnknown", "NameHasNoOwner", "NoReply", "Timeout", "TimedOut")):
+        return _("Die Sensor-Bridge antwortet nicht. Sie startet beim nächsten Versuch neu.")
+    return _("Die Sensor-Bridge meldet einen Fehler. Details stehen im Protokoll.")
 
 
 def _call(method: str, *args, timeout: int = 10, run=subprocess.run):

@@ -25,6 +25,8 @@ except ImportError:  # python3-pyside6.qtwebenginequick nicht installiert
     QtWebEngineQuick = None
 
 QML_DIR = Path(__file__).parent / "qml"
+POLL_VISIBLE_MS = 1500  # Live-Werte der Sensoren bei sichtbarem Fenster
+POLL_HIDDEN_MS = 15000
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ICON_FILE = DATA_DIR / "icons" / "de.linuxundich.Tretlager.svg"
 
@@ -377,7 +379,7 @@ class Backend(QObject):
         self._chip = btcompat.adapter_chip()
         self._sensorsEvent.connect(self._on_sensors_event)
         self._poll = QTimer(self)
-        self._poll.setInterval(1500)
+        self._poll.setInterval(POLL_VISIBLE_MS)
         self._poll.timeout.connect(self.refreshSensors)
         self._poll_busy = False
         self._adapters_at = 0.0
@@ -397,6 +399,12 @@ class Backend(QObject):
             except (bridgectl.BridgeError, OSError, ValueError) as e:
                 self._sensorsEvent.emit({"error": str(e), "scanning": False})
         threading.Thread(target=work, daemon=True).start()
+
+    @Slot(bool)
+    def setWindowHidden(self, hidden: bool) -> None:
+        """Minimiert (etwa während der Fahrt) sieht niemand die Live-Werte: seltener nachfragen.
+        Jede Abfrage startet zwei gdbus-Prozesse; alle 1,5 s kostete das im Leerlauf gut 1 % CPU."""
+        self._poll.setInterval(POLL_HIDDEN_MS if hidden else POLL_VISIBLE_MS)
 
     @Slot(bool)
     def setSensorPolling(self, on: bool) -> None:
@@ -607,23 +615,39 @@ class Backend(QObject):
                 return
             except (launch.LaunchError, bridgectl.BridgeError, login.LoginError, setup.SetupError) as e:
                 self._launchEvent.emit({"busy": False, "error": str(e), "text": ""})
-                launcher.after_exit()
+                self._after_exit_quietly(launcher)
                 self._report_gpu_errors(started_at)
                 return
             except Exception as e:  # nur den Typ melden: Ausnahmen können Befehlszeilen enthalten
+                applog.warning("Start fehlgeschlagen: %s", type(e).__name__)
                 self._launchEvent.emit({"busy": False, "error": _("Unerwarteter Fehler ({name})").format(name=type(e).__name__), "text": ""})
+                self._after_exit_quietly(launcher)
                 return
             self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift läuft")})
             applog.info("Zwift läuft")
-            while launcher.running():
+            # Ein Fehler beim Nachsehen darf die Überwachung nicht beenden: Sonst bliebe die
+            # Oberfläche für immer bei „Zwift läuft“, und niemand räumte auf.
+            misses = 0
+            while misses < 2:  # zweimal nicht gesehen = beendet (kurze Lücke beim Neustart im Spiel)
                 time.sleep(5)
+                try:
+                    misses = 0 if launcher.running() else misses + 1
+                except OSError:
+                    pass
             applog.info("Zwift beendet, räume auf")
-            launcher.after_exit()
+            self._after_exit_quietly(launcher)
             self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift beendet")})
             self._report_gpu_errors(started_at)
             self.refreshOverview()
         threading.Thread(target=work, daemon=True).start()
 
+
+    @staticmethod
+    def _after_exit_quietly(launcher) -> None:
+        try:
+            launcher.after_exit()
+        except Exception as e:  # Aufräumen ist Kür; Fehler nur ins Protokoll
+            applog.warning("Aufräumen nach Zwift: %s", type(e).__name__)
 
     def _report_gpu_errors(self, since: float) -> None:
         """Nach der Fahrt: Hat der NVIDIA-Treiber Fehler gemeldet? (läuft im Arbeits-Thread)"""

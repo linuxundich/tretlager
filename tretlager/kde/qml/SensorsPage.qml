@@ -29,11 +29,6 @@ ColumnsPage {
 
     // --- Meldungen ---
     PageMessage {
-        visible: !page.se.installed
-        type: Kirigami.MessageType.Error
-        text: i18n("Die Sensor-Bridge fehlt (Dienst tretlager-bridge). Abhilfe: das Paket tretlager neu installieren.")
-    }
-    PageMessage {
         visible: page.se.error !== ""
         type: Kirigami.MessageType.Error
         text: page.se.error
