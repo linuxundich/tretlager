@@ -42,12 +42,16 @@ Die Warnsymbole für Bluetooth und ANT+ oben rechts in Zwift sind normal.
 
 ## Anmeldung
 
-Die Anmeldung im Zwift Launcher funktioniert unter Linux derzeit nicht. Ersatzweise erfolgt sie
-im Browser auf der Zwift-Seite; Tretlager übernimmt danach die Sitzung. **Zwift erlaubt keine
-fremden Programme an seiner Anmeldung (Nutzungsbedingungen, Abschnitt 5). Die Nutzung dieses
-Wegs erfolgt auf eigenes Risiko.**
+Die Anmeldung im Zwift Launcher funktioniert unter Linux derzeit nicht. Ersatzweise öffnet
+Tretlager die Anmeldeseite von Zwift in einem eigenen, privaten Fenster und übernimmt danach die
+Sitzung. **Zwift erlaubt keine fremden Programme an seiner Anmeldung (Nutzungsbedingungen,
+Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.**
 
-- Das Passwort wird nur auf der Zwift-Seite eingegeben, nie in Tretlager.
+- E-Mail und Passwort werden nur auf der Anmeldeseite von Zwift eingegeben. Tretlager liest
+  und speichert sie nicht; das Fenster vergisst alles beim Schließen.
+- Liegt das Passwort im Passwortmanager des Browsers oder läuft die Anmeldung über Google oder
+  Apple, gibt es *Im eigenen Browser anmelden*. Der Browser zeigt danach „Bad Request“; die
+  Adresse aus der Adresszeile kopieren, Tretlager übernimmt sie aus der Zwischenablage.
 - Die Sitzung liegt im Schlüsselbund des Benutzerkontos und erneuert sich selbst. Nach einer
   Woche ohne Fahrt ist eine neue Anmeldung nötig.
 - *Abmelden* (Übersicht → *Neu anmelden …*) beendet die Sitzung auch bei Zwift.

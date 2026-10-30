@@ -20,7 +20,7 @@ FormCard.FormCardPage {
     header: WizardHeader {
         visible: page.wizard
         step: 4
-        text: "Das Passwort wird nur bei Zwift im Browser eingegeben."
+        text: "Das Passwort wird nur auf der Anmeldeseite von Zwift eingegeben."
     }
 
     component Message: Kirigami.InlineMessage {
@@ -55,15 +55,19 @@ FormCard.FormCardPage {
         }
     }
 
-    // --- Browser: mit Zustimmung ---
-    FormCard.FormHeader { visible: !page.signedIn; title: "Anmeldung über den Browser" }
+    // --- Ersatzweg: mit Zustimmung ---
+    FormCard.FormHeader { visible: !page.signedIn; title: "Anmeldung über Tretlager" }
     FormCard.FormCard {
         visible: !page.signedIn
         FormCard.FormTextDelegate {
             text: "So funktioniert es"
-            description: "Die Anmeldung erfolgt auf der Zwift-Seite im Browser. Tretlager übernimmt danach die "
-                + "Sitzung und legt sie im Schlüsselbund ab."
-            icon.name: "internet-web-browser"
+            description: backend.embeddedLogin
+                ? "Die Anmeldeseite von Zwift öffnet sich in einem privaten Fenster von Tretlager, wie im "
+                  + "offiziellen Launcher. Danach übernimmt Tretlager die Sitzung und legt sie im "
+                  + "Schlüsselbund ab. Das Passwort liest und speichert Tretlager nicht."
+                : "Die Anmeldung erfolgt auf der Zwift-Seite im Browser. Tretlager übernimmt danach die "
+                  + "Sitzung und legt sie im Schlüsselbund ab."
+            icon.name: "user-identity"
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {
@@ -74,41 +78,60 @@ FormCard.FormCardPage {
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormCheckDelegate {
-            text: "Risiko verstanden, Anmeldung über den Browser verwenden"
+            text: "Risiko verstanden, diesen Weg verwenden"
             checked: page.li.consent
             enabled: !page.li.consent
             onToggled: if (checked) backend.giveConsent()
         }
-        FormCard.FormDelegateSeparator {}
+        FormCard.FormDelegateSeparator { visible: backend.embeddedLogin }
         FormCard.FormButtonDelegate {
-            text: page.li.waiting ? "Anmeldeseite erneut öffnen" : "Im Browser anmelden"
+            visible: backend.embeddedLogin
+            text: "Bei Zwift anmelden …"
+            icon.name: "go-next"
+            enabled: page.li.consent && !page.li.busy
+            onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("LoginWebPage.qml"))
+        }
+    }
+
+    // --- Ausweichweg: eigener Browser (Passwortmanager, Anmeldung mit Google oder Apple) ---
+    FormCard.FormHeader {
+        visible: !page.signedIn
+        title: backend.embeddedLogin ? "Alternative: eigener Browser" : "Im Browser anmelden"
+        trailing: Kirigami.ContextualHelpButton {
+            visible: backend.embeddedLogin
+            toolTipText: "Sinnvoll, wenn das Passwort im Passwortmanager des Browsers liegt oder die "
+                + "Anmeldung über Google oder Apple läuft; diese Anbieter sperren eingebettete Fenster oft. "
+                + "Nach der Anmeldung zeigt der Browser eine Fehlerseite, deren Adresse Tretlager braucht."
+        }
+    }
+    FormCard.FormCard {
+        visible: !page.signedIn
+        FormCard.FormButtonDelegate {
+            text: page.li.waiting ? "Anmeldeseite erneut öffnen" : "Im eigenen Browser anmelden"
             icon.name: "internet-web-browser"
             enabled: page.li.consent && !page.li.busy
             onClicked: backend.startBrowserLogin()
         }
-    }
-
-    // --- Rückgabe aus dem Browser ---
-    FormCard.FormHeader { visible: !page.signedIn && page.li.waiting; title: "Adresse aus dem Browser" }
-    FormCard.FormCard {
-        visible: !page.signedIn && page.li.waiting
+        FormCard.FormDelegateSeparator { visible: page.li.waiting }
         FormCard.FormTextDelegate {
+            visible: page.li.waiting
             text: "Nach der Anmeldung"
-            description: "1. Im Browser bei Zwift anmelden.\n"
-                + "2. Die Seite zeigt danach „Bad Request“, das ist normal.\n"
-                + "3. Die Adresse aus der Adresszeile kopieren (Strg+L, dann Strg+C). "
-                + "Tretlager übernimmt sie von selbst aus der Zwischenablage."
+            description: "Der Browser zeigt „Bad Request“, das ist bei diesem Weg normal. Die Adresse aus "
+                + "der Adresszeile kopieren (Strg+L, dann Strg+C); Tretlager übernimmt sie von selbst "
+                + "aus der Zwischenablage."
             icon.name: "edit-paste"
         }
-        FormCard.FormDelegateSeparator {}
+        FormCard.FormDelegateSeparator { visible: page.li.waiting }
         FormCard.FormTextFieldDelegate {
             id: redirect
+            visible: page.li.waiting
             label: "Adresse"
             placeholderText: "https://launcher.zwift.com/launcher?…&code=…"
             onAccepted: backend.submitRedirect(text)
         }
-        FormCard.FormDelegateSeparator {}
+        FormCard.FormDelegateSeparator { visible: page.li.waiting }
         FormCard.FormButtonDelegate {
+            visible: page.li.waiting
             text: page.li.busy ? "Wird übernommen …" : "Adresse übernehmen"
             icon.name: "dialog-ok"
             enabled: redirect.text.length > 0 && !page.li.busy

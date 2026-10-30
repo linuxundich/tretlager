@@ -8,13 +8,20 @@ import threading
 import time
 from pathlib import Path
 
-from PySide6.QtCore import Property, QObject, QTimer, QUrl, Signal, Slot
+from PySide6.QtCore import Property, QLocale, QObject, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
 from ..core import bridgectl, instance, launch, login, prepare, setup, state, systemcheck
+
+# Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
+# bleibt nur der Weg über den eigenen Browser.
+try:
+    from PySide6.QtWebEngineQuick import QtWebEngineQuick
+except ImportError:  # python3-pyside6.qtwebenginequick nicht installiert
+    QtWebEngineQuick = None
 
 QML_DIR = Path(__file__).parent / "qml"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -263,11 +270,27 @@ class Backend(QObject):
         login.give_consent()
         self._login_update(consent=True)
 
+    @staticmethod
+    def _ui_language() -> str:
+        """Sprache der Zwift-Anmeldeseite nach der Systemsprache (z. B. „de“)."""
+        return QLocale.system().name().split("_")[0]
+
+    @Property(bool, constant=True)
+    def embeddedLogin(self) -> bool:
+        return QtWebEngineQuick is not None
+
+    @Slot(result=str)
+    def startEmbeddedLogin(self) -> str:
+        """Anmeldeseite für das eingebettete Fenster; der Rücksprung kommt über submitRedirect."""
+        self._login_state_value = login.new_state()
+        self._login_update(waiting=False, error="")
+        return login.auth_url(self._login_state_value, self._ui_language())
+
     @Slot()
     def startBrowserLogin(self) -> None:
         self._login_state_value = login.new_state()
         self._login_update(waiting=True, error="")
-        QDesktopServices.openUrl(QUrl(login.auth_url(self._login_state_value)))
+        QDesktopServices.openUrl(QUrl(login.auth_url(self._login_state_value, self._ui_language())))
 
     @Slot()
     def checkClipboard(self) -> None:
@@ -526,6 +549,8 @@ def main() -> int:
     start = "--start" in sys.argv[1:]
     if instance.forward("start" if start else "show"):
         return 0
+    if QtWebEngineQuick is not None:
+        QtWebEngineQuick.initialize()  # muss vor der QGuiApplication laufen
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Tretlager")
     app.setOrganizationDomain("linuxundich.de")

@@ -27,7 +27,9 @@ def test_parse_redirect_ok_and_state():
 @pytest.mark.parametrize("url,msg", [
     ("https://example.com/launcher?code=x", "nicht die Adresse"),
     ("https://launcher.zwift.com/launcher?state=abc", "fehlt"),
-    ("https://launcher.zwift.com/launcher?error=access_denied", "Fehler"),
+    ("https://launcher.zwift.com/launcher?error=access_denied", "abgebrochen"),
+    ("https://launcher.zwift.com/launcher?error=login_required", "erneut anmelden"),
+    ("https://launcher.zwift.com/launcher?error=something_new", "something_new"),
 ])
 def test_parse_redirect_errors(url, msg):
     with pytest.raises(login.LoginError, match=msg):
@@ -100,3 +102,8 @@ def test_valid_token_none_when_expired():
     assert login.valid_token(FakeKeyring(None)) is None
     expired = {"obtained_at": 0, "expires_in": 1, "refresh_expires_in": 1, "refresh_token": "r"}
     assert login.valid_token(FakeKeyring(expired)) is None
+
+
+def test_auth_url_language():
+    assert "ui_locales=de" in login.auth_url("s", "de")
+    assert "ui_locales" not in login.auth_url("s")

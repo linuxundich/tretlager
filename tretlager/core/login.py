@@ -2,10 +2,12 @@
 
 Die offizielle Anmeldung im Launcher 1.2 funktioniert unter Wine nicht (WebView2CompositionControl
 braucht Windows.UI.Composition, siehe FEASIBILITY.md T2). Ersatz:
-  1. Der Nutzer meldet sich im eigenen Browser auf secure.zwift.com an. Tretlager sieht das
-     Passwort nie.
-  2. Der Browser landet auf launcher.zwift.com/launcher?…&code=… (die Seite zeigt „Bad Request“).
-     Diese Adresse gibt der Nutzer an Tretlager (Zwischenablage oder Einfügen).
+  1. Die Anmeldeseite von secure.zwift.com erscheint in einem eingebetteten, privaten
+     Browserfenster (QtWebEngine), wie im offiziellen Launcher. Tretlager liest die Seite nicht aus.
+     Ausweichweg: der eigene Browser (Passwortmanager, Anmeldung mit Google oder Apple).
+  2. Zwift springt auf launcher.zwift.com/launcher?…&code=… zurück; andere Rücksprungadressen
+     (localhost usw.) lehnt Zwift ab (geprüft 2026-10-30). Das eingebettete Fenster fängt diese
+     Adresse ab, bevor die Seite („Bad Request“) lädt. Im eigenen Browser kopiert der Nutzer sie.
   3. Tretlager tauscht den Code gegen ein Token und erneuert es später selbst.
 Das nutzt die nicht dokumentierte Launcher-Anmeldung (client_id Game_Launcher) und widerspricht
 §5 der Zwift-Nutzungsbedingungen; deshalb nur nach Zustimmung und mit Hinweis.
@@ -40,10 +42,28 @@ def new_state() -> str:
     return pysecrets.token_hex(16)
 
 
-def auth_url(state_value: str) -> str:
-    q = urllib.parse.urlencode({"response_type": "code", "client_id": CLIENT_ID, "redirect_uri": REDIRECT,
-                                "scope": "openid", "login": "true", "state": state_value})
+def auth_url(state_value: str, language: str = "") -> str:
+    """Adresse der Anmeldeseite; `language` (z. B. „de“) wählt die Sprache der Zwift-Seite."""
+    params = {"response_type": "code", "client_id": CLIENT_ID, "redirect_uri": REDIRECT,
+              "scope": "openid", "login": "true", "state": state_value}
+    if language:
+        params["ui_locales"] = language
+    q = urllib.parse.urlencode(params)
     return f"{REALM}/auth?{q}"
+
+
+# Fehlercodes aus OAuth/OpenID Connect als Satz für den Nutzer
+ERROR_TEXT = {
+    "access_denied": "Die Anmeldung wurde abgebrochen.",
+    "login_required": "Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden.",
+    "interaction_required": "Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden.",
+    "temporarily_unavailable": "Die Zwift-Anmeldung ist gerade nicht erreichbar. Bitte später erneut versuchen.",
+    "server_error": "Bei der Zwift-Anmeldung ist ein Fehler aufgetreten. Bitte später erneut versuchen.",
+}
+
+
+def _error_text(code: str) -> str:
+    return ERROR_TEXT.get(code, f"Zwift hat die Anmeldung nicht abgeschlossen (Fehler „{code}“). Bitte erneut anmelden.")
 
 
 def parse_redirect(url: str, expected_state: str | None = None) -> str:
@@ -54,7 +74,7 @@ def parse_redirect(url: str, expected_state: str | None = None) -> str:
         raise LoginError("Das ist nicht die Adresse nach der Zwift-Anmeldung (launcher.zwift.com/launcher?…).")
     q = urllib.parse.parse_qs(parsed.query)
     if "error" in q:
-        raise LoginError("Zwift meldet einen Fehler bei der Anmeldung: " + q["error"][0])
+        raise LoginError(_error_text(q["error"][0]))
     code = (q.get("code") or [""])[0]
     if not code:
         raise LoginError("In der Adresse fehlt der Anmeldecode (code=…).")

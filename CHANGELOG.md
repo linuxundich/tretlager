@@ -4,6 +4,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-30
+
+### Geändert
+- Anmeldung bei Zwift ohne Fehlerseite: Die Anmeldeseite öffnet sich in einem eingebetteten,
+  privaten Fenster (QtWebEngine, ohne Cookies auf der Platte), wie im offiziellen Launcher.
+  Tretlager fängt den Rücksprung ab, bevor „Bad Request“ erscheint; Kopieren der Adresse
+  entfällt. Andere Rücksprungadressen lässt Zwift nicht zu.
+- Die Anmeldeseite erscheint in der Systemsprache (`ui_locales`).
+- Fehlercodes von Zwift (z. B. `login_required`, `access_denied`) erscheinen als Klartext.
+- Der eigene Browser bleibt als Ausweichweg, etwa für Passwortmanager oder die Anmeldung mit
+  Google oder Apple.
+- Neue Paketabhängigkeiten: `python3-pyside6.qtwebenginequick`, `qml6-module-qtwebengine`.
+
 ## [0.5.1] - 2026-10-30
 
 ### Entfernt
