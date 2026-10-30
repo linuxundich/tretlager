@@ -56,6 +56,11 @@ def set_local_only(local_only: bool, run=subprocess.run) -> None:
     _busctl("SetLocalOnly", "b", local_only, run=run)
 
 
+def set_adapter(address: str, run=subprocess.run) -> None:
+    """Bluetooth-Adapter per Adresse wählen; leer = Standardadapter von BlueZ."""
+    _busctl("SetAdapter", "s", address, timeout=60, run=run)
+
+
 def _systemctl(*args, run=subprocess.run) -> subprocess.CompletedProcess:
     return run(["systemctl", "--user", *args, BRIDGE_UNIT], capture_output=True, text=True, timeout=30)
 

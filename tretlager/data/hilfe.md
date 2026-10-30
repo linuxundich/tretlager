@@ -66,8 +66,8 @@ Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.**
 |---|---|
 | Pulswerte viel zu hoch | Elektroden des Gurts anfeuchten, Gurt enger stellen, nur einen Gurt tragen |
 | Gerät bleibt bei „Verbindet …“ | Kurz in die Pedale treten, Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden |
-| Gerät verbindet sich nie, obwohl es gefunden wird | Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle zeigt Tretlager als Warnung am Gerät, etwa Garmin HRM-Pro mit Intel AX201; dann hilft nur ein anderer Sensor. Sonst den Sensor an einem anderen Rechner oder Handy gegenprüfen |
-| Verbindung bricht oft ab | Rechner näher an den Trainer stellen oder USB-Bluetooth-Stick mit Verlängerung nutzen |
+| Gerät verbindet sich nie, obwohl es gefunden wird | Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle zeigt Tretlager als Warnung am Gerät, etwa Garmin HRM-Pro mit Intel AX201; dann hilft ein USB-Bluetooth-Stick (unter *Sensoren* → *Bluetooth-Adapter* wählen) oder ein anderer Sensor. Sonst den Sensor an einem anderen Rechner oder Handy gegenprüfen |
+| Verbindung bricht oft ab | Rechner näher an den Trainer stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen und unter *Sensoren* → *Bluetooth-Adapter* wählen |
 | Zwift findet die Sensoren nicht | Seitenleiste → *Sensoren*: Läuft die Bridge, sind die Geräte verbunden? |
 | Bild unscharf unter Plasma | *Systemeinstellungen* → *Anzeige* → *Legacy-Anwendungen (X11)*: *Skalierung selbst anwenden* |
 | Zwift hängt nach dem Ab- oder Anstecken des Netzteils | Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten; hängt es weiter, Rechner neu starten. Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören (im Journal „NVRM: Xid“) |

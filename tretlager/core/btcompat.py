@@ -12,7 +12,9 @@ Neue Fälle als Eintrag in KNOWN_ISSUES ergänzen – nur mit echtem Befund.
 
 from __future__ import annotations
 
+import json
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,8 +53,9 @@ KNOWN_ISSUES = [
         device_name="Garmin HRM-Pro",
         text="Der Garmin HRM-Pro verträgt sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}): "
              "Er wird gefunden, aber die Verbindung kommt nie zustande. Das liegt nicht an Reichweite "
-             "oder Batterie. Abhilfe: einen anderen Pulsgurt nutzen, zum Beispel einen Wahoo TICKR. "
-             "Mit anderen Chips (getestet: Intel AX200) funktioniert der Gurt.",
+             "oder Batterie. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter Sensoren als "
+             "Bluetooth-Adapter wählen oder einen anderen Pulsgurt nutzen, zum Beispiel einen Wahoo "
+             "TICKR. Mit anderen Chips (getestet: Intel AX200) funktioniert der Gurt.",
     ),
 ]
 
@@ -71,6 +74,23 @@ def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:
         except OSError:
             continue
     return Chip(usb_id, CHIP_NAMES.get(usb_id, f"USB {usb_id}" if usb_id else "unbekannter Chip"))
+
+
+def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:
+    """Alle Bluetooth-Adapter: hciN, Adresse (von BlueZ) und Chip; zur Auswahl in der Oberfläche."""
+    out = []
+    for hci in sorted(p.name for p in root.glob("hci*")):
+        chip = adapter_chip(hci, root)
+        try:
+            r = run(["busctl", "--system", "--json=short", "get-property", "org.bluez", f"/org/bluez/{hci}",
+                     "org.bluez.Adapter1", "Address"], capture_output=True, text=True, timeout=5)
+            address = json.loads(r.stdout)["data"].upper() if r.returncode == 0 else ""
+        except (OSError, subprocess.TimeoutExpired, ValueError, KeyError):
+            address = ""
+        if address:
+            out.append({"hci": hci, "address": address, "chip": chip.name if chip else "unbekannter Chip",
+                        "usb_id": chip.usb_id if chip else ""})
+    return out
 
 
 def issue_for(chip: Chip | None, device_name: str) -> str:

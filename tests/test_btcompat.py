@@ -39,3 +39,13 @@ def test_annotate_adds_field():
     ax201 = btcompat.Chip("8087:0026", "Intel Wi-Fi 6 AX201")
     out = btcompat.annotate([{"name": "HRMPro+:1"}, {"name": "Wahoo KICKR C058"}], ax201)
     assert out[0]["compat"] and out[1]["compat"] == ""
+
+
+def test_list_adapters(tmp_path):
+    _adapter(tmp_path, "8087", "0026")
+
+    def run(cmd, **kw):
+        import subprocess
+        return subprocess.CompletedProcess(cmd, 0, stdout='{"type":"s","data":"a0:b1:c2:d3:e4:f5"}')
+    assert btcompat.list_adapters(tmp_path, run=run) == [
+        {"hci": "hci0", "address": "A0:B1:C2:D3:E4:F5", "chip": "Intel Wi-Fi 6 AX201", "usb_id": "8087:0026"}]

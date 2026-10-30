@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-10-30
+
+### Hinzugefügt
+- Bluetooth-Adapter der Sensor-Bridge wählbar (Sensoren → *Bluetooth-Adapter*), etwa ein
+  USB-Stick mit Verlängerung neben dem Trainer oder als Ausweg bei einem Chip, der einen Sensor
+  nicht verträgt. Gespeichert wird die Adresse des Adapters (`adapter` in `bridge.json`), nicht
+  hciN, weil sich die Nummer beim Umstecken ändern kann. Fehlt der gewählte Adapter, nutzt die
+  Bridge den Standardadapter, zeigt eine Warnung und wechselt von selbst zurück, sobald er wieder
+  da ist. Neue D-Bus-Methode `SetAdapter`.
+- Die Chip-Warnung bezieht sich auf den gewählten Adapter und nennt den USB-Stick als Abhilfe.
+
+### Behoben
+- Die Bridge nutzte fest `hci0`; ein zusätzlicher USB-Stick blieb ungenutzt.
+
 ## [0.6.2] - 2026-10-30
 
 ### Hinzugefügt

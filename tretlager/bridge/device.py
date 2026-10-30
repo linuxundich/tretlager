@@ -35,9 +35,9 @@ _PROPS = {"read": dircon.PROP_READ, "write": dircon.PROP_WRITE, "write-without-r
           "notify": dircon.PROP_NOTIFY, "indicate": dircon.PROP_INDICATE}
 
 
-async def bluez_disconnect(address: str) -> None:
+async def bluez_disconnect(address: str, adapter: str = "") -> None:
     """Gerät in BlueZ trennen, falls es noch verbunden ist (Fehler werden ignoriert)."""
-    path = "/org/bluez/hci0/dev_" + address.upper().replace(":", "_")
+    path = f"/org/bluez/{adapter or 'hci0'}/dev_" + address.upper().replace(":", "_")
     try:
         bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
     except Exception:
@@ -66,9 +66,10 @@ class BridgedDevice:
     """Verbindet ein BLE-Gerät und spiegelt dessen Standarddienste über DIRCON."""
 
     def __init__(self, cfg: DeviceConfig, announcer: Announcer, on_change: Callable[[], None],
-                 local_only: bool = True):
+                 local_only: bool = True, adapter: str = ""):
         self.cfg = cfg
         self.local_only = local_only
+        self.adapter = adapter  # hciN, leer = Standardadapter
         self.announcer = announcer
         self.on_change = on_change
         self.state = "getrennt"  # getrennt, verbinde, verbunden, fehler
@@ -207,9 +208,9 @@ class BridgedDevice:
         # Eine verwaiste BlueZ-Verbindung (z. B. nach einem abgebrochenen Versuch) verhindert,
         # dass das Gerät wieder wirbt; dann findet bleak es nicht mehr.
         async with connect_lock:
-            await bluez_disconnect(self.cfg.address)
+            await bluez_disconnect(self.cfg.address, self.adapter)
             client = BleakClient(self.cfg.address, disconnected_callback=lambda _c: self._disconnected.set(),
-                                 timeout=CONNECT_TIMEOUT)
+                                 timeout=CONNECT_TIMEOUT, bluez={"adapter": self.adapter} if self.adapter else {})
             self._client = client  # auch bei Fehlschlag in _teardown trennen
             await client.connect()
         self._services = self._collect_services(client)

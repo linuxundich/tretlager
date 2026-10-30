@@ -346,13 +346,15 @@ class Backend(QObject):
     def _init_sensors(self) -> None:
         self._sensors = {"installed": True, "running": False, "autostart": False, "network": False,
                          "devices": [], "scanning": False,
-                         "found": [], "scanned": False, "error": ""}
+                         "found": [], "scanned": False, "error": "",
+                         "adapters": [], "adapter": "", "adapterHci": "", "adapterMissing": False}
+        self._chip = btcompat.adapter_chip()
         self._sensorsEvent.connect(self._on_sensors_event)
         self._poll = QTimer(self)
         self._poll.setInterval(1500)
         self._poll.timeout.connect(self.refreshSensors)
         self._poll_busy = False
-        self._chip = btcompat.adapter_chip()
+        self._adapters_at = 0.0
 
     @Property("QVariantMap", notify=sensorsChanged)
     def sensors(self) -> dict:
@@ -387,11 +389,20 @@ class Backend(QObject):
         def work():
             try:
                 st = bridgectl.status()
-                self._sensorsEvent.emit({
+                ev = {}
+                # Adapterliste seltener auffrischen (je Adapter ein busctl-Aufruf).
+                if time.monotonic() - self._adapters_at > 10:
+                    self._adapters_at = time.monotonic()
+                    ev["adapters"] = btcompat.list_adapters()
+                chip = btcompat.adapter_chip((st or {}).get("adapter_hci") or "hci0")
+                self._chip = chip
+                self._sensorsEvent.emit(dict(ev, **{
                     "installed": bridgectl.unit_installed(), "running": st is not None,
                     "autostart": bridgectl.autostart(),
-                    "devices": btcompat.annotate((st or {}).get("devices", []), self._chip),
-                    "network": not (st or {}).get("local_only", True)})
+                    "adapter": (st or {}).get("adapter", ""), "adapterHci": (st or {}).get("adapter_hci", ""),
+                    "adapterMissing": (st or {}).get("adapter_missing", False),
+                    "devices": btcompat.annotate((st or {}).get("devices", []), chip),
+                    "network": not (st or {}).get("local_only", True)}))
             finally:
                 self._poll_busy = False
         self._bg(work)
@@ -404,6 +415,12 @@ class Backend(QObject):
     def setBridgeNetwork(self, on: bool) -> None:
         """Bridge auch für Zwift auf anderen Geräten im Netz anbieten (statt nur 127.0.0.1)."""
         self._bg(lambda: (bridgectl.set_local_only(not on), self.refreshSensors()))
+
+    @Slot(str)
+    def setBridgeAdapter(self, address: str) -> None:
+        """Adapter wählen; die Bridge verbindet die Geräte darüber neu."""
+        self._adapters_at = 0.0
+        self._bg(lambda: (bridgectl.set_adapter(address), self.refreshSensors()))
 
     @Slot(bool)
     def setBridgeAutostart(self, on: bool) -> None:

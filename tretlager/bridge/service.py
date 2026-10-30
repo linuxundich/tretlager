@@ -18,7 +18,7 @@ from dbus_fast.aio import MessageBus
 from dbus_fast.service import ServiceInterface, method, signal as dbus_signal
 
 from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH
-from . import gatt
+from . import adapters, gatt
 from .config import BridgeConfig
 from .device import BridgedDevice, connect_lock
 from .mdns import Announcer
@@ -36,6 +36,29 @@ class Bridge(ServiceInterface):
         self.devices: dict[str, BridgedDevice] = {}
         self.scanning = False
         self._dirty = True
+        self.adapters: dict[str, str] = {}  # hciN → Adresse laut BlueZ
+        self.hci = ""  # aufgelöster Adapter, leer = Standard
+        self.adapter_missing = False
+        self._adapter_check = 0
+
+    async def resolve_adapter(self) -> bool:
+        """Gewählten Adapter auflösen; True, wenn sich der genutzte Adapter geändert hat."""
+        self.adapters = await adapters.bluez_adapters()
+        hci, missing = adapters.resolve(self.config.adapter, self.adapters)
+        changed = hci != self.hci
+        newly_missing = missing and not self.adapter_missing
+        self.hci, self.adapter_missing = hci, missing
+        if newly_missing:
+            log.warning("Adapter %s fehlt, nutze Standardadapter", self.config.adapter)
+        if changed:
+            log.info("Adapter: %s", hci or "Standard")
+        return changed
+
+    async def restart_devices(self) -> None:
+        for address in list(self.devices):
+            await self._stop(address)
+        self.start_devices()
+        self._mark_dirty()
 
     # --- Lebenszyklus ---
 
@@ -47,7 +70,8 @@ class Bridge(ServiceInterface):
     def _start(self, address: str) -> None:
         cfg = self.config.find(address)
         if cfg and address not in self.devices:
-            dev = BridgedDevice(cfg, self.announcer, self._mark_dirty, local_only=self.config.local_only)
+            dev = BridgedDevice(cfg, self.announcer, self._mark_dirty, local_only=self.config.local_only,
+                                adapter=self.hci)
             self.devices[address] = dev
             dev.start()
 
@@ -64,6 +88,11 @@ class Bridge(ServiceInterface):
     async def tick(self) -> None:
         while True:
             await asyncio.sleep(TICK)
+            # Fehlt der gewählte Adapter (USB-Stick abgezogen), regelmäßig nachsehen, ob er wieder da ist.
+            self._adapter_check += 1
+            if self.adapter_missing and self._adapter_check % 10 == 0:
+                if await self.resolve_adapter():
+                    await self.restart_devices()
             live = any(d.state == "verbunden" for d in self.devices.values())
             if self._dirty or live:
                 self._dirty = False
@@ -83,7 +112,8 @@ class Bridge(ServiceInterface):
                                 "enabled": cfg.enabled, "port": cfg.port, "state": "aus",
                                 "error": "", "services": [], "zwift_clients": 0, "values": {}})
         return json.dumps({"running": True, "scanning": self.scanning, "local_only": self.config.local_only,
-                           "devices": devices})
+                           "adapter": self.config.adapter, "adapter_hci": self.hci or next(iter(self.adapters), ""),
+                           "adapter_missing": self.adapter_missing, "devices": devices})
 
     # --- D-Bus ---
 
@@ -118,7 +148,8 @@ class Bridge(ServiceInterface):
         for attempt in range(3):
             try:
                 async with connect_lock:
-                    return await BleakScanner.discover(timeout=seconds, return_adv=True)
+                    return await BleakScanner.discover(timeout=seconds, return_adv=True,
+                                                       bluez={"adapter": self.hci} if self.hci else {})
             except BleakDBusError as e:
                 if "InProgress" not in e.dbus_error or attempt == 2:
                     raise
@@ -163,10 +194,19 @@ class Bridge(ServiceInterface):
             return True
         self.config.local_only = local_only
         self.config.save()
-        for address in list(self.devices):
-            await self._stop(address)
-        self.start_devices()
-        self._mark_dirty()
+        await self.restart_devices()
+        return True
+
+    @method()
+    async def SetAdapter(self, address: "s") -> "b":
+        """Bluetooth-Adapter per Adresse wählen (leer = Standard); Geräte darüber neu verbinden."""
+        address = address.upper()
+        if address == self.config.adapter:
+            return True
+        self.config.adapter = address
+        self.config.save()
+        await self.resolve_adapter()
+        await self.restart_devices()
         return True
 
     @dbus_signal()
@@ -180,6 +220,7 @@ async def run() -> None:
     bus.export(BRIDGE_OBJECT_PATH, bridge)
     await bus.request_name(BRIDGE_BUS_NAME)
     log.info("Bridge bereit, %d Gerät(e) konfiguriert", len(bridge.config.devices))
+    await bridge.resolve_adapter()
     bridge.start_devices()
 
     stop = asyncio.Event()

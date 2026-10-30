@@ -47,6 +47,16 @@ FormCard.FormCardPage {
         Layout.maximumWidth: Kirigami.Units.gridUnit * 30
         Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Kirigami.Units.largeSpacing
+        visible: page.se.running && page.se.adapterMissing
+        type: Kirigami.MessageType.Warning
+        text: "Der gewählte Bluetooth-Adapter ist nicht angeschlossen. Bis er wieder da ist, nutzt die "
+              + "Bridge den Standardadapter und wechselt danach von selbst zurück."
+    }
+    Kirigami.InlineMessage {
+        Layout.fillWidth: true
+        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: Kirigami.Units.largeSpacing
         visible: page.unstable.length > 0
         type: Kirigami.MessageType.Warning
         text: "Die Verbindung zu " + page.unstable.map(function (d) { return d.name }).join(", ")
@@ -71,6 +81,27 @@ FormCard.FormCardPage {
             checked: page.se.running
             enabled: page.se.installed
             onToggled: backend.setBridgeRunning(checked)
+        }
+        FormCard.FormDelegateSeparator { visible: page.se.adapters.length > 0 }
+        FormCard.FormComboBoxDelegate {
+            id: adapterBox
+            visible: page.se.adapters.length > 1
+            text: "Bluetooth-Adapter"
+            description: "Die Bridge verbindet alle Geräte über diesen Adapter. Ein USB-Stick mit "
+                + "Verlängerung neben dem Trainer hilft bei Funklöchern und bei Chips, die einen Sensor nicht vertragen."
+            enabled: page.se.running
+            model: page.se.adapters.map(function (a) { return a.chip + " (" + a.hci + ")" })
+            currentIndex: page.se.adapters.findIndex(function (a) { return a.hci === page.se.adapterHci })
+            onActivated: function (index) { backend.setBridgeAdapter(page.se.adapters[index].address) }
+        }
+        FormCard.FormTextDelegate {
+            visible: page.se.adapters.length === 1
+            text: "Bluetooth-Adapter"
+            description: page.se.adapters.length ? page.se.adapters[0].chip : ""
+            trailing: Kirigami.ContextualHelpButton {
+                toolTipText: "Bei Funklöchern oder einem Chip, der einen Sensor nicht verträgt, hilft ein "
+                    + "USB-Bluetooth-Stick. Ist er angeschlossen, lässt er sich hier auswählen."
+            }
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormSwitchDelegate {

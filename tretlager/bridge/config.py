@@ -30,6 +30,8 @@ class BridgeConfig:
     # True: nur für Zwift auf diesem Rechner (Ankündigung auf 127.0.0.1, robust bei Netzwechsel).
     # False: auch für Zwift auf anderen Geräten im Netz (Apple TV, iPad, zweiter Rechner).
     local_only: bool = True
+    # Adresse des Bluetooth-Adapters (z. B. eines USB-Sticks); leer = Standardadapter von BlueZ.
+    adapter: str = ""
 
     @classmethod
     def load(cls, path: Path | None = None) -> "BridgeConfig":
@@ -39,13 +41,13 @@ class BridgeConfig:
         except FileNotFoundError:
             return cls()
         return cls(devices=[DeviceConfig(**d) for d in raw.get("devices", [])],
-                   local_only=raw.get("local_only", True))
+                   local_only=raw.get("local_only", True), adapter=raw.get("adapter", ""))
 
     def save(self, path: Path | None = None) -> None:
         path = path or config_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
-        tmp.write_text(json.dumps({"local_only": self.local_only,
+        tmp.write_text(json.dumps({"local_only": self.local_only, "adapter": self.adapter,
                                    "devices": [asdict(d) for d in self.devices]}, indent=2) + "\n")
         tmp.replace(path)
 
