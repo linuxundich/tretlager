@@ -81,11 +81,23 @@ for (const w of workspace.windowList()) {
 """
 
 
+def _host_visible_tmpdir() -> str | None:
+    """Ordner für Dateien, die KWin lesen muss. Im Flatpak ist /tmp privat; $XDG_RUNTIME_DIR/app/<ID>
+    sieht der Rechner unter demselben Pfad. Sonst das normale Temp-Verzeichnis (None)."""
+    app_id = os.environ.get("FLATPAK_ID")
+    runtime = os.environ.get("XDG_RUNTIME_DIR")
+    if app_id and runtime:
+        path = Path(runtime) / "app" / app_id
+        path.mkdir(parents=True, exist_ok=True)
+        return str(path)
+    return None
+
+
 def maximize_window_kde(log: Callable[[str], None]) -> bool:
     """Zwift-Fenster unter KWin maximieren (über der Plasma-Leiste). False außerhalb von KDE."""
     if "KDE" not in os.environ.get("XDG_CURRENT_DESKTOP", "") or not shutil.which("gdbus"):
         return False
-    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, dir=_host_visible_tmpdir()) as f:
         f.write(KWIN_SCRIPT)
         script = f.name
     try:

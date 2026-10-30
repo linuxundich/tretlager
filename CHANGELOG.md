@@ -4,6 +4,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+### Behoben
+- Zwift-Fenster im Flatpak nicht maximiert (unten abgeschnitten): Das KWin-Skript lag im privaten
+  `/tmp` der Sandbox, das KWin nicht sieht. Es liegt nun in `$XDG_RUNTIME_DIR/app/<App-ID>`, das
+  Rechner und Sandbox unter demselben Pfad sehen.
+
 ### Hinzugefügt
 - Flatpak-Machbarkeitstest F0 (`build-aux/flatpak/spike/`, siehe `docs/flatpak.md`): Wegwerf-Manifest
   mit Wine 11.20 aus den Quellen (WoW64 per mingw), Python-Paketen, cabextract und osslsigncode.

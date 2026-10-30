@@ -112,3 +112,12 @@ def test_desktop_files_offer_direct_start():
     zwift = (root / "de.linuxundich.Tretlager.Zwift.desktop.in").read_text()
     assert "Actions=start;" in main and "--start" in main
     assert "--start" in zwift and "Icon=de.linuxundich.Tretlager" in zwift
+
+
+def test_kwin_script_dir_visible_from_host(monkeypatch, tmp_path):
+    from tretlager.core import launch
+    monkeypatch.delenv("FLATPAK_ID", raising=False)
+    assert launch._host_visible_tmpdir() is None
+    monkeypatch.setenv("FLATPAK_ID", "de.linuxundich.Tretlager")
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    assert launch._host_visible_tmpdir() == str(tmp_path / "app" / "de.linuxundich.Tretlager")
