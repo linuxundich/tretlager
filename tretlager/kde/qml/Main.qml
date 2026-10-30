@@ -17,18 +17,22 @@ Kirigami.ApplicationWindow {
     // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
     readonly property var steps: ["Prüfen", "Vorbereiten", "Zwift", "Anmeldung", "Sensoren", "Fertig"]
 
-    // Seitenleiste erst nach der Einrichtung; der Assistent ist ein linearer Ablauf ohne Sprünge.
-    property bool navigation: false
+    // Assistent: linearer Ablauf mit Schrittanzeige. Bei der ersten Einrichtung ohne Seitenleiste
+    // (nichts außer dem Assistenten ergibt dann Sinn); über „Einrichtung prüfen“ nach der
+    // Einrichtung bleibt die Seitenleiste nutzbar, und der Assistent beginnt gleich bei Schritt 1.
     property string current: ""
+    readonly property bool inWizard: current === "setup"
+    readonly property bool navigation: !inWizard || backend.setupComplete
     readonly property var destinations: ({
         "overview": "MainPage.qml", "sensors": "SensorsPage.qml", "help": "HelpPage.qml",
-        "about": "AboutPage.qml", "setup": "WelcomePage.qml" })
+        "about": "AboutPage.qml" })
 
     function show(name, props) {
         current = name
-        navigation = name !== "setup"
         pageStack.clear()
-        pageStack.push(Qt.resolvedUrl(destinations[name]), props || {})
+        const page = name === "setup" ? (backend.setupComplete ? "CheckPage.qml" : "WelcomePage.qml")
+                                      : destinations[name]
+        pageStack.push(Qt.resolvedUrl(page), props || {})
     }
 
     globalDrawer: Kirigami.GlobalDrawer {
@@ -65,6 +69,8 @@ Kirigami.ApplicationWindow {
             Kirigami.Action {
                 text: "Einrichtung prüfen"
                 icon.name: "tools-wizard"
+                checkable: true
+                checked: root.inWizard
                 onTriggered: root.show("setup")
             },
             Kirigami.Action {

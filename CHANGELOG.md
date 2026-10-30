@@ -4,6 +4,19 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.10] - 2026-10-30
+
+### Behoben
+- *Einrichtung prüfen* in der Seitenleiste schaltete die Seitenleiste ab; aus dem Assistenten
+  ging es nicht mehr heraus. Assistentenmodus und Seitenleiste sind jetzt getrennt
+  (`inWizard` bzw. `navigation` in `Main.qml`): Nach abgeschlossener Einrichtung bleibt die
+  Seitenleiste nutzbar, der Eintrag ist markiert, und die Fußleiste hat *Assistent schließen*.
+  Ohne Seitenleiste läuft nur noch die erste Einrichtung.
+
+### Geändert
+- *Einrichtung prüfen* beginnt nach der Einrichtung gleich bei Schritt 1 (System prüfen) statt
+  bei der Willkommensseite.
+
 ## [0.6.9] - 2026-10-30
 
 ### Geändert

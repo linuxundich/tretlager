@@ -9,7 +9,7 @@ ColumnsPage {
     id: page
     title: "Sensoren"
 
-    property bool wizard: !applicationWindow().navigation
+    property bool wizard: applicationWindow().inWizard
     readonly property var se: backend.sensors
     readonly property var unstable: se.devices.filter(function (d) { return d.unstable && !d.compat })
     readonly property var roleText: ({ "trainer": "Smart-Trainer", "power": "Leistungsmesser",

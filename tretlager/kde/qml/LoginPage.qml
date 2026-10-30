@@ -11,7 +11,7 @@ ColumnsPage {
 
     readonly property var li: backend.loginInfo
     readonly property bool signedIn: li.state === "valid" || li.state === "refreshable"
-    readonly property bool wizard: !applicationWindow().navigation
+    readonly property bool wizard: applicationWindow().inWizard
 
     function days(s) { return Math.round(s / 86400) }
 
