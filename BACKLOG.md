@@ -99,3 +99,12 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] Englische Oberfläche (0.7.0, gettext, `po/en.po`)
 - [ ] Neue Texte: `po/update.sh` (auf dem Arch-Rechner mit gettext), Übersetzung in `po/en.po`
   ergänzen; `tests/test_i18n.py` meldet Lücken
+
+## Flatpak (Plan: docs/flatpak.md)
+
+- [ ] F0 Machbarkeit auf tinytin: Oberfläche, Wine-WoW64 mit .NET/WebView2, Zwift-Start, Bridge, Kleinkram; Ausstieg: echte Fahrt
+- [ ] F1 Manifest und Bau (PySide-BaseApp 6.11, Kirigami Addons, Wine-Tarball, Python-Pakete)
+- [ ] F2 Code: Assistent ohne Vorbereiten, Wine-Pfade, Bridge per Portal statt systemd, Bridge-Version
+- [ ] F3 Umstieg vom Debian-Paket auf tinytin (Daten bleiben)
+- [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
+- [ ] F5 Abnahme: frisches TUXEDO OS, zweite Distribution, lange Fahrt; danach Debian-Paket einfrieren
