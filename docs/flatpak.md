@@ -18,9 +18,7 @@ Flatpak Phase F5 bestanden hat.
 
 ## Offene Kernfragen (entscheiden über das Vorhaben)
 
-1. **Kirigami Addons** (FormCard, Components) ist vermutlich nicht in `org.kde.Platform`; KDE-Apps
-   auf Flathub bauen es als eigenes Modul mit (CMake, wenige Minuten). Prüfen und ggf. als Modul
-   aufnehmen.
+1. ~~Kirigami Addons~~ – geklärt: in `org.kde.Platform//6.11` enthalten (1.13.1).
 2. **Wine in der KDE-Laufzeit.** `org.winehq.Wine` ist eine eigenständige App auf der
    Freedesktop-Laufzeit und lässt sich nicht einbinden. Plan: Wine als WoW64-Build ins Paket
    (Kron4ek `wine-11.20-amd64-wow64.tar.xz`, Prüfsumme fest im Manifest). WoW64 braucht keine
@@ -43,15 +41,30 @@ Wegwerf-Manifest unter `build-aux/flatpak/spike/`, gebaut auf dem Arch-Rechner, 
 tinytin aus einer lokalen Quelle. Der laufende Tretlager (Debian-Paket) bleibt unangetastet;
 die Bridge des Pakets während der Tests stoppen.
 
-- [ ] a) Oberfläche: PySide-BaseApp + Kirigami Addons + Tretlager-Quellen → Fenster startet,
-      FormCards, Hilfe, Anmeldefenster (WebEngine) zeigt die Zwift-Seite.
-- [ ] b) Wine: WoW64-Build im Flatpak → `wineboot`, Grafiktest auf NVIDIA, winetricks
-      (`corefonts`, `dotnet48`, `webview2`, `d3dcompiler_47`) in einem neuen Präfix.
-- [ ] c) Zwift: Launcher und Spiel im neuen Präfix starten (Token-Start wie bisher); danach eine
-      Kopie des bestehenden Präfixes (8,6 GB) gegen das Flatpak-Wine testen.
-- [ ] d) Bridge: Scan, KICKR + HRM-Pro über den UB500, Ankündigung per Avahi, Zwift koppelt.
-- [ ] e) Kleinkram: `/sys/class/bluetooth` und `/sys/class/power_supply` lesbar, Schlüsselbund
-      (`org.freedesktop.secrets`), Benachrichtigungen, KWin-Skript zum Maximieren.
+- [x] a) Oberfläche: PySide-BaseApp + Tretlager-Quellen → Fenster, FormCards, Plasma-Stil;
+      Anmeldefenster (WebEngine) zeigt die Zwift-Seite.
+- [x] b) Wine: fertige Kron4ek-WoW64-Builds stürzen in **jeder** Flatpak-Laufzeit ab
+      (`virtual_init`, Code 139), das offizielle `org.winehq.Wine//wow64` läuft → Wine 11.20 aus den
+      Quellen gebaut (mingw-w64-Erweiterung 25.08, `--enable-archs=i386,x86_64`). Braucht
+      `--allow=multiarch` (sonst bleibt `syswow64` leer). corefonts, .NET 4.8, WebView2 ok.
+- [x] c) Zwift: Launcher und Spiel im neuen Präfix, Grafiktest „NVIDIA GeForce RTX 3050 Ti“
+      (OpenGL 4.6, 580.178.04) über die GL-Erweiterung; Start mit Token aus dem Schlüsselbund.
+      Offen: Kopie des bestehenden Präfixes gegen das Flatpak-Wine.
+- [x] d) Bridge im Flatpak: BlueZ (UB500), Avahi, D-Bus-Name; Zwift im Flatpak koppelt KICKR
+      (automatisch) und HRM-Pro.
+- [x] e) sysfs (Netzteil, Bluetooth-Chip), Schlüsselbund, Benachrichtigungen (gdbus), KWin-Skript
+      (nach Korrektur, Skript in `$XDG_RUNTIME_DIR/app/<ID>`).
+
+**Ergebnis F0 (30.10.): machbar.** Eine echte Fahrt fehlt noch, alle Bausteine laufen. Erkenntnisse für
+F1/F2:
+
+- In der Sandbox fehlen `busctl`, `systemctl`, `journalctl`, `bluetoothctl`: `bridgectl`,
+  Systemprüfung (Bluetooth) und Adapterliste auf `gdbus` bzw. dbus-fast umstellen.
+- Systemprüfung: Betriebssystem aus `/run/host/os-release`; NVIDIA über `/proc/driver/nvidia/version`
+  (`/sys/module/nvidia` fehlt); Wine „im Paket“.
+- `--socket=x11` statt `fallback-x11` (Wine nähme sonst den Wayland-Treiber).
+- Kirigami Addons 1.13.1 ist in `org.kde.Platform//6.11`, kein eigenes Modul nötig.
+- Bauen auf tinytin (20 Kerne): Wine-Modul dauert dort einige Minuten.
 
 **Ausstiegskriterium:** eine echte Fahrt mit dem Spike-Flatpak. Scheitert b) oder c), Wine im
 Manifest selbst bauen (F0 wiederholen) oder das Vorhaben zurückstellen.
