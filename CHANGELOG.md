@@ -4,6 +4,22 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.8] - 2026-10-30
+
+### Hinzugefügt
+- Sensoren pausieren (Knopf an jedem gekoppelten Sensor): Die Bridge sucht einen pausierten
+  Sensor nicht, verbindet ihn nicht und bietet ihn Zwift nicht an; die Kopplung bleibt erhalten.
+  Gedacht für Sensoren, die gerade nicht genutzt werden, als Vorstufe zum Entfernen. Pausierte
+  Sensoren erscheinen gedimmt mit „Pausiert“, auch in der Übersicht. Nutzt die vorhandene
+  D-Bus-Methode `SetDeviceEnabled`.
+- *Bei Problemen*: Einträge „Sensor gerade nicht in Gebrauch“ und „Zwift findet die Sensoren
+  nicht“; Hilfe ergänzt.
+
+### Geändert
+- Gerätezeile: dritte Zeile nur noch „In Zwift: …“ (die Rolle zeigt das Symbol), Wertespalte
+  etwas schmaler. „Verbindet …“ heißt in Hilfe und Problemliste jetzt wie in der Zeile
+  „Sucht das Gerät …“.
+
 ## [0.6.7] - 2026-10-30
 
 ### Geändert

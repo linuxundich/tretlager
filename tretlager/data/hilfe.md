@@ -65,7 +65,8 @@ Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.**
 | Problem | Abhilfe |
 |---|---|
 | Pulswerte viel zu hoch | Elektroden des Gurts anfeuchten, Gurt enger stellen, nur einen Gurt tragen |
-| Gerät bleibt bei „Verbindet …“ | Kurz in die Pedale treten, Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden |
+| Sensor wird gerade nicht genutzt | Unter *Sensoren* pausieren statt entfernen: Tretlager sucht dann nicht mehr danach und bietet ihn Zwift nicht an; die Kopplung bleibt erhalten |
+| Gerät bleibt bei „Sucht das Gerät …“ | Kurz in die Pedale treten, Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden |
 | Gerät verbindet sich nie, obwohl es gefunden wird | Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle zeigt Tretlager als Warnung am Gerät, etwa Garmin HRM-Pro mit Intel AX201; dann hilft ein USB-Bluetooth-Stick (unter *Sensoren* → *Bluetooth-Adapter* wählen) oder ein anderer Sensor. Sonst den Sensor an einem anderen Rechner oder Handy gegenprüfen |
 | Verbindung bricht oft ab | Rechner näher an den Trainer stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen und unter *Sensoren* → *Bluetooth-Adapter* wählen |
 | Zwift findet die Sensoren nicht | Seitenleiste → *Sensoren*: Läuft die Bridge, sind die Geräte verbunden? |

@@ -125,6 +125,7 @@ ColumnsPage {
                         detailed: true
                         Layout.fillWidth: true
                         onRemoveRequested: backend.removeDevice(modelData.address)
+                        onPauseRequested: function (pause) { backend.setDeviceEnabled(modelData.address, !pause) }
                     }
                 }
             }
@@ -195,7 +196,7 @@ ColumnsPage {
         }
     ]
 
-    // --- Hilfe: über die volle Breite, die vier Fälle in zwei Spalten ---
+    // --- Hilfe: über die volle Breite, die Fälle in zwei Spalten (gerade Anzahl) ---
     bottomCards: [
         FormCard.FormHeader { title: "Bei Problemen" },
         FormCard.FormCard {
@@ -206,9 +207,13 @@ ColumnsPage {
                 rowSpacing: 0
                 Repeater {
                     model: [
+                        ["Sensor gerade nicht in Gebrauch", "media-playback-pause",
+                         "Pausieren statt entfernen: Tretlager sucht dann nicht mehr danach, und die Kopplung bleibt erhalten."],
+                        ["Zwift findet die Sensoren nicht", "network-bluetooth",
+                         "Die Bridge muss laufen. In Zwift unter Gekoppelte Geräte „Wahoo KICKR …“ bzw. „Wahoo HRM …“ wählen."],
                         ["Puls viel zu hoch", "emblem-important",
                          "Elektroden anfeuchten, Gurt enger stellen und nur einen Gurt tragen."],
-                        ["Gerät bleibt bei „Verbindet …“", "view-refresh",
+                        ["Gerät bleibt bei „Sucht das Gerät …“", "view-refresh",
                          "Kurz in die Pedale treten oder den Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden."],
                         ["Gerät verbindet sich nie", "data-warning",
                          "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle meldet Tretlager "

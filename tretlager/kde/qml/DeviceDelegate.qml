@@ -11,8 +11,10 @@ import org.kde.kirigamiaddons.formcard as FormCard
 FormCard.AbstractFormDelegate {
     id: row
     required property var device
-    property bool detailed: false   // Sensorseite: Rolle, Zwift-Name, Entfernen, Chip-Warnung
+    property bool detailed: false   // Sensorseite: Rolle, Zwift-Name, Pausieren, Entfernen, Chip-Warnung
+    readonly property bool paused: device.enabled === false
     signal removeRequested()
+    signal pauseRequested(bool pause)
 
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
@@ -41,7 +43,7 @@ FormCard.AbstractFormDelegate {
         case "verbinde": return "Sucht das Gerät …"
         case "getrennt": return "Getrennt, neuer Versuch folgt"
         case "fehler": return d.error || "Nicht erreichbar"
-        case "aus": return "Ausgeschaltet"
+        case "aus": return "Pausiert"
         }
         return d.state
     }
@@ -49,8 +51,8 @@ FormCard.AbstractFormDelegate {
         switch (d.state) {
         case "verbunden": return "Die Bridge empfängt Daten und bietet das Gerät Zwift an."
         case "verbinde": return "Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein Gurt nicht."
-        case "fehler": return (d.error ? d.error + ". " : "") + "Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät verbunden."
-        case "aus": return "Weiterreichen ist für dieses Gerät abgeschaltet."
+        case "fehler": return (d.error ? d.error + ". " : "") + "Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät verbunden. Wird es gerade nicht genutzt: pausieren."
+        case "aus": return "Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. Fortsetzen, sobald es wieder gebraucht wird."
         }
         return ""
     }
@@ -71,6 +73,7 @@ FormCard.AbstractFormDelegate {
             spacing: Kirigami.Units.largeSpacing
 
             Kirigami.Icon {
+                opacity: row.paused ? 0.55 : 1
                 source: row.device.role === "heartrate" ? row.iconDir + "tretlager-heartrate-symbolic.svg"
                       : row.device.role === "other" ? "network-bluetooth" : row.iconDir + "tretlager-trainer-symbolic.svg"
                 isMask: row.device.role !== "other"
@@ -82,6 +85,7 @@ FormCard.AbstractFormDelegate {
 
             // Name, Zustand, Zwift-Name: je eine Zeile
             ColumnLayout {
+                opacity: row.paused ? 0.55 : 1
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 spacing: 0
@@ -112,8 +116,9 @@ FormCard.AbstractFormDelegate {
                 Controls.Label {
                     visible: row.detailed
                     Layout.fillWidth: true
-                    text: (row.roleText[row.device.role] || "Sensor")
-                          + (row.device.dircon_name ? " · Zwift: " + row.device.dircon_name : "")
+                    // Die Rolle zeigt schon das Symbol; der Zwift-Name ist der Name zum Koppeln in Zwift.
+                    text: row.device.dircon_name ? "In Zwift: " + row.device.dircon_name
+                                                 : (row.roleText[row.device.role] || "Sensor")
                     color: Kirigami.Theme.disabledTextColor
                     font: Kirigami.Theme.smallFont
                     elide: Text.ElideRight
@@ -123,9 +128,10 @@ FormCard.AbstractFormDelegate {
 
             // Messwerte: feste Breite, zwei Zeilen reserviert
             ColumnLayout {
+                opacity: row.paused ? 0.55 : 1
                 Layout.alignment: Qt.AlignVCenter
-                Layout.preferredWidth: Kirigami.Units.gridUnit * 6.5
-                Layout.maximumWidth: Kirigami.Units.gridUnit * 6.5
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 6
+                Layout.maximumWidth: Kirigami.Units.gridUnit * 6
                 spacing: 0
                 Repeater {
                     model: 2
@@ -148,7 +154,7 @@ FormCard.AbstractFormDelegate {
                             id: unitLabel
                             anchors.right: parent.right
                             anchors.baseline: valueLabel.baseline
-                            width: Kirigami.Units.gridUnit * 4.5
+                            width: Kirigami.Units.gridUnit * 4
                             text: parent.spec ? parent.spec[1] : ""
                             color: Kirigami.Theme.disabledTextColor
                             font: Kirigami.Theme.smallFont
@@ -157,6 +163,18 @@ FormCard.AbstractFormDelegate {
                 }
             }
 
+            Controls.ToolButton {
+                visible: row.detailed
+                Layout.alignment: Qt.AlignVCenter
+                icon.name: row.paused ? "media-playback-start" : "media-playback-pause"
+                text: row.paused ? "Fortsetzen" : "Pausieren"
+                display: Controls.AbstractButton.IconOnly
+                Controls.ToolTip.text: row.paused ? "Fortsetzen: wieder suchen und Zwift anbieten"
+                                                  : "Pausieren: nicht mehr suchen, bis zum Fortsetzen"
+                Controls.ToolTip.visible: hovered
+                Controls.ToolTip.delay: Kirigami.Units.toolTipDelay
+                onClicked: row.pauseRequested(!row.paused)
+            }
             Controls.ToolButton {
                 visible: row.detailed
                 Layout.alignment: Qt.AlignVCenter

@@ -441,6 +441,11 @@ class Backend(QObject):
         self._on_sensors_event({"found": [dict(d, configured=d["configured"] or d["address"] == address)
                                           for d in self._sensors["found"]]})
 
+    @Slot(str, bool)
+    def setDeviceEnabled(self, address: str, enabled: bool) -> None:
+        """Sensor pausieren (False) oder fortsetzen: Pausiert sucht die Bridge nicht nach ihm."""
+        self._bg(lambda: (bridgectl.set_device_enabled(address, enabled), self.refreshSensors()))
+
     @Slot(str)
     def removeDevice(self, address: str) -> None:
         self._bg(lambda: (bridgectl.remove_device(address), self.refreshSensors()))
