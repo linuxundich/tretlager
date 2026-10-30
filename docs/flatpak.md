@@ -47,8 +47,8 @@ eingestellt (auf tinytin am 30.10. entfernt) und wird nicht mehr weiterentwickel
 
 ### F0 Machbarkeit auf tinytin (vor jeder Umbauarbeit)
 
-Wegwerf-Manifest unter `build-aux/flatpak/spike/`, gebaut auf dem Arch-Rechner, installiert auf
-tinytin aus einer lokalen Quelle. Der laufende Tretlager (Debian-Paket) bleibt unangetastet;
+Wegwerf-Manifest (`build-aux/flatpak/spike/`, nach F0 durch das echte Manifest ersetzt), installiert
+auf tinytin aus einer Einzeldatei. Der laufende Tretlager (Debian-Paket) bleibt unangetastet;
 die Bridge des Pakets während der Tests stoppen.
 
 - [x] a) Oberfläche: PySide-BaseApp + Tretlager-Quellen → Fenster, FormCards, Plasma-Stil;
@@ -79,7 +79,7 @@ F1/F2:
 **Ausstiegskriterium:** eine echte Fahrt mit dem Spike-Flatpak. Scheitert b) oder c), Wine im
 Manifest selbst bauen (F0 wiederholen) oder das Vorhaben zurückstellen.
 
-### F1 Manifest und Bau
+### F1 Manifest und Bau – erledigt (0.8.0, 30.10.)
 
 - `build-aux/flatpak/de.linuxundich.Tretlager.yml`, Basis `io.qt.PySide.BaseApp//6.11`,
   Laufzeit `org.kde.Platform//6.11`.
@@ -96,7 +96,15 @@ Manifest selbst bauen (F0 wiederholen) oder das Vorhaben zurückstellen.
     ohne eigene Freigabe erlaubt.
 - `build-aux/flatpak/build.sh` wie bei Freisteller/Kulisse (lokale Quelle `repo/`).
 
-### F2 Anpassungen im Code (Erkennung über `/.flatpak-info`)
+### F2 Anpassungen im Code (Erkennung über `/.flatpak-info`) – erledigt (0.8.0)
+
+Umgesetzt: Bridge per D-Bus-Aktivierung (statt Portal-Spawn: der Sitzungsbus startet die
+exportierte Dienstdatei als eigene Instanz) und `Quit`, Autostart über das Background-Portal,
+Bridge-Version mit Neustart nach Update, gdbus statt busctl/systemctl, Assistent ohne
+*Vorbereiten*, Systemprüfung mit Host-os-release und Avahi. Auf tinytin geprüft: Aktivierung,
+`Quit`, Start aus der Oberfläche, Systemprüfung alles grün. Offen: NVIDIA-Fehler nach der Fahrt
+(kein Journal in der Sandbox) entfallen; Autostart über das Portal noch nicht nach einem Neustart
+geprüft.
 
 - **Assistent ohne *Vorbereiten*:** Polkit-Helfer, APT-Plan und WineHQ-Prüfung nur im
   Debian-Paket; im Flatpak fünf Schritte. Systemprüfung: Wine „im Paket enthalten“.

@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=de.linuxundich.Tretlager.Bridge
+Exec=/app/bin/tretlager-bridge

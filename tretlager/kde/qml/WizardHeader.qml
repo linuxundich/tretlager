@@ -3,10 +3,12 @@ import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Kopfzeile der Assistentenseiten: „Schritt n von 6“ und ein kurzer Satz, was jetzt passiert.
+// Kopfzeile der Assistentenseiten: „Schritt n von m“ und ein kurzer Satz, was jetzt passiert.
+// Die Nummer ergibt sich aus der Schrittkennung (im Flatpak entfällt „Vorbereiten“).
 Controls.Control {
     id: header
-    property int step
+    property string stepId
+    readonly property int step: applicationWindow().stepIds.indexOf(stepId) + 1
     property string text
 
     padding: Kirigami.Units.largeSpacing

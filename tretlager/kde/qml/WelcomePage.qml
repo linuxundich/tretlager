@@ -10,7 +10,7 @@ ColumnsPage {
 
     PageHero {
         title: i18n("Zwift unter Linux")
-        text: i18n("Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. Die Einrichtung führt in sechs Schritten durch alles.")
+        text: i18n("Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. Die Einrichtung führt in %1 Schritten durch alles.", applicationWindow().stepIds.length)
     }
 
     leftCards: [
@@ -24,7 +24,7 @@ ColumnsPage {
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
                 text: i18n("Smart-Trainer und Pulsgurt mit Bluetooth")
-                description: i18n("Erst im fünften Schritt nötig")
+                description: i18n("Erst bei Schritt %1 nötig", applicationWindow().stepIds.indexOf("sensors") + 1)
                 icon.name: "network-bluetooth"
             }
         }

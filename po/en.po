@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 10:43+0100\n"
+"POT-Creation-Date: 2026-10-30 12:17+0100\n"
 "PO-Revision-Date: 2026-10-30 09:30+0100\n"
 "Last-Translator: Christoph Langner\n"
 "Language-Team: English\n"
@@ -44,11 +44,23 @@ msgstr "Connection to the device lost"
 msgid "Gerät nicht verbunden"
 msgstr "Device not connected"
 
-#: tretlager/core/bridgectl.py:27
+#: tretlager/core/bridgectl.py:47
+msgid "gdbus fehlt (Paket libglib2.0-bin bzw. glib2)"
+msgstr "gdbus is missing (package libglib2.0-bin or glib2)"
+
+#: tretlager/core/bridgectl.py:49
 msgid "Bridge antwortet nicht"
 msgstr "Bridge does not respond"
 
-#: tretlager/core/btcompat.py:61
+#: tretlager/core/bridgectl.py:62
+msgid "Unerwartete Antwort der Bridge"
+msgstr "Unexpected response from the bridge"
+
+#: tretlager/core/bridgectl.py:159
+msgid "Sensoren beim Anmelden bereithalten"
+msgstr "Keep sensors ready at login"
+
+#: tretlager/core/btcompat.py:62
 #, python-brace-format
 msgid ""
 "Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses "
@@ -64,7 +76,7 @@ msgstr ""
 "the Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another "
 "heart rate strap such as a Wahoo TICKR."
 
-#: tretlager/core/btcompat.py:66
+#: tretlager/core/btcompat.py:67
 #, python-brace-format
 msgid ""
 "Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-"
@@ -73,7 +85,7 @@ msgstr ""
 "Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth "
 "dongle"
 
-#: tretlager/core/btcompat.py:84
+#: tretlager/core/btcompat.py:85
 msgid "unbekannter Chip"
 msgstr "unknown chip"
 
@@ -82,87 +94,87 @@ msgstr "unknown chip"
 msgid "Schnappschuss fehlgeschlagen: {error}"
 msgstr "Snapshot failed: {error}"
 
-#: tretlager/core/launch.py:100
+#: tretlager/core/launch.py:112
 msgid "KWin-Skript ließ sich nicht laden"
 msgstr "Could not load the KWin script"
 
-#: tretlager/core/launch.py:121
+#: tretlager/core/launch.py:133
 msgid "Sensor-Bridge prüfen"
 msgstr "Checking the sensor bridge"
 
-#: tretlager/core/launch.py:123
+#: tretlager/core/launch.py:135
 msgid "Anmeldung prüfen"
 msgstr "Checking the sign-in"
 
-#: tretlager/core/launch.py:130
+#: tretlager/core/launch.py:142
 #, python-brace-format
 msgid "Wine-DPI an den Bildschirm angepasst: {dpi}"
 msgstr "Wine DPI adjusted to the screen: {dpi}"
 
-#: tretlager/core/launch.py:131
+#: tretlager/core/launch.py:143
 msgid "Zwift starten"
 msgstr "Start Zwift"
 
-#: tretlager/core/launch.py:133
+#: tretlager/core/launch.py:145
 msgid "Fenster anpassen"
 msgstr "Adjusting the window"
 
-#: tretlager/core/launch.py:135 tretlager/kde/app.py:589
+#: tretlager/core/launch.py:147 tretlager/kde/app.py:596
 msgid "Zwift läuft"
 msgstr "Zwift is running"
 
-#: tretlager/core/launch.py:139
+#: tretlager/core/launch.py:151
 msgid "Sensor-Bridge nicht installiert, Start ohne Sensoren"
 msgstr "Sensor bridge not installed, starting without sensors"
 
-#: tretlager/core/launch.py:143
+#: tretlager/core/launch.py:155
 msgid "Sensor-Bridge gestartet"
 msgstr "Sensor bridge started"
 
-#: tretlager/core/launch.py:150
+#: tretlager/core/launch.py:162
 #, python-brace-format
 msgid "Update-Prüfung nicht möglich: {error}"
 msgstr "Could not check for updates: {error}"
 
-#: tretlager/core/launch.py:155
+#: tretlager/core/launch.py:167
 #, python-brace-format
 msgid "Zwift wird aktualisiert ({old} → {new})"
 msgstr "Updating Zwift ({old} → {new})"
 
-#: tretlager/core/launch.py:158
+#: tretlager/core/launch.py:170
 #, python-brace-format
 msgid "Schnappschuss vor dem Update: {path}"
 msgstr "Snapshot before the update: {path}"
 
-#: tretlager/core/launch.py:167
+#: tretlager/core/launch.py:179
 #, python-brace-format
 msgid "Zwift aktualisiert auf {version}"
 msgstr "Zwift updated to {version}"
 
-#: tretlager/core/launch.py:170
+#: tretlager/core/launch.py:182
 msgid ""
 "Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."
 msgstr ""
 "The Zwift update did not finish. The snapshot taken before it has been kept."
 
-#: tretlager/core/launch.py:186
+#: tretlager/core/launch.py:198
 msgid "Hilfsprogramm zum Starten ließ sich nicht übersetzen."
 msgstr "Could not compile the start helper."
 
-#: tretlager/core/launch.py:209
+#: tretlager/core/launch.py:221
 msgid "Der Zwift-Launcher startet nicht."
 msgstr "The Zwift launcher does not start."
 
-#: tretlager/core/launch.py:226
+#: tretlager/core/launch.py:238
 #, python-brace-format
 msgid "Zwift ließ sich nicht starten (RunFromProcess, Code {code})."
 msgstr "Could not start Zwift (RunFromProcess, code {code})."
 
-#: tretlager/core/launch.py:229
+#: tretlager/core/launch.py:241
 msgid "Zwift ließ sich nicht starten (Zeitüberschreitung)."
 msgstr "Could not start Zwift (timed out)."
 
-#: tretlager/core/launch.py:251
+#: tretlager/core/launch.py:263
 msgid "Sensor-Bridge gestoppt"
 msgstr "Sensor bridge stopped"
 
@@ -362,86 +374,75 @@ msgstr "Wine gets no OpenGL context; Zwift would not start."
 msgid "Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"
 msgstr "Warning: NVIDIA present, but OpenGL does not run on it"
 
-#: tretlager/core/systemcheck.py:57 tretlager/core/systemcheck.py:62
-#: tretlager/core/systemcheck.py:65 tretlager/core/systemcheck.py:67
+#: tretlager/core/systemcheck.py:61 tretlager/core/systemcheck.py:66
 #: tretlager/core/systemcheck.py:68
 msgid "System"
 msgstr "System"
 
-#: tretlager/core/systemcheck.py:57
+#: tretlager/core/systemcheck.py:61
 msgid "Betriebssystem nicht erkannt"
 msgstr "Operating system not recognised"
 
-#: tretlager/core/systemcheck.py:60
+#: tretlager/core/systemcheck.py:64
 msgid "ohne Codename"
 msgstr "no codename"
 
-#: tretlager/core/systemcheck.py:62
+#: tretlager/core/systemcheck.py:66
 #, python-brace-format
 msgid "{machine} wird nicht unterstützt (Zwift braucht x86-64)"
 msgstr "{machine} is not supported (Zwift needs x86-64)"
 
-#: tretlager/core/systemcheck.py:67
-#, python-brace-format
-msgid "{name}: Debian testing, nicht TUXEDO OS – nicht getestet"
-msgstr "{name}: Debian testing, not TUXEDO OS – untested"
-
-#: tretlager/core/systemcheck.py:68
-#, python-brace-format
-msgid "{name} ist nicht das Zielsystem (TUXEDO OS forky)"
-msgstr "{name} is not the target system (TUXEDO OS forky)"
-
-#: tretlager/core/systemcheck.py:117 tretlager/core/systemcheck.py:127
-#: tretlager/core/systemcheck.py:132 tretlager/core/systemcheck.py:142
+#: tretlager/core/systemcheck.py:122 tretlager/core/systemcheck.py:132
+#: tretlager/core/systemcheck.py:137 tretlager/core/systemcheck.py:147
 msgid "Grafik"
 msgstr "Graphics"
 
-#: tretlager/core/systemcheck.py:117
+#: tretlager/core/systemcheck.py:122
 msgid "Keine Grafikkarte gefunden"
 msgstr "No graphics card found"
 
-#: tretlager/core/systemcheck.py:118
+#: tretlager/core/systemcheck.py:123
 #, python-brace-format
 msgid "{vendor} {device} (Treiber {driver})"
 msgstr "{vendor} {device} (driver {driver})"
 
-#: tretlager/core/systemcheck.py:118
+#: tretlager/core/systemcheck.py:123
 msgid "keiner"
 msgstr "none"
 
-#: tretlager/core/systemcheck.py:119
+#: tretlager/core/systemcheck.py:124
 msgid " – Anzeige"
 msgstr " – display"
 
-#: tretlager/core/systemcheck.py:127
+#: tretlager/core/systemcheck.py:132
 #, python-brace-format
 msgid "NVIDIA-Treiber {version} geladen"
 msgstr "NVIDIA driver {version} loaded"
 
-#: tretlager/core/systemcheck.py:130
+#: tretlager/core/systemcheck.py:135
 msgid ""
 "Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung)."
 msgstr ""
 "Secure Boot is on; the kernel module must be signed (see the TUXEDO guide)."
 
-#: tretlager/core/systemcheck.py:133
+#: tretlager/core/systemcheck.py:138
 msgid "NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen."
 msgstr "NVIDIA card found, but the proprietary driver is not loaded."
 
-#: tretlager/core/systemcheck.py:136
+#: tretlager/core/systemcheck.py:141
 msgid "Hybrid-Grafik"
 msgstr "Hybrid graphics"
 
-#: tretlager/core/systemcheck.py:137
+#: tretlager/core/systemcheck.py:142
 msgid "Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"
 msgstr "Laptop with two graphics chips – Zwift runs on the NVIDIA card"
 
-#: tretlager/core/systemcheck.py:138
+#: tretlager/core/systemcheck.py:143
 #, python-brace-format
 msgid "Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)"
 msgstr "Display via {vendor}, Zwift via PRIME offload (GLX)"
 
-#: tretlager/core/systemcheck.py:143
+#: tretlager/core/systemcheck.py:148
 #, python-brace-format
 msgid ""
 "{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA"
@@ -449,122 +450,147 @@ msgstr ""
 "{vendor} graphics (Mesa): Zwift runs, but at a lower frame rate than with "
 "NVIDIA"
 
-#: tretlager/core/systemcheck.py:176 tretlager/core/systemcheck.py:183
-#: tretlager/core/systemcheck.py:185
+#: tretlager/core/systemcheck.py:179 tretlager/core/systemcheck.py:186
+#: tretlager/core/systemcheck.py:188
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: tretlager/core/systemcheck.py:177
+#: tretlager/core/systemcheck.py:180
 msgid ""
 "Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter "
 "verbinden"
 msgstr ""
 "No Bluetooth adapter found – sensors can only be connected with an adapter"
 
-#: tretlager/core/systemcheck.py:181
+#: tretlager/core/systemcheck.py:184
 #, python-brace-format
 msgid "Chip: {name}"
 msgstr "Chip: {name}"
 
-#: tretlager/core/systemcheck.py:183
+#: tretlager/core/systemcheck.py:186
 msgid "Bluetooth ist ausgeschaltet"
 msgstr "Bluetooth is turned off"
 
-#: tretlager/core/systemcheck.py:185
+#: tretlager/core/systemcheck.py:188
 msgid "Bluetooth bereit für Trainer und Pulsgurt"
 msgstr "Bluetooth ready for trainer and heart rate strap"
 
-#: tretlager/core/systemcheck.py:192
+#: tretlager/core/systemcheck.py:195
 #, python-brace-format
 msgid "{gb} GB frei in {path}"
 msgstr "{gb} GB free in {path}"
 
-#: tretlager/core/systemcheck.py:192
+#: tretlager/core/systemcheck.py:195
 msgid "Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)"
 msgstr "Required: about 11 GB (Wine 1.8 GB, Zwift with environment 8.6 GB)"
 
-#: tretlager/core/systemcheck.py:194 tretlager/core/systemcheck.py:196
-#: tretlager/core/systemcheck.py:197
+#: tretlager/core/systemcheck.py:197 tretlager/core/systemcheck.py:199
+#: tretlager/core/systemcheck.py:200
 msgid "Speicherplatz"
 msgstr "Disk space"
 
-#: tretlager/core/systemcheck.py:194
+#: tretlager/core/systemcheck.py:197
 #, python-brace-format
 msgid "{gb} GB frei"
 msgstr "{gb} GB free"
 
-#: tretlager/core/systemcheck.py:196
+#: tretlager/core/systemcheck.py:199
 #, python-brace-format
 msgid "Nur {gb} GB frei – reicht knapp"
 msgstr "Only {gb} GB free – just enough"
 
-#: tretlager/core/systemcheck.py:197
+#: tretlager/core/systemcheck.py:200
 #, python-brace-format
 msgid "Nur {gb} GB frei, nötig sind etwa 11 GB"
 msgstr "Only {gb} GB free, about 11 GB are needed"
 
-#: tretlager/core/systemcheck.py:212
+#: tretlager/core/systemcheck.py:216
 msgid "nicht erreichbar"
 msgstr "unreachable"
 
-#: tretlager/core/systemcheck.py:212
+#: tretlager/core/systemcheck.py:216
 msgid "erreichbar"
 msgstr "reachable"
 
-#: tretlager/core/systemcheck.py:214 tretlager/core/systemcheck.py:215
+#: tretlager/core/systemcheck.py:218 tretlager/core/systemcheck.py:219
 msgid "Internet"
 msgstr "Internet"
 
-#: tretlager/core/systemcheck.py:214
+#: tretlager/core/systemcheck.py:218
 msgid "Download-Quellen nicht erreichbar"
 msgstr "Download sources unreachable"
 
-#: tretlager/core/systemcheck.py:215
-msgid "Zwift und WineHQ erreichbar"
-msgstr "Zwift and WineHQ reachable"
+#: tretlager/core/systemcheck.py:219
+msgid "Zwift und GitHub erreichbar"
+msgstr "Zwift and GitHub reachable"
 
-#: tretlager/core/systemcheck.py:230
+#: tretlager/core/systemcheck.py:235
+#, python-brace-format
+msgid "{version}, im Flatpak enthalten"
+msgstr "{version}, included in the Flatpak"
+
+#: tretlager/core/systemcheck.py:236
+msgid "Wine fehlt im Flatpak – Tretlager neu installieren"
+msgstr "Wine is missing from the Flatpak – reinstall Tretlager"
+
+#: tretlager/core/systemcheck.py:238
 #, python-brace-format
 msgid "WineHQ-Paketquelle: {state}"
 msgstr "WineHQ package source: {state}"
 
-#: tretlager/core/systemcheck.py:230
+#: tretlager/core/systemcheck.py:238
 msgid "eingerichtet"
 msgstr "set up"
 
-#: tretlager/core/systemcheck.py:230
+#: tretlager/core/systemcheck.py:238
 msgid "fehlt"
 msgstr "missing"
 
-#: tretlager/core/systemcheck.py:231
+#: tretlager/core/systemcheck.py:239
 #, python-brace-format
 msgid "Wine: {version}"
 msgstr "Wine: {version}"
 
-#: tretlager/core/systemcheck.py:231
+#: tretlager/core/systemcheck.py:239
 msgid "nicht installiert"
 msgstr "not installed"
 
-#: tretlager/core/systemcheck.py:233
+#: tretlager/core/systemcheck.py:241
 #, python-brace-format
 msgid "{version} installiert"
 msgstr "{version} installed"
 
-#: tretlager/core/systemcheck.py:234
+#: tretlager/core/systemcheck.py:242
 msgid "Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)"
 msgstr "Will be set up in the next step (WineHQ, about 290 MB)"
 
-#: tretlager/core/systemcheck.py:242
+#: tretlager/core/systemcheck.py:250
 msgid "Zwift ist schon eingerichtet"
 msgstr "Zwift is already set up"
 
-#: tretlager/core/systemcheck.py:242
+#: tretlager/core/systemcheck.py:250
 msgid "Launcher vorhanden, Spiel fehlt noch"
 msgstr "Launcher present, game still missing"
 
-#: tretlager/core/systemcheck.py:244
+#: tretlager/core/systemcheck.py:252
 msgid "Noch nicht eingerichtet – das übernimmt Tretlager"
 msgstr "Not set up yet – Tretlager takes care of it"
+
+#: tretlager/core/systemcheck.py:259 tretlager/core/systemcheck.py:260
+msgid "Geräte-Ankündigung"
+msgstr "Device announcement"
+
+#: tretlager/core/systemcheck.py:259
+msgid "Avahi läuft, Zwift kann die Sensoren finden"
+msgstr "Avahi is running, Zwift can find the sensors"
+
+#: tretlager/core/systemcheck.py:261
+msgid ""
+"Avahi läuft nicht – Zwift findet die Sensoren dann nicht. Abhilfe: Paket "
+"avahi installieren und den Dienst avahi-daemon starten."
+msgstr ""
+"Avahi is not running – Zwift will not find the sensors. Remedy: install the "
+"avahi package and start the avahi-daemon service."
 
 #: tretlager/kde/app.py:133
 msgid "Berechtigung anfragen …"
@@ -584,19 +610,19 @@ msgstr "Unknown error"
 msgid "Helfer beendet mit Code {code}"
 msgstr "Helper exited with code {code}"
 
-#: tretlager/kde/app.py:480
+#: tretlager/kde/app.py:485
 msgid "Stromversorgung gewechselt: Netz"
 msgstr "Power source changed: AC"
 
-#: tretlager/kde/app.py:480
+#: tretlager/kde/app.py:485
 msgid "Stromversorgung gewechselt: Akku"
 msgstr "Power source changed: battery"
 
-#: tretlager/kde/app.py:482
+#: tretlager/kde/app.py:487
 msgid "Stromversorgung gewechselt"
 msgstr "Power source changed"
 
-#: tretlager/kde/app.py:483
+#: tretlager/kde/app.py:488
 msgid ""
 "Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt "
 "Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
@@ -604,7 +630,7 @@ msgstr ""
 "Switching between AC and battery can upset the NVIDIA driver. If Zwift "
 "hangs, close it with Alt+F4 and restart it with the power adapter connected."
 
-#: tretlager/kde/app.py:507
+#: tretlager/kde/app.py:512
 msgid ""
 "GNU General Public License, Version 3 oder später: https://www.gnu.org/"
 "licenses/gpl-3.0.html"
@@ -612,43 +638,47 @@ msgstr ""
 "GNU General Public License, version 3 or later: https://www.gnu.org/licenses/"
 "gpl-3.0.html"
 
-#: tretlager/kde/app.py:553
+#: tretlager/kde/app.py:526
+msgid "Sensor-Bridge nach Update neu gestartet"
+msgstr "Sensor bridge restarted after an update"
+
+#: tretlager/kde/app.py:560
 msgid "gültig"
 msgstr "valid"
 
-#: tretlager/kde/app.py:553
+#: tretlager/kde/app.py:560
 msgid "wird beim Start erneuert"
 msgstr "renewed at start"
 
-#: tretlager/kde/app.py:554
+#: tretlager/kde/app.py:561
 msgid "abgelaufen – bitte neu anmelden"
 msgstr "expired – please sign in again"
 
-#: tretlager/kde/app.py:555
+#: tretlager/kde/app.py:562
 msgid "nicht angemeldet"
 msgstr "not signed in"
 
-#: tretlager/kde/app.py:558
+#: tretlager/kde/app.py:565
 #, python-brace-format
 msgid ", Erneuerung noch {n} Tag"
 msgid_plural ", Erneuerung noch {n} Tage"
 msgstr[0] ", renewal for {n} more day"
 msgstr[1] ", renewal for {n} more days"
 
-#: tretlager/kde/app.py:570
+#: tretlager/kde/app.py:577
 msgid "Start vorbereiten"
 msgstr "Preparing the start"
 
-#: tretlager/kde/app.py:587
+#: tretlager/kde/app.py:594
 #, python-brace-format
 msgid "Unerwarteter Fehler ({name})"
 msgstr "Unexpected error ({name})"
 
-#: tretlager/kde/app.py:593
+#: tretlager/kde/app.py:600
 msgid "Zwift beendet"
 msgstr "Zwift closed"
 
-#: tretlager/kde/app.py:604
+#: tretlager/kde/app.py:611
 #, python-brace-format
 msgid "NVIDIA-Treiber meldete {errors}"
 msgstr "NVIDIA driver reported {errors}"
@@ -681,7 +711,7 @@ msgstr "Installing Wine and tools"
 msgid "System vorbereitet"
 msgstr "System prepared"
 
-#: tretlager/kde/qml/AboutPage.qml:11 tretlager/kde/qml/Main.qml:77
+#: tretlager/kde/qml/AboutPage.qml:11 tretlager/kde/qml/Main.qml:80
 msgid "Über Tretlager"
 msgstr "About Tretlager"
 
@@ -858,7 +888,6 @@ msgstr ""
 "license terms apply."
 
 #: tretlager/kde/qml/AboutPage.qml:97 tretlager/kde/qml/MainPage.qml:149
-#: tretlager/kde/qml/Main.qml:18
 msgid "Zwift"
 msgstr "Zwift"
 
@@ -1040,7 +1069,7 @@ msgstr "Pause: stop searching until resumed"
 msgid "Gerät entfernen"
 msgstr "Remove device"
 
-#: tretlager/kde/qml/FinishPage.qml:8 tretlager/kde/qml/Main.qml:18
+#: tretlager/kde/qml/FinishPage.qml:8
 msgid "Fertig"
 msgstr "Done"
 
@@ -1096,7 +1125,7 @@ msgstr ""
 msgid "Zur Übersicht"
 msgstr "Go to overview"
 
-#: tretlager/kde/qml/HelpPage.qml:13 tretlager/kde/qml/Main.qml:62
+#: tretlager/kde/qml/HelpPage.qml:13 tretlager/kde/qml/Main.qml:65
 msgid "Hilfe"
 msgstr "Help"
 
@@ -1107,7 +1136,6 @@ msgid "Protokoll"
 msgstr "Log"
 
 #: tretlager/kde/qml/LoginPage.qml:10 tretlager/kde/qml/MainPage.qml:170
-#: tretlager/kde/qml/Main.qml:18
 msgid "Anmeldung"
 msgstr "Sign-in"
 
@@ -1278,7 +1306,7 @@ msgstr "Try again"
 msgid "Anmeldung wird übernommen …"
 msgstr "Taking over the sign-in…"
 
-#: tretlager/kde/qml/MainPage.qml:11 tretlager/kde/qml/Main.qml:48
+#: tretlager/kde/qml/MainPage.qml:11 tretlager/kde/qml/Main.qml:51
 msgid "Übersicht"
 msgstr "Overview"
 
@@ -1351,8 +1379,8 @@ msgstr ""
 "heavily throttled."
 
 #: tretlager/kde/qml/MainPage.qml:71 tretlager/kde/qml/MainPage.qml:78
-#: tretlager/kde/qml/MainPage.qml:112 tretlager/kde/qml/Main.qml:18
-#: tretlager/kde/qml/Main.qml:55 tretlager/kde/qml/SensorsPage.qml:10
+#: tretlager/kde/qml/MainPage.qml:112 tretlager/kde/qml/Main.qml:58
+#: tretlager/kde/qml/SensorsPage.qml:10
 msgid "Sensoren"
 msgstr "Sensors"
 
@@ -1479,15 +1507,7 @@ msgstr "Log of the last start…"
 msgid "Tretlager"
 msgstr "Tretlager"
 
-#: tretlager/kde/qml/Main.qml:18
-msgid "Prüfen"
-msgstr "Check"
-
-#: tretlager/kde/qml/Main.qml:18
-msgid "Vorbereiten"
-msgstr "Prepare"
-
-#: tretlager/kde/qml/Main.qml:70
+#: tretlager/kde/qml/Main.qml:73
 msgid "Einrichtung prüfen"
 msgstr "Check setup"
 
@@ -1839,10 +1859,10 @@ msgstr "Zwift on Linux"
 #: tretlager/kde/qml/WelcomePage.qml:13
 msgid ""
 "Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und "
-"Pulsgurt. Die Einrichtung führt in sechs Schritten durch alles."
+"Pulsgurt. Die Einrichtung führt in %1 Schritten durch alles."
 msgstr ""
 "Tretlager sets up Zwift on this computer and connects your trainer and heart "
-"rate strap. The setup guides you through everything in six steps."
+"rate strap. The setup guides you through everything in %1 steps."
 
 #: tretlager/kde/qml/WelcomePage.qml:17
 msgid "Voraussetzungen"
@@ -1865,8 +1885,8 @@ msgid "Smart-Trainer und Pulsgurt mit Bluetooth"
 msgstr "Smart trainer and heart rate strap with Bluetooth"
 
 #: tretlager/kde/qml/WelcomePage.qml:27
-msgid "Erst im fünften Schritt nötig"
-msgstr "Only needed in the fifth step"
+msgid "Erst bei Schritt %1 nötig"
+msgstr "Only needed at step %1"
 
 #: tretlager/kde/qml/WelcomePage.qml:34
 msgid "Wichtig"
@@ -1902,7 +1922,7 @@ msgstr "Start setup"
 msgid "Assistent schließen"
 msgstr "Close assistant"
 
-#: tretlager/kde/qml/WizardHeader.qml:20
+#: tretlager/kde/qml/WizardHeader.qml:22
 msgid "Schritt %1 von %2"
 msgstr "Step %1 of %2"
 
@@ -1943,3 +1963,30 @@ msgstr "already done"
 #: tretlager/kde/qml/ZwiftPage.qml:107
 msgid "Abbrechen"
 msgstr "Cancel"
+
+#~ msgid "Zwift und WineHQ erreichbar"
+#~ msgstr "Zwift and WineHQ reachable"
+
+#, python-brace-format
+#~ msgid "{name}: Debian testing, nicht TUXEDO OS – nicht getestet"
+#~ msgstr "{name}: Debian testing, not TUXEDO OS – untested"
+
+#, python-brace-format
+#~ msgid "{name} ist nicht das Zielsystem (TUXEDO OS forky)"
+#~ msgstr "{name} is not the target system (TUXEDO OS forky)"
+
+#~ msgid "Prüfen"
+#~ msgstr "Check"
+
+#~ msgid "Vorbereiten"
+#~ msgstr "Prepare"
+
+#~ msgid ""
+#~ "Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und "
+#~ "Pulsgurt. Die Einrichtung führt in sechs Schritten durch alles."
+#~ msgstr ""
+#~ "Tretlager sets up Zwift on this computer and connects your trainer and "
+#~ "heart rate strap. The setup guides you through everything in six steps."
+
+#~ msgid "Erst im fünften Schritt nötig"
+#~ msgstr "Only needed in the fifth step"

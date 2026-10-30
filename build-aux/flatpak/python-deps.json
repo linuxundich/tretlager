@@ -1,0 +1,44 @@
+{
+  "name": "python-deps",
+  "buildsystem": "simple",
+  "build-commands": [
+    "pip3 install --no-index --no-build-isolation --find-links=. --prefix=${FLATPAK_DEST} bleak dbus-fast secretstorage"
+  ],
+  "sources": [
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/26/54/05aceb9cd80073805b3ed8522e3196e8cb22f70e741873fa51406c31f4e7/bleak-3.0.2-py3-none-any.whl",
+      "sha256": "39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/95/95/86342356ff5953b3fb06f7ef7c5bee212d45e770abc7218d451b9148313c/cffi-2.1.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "a931079504ecc49efed7744c476a5c343a92fabf66dec2db95edb1b2fdc770e2"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/1a/f1/b474e930c4d910328780e3940da76f5aa5cbc48ce1fc14e44d239d9ea9db/cryptography-50.0.2-cp311-abi3-manylinux_2_28_x86_64.whl",
+      "sha256": "4061c0079120205fb760c58acab6443e217307dcf05e3702cf970e0689972856"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/7c/8d/8faf59c288feabba6545998de9c7748c8f995ec953a7b6a07e2c7f84cba4/dbus_fast-5.2.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "da7835ccc6e8cb2b54516558097156da6dbf6636c27033b427135bad693317fb"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/b2/a3/e137168c9c44d18eff0376253da9f1e9234d0239e0ee230d2fee6cea8e55/jeepney-0.9.0-py3-none-any.whl",
+      "sha256": "97e5714520c16fc0a45695e5365a2e11b81ea79bba796e26f9f1d178cb182683"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/b6/ae/315bbeee126a769cbde43cf4908acb4b40408d8bf8bbf334dd7368d8dadf/pycparser-3.12-py3-none-any.whl",
+      "sha256": "a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e"
+    },
+    {
+      "type": "file",
+      "url": "https://files.pythonhosted.org/packages/b7/46/f5af3402b579fd5e11573ce652019a67074317e18c1935cc0b4ba9b35552/secretstorage-3.5.0-py3-none-any.whl",
+      "sha256": "0ce65888c0725fcb2c5bc0fdb8e5438eece02c523557ea40ce0703c266248137"
+    }
+  ]
+}

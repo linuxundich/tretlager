@@ -15,7 +15,10 @@ Kirigami.ApplicationWindow {
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
 
     // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
-    readonly property var steps: [i18n("Prüfen"), i18n("Vorbereiten"), i18n("Zwift"), i18n("Anmeldung"), i18n("Sensoren"), i18n("Fertig")]
+    // Im Flatpak entfällt „Vorbereiten“ (Wine ist im Paket), die Schritte zählen dann 1–5.
+    readonly property var stepIds: backend.flatpak ? ["check", "zwift", "login", "sensors", "finish"]
+                                                   : ["check", "prepare", "zwift", "login", "sensors", "finish"]
+    readonly property var steps: stepIds
 
     // Assistent: linearer Ablauf mit Schrittanzeige. Bei der ersten Einrichtung ohne Seitenleiste
     // (nichts außer dem Assistenten ergibt dann Sinn); über „Einrichtung prüfen“ nach der

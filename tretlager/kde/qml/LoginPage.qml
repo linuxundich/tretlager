@@ -19,7 +19,7 @@ ColumnsPage {
 
     header: WizardHeader {
         visible: page.wizard
-        step: 4
+        stepId: "login"
         text: i18n("Das Passwort wird nur auf der Anmeldeseite von Zwift eingegeben.")
     }
 

@@ -111,8 +111,9 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 ## Flatpak (Plan: docs/flatpak.md)
 
 - [x] F0 Machbarkeit auf tinytin (30.10.): alle Bausteine laufen (Wine aus Quellen, multiarch); offen: echte Fahrt, Kopie des bestehenden Präfixes
-- [ ] F1 Manifest und Bau (PySide-BaseApp 6.11, Kirigami Addons, Wine-Tarball, Python-Pakete)
-- [ ] F2 Code: Assistent ohne Vorbereiten, Wine-Pfade, Bridge per Portal statt systemd, Bridge-Version
+- [x] F1 Manifest und Bau (0.8.0): Wine aus Quellen, Python-Wheels fest, Metainfo, build.sh auf tinytin
+- [x] F2 Code (0.8.0): Bridge per D-Bus-Aktivierung + Quit, Autostart-Portal, Bridge-Version, gdbus, Assistent ohne Vorbereiten
+- [ ] Autostart der Bridge über das Background-Portal nach einem Neustart von tinytin prüfen
 - [ ] F2b Distributionsunabhängig: Systemprüfung ohne Debian-Annahmen, Avahi-Prüfung, GNOME-Rückfälle (Maximieren, DPI)
 - [ ] F3 Umstieg auf tinytin: Debian-Paket entfernt (30.10.); Zwift-Präfix (36 GB inkl. Sicherungen) unter ~/.local/share/tretlager übernehmen oder löschen
 - [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel

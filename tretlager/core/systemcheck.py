@@ -8,6 +8,7 @@ menschenlesbare Ausgabe von Werkzeugen.
 from __future__ import annotations
 
 import json
+import re
 import os
 import platform
 import shutil
@@ -16,7 +17,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from . import btcompat, paths
+from . import btcompat, dbusutil, paths
 from ..i18n import _
 
 OK, WARN, FAIL = "ok", "warn", "fail"
@@ -41,8 +42,11 @@ class Check:
 # --- einzelne Prüfungen; `root` erlaubt Tests gegen ein nachgebautes Dateisystem ---
 
 def read_os_release(root: Path = Path("/")) -> dict:
+    """os-release des Rechners; im Flatpak liegt es unter /run/host (sonst sähe man die Laufzeit)."""
     out = {}
-    for line in (root / "etc/os-release").read_text().splitlines():
+    host = root / "run/host/os-release"
+    source = host if host.exists() else root / "etc/os-release"
+    for line in source.read_text().splitlines():
         if "=" in line:
             k, v = line.split("=", 1)
             out[k] = v.strip().strip('"')
@@ -60,12 +64,8 @@ def check_system(root: Path = Path("/"), machine: str | None = None) -> Check:
     details = [f"{name}, {codename or _('ohne Codename')}, {machine}"]
     if machine != "x86_64":
         return Check("system", _("System"), FAIL, _("{machine} wird nicht unterstützt (Zwift braucht x86-64)").format(machine=machine), details)
-    is_debian = osr.get("ID") == "debian" or "debian" in osr.get("ID_LIKE", "")
-    if osr.get("ID") == "tuxedo" and codename == "forky":
-        return Check("system", _("System"), OK, f"{name}, forky", details)
-    if is_debian and codename == "forky":
-        return Check("system", _("System"), WARN, _("{name}: Debian testing, nicht TUXEDO OS – nicht getestet").format(name=name), details)
-    return Check("system", _("System"), WARN, _("{name} ist nicht das Zielsystem (TUXEDO OS forky)").format(name=name), details)
+    # Tretlager läuft als Flatpak auf allen modernen Distributionen; das System wird nur angezeigt.
+    return Check("system", _("System"), OK, name, details)
 
 
 @dataclass
@@ -99,6 +99,11 @@ def list_gpus(root: Path = Path("/")) -> list[Gpu]:
 def nvidia_driver_version(root: Path = Path("/")) -> str:
     try:
         return (root / "sys/module/nvidia/version").read_text().strip()
+    except OSError:
+        pass
+    try:  # im Flatpak fehlt /sys/module, /proc/driver/nvidia ist sichtbar
+        m = re.search(r"Kernel Module.*?\s(\d+\.\d+(?:\.\d+)?)\s", (root / "proc/driver/nvidia/version").read_text())
+        return m.group(1) if m else ""
     except OSError:
         return ""
 
@@ -145,15 +150,13 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
     return checks
 
 
-def bluez_adapter(run=subprocess.run) -> dict | None:
-    """Eigenschaften von hci0 über busctl im JSON-Format, None ohne Adapter."""
-    props = {}
-    for prop in ("Powered", "Name", "Address"):
-        r = run(["busctl", "--system", "--json=short", "get-property", "org.bluez", "/org/bluez/hci0",
-                 "org.bluez.Adapter1", prop], capture_output=True, text=True, timeout=5)
-        if r.returncode != 0:
-            return None
-        props[prop] = json.loads(r.stdout)["data"]
+def bluez_adapter(run=subprocess.run, adapter: str = "hci0") -> dict | None:
+    """Eigenschaften eines BlueZ-Adapters (über gdbus), None ohne Adapter."""
+    props = dbusutil.get_all("system", "org.bluez", f"/org/bluez/{adapter}", "org.bluez.Adapter1", run)
+    if not props or "Address" not in props:
+        return None
+    props.setdefault("Name", adapter)
+    props.setdefault("Powered", False)
     return props
 
 
@@ -197,7 +200,8 @@ def check_disk(path: Path | None = None) -> Check:
     return Check("disk", _("Speicherplatz"), FAIL, _("Nur {gb} GB frei, nötig sind etwa 11 GB").format(gb=f"{gb:.0f}"), details)
 
 
-NETWORK_HOSTS = [("cdn.zwift.com", 443), ("dl.winehq.org", 443)]
+# Zwift (Installer, Spiel) und GitHub (winetricks); WineHQ nur noch für das alte Debian-Paket.
+NETWORK_HOSTS = [("cdn.zwift.com", 443), ("raw.githubusercontent.com", 443)]
 
 
 def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
@@ -212,7 +216,7 @@ def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
     details = [f"{h}: {_('nicht erreichbar') if h in bad else _('erreichbar')}" for h, _port in hosts]
     if bad:
         return Check("network", _("Internet"), FAIL, _("Download-Quellen nicht erreichbar"), details)
-    return Check("network", _("Internet"), OK, _("Zwift und WineHQ erreichbar"), details)
+    return Check("network", _("Internet"), OK, _("Zwift und GitHub erreichbar"), details)
 
 
 def wine_version(run=subprocess.run) -> str:
@@ -226,6 +230,10 @@ def wine_version(run=subprocess.run) -> str:
 
 def check_wine(root: Path = Path("/"), run=subprocess.run) -> Check:
     version = wine_version(run)
+    if (root / ".flatpak-info").exists():
+        if version:
+            return Check("wine", "Wine", OK, _("{version}, im Flatpak enthalten").format(version=version))
+        return Check("wine", "Wine", FAIL, _("Wine fehlt im Flatpak – Tretlager neu installieren"))
     source = any((root / "etc/apt/sources.list.d").glob("winehq-*.sources"))
     details = [_("WineHQ-Paketquelle: {state}").format(state=_("eingerichtet") if source else _("fehlt")),
                _("Wine: {version}").format(version=version or _("nicht installiert"))]
@@ -244,10 +252,20 @@ def check_existing(zwift_dir: Path | None = None) -> Check:
     return Check("existing", "Zwift", OK, _("Noch nicht eingerichtet – das übernimmt Tretlager"), [])
 
 
+def check_avahi(run=subprocess.run) -> Check:
+    """Avahi kündigt die Sensoren für Zwift an (mDNS); fehlt es, findet Zwift keine Geräte."""
+    if dbusutil.name_has_owner("system", "org.freedesktop.Avahi", run) or \
+            dbusutil.activatable("system", "org.freedesktop.Avahi", run):
+        return Check("avahi", _("Geräte-Ankündigung"), OK, _("Avahi läuft, Zwift kann die Sensoren finden"))
+    return Check("avahi", _("Geräte-Ankündigung"), WARN,
+                 _("Avahi läuft nicht – Zwift findet die Sensoren dann nicht. Abhilfe: Paket avahi "
+                   "installieren und den Dienst avahi-daemon starten."))
+
+
 def run_all() -> list[Check]:
     checks = [check_system()]
     checks += check_graphics()
-    checks += [check_bluetooth(), check_disk(), check_network(), check_wine(), check_existing()]
+    checks += [check_bluetooth(), check_avahi(), check_disk(), check_network(), check_wine(), check_existing()]
     return checks
 
 

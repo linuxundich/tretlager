@@ -17,7 +17,7 @@ from bleak.exc import BleakDBusError
 from dbus_fast.aio import MessageBus
 from dbus_fast.service import ServiceInterface, method, signal as dbus_signal
 
-from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH
+from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH, __version__
 from . import adapters, gatt
 from .config import BridgeConfig
 from .device import BridgedDevice, connect_lock
@@ -36,6 +36,7 @@ class Bridge(ServiceInterface):
         self.devices: dict[str, BridgedDevice] = {}
         self.scanning = False
         self._dirty = True
+        self.stop_event = asyncio.Event()
         self.adapters: dict[str, str] = {}  # hciN → Adresse laut BlueZ
         self.hci = ""  # aufgelöster Adapter, leer = Standard
         self.adapter_missing = False
@@ -112,7 +113,8 @@ class Bridge(ServiceInterface):
                 devices.append({"address": cfg.address, "name": cfg.name, "role": cfg.role,
                                 "enabled": cfg.enabled, "port": cfg.port, "state": "aus",
                                 "error": "", "services": [], "zwift_clients": 0, "values": {}})
-        return json.dumps({"running": True, "scanning": self.scanning, "local_only": self.config.local_only,
+        return json.dumps({"running": True, "version": __version__, "scanning": self.scanning,
+                           "local_only": self.config.local_only,
                            "adapter": self.config.adapter, "adapter_hci": self.hci or next(iter(self.adapters), ""),
                            "adapter_missing": self.adapter_missing, "devices": devices})
 
@@ -210,6 +212,13 @@ class Bridge(ServiceInterface):
         await self.restart_devices()
         return True
 
+    @method()
+    def Quit(self) -> "b":
+        """Bridge beenden (ersetzt `systemctl stop`; Geräte werden sauber getrennt)."""
+        log.info("Beenden über D-Bus angefordert")
+        self.stop_event.set()
+        return True
+
     @dbus_signal()
     def Changed(self, status: "s") -> "s":
         return status
@@ -224,7 +233,7 @@ async def run() -> None:
     await bridge.resolve_adapter()
     bridge.start_devices()
 
-    stop = asyncio.Event()
+    stop = bridge.stop_event
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, stop.set)

@@ -19,6 +19,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from ..i18n import _
+from . import dbusutil
 
 BLUETOOTH = Path("/sys/class/bluetooth")
 
@@ -89,12 +90,8 @@ def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:
     out = []
     for hci in sorted(p.name for p in root.glob("hci*")):
         chip = adapter_chip(hci, root)
-        try:
-            r = run(["busctl", "--system", "--json=short", "get-property", "org.bluez", f"/org/bluez/{hci}",
-                     "org.bluez.Adapter1", "Address"], capture_output=True, text=True, timeout=5)
-            address = json.loads(r.stdout)["data"].upper() if r.returncode == 0 else ""
-        except (OSError, subprocess.TimeoutExpired, ValueError, KeyError):
-            address = ""
+        props = dbusutil.get_all("system", "org.bluez", f"/org/bluez/{hci}", "org.bluez.Adapter1", run) or {}
+        address = str(props.get("Address", "")).upper()
         if address:
             out.append({"hci": hci, "address": address, "chip": chip.name if chip else "unbekannter Chip",
                         "usb_id": chip.usb_id if chip else ""})

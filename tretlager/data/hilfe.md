@@ -4,8 +4,8 @@
 Tretlager richtet Zwift unter Linux ein, startet es mit einem Klick und verbindet Trainer und
 Pulsgurt.
 
-- **Zwift unter Wine**: Der offizielle Windows-Client von Zwift läuft unter Wine. Tretlager lädt
-  ihn von Zwift, prüft die Signatur und verändert nichts daran.
+- **Zwift unter Wine**: Der offizielle Windows-Client von Zwift läuft unter Wine, das Tretlager
+  mitbringt. Tretlager lädt Zwift von Zwift, prüft die Signatur und verändert nichts daran.
 - **Sensor-Bridge**: Zwift kann unter Wine kein Bluetooth. Die Bridge verbindet Trainer und
   Pulsgurt und bietet sie Zwift als Wahoo-Geräte an; die Companion App ist nicht nötig.
 - **Kein Programm von Zwift**: Zwift unterstützt Linux nicht. Die Benutzung erfolgt auf eigene
@@ -50,23 +50,22 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
 ## Datenschutz und Speicherorte
 <!-- icon: security-high -->
 
-- **Keine Nutzungsdaten**: Tretlager verbindet sich nur mit Zwift, WineHQ und Microsoft
+- **Keine Nutzungsdaten**: Tretlager verbindet sich nur mit Zwift, GitHub (winetricks) und Microsoft
   (Komponenten über winetricks). Zwift selbst sendet Absturzberichte an Sentry.
-- **Zwift-Umgebung**: `~/.local/share/tretlager/prefix`
-- **Sicherungen vor Updates**: `~/.local/share/tretlager/snapshots`
-- **Zwischenspeicher**: `~/.cache/tretlager`
-- **Einstellungen der Bridge**: `~/.config/tretlager/bridge.json`
-- **Zustand der Einrichtung**: `~/.local/state/tretlager/state.json`
+- **Alles an einem Ort**: `~/.var/app/de.linuxundich.Tretlager/` – Zwift-Umgebung und Sicherungen
+  unter `data/tretlager`, Einstellungen der Bridge unter `config/tretlager`, Zwischenspeicher unter
+  `cache/tretlager`.
+- **Entfernen**: Mit Tretlager verschwindet das Programm; die Zwift-Umgebung (etwa 9 GB) bleibt, bis
+  der Ordner gelöscht wird (`flatpak uninstall --delete-data de.linuxundich.Tretlager`).
 
 ## Einrichtung
 <!-- icon: configure -->
 
-- **1. Prüfen**: Grafik, Bluetooth, Speicher und Internet. Am System ändert sich nichts.
-- **2. Vorbereiten**: WineHQ-Paketquelle und Wine. Alle Änderungen stehen vorher in einer Liste,
-  das Passwort ist nur einmal nötig.
-- **3. Zwift**: Download und Installation, etwa zehn Minuten. Abbrechen geht jederzeit, beim
+- **1. Prüfen**: Grafik, Bluetooth, Geräte-Ankündigung, Speicher und Internet. Am System ändert
+  sich nichts, ein Passwort ist nicht nötig.
+- **2. Zwift**: Download und Installation, etwa zehn Minuten. Abbrechen geht jederzeit, beim
   nächsten Start geht es an derselben Stelle weiter.
-- **4.–6. Anmeldung, Sensoren, Fertig**: Siehe die Abschnitte oben.
+- **3.–5. Anmeldung, Sensoren, Fertig**: Siehe die Abschnitte oben.
 
 ## Wenn etwas nicht klappt
 <!-- icon: help-hint; wide -->
@@ -80,7 +79,7 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
 - [network-wireless-disconnected] **Verbindung bricht oft ab**: Rechner näher an den Trainer
   stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen.
 - [network-bluetooth] **Zwift findet die Sensoren nicht**: Unter *Sensoren* prüfen, ob die Bridge
-  läuft und die Sensoren verbunden sind.
+  läuft und die Sensoren verbunden sind; ohne laufendes Avahi (`avahi-daemon`) findet Zwift sie nicht.
 - [battery-low] **Zwift hängt nach dem Ab- oder Anstecken des Netzteils**: Mit Alt+F4 beenden und
   mit Netzteil neu starten; hilft das nicht, den Rechner neu starten.
 - [video-display] **Bild unscharf unter Plasma**: *Systemeinstellungen* → *Anzeige* →

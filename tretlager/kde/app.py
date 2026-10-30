@@ -277,6 +277,11 @@ class Backend(QObject):
         return LANGUAGE
 
     @Property(bool, constant=True)
+    def flatpak(self) -> bool:
+        """Im Flatpak bringt Tretlager Wine selbst mit; der Schritt *Vorbereiten* entfällt."""
+        return bridgectl.IN_FLATPAK
+
+    @Property(bool, constant=True)
     def embeddedLogin(self) -> bool:
         return QtWebEngineQuick is not None
 
@@ -517,6 +522,8 @@ class Backend(QObject):
     def prewarmBridge(self) -> None:
         """Bridge schon beim Öffnen starten, damit Trainer und Gurt beim Aufsteigen verbunden sind."""
         def work():
+            if not self._launch.get("zwiftRunning") and bridgectl.restart_if_outdated(__version__):
+                self._launchEvent.emit({"logline": _("Sensor-Bridge nach Update neu gestartet")})
             if bridgectl.unit_installed() and not bridgectl.is_running():
                 bridgectl.set_running(True)
             self.refreshSensors()

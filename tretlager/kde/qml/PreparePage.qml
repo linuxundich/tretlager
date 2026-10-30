@@ -19,7 +19,7 @@ ColumnsPage {
 
     Component.onCompleted: backend.loadPlan()
 
-    header: WizardHeader { step: 2; text: i18n("Eine Passwortabfrage für alle Änderungen.") }
+    header: WizardHeader { stepId: "prepare"; text: i18n("Eine Passwortabfrage für alle Änderungen.") }
 
     LogDialog { id: logDialog; text: page.prep.log }
 

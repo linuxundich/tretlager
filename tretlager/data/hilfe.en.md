@@ -4,8 +4,8 @@
 Tretlager sets up Zwift on Linux, starts it with one click and connects your trainer and heart
 rate strap.
 
-- **Zwift under Wine**: The official Zwift Windows client runs under Wine. Tretlager downloads it
-  from Zwift, verifies the signature and does not modify it.
+- **Zwift under Wine**: The official Zwift Windows client runs under Wine, which Tretlager brings
+  along. Tretlager downloads Zwift from Zwift, verifies the signature and does not modify it.
 - **Sensor bridge**: Zwift cannot use Bluetooth under Wine. The bridge connects the trainer and
   heart rate strap and offers them to Zwift as Wahoo devices; the Companion app is not needed.
 - **Not a Zwift program**: Zwift does not support Linux. Use at your own risk.
@@ -50,23 +50,21 @@ using it is at your own risk.**
 ## Privacy and storage locations
 <!-- icon: security-high -->
 
-- **No usage data**: Tretlager only connects to Zwift, WineHQ and Microsoft (components via
-  winetricks). Zwift itself sends crash reports to Sentry.
-- **Zwift environment**: `~/.local/share/tretlager/prefix`
-- **Backups before updates**: `~/.local/share/tretlager/snapshots`
-- **Cache**: `~/.cache/tretlager`
-- **Bridge settings**: `~/.config/tretlager/bridge.json`
-- **Setup state**: `~/.local/state/tretlager/state.json`
+- **No usage data**: Tretlager only connects to Zwift, GitHub (winetricks) and Microsoft
+  (components via winetricks). Zwift itself sends crash reports to Sentry.
+- **Everything in one place**: `~/.var/app/de.linuxundich.Tretlager/` – Zwift environment and backups
+  under `data/tretlager`, bridge settings under `config/tretlager`, cache under `cache/tretlager`.
+- **Removing**: Uninstalling removes the program; the Zwift environment (about 9 GB) stays until the
+  folder is deleted (`flatpak uninstall --delete-data de.linuxundich.Tretlager`).
 
 ## Setup
 <!-- icon: configure -->
 
-- **1. Check**: Graphics, Bluetooth, disk space and internet. Nothing on the system changes.
-- **2. Prepare**: WineHQ package source and Wine. All changes are listed beforehand; the
-  password is needed only once.
-- **3. Zwift**: Download and installation, about ten minutes. You can cancel at any time; the
+- **1. Check**: Graphics, Bluetooth, device announcement, disk space and internet. Nothing on the
+  system changes, no password is needed.
+- **2. Zwift**: Download and installation, about ten minutes. You can cancel at any time; the
   next start continues where it left off.
-- **4.–6. Sign-in, sensors, done**: See the sections above.
+- **3.–5. Sign-in, sensors, done**: See the sections above.
 
 ## Troubleshooting
 <!-- icon: help-hint; wide -->
@@ -80,7 +78,8 @@ using it is at your own risk.**
 - [network-wireless-disconnected] **Connection drops often**: Move the computer closer to the
   trainer or place a USB Bluetooth dongle on an extension cable next to the trainer.
 - [network-bluetooth] **Zwift does not find the sensors**: Check under *Sensors* that the bridge
-  is running and the sensors are connected.
+  is running and the sensors are connected; without a running Avahi (`avahi-daemon`) Zwift will not
+  find them.
 - [battery-low] **Zwift hangs after plugging or unplugging the power adapter**: Close it with
   Alt+F4 and restart it with the power adapter connected; if that does not help, restart the
   computer.

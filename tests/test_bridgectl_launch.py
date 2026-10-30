@@ -15,33 +15,73 @@ def fake_run(stdout="", returncode=0, seen=None):
     return run
 
 
-def test_status_parses_busctl_json():
-    payload = {"running": True, "devices": [{"name": "KICKR"}]}
-    out = json.dumps({"type": "s", "data": [json.dumps(payload)]})
-    assert bridgectl.status(run=fake_run(out)) == payload
+def gdbus_run(responses, seen=None):
+    """Antwortet je nach Methode: NameHasOwner, GetStatus usw."""
+    def run(cmd, **_kw):
+        if seen is not None:
+            seen.append(cmd)
+        method = cmd[cmd.index("--method") + 1].rsplit(".", 1)[-1]
+        out, rc = responses.get(method, ("", 1))
+        return subprocess.CompletedProcess(cmd, rc, out, "" if rc == 0 else "Fehler")
+    return run
+
+
+def test_status_parses_gdbus_string():
+    payload = {"running": True, "devices": [{"name": "KICKR „Fe2E“ \'x\'", "on": True}]}
+    text = json.dumps(payload, ensure_ascii=False)
+    gv = "(" + repr(text) + ",)"  # GVariant-Text eines Strings entspricht einem Python-Literal
+    run = gdbus_run({"NameHasOwner": ("(true,)", 0), "GetStatus": (gv, 0)})
+    assert bridgectl.status(run=run) == payload
 
 
 def test_status_none_when_bridge_down():
-    assert bridgectl.status(run=fake_run(returncode=1)) is None
+    assert bridgectl.status(run=gdbus_run({"NameHasOwner": ("(false,)", 0)})) is None
 
 
-def test_busctl_arguments_and_bool_formatting():
+def test_gdbus_arguments_and_formatting():
     seen = []
-    bridgectl.set_device_enabled("AA:BB", False, run=fake_run(json.dumps({"type": "b", "data": [True]}), seen=seen))
+    bridgectl.set_device_enabled("AA:BB", False, run=gdbus_run({"SetDeviceEnabled": ("(true,)", 0)}, seen))
     cmd = seen[0]
-    assert cmd[:3] == ["busctl", "--user", "--json=short"]
-    assert cmd[-4:] == ["SetDeviceEnabled", "sb", "AA:BB", "false"]
+    assert cmd[:3] == ["gdbus", "call", "--session"]
+    assert cmd[-3:] == ["de.linuxundich.Tretlager.Bridge.SetDeviceEnabled", "'AA:BB'", "false"]
 
 
-def test_scan_uses_long_timeout():
+def test_scan_uses_long_timeout_and_uint():
     seen = []
-    bridgectl.scan(10, run=fake_run(json.dumps({"type": "s", "data": ["[]"]}), seen=seen))
-    assert "--timeout=70" in seen[0]
+    bridgectl.scan(10, run=gdbus_run({"Scan": ("('[]',)", 0)}, seen))
+    assert "--timeout=70" in seen[0] and seen[0][-1] == "uint32 10"
 
 
-def test_systemctl_errors_raise():
-    with pytest.raises(bridgectl.BridgeError):
-        bridgectl.set_running(True, run=fake_run(returncode=1))
+def test_set_running_activates_over_dbus():
+    seen = []
+    run = gdbus_run({"NameHasOwner": ("(false,)", 0), "StartServiceByName": ("(uint32 1,)", 0)}, seen)
+    bridgectl.set_running(True, run=run, popen=lambda *a, **k: pytest.fail("kein Prozess erwartet"))
+    assert any("org.freedesktop.DBus.StartServiceByName" in c for c in seen)
+
+
+def test_set_running_falls_back_to_process(monkeypatch):
+    monkeypatch.setattr(bridgectl, "IN_FLATPAK", False)
+    started = []
+    run = gdbus_run({"NameHasOwner": ("(false,)", 0)})
+    bridgectl.set_running(True, run=run, popen=lambda cmd, **k: started.append((cmd, k)))
+    assert started and started[0][0][-2:] == ["-m", "tretlager.bridge"] and started[0][1]["start_new_session"]
+
+
+def test_set_running_off_calls_quit():
+    seen = []
+    bridgectl.set_running(False, run=gdbus_run({"NameHasOwner": ("(true,)", 0), "Quit": ("(true,)", 0)}, seen))
+    assert any("de.linuxundich.Tretlager.Bridge.Quit" in c for c in seen)
+
+
+def test_autostart_remembered(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path))
+    import importlib
+    from tretlager.core import paths, state
+    importlib.reload(paths); importlib.reload(state)
+    monkeypatch.setattr(bridgectl, "state", state)
+    monkeypatch.setattr(bridgectl, "IN_FLATPAK", False)
+    bridgectl.set_autostart(True)
+    assert bridgectl.autostart() is True
 
 
 class FakeResponse(io.BytesIO):

@@ -22,7 +22,7 @@ ColumnsPage {
     // Direkt geöffnet (Seitenleiste → Einrichtung prüfen) ohne laufende Prüfung: gleich prüfen.
     Component.onCompleted: if (!backend.busy && backend.checks.length === 0) backend.runChecks()
 
-    header: WizardHeader { step: 1; text: i18n("Nur lesend, am System ändert sich nichts.") }
+    header: WizardHeader { stepId: "check"; text: i18n("Nur lesend, am System ändert sich nichts.") }
 
     PageMessage {
         visible: !backend.busy && backend.overall !== ""
@@ -98,6 +98,6 @@ ColumnsPage {
 
     footer: WizardFooter {
         nextEnabled: !backend.busy && backend.overall !== "" && backend.overall !== "fail"
-        onNext: applicationWindow().pageStack.push(Qt.resolvedUrl("PreparePage.qml"))
+        onNext: applicationWindow().pageStack.push(Qt.resolvedUrl(backend.flatpak ? "ZwiftPage.qml" : "PreparePage.qml"))
     }
 }

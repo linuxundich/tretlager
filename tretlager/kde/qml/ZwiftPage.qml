@@ -16,7 +16,7 @@ ColumnsPage {
 
     Component.onCompleted: if (!st.running && st.result !== "done") backend.runSetup()
 
-    header: WizardHeader { step: 3; text: i18n("Läuft von selbst, etwa zehn Minuten.") }
+    header: WizardHeader { stepId: "zwift"; text: i18n("Läuft von selbst, etwa zehn Minuten.") }
 
     LogDialog { id: logDialog; text: page.st.log }
 

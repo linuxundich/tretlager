@@ -64,18 +64,47 @@ def test_intel_only_is_warning(tmp_path):
 
 
 def test_other_systems(tmp_path):
-    root = make_root(tmp_path, 'ID=debian\nPRETTY_NAME="Debian forky"\nVERSION_CODENAME=forky\n', [])
-    assert sc.check_system(root, "x86_64").status == sc.WARN
+    root = make_root(tmp_path, 'ID=fedora\nPRETTY_NAME="Fedora Linux 45 (KDE Plasma)"\n', [])
+    c = sc.check_system(root, "x86_64")
+    assert c.status == sc.OK and c.summary == "Fedora Linux 45 (KDE Plasma)"  # nur angezeigt, nicht bewertet
     assert sc.check_system(root, "aarch64").status == sc.FAIL
 
 
+def test_os_release_of_host_inside_flatpak(tmp_path):
+    root = make_root(tmp_path, 'ID=org.kde.Platform\nPRETTY_NAME="KDE Flatpak runtime"\n', [])
+    (root / "run/host").mkdir(parents=True)
+    (root / "run/host/os-release").write_text('ID=tuxedo\nPRETTY_NAME="TUXEDO OS"\n')
+    assert sc.check_system(root, "x86_64").summary == "TUXEDO OS"
+
+
+def test_nvidia_version_from_proc(tmp_path):
+    (tmp_path / "proc/driver/nvidia").mkdir(parents=True)
+    (tmp_path / "proc/driver/nvidia/version").write_text(
+        "NVRM version: NVIDIA UNIX Open Kernel Module for x86_64  580.178.04  Release Build  (pbuilder)\n")
+    assert sc.nvidia_driver_version(tmp_path) == "580.178.04"
+
+
+def test_avahi_check():
+    def run_with(owner):
+        def run(cmd, **_kw):
+            method = cmd[cmd.index("--method") + 1]
+            out = {"org.freedesktop.DBus.NameHasOwner": "(%s,)" % ("true" if owner else "false"),
+                   "org.freedesktop.DBus.ListActivatableNames": "(['org.freedesktop.DBus'],)"}[method]
+            return subprocess.CompletedProcess(cmd, 0, out, "")
+        return run
+    assert sc.check_avahi(run_with(True)).status == sc.OK
+    assert sc.check_avahi(run_with(False)).status == sc.WARN
+
+
 def fake_busctl(powered=True, missing=False):
+    """gdbus Properties.GetAll eines BlueZ-Adapters (Name historisch)."""
     def run(cmd, **_kw):
-        prop = cmd[-1]
         if missing:
             return subprocess.CompletedProcess(cmd, 1, "", "no adapter")
-        data = {"Powered": powered, "Name": "tinytin", "Address": "68:54:5A:AC:2E:15"}[prop]
-        return subprocess.CompletedProcess(cmd, 0, json.dumps({"type": "b", "data": data}), "")
+        out = ("({'Address': <'68:54:5A:AC:2E:15'>, 'AddressType': <'public'>, 'Name': <'tinytin'>, "
+               "'Powered': <%s>, 'Class': <uint32 7078156>, 'UUIDs': <['0000110e-0000-1000-8000-00805f9b34fb']>},)"
+               % ("true" if powered else "false"))
+        return subprocess.CompletedProcess(cmd, 0, out, "")
     return run
 
 

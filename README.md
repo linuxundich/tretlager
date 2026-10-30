@@ -61,6 +61,20 @@ in `_()` (Texte der Bridge in `N_()`, übersetzt erst in der Oberfläche).
 `build-deb.sh` übersetzt die Kataloge selbst. `tests/test_i18n.py` schlägt fehl, wenn ein Text
 keine englische Übersetzung hat oder Platzhalter nicht übereinstimmen.
 
+## Flatpak
+
+    build-aux/flatpak/build.sh            # auf tinytin: bauen und für den Benutzer installieren
+    build-aux/flatpak/build.sh --bundle   # zusätzlich tretlager.flatpak (Einzeldatei)
+    flatpak run de.linuxundich.Tretlager
+
+Braucht `flatpak-builder` sowie (lädt `build.sh` selbst) `org.kde.Sdk//6.11`,
+`io.qt.PySide.BaseApp//6.11` und `org.freedesktop.Sdk.Extension.mingw-w64//25.08`. Wine wird aus
+den Quellen gebaut (auf tinytin einige Minuten). Neue Python-Abhängigkeiten:
+`build-aux/flatpak/gen-python-deps.py` schreibt `python-deps.json` neu.
+
+Die Sensor-Bridge startet per D-Bus-Aktivierung als eigene Instanz:
+`flatpak run --command=tretlager-bridge de.linuxundich.Tretlager` startet sie von Hand.
+
 ## Debian-Paket (eingestellt)
 
 Das Debian-Paket (bis 0.7.1) war der erste Auslieferungsweg und wird nicht weiterentwickelt; es

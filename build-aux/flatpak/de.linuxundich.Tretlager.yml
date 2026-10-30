@@ -1,9 +1,9 @@
-# Machbarkeitstest F0 (docs/flatpak.md) – Wegwerf-Manifest, nicht für die Verteilung.
-# Baut Tretlager mit Wine (WoW64, ohne 32-Bit-Bibliotheken) auf der PySide-BaseApp.
+# Tretlager als Flatpak (docs/flatpak.md). Bauen auf tinytin: build-aux/flatpak/build.sh
 id: de.linuxundich.Tretlager
 runtime: org.kde.Platform
 runtime-version: '6.11'
 sdk: org.kde.Sdk
+# PySide6 6.11 mit QtWebEngine (Anmeldefenster); Kirigami und Kirigami Addons bringt die KDE-Laufzeit.
 base: io.qt.PySide.BaseApp
 base-version: '6.11'
 command: tretlager
@@ -15,20 +15,22 @@ finish-args:
   - --share=network
   - --share=ipc
   - --socket=wayland
-  # Wine und Zwift über XWayland wie im Debian-Paket (fallback-x11 gäbe X11 nicht frei, Wine nähme
-  # dann seinen Wayland-Treiber).
+  # Wine und Zwift über XWayland (fallback-x11 gäbe X11 nicht frei, Wine nähme seinen Wayland-Treiber)
   - --socket=x11
   - --socket=pulseaudio
   - --device=dri
-  # WoW64: ohne multiarch lässt die Sandbox keinen 32-Bit-Code zu, syswow64 bliebe leer.
+  # WoW64: ohne multiarch lässt die Sandbox keinen 32-Bit-Code zu, syswow64 bliebe leer
   - --allow=multiarch
+  # Sensor-Bridge: Bluetooth LE über BlueZ, Ankündigung für Zwift über Avahi
   - --system-talk-name=org.bluez
   - --system-talk-name=org.freedesktop.Avahi
+  # Zwift-Sitzung im Schlüsselbund, Hinweise, Zwift-Fenster maximieren (Plasma)
   - --talk-name=org.freedesktop.secrets
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.kde.KWin
+  # XWayland-Skalierung für die DPI der Wine-Fenster (nur lesen)
+  - --filesystem=xdg-config/kwinrc:ro
   - --env=PATH=/app/wine/bin:/app/bin:/usr/bin
-  - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
 modules:
   # Kirigami Addons (1.13.1, mit FormCard) und der Plasma-Stil sind schon in org.kde.Platform 6.11.
 
@@ -38,6 +40,7 @@ modules:
         url: https://www.cabextract.org.uk/cabextract-1.11.tar.gz
         sha256: b5546db1155e4c718ff3d4b278573604f30dd64c3c5bfd4657cd089b823a3ac6
 
+  # Signaturprüfung des Zwift-Installers
   - name: osslsigncode
     buildsystem: cmake-ninja
     config-opts: [-DCMAKE_BUILD_TYPE=Release]
@@ -46,17 +49,12 @@ modules:
         url: https://github.com/mtrojnar/osslsigncode/archive/refs/tags/2.14.tar.gz
         sha256: 0f033fd6069387d2e489fbd2187e62f624764eb8c2758ee94e3e793e5150b5c5
 
-  # Python-Pakete: im Spike einfach per pip mit Netz; für F1 per flatpak-pip-generator.
-  - name: python-deps
-    buildsystem: simple
-    build-options:
-      build-args: [--share=network]
-    build-commands:
-      - pip3 install --prefix=/app --no-cache-dir bleak dbus-fast secretstorage
+  # bleak, dbus-fast, SecretStorage als feste Wheels (build-aux/flatpak/gen-python-deps.py)
+  - python-deps.json
 
   # Wine aus den Quellen als WoW64 (64-Bit-Unix-Teil, 32-Bit-Windows-Code per mingw), wie das
   # WoW64-Flatpak von Flathub. Fertige Kron4ek-WoW64-Builds stürzten in jeder Flatpak-Laufzeit
-  # beim Start ab (virtual_init, Code 139), die KDE-Laufzeit hat keine 32-Bit-Erweiterungen.
+  # beim Start ab (virtual_init, Code 139); die KDE-Laufzeit hat keine 32-Bit-Erweiterungen.
   - name: wine
     config-opts:
       - --prefix=/app/wine
@@ -67,6 +65,9 @@ modules:
       - LDCONFIG=/bin/true
       - UPDATE_DESKTOP_DATABASE=/bin/true
       - INSTALL_PROGRAM_FLAGS=-s
+    cleanup:
+      - /wine/include
+      - /wine/share/man
     sources:
       - type: archive
         url: https://dl.winehq.org/wine/source/11.x/wine-11.20.tar.xz
@@ -76,15 +77,24 @@ modules:
     buildsystem: simple
     build-commands:
       - po/update.sh --build
-      - mkdir -p /app/share/tretlager && cp -a tretlager /app/share/tretlager/
-      - install -Dm755 build-aux/flatpak/spike/run-setup.py /app/bin/tretlager-spike-setup
-      - printf '#!/bin/sh\nexport PYTHONPATH=/app/share/tretlager\nexec python3 -m tretlager.kde "$@"\n' > /app/bin/tretlager
-      - printf '#!/bin/sh\nexport PYTHONPATH=/app/share/tretlager\nexec python3 -m tretlager.bridge "$@"\n' > /app/bin/tretlager-bridge
+      - |
+        SITE=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib", vars={"base": "/app"}))')
+        mkdir -p "$SITE" && cp -a tretlager "$SITE/"
+        find "$SITE/tretlager" -name __pycache__ -prune -exec rm -rf {} +
+      - printf '#!/bin/sh\nexec python3 -m tretlager.kde "$@"\n' > /app/bin/tretlager
+      - printf '#!/bin/sh\nexec python3 -m tretlager.bridge "$@"\n' > /app/bin/tretlager-bridge
       - chmod 755 /app/bin/tretlager /app/bin/tretlager-bridge
+      # Sensor-Bridge per D-Bus-Aktivierung: eigene Instanz, unabhängig vom Fenster
+      - install -Dm644 build-aux/flatpak/de.linuxundich.Tretlager.Bridge.service -t /app/share/dbus-1/services/
       - install -Dm644 tretlager/data/icons/de.linuxundich.Tretlager.svg /app/share/icons/hicolor/scalable/apps/de.linuxundich.Tretlager.svg
-      - sed -e 's|^Exec=.*--start|Exec=tretlager --start|' -e 's|^Exec=env.*|Exec=tretlager|' data/de.linuxundich.Tretlager.desktop.in > de.linuxundich.Tretlager.desktop
-      - install -Dm644 de.linuxundich.Tretlager.desktop /app/share/applications/de.linuxundich.Tretlager.desktop
+      - |
+        for d in de.linuxundich.Tretlager de.linuxundich.Tretlager.Zwift; do
+          sed -e 's|^Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde|Exec=tretlager|' data/$d.desktop.in > $d.desktop
+          install -Dm644 $d.desktop -t /app/share/applications/
+        done
+      - install -Dm644 build-aux/flatpak/de.linuxundich.Tretlager.metainfo.xml -t /app/share/metainfo/
     sources:
       - type: dir
-        path: ../../..
-        skip: [dist, poc, .git, build-aux/flatpak/spike/build-dir, build-aux/flatpak/spike/repo, build-aux/flatpak/spike/.flatpak-builder]
+        path: ../..
+        skip: [dist, poc, .git, .pytest_cache, build-aux/flatpak/build-dir, build-aux/flatpak/repo,
+               build-aux/flatpak/.flatpak-builder, tretlager/data/locale]

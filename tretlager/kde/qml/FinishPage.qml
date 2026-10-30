@@ -9,7 +9,7 @@ ColumnsPage {
 
     Component.onCompleted: backend.markSetupComplete()
 
-    header: WizardHeader { step: 6; text: i18n("Noch ein Handgriff in Zwift.") }
+    header: WizardHeader { stepId: "finish"; text: i18n("Noch ein Handgriff in Zwift.") }
 
     PageHero {
         iconName: "data-success"

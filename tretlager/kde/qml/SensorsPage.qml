@@ -23,7 +23,7 @@ ColumnsPage {
 
     header: WizardHeader {
         visible: page.wizard
-        step: 5
+        stepId: "sensors"
         text: i18n("Kurz in die Pedale treten und den Pulsgurt anlegen.")
     }
 

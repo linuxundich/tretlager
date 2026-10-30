@@ -47,6 +47,6 @@ def test_list_adapters(tmp_path):
 
     def run(cmd, **kw):
         import subprocess
-        return subprocess.CompletedProcess(cmd, 0, stdout='{"type":"s","data":"a0:b1:c2:d3:e4:f5"}')
+        return subprocess.CompletedProcess(cmd, 0, stdout="({'Address': <'a0:b1:c2:d3:e4:f5'>, 'Powered': <true>},)")
     assert btcompat.list_adapters(tmp_path, run=run) == [
         {"hci": "hci0", "address": "A0:B1:C2:D3:E4:F5", "chip": "Intel Wi-Fi 6 AX201", "usb_id": "8087:0026"}]

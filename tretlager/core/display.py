@@ -45,7 +45,10 @@ def wine_dpi(env=os.environ) -> int:
     forced = env.get("TRETLAGER_DPI", "")
     if forced.isdigit():
         return int(forced)
-    scale = _kwin_xwayland_scale(Path(env.get("XDG_CONFIG_HOME") or Path.home() / ".config")) or _scale
+    # Im Flatpak zeigt XDG_CONFIG_HOME in die Sandbox; kwinrc des Rechners liegt (mit Freigabe
+    # xdg-config/kwinrc:ro) unter ~/.config.
+    scale = (_kwin_xwayland_scale(Path(env.get("XDG_CONFIG_HOME") or Path.home() / ".config"))
+             or _kwin_xwayland_scale(Path(env.get("HOME") or Path.home()) / ".config") or _scale)
     if not scale or scale < 1:
         return BASE_DPI
     return round(BASE_DPI * scale)

@@ -4,14 +4,38 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
-### Behoben
-- Zwift-Fenster im Flatpak nicht maximiert (unten abgeschnitten): Das KWin-Skript lag im privaten
-  `/tmp` der Sandbox, das KWin nicht sieht. Es liegt nun in `$XDG_RUNTIME_DIR/app/<App-ID>`, das
-  Rechner und Sandbox unter demselben Pfad sehen.
+## [0.8.0] - 2026-10-30
+
+Erste Version als Flatpak (`build-aux/flatpak/de.linuxundich.Tretlager.yml`); das Debian-Paket ist
+eingestellt. Plan und Testergebnisse in `docs/flatpak.md`.
 
 ### Hinzugefügt
-- Flatpak-Machbarkeitstest F0 (`build-aux/flatpak/spike/`, siehe `docs/flatpak.md`): Wegwerf-Manifest
-  mit Wine 11.20 aus den Quellen (WoW64 per mingw), Python-Paketen, cabextract und osslsigncode.
+- Flatpak mit eigenem Wine 11.20 (aus den Quellen als WoW64 gebaut, mingw-w64), cabextract,
+  osslsigncode und den Python-Paketen als feste Wheels (`gen-python-deps.py`); Laufzeit KDE 6.11
+  mit PySide-BaseApp 6.11. Bauen auf tinytin: `build-aux/flatpak/build.sh`.
+- Sensor-Bridge per D-Bus-Aktivierung (`de.linuxundich.Tretlager.Bridge.service`): eigene Instanz,
+  läuft unabhängig vom Fenster; neue D-Bus-Methode `Quit`; die Bridge meldet ihre Version, und
+  Tretlager startet eine ältere laufende Bridge nach einem Update neu (solange Zwift nicht läuft).
+- *Beim Anmelden starten* über das Background-Portal.
+- Systemprüfung „Geräte-Ankündigung“: ohne Avahi findet Zwift die Sensoren nicht.
+
+### Geändert
+- Bridge-Steuerung, Adapterliste und Bluetooth-Prüfung über `gdbus` statt `busctl`/`systemctl`
+  (beides fehlt in der Sandbox).
+- Assistent im Flatpak ohne *Vorbereiten* (Wine ist im Paket): fünf Schritte, die Nummern ergeben
+  sich aus der Schrittkennung.
+- Systemprüfung: Betriebssystem aus `/run/host/os-release` und nur angezeigt, nicht mehr als
+  „Zielsystem“ bewertet; NVIDIA-Treiber auch aus `/proc/driver/nvidia/version`; Wine „im Flatpak
+  enthalten“.
+- Wine-DPI liest `~/.config/kwinrc` auch aus dem Flatpak (Freigabe nur lesend).
+- Hilfe: Speicherorte unter `~/.var/app/de.linuxundich.Tretlager/`, Einrichtung in fünf Schritten.
+
+### Behoben
+- Zwift-Fenster im Flatpak nicht maximiert (unten abgeschnitten): Das KWin-Skript lag im privaten
+  `/tmp` der Sandbox, das KWin nicht sieht. Es liegt nun in `$XDG_RUNTIME_DIR/app/<App-ID>`.
+
+### Entfernt
+- Flatpak-Spike aus F0 (`build-aux/flatpak/spike/`), ersetzt durch das echte Manifest.
 
 ## [0.7.1] - 2026-10-30
 
