@@ -104,12 +104,20 @@ ColumnsPage {
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
+            // Die eine Hauptaktion: größer als alle anderen Knöpfe und als einziger hervorgehoben.
             Controls.Button {
+                id: startButton
                 text: page.la.zwiftRunning ? i18n("Zwift läuft") : i18n("Zwift starten")
                 icon.name: "media-playback-start"
+                icon.width: Kirigami.Units.iconSizes.smallMedium
+                icon.height: Kirigami.Units.iconSizes.smallMedium
+                // Der Plasma-Stil misst Knöpfe selbst und übergeht Polsterwerte; Größe direkt setzen.
+                implicitHeight: Kirigami.Units.gridUnit * 2.4
+                implicitWidth: Math.max(implicitContentWidth + Kirigami.Units.gridUnit * 2, Kirigami.Units.gridUnit * 11)
                 highlighted: true
                 enabled: !page.la.busy && !page.la.zwiftRunning
                 onClicked: backend.startZwift()
+                Component.onCompleted: if (!backend.autoStart) forceActiveFocus()
             }
             Controls.BusyIndicator {
                 visible: page.la.busy
@@ -120,6 +128,15 @@ ColumnsPage {
             Kirigami.ContextualHelpButton {
                 toolTipText: i18n("Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-Sitzung. Gibt es eine neue Zwift-Version, sichert Tretlager die alte und spielt das Update ein. Zwift läuft auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms.")
             }
+        }
+        // Haftungshinweis direkt an der Hauptaktion: Die Werte der Bridge sind nicht abgesichert.
+        Controls.Label {
+            Layout.fillWidth: true
+            Layout.topMargin: Kirigami.Units.smallSpacing
+            wrapMode: Text.WordWrap
+            color: Kirigami.Theme.disabledTextColor
+            font: Kirigami.Theme.smallFont
+            text: i18n("Nicht für Rennen: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt.")
         }
     }
 

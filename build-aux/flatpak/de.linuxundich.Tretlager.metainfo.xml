@@ -14,6 +14,8 @@
       connects smart trainers and heart rate straps through a Bluetooth bridge that presents them to Zwift
       as Wahoo Direct Connect devices.</p>
     <p>Tretlager is not affiliated with Zwift Inc. Zwift does not support Linux; use at your own risk.</p>
+    <p>Not for races: there is no guarantee that the sensor bridge passes power, cadence and heart rate
+      to Zwift correctly. Do not use Tretlager for races or competitions with results.</p>
   </description>
   <launchable type="desktop-id">de.linuxundich.Tretlager.desktop</launchable>
   <url type="homepage">https://linuxundich.de/</url>

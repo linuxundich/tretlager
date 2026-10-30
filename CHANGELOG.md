@@ -9,6 +9,12 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   auf einem dunklen Plasma-Panel kaum zu erkennen.
 
 ### Geändert
+- Hinweis „Nicht für Rennen“: Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz
+  und Puls korrekt an Zwift weitergibt; an Rennen und Wettbewerben mit Wertung nicht mit Tretlager
+  teilnehmen. Steht in der Übersicht unter *Zwift starten*, auf der Willkommensseite, unter
+  *Über Tretlager*, in der Hilfe, im README und in den Metadaten.
+- Übersicht sportlicher gewichtet: *Zwift starten* als großer, einziger hervorgehobener Knopf (hat
+  den Tastaturfokus), Messwerte der Sensoren als Kennzahlen (große Ziffer, Einheit darunter).
 - Übersicht: „Bereit zum Fahren“ nur, wenn alle eingeschalteten Sensoren verbunden sind, sonst
   „Fast bereit“ mit den noch gesuchten Sensoren.
 - Verständliche Fehlertexte statt BlueZ-/D-Bus-Meldungen an Sensoren und Bridge; Rohtext ins

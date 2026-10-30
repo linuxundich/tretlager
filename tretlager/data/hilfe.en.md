@@ -17,6 +17,8 @@ rate strap.
 - **Before the start**: Tretlager checks for Zwift updates and backs up the Zwift environment
   first.
 - **During the ride**: Tretlager waits minimised and tidies up after Zwift closes.
+- **Not for races**: Tretlager does not guarantee that the sensor bridge passes power, cadence
+  and heart rate to Zwift correctly. Do not use Tretlager for races or competitions with results.
 - **On a laptop**: Connect the power adapter before starting and keep it connected. Switching
   between AC and battery can crash the NVIDIA driver.
 

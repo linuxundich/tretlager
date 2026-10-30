@@ -140,5 +140,5 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] Bridge-Zustand per QtDBus-Signal `Changed` statt gdbus-Abfrage; `Backend` aufteilen
 - [ ] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
 - [ ] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
-- [ ] U-03 Startknopf größer, Live-Werte als Kennzahlen gewichten (im HIG-Rahmen)
+- [x] U-03 Startknopf größer, Live-Werte als Kennzahlen (im HIG-Rahmen); Hervorhebung unter echtem Plasma noch ansehen (Bildschirm war gesperrt)
 - [ ] Metainfo: Screenshots und Release-Beschreibungen

@@ -15,6 +15,11 @@ Connect, ohne Companion App. Machbarkeit in [FEASIBILITY.md](FEASIBILITY.md), Be
 [docs/bedienkonzept.md](docs/bedienkonzept.md), QA-Audit in
 [docs/qa-audit-2026-10-30.md](docs/qa-audit-2026-10-30.md), offene Punkte in [BACKLOG.md](BACKLOG.md).
 
+**Nicht für Rennen:** Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz und
+Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung sollte man mit Tretlager
+nicht teilnehmen. Der Hinweis steht in der App auf der Willkommensseite, in der Übersicht unter
+*Zwift starten*, unter *Über Tretlager* und in der Hilfe.
+
 Kernbefunde:
 - Zwift läuft nur experimentell unter Wine (11.x, im Flatpak aus den Quellen gebaut).
 - Das Spiel nutzt OpenGL 3.1, DXVK ist überflüssig.

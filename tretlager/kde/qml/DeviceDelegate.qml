@@ -126,8 +126,37 @@ FormCard.AbstractFormDelegate {
                 }
             }
 
-            // Messwerte: feste Breite, zwei Zeilen reserviert
+            // Übersicht: Messwerte als Kennzahlen (große Ziffer, Einheit klein darunter), feste
+            // Breite je Wert, damit beim Treten nichts springt.
+            Repeater {
+                model: row.detailed ? [] : (row.valueRows[row.device.role] || [])
+                delegate: ColumnLayout {
+                    required property var modelData
+                    readonly property bool live: row.values[modelData[0]] !== undefined
+                    opacity: row.paused ? 0.55 : 1
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Kirigami.Units.gridUnit * 4.5
+                    spacing: 0
+                    Kirigami.Heading {
+                        Layout.alignment: Qt.AlignRight
+                        level: 1
+                        text: row.formatValue(modelData[0])
+                        font.features: { "tnum": 1 }
+                        color: parent.live ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
+                        Accessible.name: text + " " + modelData[1]
+                    }
+                    Controls.Label {
+                        Layout.alignment: Qt.AlignRight
+                        text: modelData[1]
+                        color: Kirigami.Theme.disabledTextColor
+                        font: Kirigami.Theme.smallFont
+                    }
+                }
+            }
+
+            // Sensorseite: Messwerte kompakt, feste Breite, zwei Zeilen reserviert
             ColumnLayout {
+                visible: row.detailed
                 opacity: row.paused ? 0.55 : 1
                 Layout.alignment: Qt.AlignVCenter
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 6

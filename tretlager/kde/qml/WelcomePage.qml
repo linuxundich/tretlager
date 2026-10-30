@@ -39,6 +39,12 @@ ColumnsPage {
                 icon.name: "dialog-warning"
             }
             FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
+                text: i18n("Nicht für Rennen")
+                description: i18n("Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")
+                icon.name: "flag"
+            }
+            FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
                 text: i18n("Über Tretlager und Lizenzen")
                 icon.name: "help-about"

@@ -17,6 +17,9 @@ Pulsgurt.
 - **Zwift starten**: In der Übersicht oder im Startmenü unter *Zwift (Tretlager)*.
 - **Vor dem Start**: Tretlager sucht nach Zwift-Updates und sichert vorher die Zwift-Umgebung.
 - **Während der Fahrt**: Tretlager wartet minimiert und räumt nach dem Beenden auf.
+- **Nicht für Rennen**: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung,
+  Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher
+  nicht mit Tretlager teilnehmen.
 - **Auf dem Notebook**: Netzteil vor dem Start anschließen und angeschlossen lassen. Ein Wechsel
   zwischen Netz und Akku kann den NVIDIA-Treiber zum Absturz bringen.
 

@@ -74,8 +74,14 @@ ColumnsPage {
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
                 text: i18n("Sensor-Bridge")
-                description: i18n("Gibt sich gegenüber Zwift als Wahoo-Gerät mit „Direct Connect“ aus. Werte und Widerstand kommen unverändert vom Gerät; eine Garantie für ihre Richtigkeit gibt es nicht, etwa bei Rennen mit Wertung.")
+                description: i18n("Gibt sich gegenüber Zwift als Wahoo-Gerät mit „Direct Connect“ aus und reicht die Werte des Geräts weiter, ohne sie zu verändern.")
                 icon.name: "network-bluetooth"
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormTextDelegate {
+                text: i18n("Nicht für Rennen")
+                description: i18n("Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls vollständig und korrekt an Zwift weitergibt; Übertragungsfehler und Aussetzer sind möglich. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")
+                icon.name: "flag"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
