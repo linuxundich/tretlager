@@ -1,8 +1,13 @@
 # Tretlager (Arbeitstitel)
 
-Native Qt-/Kirigami-Anwendung für KDE Plasma, die den offiziellen Windows-Client von **Zwift** unter
-**TUXEDO OS Forky** (Debian testing) einrichtet, startet und aktuell hält: Wine, Laufzeit,
-Grafikdiagnose (NVIDIA), Sensoren über Bluetooth LE ohne Zwift Companion App.
+Native Qt-/Kirigami-Anwendung, die den offiziellen Windows-Client von **Zwift** unter Linux
+einrichtet, startet und aktuell hält: Wine, Laufzeit, Grafikdiagnose (NVIDIA), Sensoren über
+Bluetooth LE ohne Zwift Companion App.
+
+**Ziel (seit 2026-10-30): ein Flatpak**, das auf modernen Distributionen läuft und alles mitbringt,
+was Zwift braucht (eigenes Wine, winetricks, Werkzeuge). Plan und Stand in
+[docs/flatpak.md](docs/flatpak.md). Entwickelt und getestet auf TUXEDO OS Forky (Plasma) auf
+tinytin; Plasma ist das Hauptziel, GNOME soll funktionieren.
 
 **Stand (2026-10-29):** Machbarkeit geprüft, Zwift läuft auf dem Testrechner tinytin (Opt-in-
 Token-Login, NVIDIA per GLX + PRIME-Offload). Die **Sensor-Bridge** mit Oberfläche funktioniert:
@@ -56,7 +61,11 @@ in `_()` (Texte der Bridge in `N_()`, übersetzt erst in der Oberfläche).
 `build-deb.sh` übersetzt die Kataloge selbst. `tests/test_i18n.py` schlägt fehl, wenn ein Text
 keine englische Übersetzung hat oder Platzhalter nicht übereinstimmen.
 
-## Debian-Paket
+## Debian-Paket (eingestellt)
+
+Das Debian-Paket (bis 0.7.1) war der erste Auslieferungsweg und wird nicht weiterentwickelt; es
+bleibt nur, bis das Flatpak die Abnahme (F5) bestanden hat. Auf tinytin ist es seit 2026-10-30
+entfernt.
 
     build-aux/build-deb.sh            # → dist/tretlager_<Version>_all.deb (braucht dpkg-deb)
     sudo apt install ./dist/tretlager_<Version>_all.deb

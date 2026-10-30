@@ -1,10 +1,20 @@
 # Tretlager als Flatpak – Phasenplan
 
-Stand 2026-10-30. Ziel: Tretlager mit allem, was Zwift braucht (Wine, winetricks, Werkzeuge,
-Python-Pakete), als ein Flatpak ausliefern. Damit kann ein Systemupdate die getestete
-Wine-Version nicht mehr ändern, der Schritt *Vorbereiten* (WineHQ-Quelle, Passwort, APT)
-entfällt, und Tretlager läuft auch außerhalb von TUXEDO OS. Das Debian-Paket bleibt, bis das
-Flatpak Phase F5 bestanden hat.
+Stand 2026-10-30. **Primärziel:** Tretlager als Flatpak, das distributionsunabhängig auf modernen
+Distributionen läuft (nicht zwingend überall) und alles mitbringt, was Zwift braucht (Wine,
+winetricks, Werkzeuge, Python-Pakete). Ein Systemupdate kann die getestete Wine-Version nicht mehr
+ändern, der Schritt *Vorbereiten* (WineHQ-Quelle, Passwort, APT) entfällt. Das Debian-Paket ist
+eingestellt (auf tinytin am 30.10. entfernt) und wird nicht mehr weiterentwickelt.
+
+### Was „moderne Distribution“ heißt
+
+- Flatpak ≥ 1.14 (Background-Portal, `--allow=multiarch`), xdg-desktop-portal mit KDE- oder
+  GNOME-Backend, BlueZ ≥ 5.6x, Avahi (für die Ankündigung an Zwift), PipeWire oder PulseAudio.
+- Wayland-Sitzung mit XWayland oder X11; NVIDIA mit proprietärem Treiber, für den es die
+  passende Flathub-Erweiterung gibt, oder Mesa (Intel/AMD).
+- Ziel-Tests: TUXEDO OS (Plasma), Fedora (KDE und GNOME), Arch, Ubuntu 26.04 LTS.
+- Was nur unter Plasma geht (KWin-Skript zum Maximieren, XWayland-Skalierung aus `kwinrc`),
+  bekommt unter GNOME einen sinnvollen Rückfall statt eines Fehlers.
 
 ## Was schon geklärt ist (Flathub, 30.10.)
 
@@ -104,6 +114,16 @@ Manifest selbst bauen (F0 wiederholen) oder das Vorhaben zurückstellen.
   `xdg-cache/tretlager`, `xdg-state/tretlager` → dieselben Pfade wie das Debian-Paket, keine
   Umzüge, Präfix und Einstellungen bleiben. Alternative (sauberer, aber mit Umzug von 8,6 GB):
   Sandbox-Pfade unter `~/.var/app/de.linuxundich.Tretlager/`.
+
+### F2b Distributionsunabhängigkeit
+
+- Systemprüfung ohne Debian-Annahmen: Betriebssystem nur noch anzeigen (aus
+  `/run/host/os-release`), nicht mehr als „Zielsystem“ werten; Prüfungen auf Flatpak-Fähigkeiten
+  (Portal, Avahi, BlueZ, GPU) statt auf Pakete.
+- Hilfe und Texte ohne TUXEDO-/APT-Bezug, wo es nicht ums Debian-Paket geht.
+- Avahi fehlt auf manchen Distributionen standardmäßig: Prüfung mit verständlicher Abhilfe, ggf.
+  Ankündigung ohne Avahi (eigenes mDNS) als Ausweg.
+- GNOME: Fenster maximieren ohne KWin (Wine-Registry bzw. Vollbild), DPI aus der Fensterskalierung.
 
 ### F3 Umstieg vom Debian-Paket
 
