@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import paths, state, systemcheck
+from . import display, paths, state, systemcheck
 from ..i18n import _
 
 INSTALLER_URL = "https://cdn.zwift.com/app/ZwiftSetup.exe"
@@ -166,6 +166,8 @@ class Prefix(Step):
         if ctx.run(["wine", "wineboot", "-u"], env=env) != 0:
             raise SetupError(_("Wine konnte die Umgebung nicht anlegen."))
         ctx.wineserver_wait()
+        # Ab jetzt in Bildschirmgröße: Installer und .NET-Einrichtung sonst winzig auf HiDPI
+        display.ensure_dpi(paths.PREFIX, ctx.run)
 
 
 class Winetricks:
@@ -343,6 +345,8 @@ STEPS: list[Step] = [Installer(), Prefix(), Components(), Launcher(), Game(), Gr
 
 def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
     """Alle Schritte der Reihe nach; on_step(id, status, text) mit status running/done/skipped/error."""
+    # Weitergeführte Einrichtung: DPI der vorhandenen Umgebung an den Bildschirm anpassen
+    display.ensure_dpi(paths.PREFIX, ctx.run)
     for step in STEPS:
         if ctx.cancel.is_set():
             return False

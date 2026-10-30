@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 09:00+0100\n"
+"POT-Creation-Date: 2026-10-30 10:43+0100\n"
 "PO-Revision-Date: 2026-10-30 09:30+0100\n"
 "Last-Translator: Christoph Langner\n"
 "Language-Team: English\n"
@@ -33,7 +33,8 @@ msgstr "Device is asleep – pedal briefly or put on the strap"
 msgid ""
 "Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, "
 "Herzfrequenz)"
-msgstr "Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"
+msgstr ""
+"Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"
 
 #: tretlager/bridge/device.py:231
 msgid "Verbindung zum Gerät verloren"
@@ -56,14 +57,21 @@ msgid ""
 "Bluetooth-Stick anschließen und unter Sensoren als Bluetooth-Adapter wählen "
 "(getestet: TP-Link UB500) oder einen anderen Pulsgurt nutzen, etwa einen "
 "Wahoo TICKR."
-msgstr "The Garmin HRM-Pro does not connect to this computer's Bluetooth chip ({chip}). It is found, but the connection never completes; range and battery are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as the Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another heart rate strap such as a Wahoo TICKR."
+msgstr ""
+"The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
+"({chip}). It is found, but the connection never completes; range and battery "
+"are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as "
+"the Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another "
+"heart rate strap such as a Wahoo TICKR."
 
 #: tretlager/core/btcompat.py:66
 #, python-brace-format
 msgid ""
 "Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-"
 "Bluetooth-Stick"
-msgstr "Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth dongle"
+msgstr ""
+"Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth "
+"dongle"
 
 #: tretlager/core/btcompat.py:84
 msgid "unbekannter Chip"
@@ -86,69 +94,75 @@ msgstr "Checking the sensor bridge"
 msgid "Anmeldung prüfen"
 msgstr "Checking the sign-in"
 
-#: tretlager/core/launch.py:128
+#: tretlager/core/launch.py:130
+#, python-brace-format
+msgid "Wine-DPI an den Bildschirm angepasst: {dpi}"
+msgstr "Wine DPI adjusted to the screen: {dpi}"
+
+#: tretlager/core/launch.py:131
 msgid "Zwift starten"
 msgstr "Start Zwift"
 
-#: tretlager/core/launch.py:130
+#: tretlager/core/launch.py:133
 msgid "Fenster anpassen"
 msgstr "Adjusting the window"
 
-#: tretlager/core/launch.py:132 tretlager/kde/app.py:589
+#: tretlager/core/launch.py:135 tretlager/kde/app.py:589
 msgid "Zwift läuft"
 msgstr "Zwift is running"
 
-#: tretlager/core/launch.py:136
+#: tretlager/core/launch.py:139
 msgid "Sensor-Bridge nicht installiert, Start ohne Sensoren"
 msgstr "Sensor bridge not installed, starting without sensors"
 
-#: tretlager/core/launch.py:140
+#: tretlager/core/launch.py:143
 msgid "Sensor-Bridge gestartet"
 msgstr "Sensor bridge started"
 
-#: tretlager/core/launch.py:147
+#: tretlager/core/launch.py:150
 #, python-brace-format
 msgid "Update-Prüfung nicht möglich: {error}"
 msgstr "Could not check for updates: {error}"
 
-#: tretlager/core/launch.py:152
+#: tretlager/core/launch.py:155
 #, python-brace-format
 msgid "Zwift wird aktualisiert ({old} → {new})"
 msgstr "Updating Zwift ({old} → {new})"
 
-#: tretlager/core/launch.py:155
+#: tretlager/core/launch.py:158
 #, python-brace-format
 msgid "Schnappschuss vor dem Update: {path}"
 msgstr "Snapshot before the update: {path}"
 
-#: tretlager/core/launch.py:164
+#: tretlager/core/launch.py:167
 #, python-brace-format
 msgid "Zwift aktualisiert auf {version}"
 msgstr "Zwift updated to {version}"
 
-#: tretlager/core/launch.py:167
+#: tretlager/core/launch.py:170
 msgid ""
 "Das Zwift-Update wurde nicht fertig. Der Schnappschuss davor ist erhalten."
-msgstr "The Zwift update did not finish. The snapshot taken before it has been kept."
+msgstr ""
+"The Zwift update did not finish. The snapshot taken before it has been kept."
 
-#: tretlager/core/launch.py:183
+#: tretlager/core/launch.py:186
 msgid "Hilfsprogramm zum Starten ließ sich nicht übersetzen."
 msgstr "Could not compile the start helper."
 
-#: tretlager/core/launch.py:206
+#: tretlager/core/launch.py:209
 msgid "Der Zwift-Launcher startet nicht."
 msgstr "The Zwift launcher does not start."
 
-#: tretlager/core/launch.py:223
+#: tretlager/core/launch.py:226
 #, python-brace-format
 msgid "Zwift ließ sich nicht starten (RunFromProcess, Code {code})."
 msgstr "Could not start Zwift (RunFromProcess, code {code})."
 
-#: tretlager/core/launch.py:226
+#: tretlager/core/launch.py:229
 msgid "Zwift ließ sich nicht starten (Zeitüberschreitung)."
 msgstr "Could not start Zwift (timed out)."
 
-#: tretlager/core/launch.py:248
+#: tretlager/core/launch.py:251
 msgid "Sensor-Bridge gestoppt"
 msgstr "Sensor bridge stopped"
 
@@ -159,7 +173,8 @@ msgstr "The sign-in was cancelled."
 #: tretlager/core/login.py:59 tretlager/core/login.py:60
 msgid ""
 "Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden."
-msgstr "Zwift requires signing in with email and password. Please sign in again."
+msgstr ""
+"Zwift requires signing in with email and password. Please sign in again."
 
 #: tretlager/core/login.py:61
 msgid ""
@@ -178,13 +193,16 @@ msgstr "Zwift sign-in reported an error. Please try again later."
 msgid ""
 "Zwift hat die Anmeldung nicht abgeschlossen (Fehler „{code}“). Bitte erneut "
 "anmelden."
-msgstr "Zwift did not complete the sign-in (error “{code}”). Please sign in again."
+msgstr ""
+"Zwift did not complete the sign-in (error “{code}”). Please sign in again."
 
 #: tretlager/core/login.py:75
 msgid ""
 "Das ist nicht die Adresse nach der Zwift-Anmeldung (launcher.zwift.com/"
 "launcher?…)."
-msgstr "This is not the address shown after signing in to Zwift (launcher.zwift.com/launcher?…)."
+msgstr ""
+"This is not the address shown after signing in to Zwift (launcher.zwift.com/"
+"launcher?…)."
 
 #: tretlager/core/login.py:81
 msgid "In der Adresse fehlt der Anmeldecode (code=…)."
@@ -194,7 +212,9 @@ msgstr "The address is missing the sign-in code (code=…)."
 msgid ""
 "Die Adresse gehört zu einer älteren Anmeldung. Bitte erneut im Browser "
 "anmelden."
-msgstr "The address belongs to an earlier sign-in. Please sign in again in the browser."
+msgstr ""
+"The address belongs to an earlier sign-in. Please sign in again in the "
+"browser."
 
 #: tretlager/core/login.py:95
 msgid ""
@@ -237,7 +257,7 @@ msgstr "Package planning failed: {error}"
 msgid "Abgebrochen oder keine Berechtigung erteilt"
 msgstr "Cancelled or permission not granted"
 
-#: tretlager/core/setup.py:101 tretlager/core/setup.py:270
+#: tretlager/core/setup.py:101 tretlager/core/setup.py:272
 msgid "Abgebrochen"
 msgstr "Cancelled"
 
@@ -284,61 +304,61 @@ msgstr "Wine is setting up the environment"
 msgid "Wine konnte die Umgebung nicht anlegen."
 msgstr "Wine could not create the environment."
 
-#: tretlager/core/setup.py:179
+#: tretlager/core/setup.py:181
 msgid "winetricks hat nicht die erwartete Prüfsumme; Download verworfen."
 msgstr "winetricks does not have the expected checksum; download discarded."
 
-#: tretlager/core/setup.py:193
+#: tretlager/core/setup.py:195
 msgid "Komponenten von Microsoft (Schriften, .NET 4.8, WebView2)"
 msgstr "Microsoft components (fonts, .NET 4.8, WebView2)"
 
-#: tretlager/core/setup.py:207
+#: tretlager/core/setup.py:209
 #, python-brace-format
 msgid "winetricks konnte „{verb}“ nicht installieren."
 msgstr "winetricks could not install “{verb}”."
 
-#: tretlager/core/setup.py:214
+#: tretlager/core/setup.py:216
 msgid "Zwift-Launcher installieren"
 msgstr "Install the Zwift launcher"
 
-#: tretlager/core/setup.py:220
+#: tretlager/core/setup.py:222
 msgid "Installer läuft unbeaufsichtigt"
 msgstr "Installer is running unattended"
 
-#: tretlager/core/setup.py:226
+#: tretlager/core/setup.py:228
 msgid "Der Zwift-Launcher wurde nicht installiert."
 msgstr "The Zwift launcher was not installed."
 
-#: tretlager/core/setup.py:255
+#: tretlager/core/setup.py:257
 msgid "Zwift laden (etwa 5 GB)"
 msgstr "Download Zwift (about 5 GB)"
 
-#: tretlager/core/setup.py:279
+#: tretlager/core/setup.py:281
 #, python-brace-format
 msgid "Zwift {version} geladen"
 msgstr "Zwift {version} downloaded"
 
-#: tretlager/core/setup.py:281
+#: tretlager/core/setup.py:283
 msgid "Zwift wurde nicht vollständig geladen (Zeitüberschreitung)."
 msgstr "Zwift was not fully downloaded (timed out)."
 
-#: tretlager/core/setup.py:304
+#: tretlager/core/setup.py:306
 msgid "Grafik einrichten"
 msgstr "Set up graphics"
 
-#: tretlager/core/setup.py:321
+#: tretlager/core/setup.py:323
 msgid "Grafiktest übersetzen"
 msgstr "Compiling the graphics test"
 
-#: tretlager/core/setup.py:327
+#: tretlager/core/setup.py:329
 msgid "Grafiktest ausführen"
 msgstr "Running the graphics test"
 
-#: tretlager/core/setup.py:335
+#: tretlager/core/setup.py:337
 msgid "Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."
 msgstr "Wine gets no OpenGL context; Zwift would not start."
 
-#: tretlager/core/setup.py:337
+#: tretlager/core/setup.py:339
 msgid "Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"
 msgstr "Warning: NVIDIA present, but OpenGL does not run on it"
 
@@ -401,7 +421,8 @@ msgstr "NVIDIA driver {version} loaded"
 #: tretlager/core/systemcheck.py:130
 msgid ""
 "Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung)."
-msgstr "Secure Boot is on; the kernel module must be signed (see the TUXEDO guide)."
+msgstr ""
+"Secure Boot is on; the kernel module must be signed (see the TUXEDO guide)."
 
 #: tretlager/core/systemcheck.py:133
 msgid "NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen."
@@ -424,7 +445,9 @@ msgstr "Display via {vendor}, Zwift via PRIME offload (GLX)"
 #, python-brace-format
 msgid ""
 "{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA"
-msgstr "{vendor} graphics (Mesa): Zwift runs, but at a lower frame rate than with NVIDIA"
+msgstr ""
+"{vendor} graphics (Mesa): Zwift runs, but at a lower frame rate than with "
+"NVIDIA"
 
 #: tretlager/core/systemcheck.py:176 tretlager/core/systemcheck.py:183
 #: tretlager/core/systemcheck.py:185
@@ -435,7 +458,8 @@ msgstr "Bluetooth"
 msgid ""
 "Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter "
 "verbinden"
-msgstr "No Bluetooth adapter found – sensors can only be connected with an adapter"
+msgstr ""
+"No Bluetooth adapter found – sensors can only be connected with an adapter"
 
 #: tretlager/core/systemcheck.py:181
 #, python-brace-format
@@ -576,13 +600,17 @@ msgstr "Power source changed"
 msgid ""
 "Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt "
 "Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
-msgstr "Switching between AC and battery can upset the NVIDIA driver. If Zwift hangs, close it with Alt+F4 and restart it with the power adapter connected."
+msgstr ""
+"Switching between AC and battery can upset the NVIDIA driver. If Zwift "
+"hangs, close it with Alt+F4 and restart it with the power adapter connected."
 
 #: tretlager/kde/app.py:507
 msgid ""
 "GNU General Public License, Version 3 oder später: https://www.gnu.org/"
 "licenses/gpl-3.0.html"
-msgstr "GNU General Public License, version 3 or later: https://www.gnu.org/licenses/gpl-3.0.html"
+msgstr ""
+"GNU General Public License, version 3 or later: https://www.gnu.org/licenses/"
+"gpl-3.0.html"
 
 #: tretlager/kde/app.py:553
 msgid "gültig"
@@ -672,7 +700,11 @@ msgid ""
 "Tretlager ist ein privates Projekt und kein Programm von Zwift Inc. Zwift "
 "unterstützt den Betrieb unter Linux nicht. Die Benutzung erfolgt auf eigene "
 "Gefahr."
-msgstr "Set up Zwift on Linux, keep it up to date and connect it to your trainer and heart rate strap.\nTretlager is a private project and not a program by Zwift Inc. Zwift does not support running on Linux. Use at your own risk."
+msgstr ""
+"Set up Zwift on Linux, keep it up to date and connect it to your trainer and "
+"heart rate strap.\n"
+"Tretlager is a private project and not a program by Zwift Inc. Zwift does "
+"not support running on Linux. Use at your own risk."
 
 #: tretlager/kde/qml/AboutPage.qml:23
 msgid "© 2026 Christoph Langner · GPL-3.0-or-later"
@@ -750,7 +782,9 @@ msgstr "No support from Zwift"
 msgid ""
 "Zwift unterstützt Linux und Wine nicht. Probleme an Tretlager melden, nicht "
 "an Zwift."
-msgstr "Zwift does not support Linux or Wine. Report problems to Tretlager, not to Zwift."
+msgstr ""
+"Zwift does not support Linux or Wine. Report problems to Tretlager, not to "
+"Zwift."
 
 #: tretlager/kde/qml/AboutPage.qml:64
 msgid "Anmeldung über den Browser"
@@ -761,7 +795,9 @@ msgid ""
 "Umgeht den offiziellen Launcher und widerspricht den Zwift-"
 "Nutzungsbedingungen. Einschränkungen bis hin zur Sperre des Kontos lassen "
 "sich nicht ausschließen."
-msgstr "Bypasses the official launcher and contradicts Zwift's terms of service. Restrictions up to a suspended account cannot be ruled out."
+msgstr ""
+"Bypasses the official launcher and contradicts Zwift's terms of service. "
+"Restrictions up to a suspended account cannot be ruled out."
 
 #: tretlager/kde/qml/AboutPage.qml:70
 msgid "Zwift bleibt unverändert"
@@ -771,7 +807,10 @@ msgstr "Zwift stays unmodified"
 msgid ""
 "Tretlager verändert keine Zwift-Dateien und umgeht weder Kopierschutz noch "
 "Abo-Prüfung. Ohne gültiges Zwift-Abo ist keine Fahrt möglich."
-msgstr "Tretlager does not modify any Zwift files and bypasses neither copy protection nor the subscription check. Riding requires a valid Zwift subscription."
+msgstr ""
+"Tretlager does not modify any Zwift files and bypasses neither copy "
+"protection nor the subscription check. Riding requires a valid Zwift "
+"subscription."
 
 #: tretlager/kde/qml/AboutPage.qml:76 tretlager/kde/qml/SensorsPage.qml:133
 #: tretlager/kde/qml/SensorsPage.qml:140
@@ -783,7 +822,10 @@ msgid ""
 "Gibt sich gegenüber Zwift als Wahoo-Gerät mit „Direct Connect“ aus. Werte "
 "und Widerstand kommen unverändert vom Gerät; eine Garantie für ihre "
 "Richtigkeit gibt es nicht, etwa bei Rennen mit Wertung."
-msgstr "Presents itself to Zwift as a Wahoo device with “Direct Connect”. Values and resistance come unchanged from the device; there is no guarantee of their accuracy, for example in ranked races."
+msgstr ""
+"Presents itself to Zwift as a Wahoo device with “Direct Connect”. Values and "
+"resistance come unchanged from the device; there is no guarantee of their "
+"accuracy, for example in ranked races."
 
 #: tretlager/kde/qml/AboutPage.qml:82
 msgid "Keine Gewährleistung"
@@ -794,7 +836,10 @@ msgid ""
 "Soweit gesetzlich zulässig (GPL, Abschnitte 15 und 16). Zwift, Wahoo, KICKR, "
 "TICKR und Garmin sind Marken ihrer Inhaber; Tretlager steht mit keinem "
 "dieser Unternehmen in Verbindung."
-msgstr "To the extent permitted by law (GPL, sections 15 and 16). Zwift, Wahoo, KICKR, TICKR and Garmin are trademarks of their owners; Tretlager is not affiliated with any of these companies."
+msgstr ""
+"To the extent permitted by law (GPL, sections 15 and 16). Zwift, Wahoo, "
+"KICKR, TICKR and Garmin are trademarks of their owners; Tretlager is not "
+"affiliated with any of these companies."
 
 #: tretlager/kde/qml/AboutPage.qml:88
 msgid "Unfreie Software, die Tretlager herunterlädt"
@@ -808,7 +853,9 @@ msgstr "Not included in the package"
 msgid ""
 "Die Einrichtung lädt diese Teile direkt beim Hersteller; es gelten dessen "
 "Lizenzbedingungen."
-msgstr "The setup downloads these parts directly from the vendor; the vendor's license terms apply."
+msgstr ""
+"The setup downloads these parts directly from the vendor; the vendor's "
+"license terms apply."
 
 #: tretlager/kde/qml/AboutPage.qml:97 tretlager/kde/qml/MainPage.qml:149
 #: tretlager/kde/qml/Main.qml:18
@@ -819,7 +866,8 @@ msgstr "Zwift"
 msgid ""
 "Zwift-Nutzungsbedingungen · das Spiel selbst, lädt Tretlager von Zwift "
 "herunter"
-msgstr "Zwift terms of service · the game itself, downloaded by Tretlager from Zwift"
+msgstr ""
+"Zwift terms of service · the game itself, downloaded by Tretlager from Zwift"
 
 #: tretlager/kde/qml/AboutPage.qml:103
 msgid ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
@@ -829,7 +877,9 @@ msgstr ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
 msgid ""
 "Lizenzbedingungen von Microsoft · braucht der Zwift Launcher, lädt "
 "winetricks von Microsoft"
-msgstr "Microsoft license terms · required by the Zwift launcher, downloaded by winetricks from Microsoft"
+msgstr ""
+"Microsoft license terms · required by the Zwift launcher, downloaded by "
+"winetricks from Microsoft"
 
 #: tretlager/kde/qml/AboutPage.qml:110
 msgid "Freie Software, auf der Tretlager aufbaut"
@@ -839,7 +889,9 @@ msgstr "Free software Tretlager builds on"
 msgid ""
 "Beschreibung des Protokolls Wahoo „Direct Connect“ (DIRCON), nach der die "
 "Bridge umgesetzt ist"
-msgstr "Description of the Wahoo “Direct Connect” protocol (DIRCON) the bridge is based on"
+msgstr ""
+"Description of the Wahoo “Direct Connect” protocol (DIRCON) the bridge is "
+"based on"
 
 #: tretlager/kde/qml/CheckPage.qml:9
 msgid "System prüfen"
@@ -944,19 +996,25 @@ msgstr "The bridge receives data and offers the device to Zwift."
 msgid ""
 "Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein "
 "Gurt nicht."
-msgstr "Pedal briefly or put on the strap; a strap does not transmit without skin contact."
+msgstr ""
+"Pedal briefly or put on the strap; a strap does not transmit without skin "
+"contact."
 
 #: tretlager/kde/qml/DeviceDelegate.qml:54
 msgid ""
 "Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät "
 "verbunden. Wird es gerade nicht genutzt: pausieren."
-msgstr "The device is asleep, too far away or connected to another device. If it is not in use right now: pause it."
+msgstr ""
+"The device is asleep, too far away or connected to another device. If it is "
+"not in use right now: pause it."
 
 #: tretlager/kde/qml/DeviceDelegate.qml:55
 msgid ""
 "Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. "
 "Fortsetzen, sobald es wieder gebraucht wird."
-msgstr "Paused: the bridge does not search for the device or offer it to Zwift. Resume as soon as it is needed again."
+msgstr ""
+"Paused: the bridge does not search for the device or offer it to Zwift. "
+"Resume as soon as it is needed again."
 
 #: tretlager/kde/qml/DeviceDelegate.qml:120
 msgid "In Zwift: %1"
@@ -998,7 +1056,9 @@ msgstr "Zwift is ready"
 msgid ""
 "Ab jetzt startet Zwift mit einem Klick, in der Übersicht oder im Startmenü "
 "unter Zwift (Tretlager)."
-msgstr "From now on Zwift starts with one click, from the overview or from the application menu under Zwift (Tretlager)."
+msgstr ""
+"From now on Zwift starts with one click, from the overview or from the "
+"application menu under Zwift (Tretlager)."
 
 #: tretlager/kde/qml/FinishPage.qml:20
 msgid "Einmalig in Zwift: Gekoppelte Geräte"
@@ -1028,7 +1088,9 @@ msgstr "Notices about Bluetooth and ANT+"
 msgid ""
 "Zwift meldet beides als nicht verfügbar. Das ist normal, die Geräte kommen "
 "über die Sensor-Bridge."
-msgstr "Zwift reports both as unavailable. That is normal; the devices come through the sensor bridge."
+msgstr ""
+"Zwift reports both as unavailable. That is normal; the devices come through "
+"the sensor bridge."
 
 #: tretlager/kde/qml/FinishPage.qml:42 tretlager/kde/qml/LoginPage.qml:132
 msgid "Zur Übersicht"
@@ -1060,8 +1122,12 @@ msgid ""
 msgid_plural ""
 "Angemeldet. Tretlager erneuert die Sitzung noch %1 Tage lang selbst, danach "
 "ist eine neue Anmeldung nötig."
-msgstr[0] "Signed in. Tretlager renews the session by itself for one more day; after that, signing in again is required."
-msgstr[1] "Signed in. Tretlager renews the session by itself for %1 more days; after that, signing in again is required."
+msgstr[0] ""
+"Signed in. Tretlager renews the session by itself for one more day; after "
+"that, signing in again is required."
+msgstr[1] ""
+"Signed in. Tretlager renews the session by itself for %1 more days; after "
+"that, signing in again is required."
 
 #: tretlager/kde/qml/LoginPage.qml:32
 msgid "Abmelden"
@@ -1081,13 +1147,18 @@ msgid ""
 "Tretlager, wie im offiziellen Launcher. Danach übernimmt Tretlager die "
 "Sitzung und legt sie im Schlüsselbund ab. Das Passwort liest und speichert "
 "Tretlager nicht."
-msgstr "Zwift's sign-in page opens in a private Tretlager window, as in the official launcher. Tretlager then takes over the session and stores it in the keyring. Tretlager neither reads nor stores the password."
+msgstr ""
+"Zwift's sign-in page opens in a private Tretlager window, as in the official "
+"launcher. Tretlager then takes over the session and stores it in the "
+"keyring. Tretlager neither reads nor stores the password."
 
 #: tretlager/kde/qml/LoginPage.qml:49
 msgid ""
 "Die Anmeldung erfolgt auf der Zwift-Seite im Browser. Tretlager übernimmt "
 "danach die Sitzung und legt sie im Schlüsselbund ab."
-msgstr "You sign in on Zwift's page in the browser. Tretlager then takes over the session and stores it in the keyring."
+msgstr ""
+"You sign in on Zwift's page in the browser. Tretlager then takes over the "
+"session and stores it in the keyring."
 
 #: tretlager/kde/qml/LoginPage.qml:54
 msgid "Nicht von Zwift erlaubt"
@@ -1098,7 +1169,9 @@ msgid ""
 "Zwift erlaubt keine fremden Programme an seiner Anmeldung "
 "(Nutzungsbedingungen, Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf "
 "eigenes Risiko."
-msgstr "Zwift does not allow third-party programs to use its sign-in (terms of service, section 5). Using this route is at your own risk."
+msgstr ""
+"Zwift does not allow third-party programs to use its sign-in (terms of "
+"service, section 5). Using this route is at your own risk."
 
 #: tretlager/kde/qml/LoginPage.qml:60
 msgid "Risiko verstanden, diesen Weg verwenden"
@@ -1122,7 +1195,11 @@ msgid ""
 "Anmeldung über Google oder Apple läuft; diese Anbieter sperren eingebettete "
 "Fenster oft. Nach der Anmeldung zeigt der Browser eine Fehlerseite, deren "
 "Adresse Tretlager braucht."
-msgstr "Useful if the password is stored in the browser's password manager or you sign in with Google or Apple; these providers often block embedded windows. After signing in, the browser shows an error page whose address Tretlager needs."
+msgstr ""
+"Useful if the password is stored in the browser's password manager or you "
+"sign in with Google or Apple; these providers often block embedded windows. "
+"After signing in, the browser shows an error page whose address Tretlager "
+"needs."
 
 #: tretlager/kde/qml/LoginPage.qml:89
 msgid "Anmeldeseite erneut öffnen"
@@ -1141,7 +1218,10 @@ msgid ""
 "Der Browser zeigt „Bad Request“, das ist bei diesem Weg normal. Die Adresse "
 "aus der Adresszeile kopieren (Strg+L, dann Strg+C); Tretlager übernimmt sie "
 "von selbst aus der Zwischenablage."
-msgstr "The browser shows “Bad Request”; that is normal for this route. Copy the address from the address bar (Ctrl+L, then Ctrl+C); Tretlager picks it up from the clipboard by itself."
+msgstr ""
+"The browser shows “Bad Request”; that is normal for this route. Copy the "
+"address from the address bar (Ctrl+L, then Ctrl+C); Tretlager picks it up "
+"from the clipboard by itself."
 
 #: tretlager/kde/qml/LoginPage.qml:105
 msgid "Adresse"
@@ -1167,7 +1247,9 @@ msgstr "Currently not possible"
 msgid ""
 "Der Zwift Launcher nutzt seit Version 1.2 eine Windows-Funktion, die Wine "
 "noch fehlt."
-msgstr "Since version 1.2, the Zwift launcher uses a Windows feature that Wine does not provide yet."
+msgstr ""
+"Since version 1.2, the Zwift launcher uses a Windows feature that Wine does "
+"not provide yet."
 
 #: tretlager/kde/qml/LoginPage.qml:132 tretlager/kde/qml/PreparePage.qml:137
 #: tretlager/kde/qml/WizardFooter.qml:11
@@ -1183,7 +1265,9 @@ msgid ""
 "Anmeldeseite von Zwift in einem privaten Fenster: Es speichert nichts und "
 "vergisst die Eingaben beim Schließen. Tretlager übernimmt danach nur die "
 "Sitzung."
-msgstr "Zwift's sign-in page in a private window: it stores nothing and forgets what you entered when closed. Tretlager only takes over the session afterwards."
+msgstr ""
+"Zwift's sign-in page in a private window: it stores nothing and forgets what "
+"you entered when closed. Tretlager only takes over the session afterwards."
 
 #: tretlager/kde/qml/LoginWebPage.qml:70 tretlager/kde/qml/PreparePage.qml:35
 #: tretlager/kde/qml/ZwiftPage.qml:28
@@ -1206,7 +1290,9 @@ msgstr "Log of the last start"
 msgid ""
 "Die Zwift-Sitzung ist abgelaufen. Nach einer neuen Anmeldung im Browser "
 "startet Zwift wieder mit einem Klick."
-msgstr "The Zwift session has expired. After signing in again, Zwift starts with one click again."
+msgstr ""
+"The Zwift session has expired. After signing in again, Zwift starts with one "
+"click again."
 
 #: tretlager/kde/qml/MainPage.qml:33
 msgid "Anmelden …"
@@ -1217,7 +1303,10 @@ msgid ""
 "Der Grafiktreiber hat bei der letzten Fahrt Fehler gemeldet (%1). Kurz davor "
 "wechselte die Stromversorgung zwischen Netz und Akku; das ist die "
 "wahrscheinliche Ursache."
-msgstr "The graphics driver reported errors during the last ride (%1). Shortly before, the power source switched between AC and battery; that is the likely cause."
+msgstr ""
+"The graphics driver reported errors during the last ride (%1). Shortly "
+"before, the power source switched between AC and battery; that is the likely "
+"cause."
 
 #: tretlager/kde/qml/MainPage.qml:48
 msgid "Der Grafiktreiber hat bei der letzten Fahrt Fehler gemeldet (%1)."
@@ -1227,20 +1316,27 @@ msgstr "The graphics driver reported errors during the last ride (%1)."
 msgid ""
 "Zwift mit angeschlossenem Netzteil neu starten; hängt es weiter, den Rechner "
 "neu starten."
-msgstr "Restart Zwift with the power adapter connected; if it still hangs, restart the computer."
+msgstr ""
+"Restart Zwift with the power adapter connected; if it still hangs, restart "
+"the computer."
 
 #: tretlager/kde/qml/MainPage.qml:56
 msgid ""
 "Die Stromversorgung hat während des Starts gewechselt. Hängt Zwift, Zwift "
 "mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
-msgstr "The power source changed during the start. If Zwift hangs, close it with Alt+F4 and restart it with the power adapter connected."
+msgstr ""
+"The power source changed during the start. If Zwift hangs, close it with "
+"Alt+F4 and restart it with the power adapter connected."
 
 #: tretlager/kde/qml/MainPage.qml:57
 msgid ""
 "Die Stromversorgung hat während der letzten Fahrt gewechselt. Ein Wechsel "
 "zwischen Netz und Akku kann den Grafiktreiber stören; das Netzteil am besten "
 "vor dem Start anschließen und während der Fahrt angeschlossen lassen."
-msgstr "The power source changed during the last ride. Switching between AC and battery can upset the graphics driver; best connect the power adapter before starting and keep it connected during the ride."
+msgstr ""
+"The power source changed during the last ride. Switching between AC and "
+"battery can upset the graphics driver; best connect the power adapter before "
+"starting and keep it connected during the ride."
 
 #: tretlager/kde/qml/MainPage.qml:62
 msgid ""
@@ -1248,7 +1344,11 @@ msgid ""
 "starten und es während der Fahrt angeschlossen lassen: Ein Wechsel zwischen "
 "Netz und Akku kann den Grafiktreiber zum Absturz bringen, und auf Akku "
 "drosselt die Grafikkarte stark."
-msgstr "The computer is running on battery. Best start Zwift with the power adapter connected and keep it connected during the ride: switching between AC and battery can crash the graphics driver, and on battery the graphics card is heavily throttled."
+msgstr ""
+"The computer is running on battery. Best start Zwift with the power adapter "
+"connected and keep it connected during the ride: switching between AC and "
+"battery can crash the graphics driver, and on battery the graphics card is "
+"heavily throttled."
 
 #: tretlager/kde/qml/MainPage.qml:71 tretlager/kde/qml/MainPage.qml:78
 #: tretlager/kde/qml/MainPage.qml:112 tretlager/kde/qml/Main.qml:18
@@ -1260,7 +1360,9 @@ msgstr "Sensors"
 msgid ""
 "Ein Sensor verliert oft die Verbindung. Meist steht der Rechner zu weit vom "
 "Trainer entfernt."
-msgstr "A sensor often loses its connection. Usually the computer is too far from the trainer."
+msgstr ""
+"A sensor often loses its connection. Usually the computer is too far from "
+"the trainer."
 
 #: tretlager/kde/qml/MainPage.qml:83
 msgid "Gute Fahrt!"
@@ -1281,7 +1383,8 @@ msgstr "Tretlager waits minimised and tidies up after the ride."
 #: tretlager/kde/qml/MainPage.qml:86
 msgid ""
 "Ein Klick prüft Sensoren und Anmeldung, spielt Updates ein und startet Zwift."
-msgstr "One click checks sensors and sign-in, installs updates and starts Zwift."
+msgstr ""
+"One click checks sensors and sign-in, installs updates and starts Zwift."
 
 #: tretlager/kde/qml/MainPage.qml:104
 msgid ""
@@ -1289,7 +1392,11 @@ msgid ""
 "Sitzung. Gibt es eine neue Zwift-Version, sichert Tretlager die alte und "
 "spielt das Update ein. Zwift läuft auf der leistungsstärksten Grafikkarte "
 "und in der Auflösung des Bildschirms."
-msgstr "Before starting, Tretlager checks the sensor bridge and renews the Zwift session. If there is a new Zwift version, Tretlager backs up the old one and installs the update. Zwift runs on the most powerful graphics card and at the screen's resolution."
+msgstr ""
+"Before starting, Tretlager checks the sensor bridge and renews the Zwift "
+"session. If there is a new Zwift version, Tretlager backs up the old one and "
+"installs the update. Zwift runs on the most powerful graphics card and at "
+"the screen's resolution."
 
 #: tretlager/kde/qml/MainPage.qml:115
 msgid ""
@@ -1298,7 +1405,11 @@ msgid ""
 "„Direct Connect“ an. In Zwift einmalig unter Gekoppelte Geräte auswählen: "
 "„Wahoo KICKR …“ für Leistung, Trittfrequenz und Widerstand, „Wahoo HRM …“ "
 "für den Puls."
-msgstr "Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the trainer and heart rate strap and offers them to Zwift as Wahoo devices with “Direct Connect”. Select them once in Zwift under Paired Devices: “Wahoo KICKR …” for power, cadence and resistance, “Wahoo HRM …” for heart rate."
+msgstr ""
+"Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the "
+"trainer and heart rate strap and offers them to Zwift as Wahoo devices with "
+"“Direct Connect”. Select them once in Zwift under Paired Devices: “Wahoo "
+"KICKR …” for power, cadence and resistance, “Wahoo HRM …” for heart rate."
 
 #: tretlager/kde/qml/MainPage.qml:123 tretlager/kde/qml/SensorsPage.qml:106
 msgid "Sensor-Bridge ist aus"
@@ -1341,14 +1452,20 @@ msgid ""
 "Den Grafikweg hat Tretlager bei der Einrichtung getestet. Auf Notebooks mit "
 "zwei Grafikchips läuft Zwift auf der NVIDIA-Karte, der Desktop bleibt auf "
 "dem sparsamen Chip. Die Bildschirmauflösung bleibt unverändert."
-msgstr "Tretlager tested the graphics path during setup. On laptops with two graphics chips, Zwift runs on the NVIDIA card while the desktop stays on the power-saving chip. The screen resolution stays unchanged."
+msgstr ""
+"Tretlager tested the graphics path during setup. On laptops with two "
+"graphics chips, Zwift runs on the NVIDIA card while the desktop stays on the "
+"power-saving chip. The screen resolution stays unchanged."
 
 #: tretlager/kde/qml/MainPage.qml:174
 msgid ""
 "Die offizielle Anmeldung funktioniert unter Linux nicht, deshalb läuft sie "
 "über ein eigenes Anmeldefenster. Das widerspricht den Zwift-"
 "Nutzungsbedingungen. Die Sitzung liegt nur im Schlüsselbund dieses Rechners."
-msgstr "The official sign-in does not work on Linux, so it runs through a separate sign-in window. This contradicts Zwift's terms of service. The session is only stored in this computer's keyring."
+msgstr ""
+"The official sign-in does not work on Linux, so it runs through a separate "
+"sign-in window. This contradicts Zwift's terms of service. The session is "
+"only stored in this computer's keyring."
 
 #: tretlager/kde/qml/MainPage.qml:179
 msgid "Neu anmelden …"
@@ -1390,13 +1507,16 @@ msgstr "One password prompt for all changes."
 msgid ""
 "WineHQ-Quelle und alle Pakete sind schon vorhanden. Hier gibt es nichts zu "
 "tun."
-msgstr "The WineHQ source and all packages are already present. Nothing to do here."
+msgstr ""
+"The WineHQ source and all packages are already present. Nothing to do here."
 
 #: tretlager/kde/qml/PreparePage.qml:40
 msgid ""
 "APT müsste dafür Pakete entfernen (%1). Das macht Tretlager nicht. Die "
 "Ursache steht im Protokoll."
-msgstr "APT would have to remove packages for this (%1). Tretlager does not do that. The cause is in the log."
+msgstr ""
+"APT would have to remove packages for this (%1). Tretlager does not do that. "
+"The cause is in the log."
 
 #: tretlager/kde/qml/PreparePage.qml:51
 msgid "System vorbereitet."
@@ -1419,7 +1539,10 @@ msgid ""
 "Unverändert bleiben: keine 32-Bit-Architektur, kein Systemupgrade, keine "
 "Grafiktreiber, nichts wird entfernt. TUXEDO OS legt vor und nach der "
 "Installation automatisch einen Schnappschuss an."
-msgstr "Left unchanged: no 32-bit architecture, no system upgrade, no graphics drivers, nothing is removed. TUXEDO OS automatically takes a snapshot before and after the installation."
+msgstr ""
+"Left unchanged: no 32-bit architecture, no system upgrade, no graphics "
+"drivers, nothing is removed. TUXEDO OS automatically takes a snapshot before "
+"and after the installation."
 
 #: tretlager/kde/qml/PreparePage.qml:76
 msgid "Paketquelle WineHQ"
@@ -1477,21 +1600,28 @@ msgstr "Pedal briefly and put on the heart rate strap."
 msgid ""
 "Die Sensor-Bridge fehlt (Dienst tretlager-bridge). Abhilfe: das Paket "
 "tretlager neu installieren."
-msgstr "The sensor bridge is missing (service tretlager-bridge). Remedy: reinstall the tretlager package."
+msgstr ""
+"The sensor bridge is missing (service tretlager-bridge). Remedy: reinstall "
+"the tretlager package."
 
 #: tretlager/kde/qml/SensorsPage.qml:44
 msgid ""
 "Der gewählte Bluetooth-Adapter ist abgezogen oder ausgeschaltet. Bis dahin "
 "nutzt die Bridge den eingebauten Adapter und wechselt danach von selbst "
 "zurück."
-msgstr "The selected Bluetooth adapter is unplugged or turned off. Until it is back, the bridge uses the built-in adapter and then switches back by itself."
+msgstr ""
+"The selected Bluetooth adapter is unplugged or turned off. Until it is back, "
+"the bridge uses the built-in adapter and then switches back by itself."
 
 #: tretlager/kde/qml/SensorsPage.qml:49
 msgid ""
 "Die Verbindung zu %1 bricht oft ab. Meist ist der Funkweg zu lang. Abhilfe: "
 "Rechner näher an den Trainer stellen oder einen USB-Bluetooth-Stick mit "
 "Verlängerung neben den Trainer legen."
-msgstr "The connection to %1 drops often. Usually the radio path is too long. Remedy: move the computer closer to the trainer or place a USB Bluetooth dongle on an extension cable next to the trainer."
+msgstr ""
+"The connection to %1 drops often. Usually the radio path is too long. "
+"Remedy: move the computer closer to the trainer or place a USB Bluetooth "
+"dongle on an extension cable next to the trainer."
 
 #: tretlager/kde/qml/SensorsPage.qml:56
 msgid "Sensoren in der Nähe"
@@ -1503,7 +1633,10 @@ msgid ""
 "Leistungsmesser, Trittfrequenzsensoren und Pulsgurte. Vorher kurz in die "
 "Pedale treten, damit der Trainer aufwacht; ein Pulsgurt sendet nur mit "
 "Hautkontakt."
-msgstr "The search takes about ten seconds and finds smart trainers, power meters, cadence sensors and heart rate straps. Pedal briefly beforehand so the trainer wakes up; a heart rate strap only transmits with skin contact."
+msgstr ""
+"The search takes about ten seconds and finds smart trainers, power meters, "
+"cadence sensors and heart rate straps. Pedal briefly beforehand so the "
+"trainer wakes up; a heart rate strap only transmits with skin contact."
 
 #: tretlager/kde/qml/SensorsPage.qml:63
 msgid "Suche läuft …"
@@ -1558,7 +1691,10 @@ msgid ""
 "Zwift kann unter Linux kein Bluetooth nutzen. Die Sensor-Bridge verbindet "
 "sich mit Trainer und Pulsgurt und bietet sie Zwift als Wahoo-Geräte mit "
 "„Direct Connect“ an; die Zwift Companion App ist dafür nicht nötig."
-msgstr "Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the trainer and heart rate strap and offers them to Zwift as Wahoo devices with “Direct Connect”; the Zwift Companion app is not needed."
+msgstr ""
+"Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the "
+"trainer and heart rate strap and offers them to Zwift as Wahoo devices with "
+"“Direct Connect”; the Zwift Companion app is not needed."
 
 #: tretlager/kde/qml/SensorsPage.qml:141
 msgid "Läuft und bietet die Sensoren Zwift an"
@@ -1581,7 +1717,10 @@ msgid ""
 "Ein USB-Bluetooth-Stick hilft, wenn der Rechner weit vom Trainer steht (mit "
 "Verlängerung neben den Trainer legen) oder der eingebaute Chip einen Sensor "
 "nicht verträgt. Angeschlossen lässt er sich hier auswählen."
-msgstr "A USB Bluetooth dongle helps if the computer is far from the trainer (place it next to the trainer on an extension cable) or if the built-in chip does not get along with a sensor. Once plugged in, it can be selected here."
+msgstr ""
+"A USB Bluetooth dongle helps if the computer is far from the trainer (place "
+"it next to the trainer on an extension cable) or if the built-in chip does "
+"not get along with a sensor. Once plugged in, it can be selected here."
 
 #: tretlager/kde/qml/SensorsPage.qml:171
 msgid "Beim Anmelden starten"
@@ -1598,13 +1737,17 @@ msgstr "Offer on the network"
 #: tretlager/kde/qml/SensorsPage.qml:181
 msgid ""
 "Im lokalen Netz sichtbar; jedes Gerät im Netz kann damit den Trainer steuern."
-msgstr "Visible on the local network; any device on the network can then control the trainer."
+msgstr ""
+"Visible on the local network; any device on the network can then control the "
+"trainer."
 
 #: tretlager/kde/qml/SensorsPage.qml:182
 msgid ""
 "Nur nötig, wenn Zwift auf einem anderen Gerät läuft (Apple TV, iPad, zweiter "
 "Rechner)."
-msgstr "Only needed if Zwift runs on another device (Apple TV, iPad, second computer)."
+msgstr ""
+"Only needed if Zwift runs on another device (Apple TV, iPad, second "
+"computer)."
 
 #: tretlager/kde/qml/SensorsPage.qml:192
 msgid "Bei Problemen"
@@ -1618,7 +1761,9 @@ msgstr "Sensor not in use right now"
 msgid ""
 "Pausieren statt entfernen: Tretlager sucht dann nicht mehr danach, und die "
 "Kopplung bleibt erhalten."
-msgstr "Pause instead of removing: Tretlager then stops searching for it, and the pairing is kept."
+msgstr ""
+"Pause instead of removing: Tretlager then stops searching for it, and the "
+"pairing is kept."
 
 #: tretlager/kde/qml/SensorsPage.qml:203
 msgid "Zwift findet die Sensoren nicht"
@@ -1628,7 +1773,9 @@ msgstr "Zwift does not find the sensors"
 msgid ""
 "Die Bridge muss laufen. In Zwift unter Gekoppelte Geräte „Wahoo KICKR …“ "
 "bzw. „Wahoo HRM …“ wählen."
-msgstr "The bridge must be running. In Zwift, select “Wahoo KICKR …” or “Wahoo HRM …” under Paired Devices."
+msgstr ""
+"The bridge must be running. In Zwift, select “Wahoo KICKR …” or “Wahoo HRM "
+"…” under Paired Devices."
 
 #: tretlager/kde/qml/SensorsPage.qml:205
 msgid "Puls viel zu hoch"
@@ -1646,7 +1793,9 @@ msgstr "Device stays at “Searching for the device…”"
 msgid ""
 "Kurz in die Pedale treten oder den Gurt kurz abklipsen; die Bridge sucht "
 "alle zehn Sekunden."
-msgstr "Pedal briefly or unclip the strap for a moment; the bridge searches every ten seconds."
+msgstr ""
+"Pedal briefly or unclip the strap for a moment; the bridge searches every "
+"ten seconds."
 
 #: tretlager/kde/qml/SensorsPage.qml:209
 msgid "Gerät verbindet sich nie"
@@ -1657,7 +1806,10 @@ msgid ""
 "Manche Sensoren vertragen bestimmte Bluetooth-Chips nicht. Bekannte Fälle "
 "meldet Tretlager am Gerät; dann hilft ein USB-Bluetooth-Stick, gewählt als "
 "Bluetooth-Adapter."
-msgstr "Some sensors do not get along with certain Bluetooth chips. Tretlager reports known cases on the device; a USB Bluetooth dongle selected as the Bluetooth adapter helps then."
+msgstr ""
+"Some sensors do not get along with certain Bluetooth chips. Tretlager "
+"reports known cases on the device; a USB Bluetooth dongle selected as the "
+"Bluetooth adapter helps then."
 
 #: tretlager/kde/qml/SensorsPage.qml:211
 msgid "Verbindung bricht oft ab"
@@ -1667,7 +1819,10 @@ msgstr "Connection drops often"
 msgid ""
 "Bluetooth reicht schlecht durch Wände. Rechner näher an den Trainer stellen "
 "oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen."
-msgstr "Bluetooth does not travel well through walls. Move the computer closer to the trainer or place a USB Bluetooth dongle on an extension cable next to the trainer."
+msgstr ""
+"Bluetooth does not travel well through walls. Move the computer closer to "
+"the trainer or place a USB Bluetooth dongle on an extension cable next to "
+"the trainer."
 
 #: tretlager/kde/qml/SensorsPage.qml:230
 msgid "Überspringen"
@@ -1685,7 +1840,9 @@ msgstr "Zwift on Linux"
 msgid ""
 "Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und "
 "Pulsgurt. Die Einrichtung führt in sechs Schritten durch alles."
-msgstr "Tretlager sets up Zwift on this computer and connects your trainer and heart rate strap. The setup guides you through everything in six steps."
+msgstr ""
+"Tretlager sets up Zwift on this computer and connects your trainer and heart "
+"rate strap. The setup guides you through everything in six steps."
 
 #: tretlager/kde/qml/WelcomePage.qml:17
 msgid "Voraussetzungen"
@@ -1724,7 +1881,10 @@ msgid ""
 "Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der "
 "offiziellen Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser "
 "widerspricht den Zwift-Nutzungsbedingungen. Benutzung auf eigene Gefahr."
-msgstr "Zwift does not support Linux. Tretlager uses Wine and downloads Zwift from the official source without modifying it. Signing in outside the launcher contradicts Zwift's terms of service. Use at your own risk."
+msgstr ""
+"Zwift does not support Linux. Tretlager uses Wine and downloads Zwift from "
+"the official source without modifying it. Signing in outside the launcher "
+"contradicts Zwift's terms of service. Use at your own risk."
 
 #: tretlager/kde/qml/WelcomePage.qml:43
 msgid "Über Tretlager und Lizenzen"
@@ -1771,7 +1931,10 @@ msgid ""
 "Das Fenster darf geschlossen werden; beim nächsten Start macht Tretlager an "
 "derselben Stelle weiter. Die Komponenten von Microsoft (.NET, WebView2, "
 "Schriften) unterliegen den Lizenzbedingungen von Microsoft."
-msgstr "You may close the window; at the next start Tretlager continues where it left off. The Microsoft components (.NET, WebView2, fonts) are subject to Microsoft's license terms."
+msgstr ""
+"You may close the window; at the next start Tretlager continues where it "
+"left off. The Microsoft components (.NET, WebView2, fonts) are subject to "
+"Microsoft's license terms."
 
 #: tretlager/kde/qml/ZwiftPage.qml:73
 msgid "schon erledigt"

@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import bridgectl, btcompat, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
+from ..core import bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck
 from ..i18n import LANGUAGE, _, ngettext
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
@@ -628,6 +628,11 @@ def main() -> int:
     backend.listen_for_instances()
     engine.rootContext().setContextProperty("backend", backend)
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
+    # Skalierung für Wine (LogPixels), falls KWins XWayland-Einstellung nicht lesbar ist (Flatpak):
+    # die des Fensters ist unter Wayland gebrochen (z. B. 1,6), die des Bildschirms aufgerundet.
+    for window in engine.rootObjects():
+        display.set_scale(window.devicePixelRatio())
+        window.screenChanged.connect(lambda _s, w=window: display.set_scale(w.devicePixelRatio()))
     if not engine.rootObjects():
         return 1
     return app.exec()

@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
-from . import bridgectl, login, paths, setup, state
+from . import bridgectl, display, login, paths, setup, state
 from ..i18n import _
 
 VER_CUR_URL = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml"
@@ -125,6 +125,9 @@ class Launcher:
         if token is None:
             raise NeedLogin()
         self.update_if_needed()
+        dpi = display.ensure_dpi(paths.PREFIX, self.ctx.run)
+        if dpi:
+            self.log(_("Wine-DPI an den Bildschirm angepasst: {dpi}").format(dpi=dpi))
         self.progress(_("Zwift starten"))
         self.start(token)
         self.progress(_("Fenster anpassen"))

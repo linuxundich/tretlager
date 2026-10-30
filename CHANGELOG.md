@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Flatpak-Machbarkeitstest F0 (`build-aux/flatpak/spike/`, siehe `docs/flatpak.md`): Wegwerf-Manifest
+  mit Wine 11.20 aus den Quellen (WoW64 per mingw), Python-Paketen, cabextract und osslsigncode.
+
+## [0.7.1] - 2026-10-30
+
+### Hinzugefügt
+- Wine-Fenster in Bildschirmgröße auf HiDPI (`core/display.py`): Tretlager setzt
+  `HKCU\Control Panel\Desktop\LogPixels` auf 96 × Skalierung, nach dem Anlegen der
+  Wine-Umgebung, beim Fortsetzen der Einrichtung und vor jedem Start (nur bei Abweichung).
+  Die Skalierung kommt aus KWins XWayland-Einstellung (`kwinrc`, `[Xwayland] Scale`), sonst aus
+  der Fensterskalierung der Oberfläche; `TRETLAGER_DPI` erzwingt einen Wert. Auf tinytin (1,6×)
+  nun 154 statt 96; Zwift startet damit unverändert.
+
 ## [0.7.0] - 2026-10-30
 
 ### Hinzugefügt

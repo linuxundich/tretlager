@@ -1,0 +1,4 @@
+spike/build-dir/
+spike/repo/
+spike/.flatpak-builder/
+spike/*.flatpak
