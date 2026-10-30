@@ -116,3 +116,10 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] F3 Umstieg vom Debian-Paket auf tinytin (Daten bleiben)
 - [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
 - [ ] F5 Abnahme: frisches TUXEDO OS, zweite Distribution, lange Fahrt; danach Debian-Paket einfrieren
+
+## Sicherheit
+
+- [ ] Zwift bekommt das Token als Befehlszeilenargument (`ZwiftApp.exe --token={…}`); es steht damit in der
+  Prozessliste und ist für jeden lokalen Benutzer lesbar (`ps`). Prüfen, ob RunFromProcess das Token
+  anders übergeben kann (Datei/Pipe) oder ob Zwift es nur so annimmt; sonst in der Hilfe erwähnen.
+  (Gesehen 30.10. beim Flatpak-Test; nie `pgrep -fa Zwift` o. Ä. ausgeben.)
