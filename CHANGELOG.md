@@ -4,6 +4,23 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-10-30
+
+### Geändert
+- Einheitliches Seitengerüst für alle Seiten (`ColumnsPage.qml`, Vorbild Übersicht): Meldungen
+  und Seitenkopf über die volle Breite, darunter zwei Spalten, auf schmalen Fenstern
+  untereinander; überall dieselbe Breite (Fenster bis `gridUnit * 62`, darüber mittig). Vorher
+  waren alle Seiten außer der Übersicht schmale Listen mit viel Leerraum links und rechts.
+  - Sensoren: links Geräte und Suche, rechts Bridge-Einstellungen und Hilfe bei Problemen.
+  - Assistent: Willkommen und Fertig mit Seitenkopf wie die Übersicht; Vorbereiten mit Paketen
+    in der rechten Spalte; Anmeldung mit dem eigenen Browser als zweite Spalte.
+  - Hilfe: jeder Abschnitt als Karte, auf zwei Spalten verteilt, die Tabelle darunter.
+  - Über Tretlager: eigene Seite statt der schmalen Standardseite, Lizenztext im Dialog.
+- Gemeinsame Bausteine `PageHero.qml` und `PageMessage.qml`; `PageContent.qml` entfällt.
+
+### Behoben
+- *Einrichtung prüfen* aus der Seitenleiste zeigte eine leere Liste, bis man *Erneut prüfen* wählte.
+
 ## [0.6.3] - 2026-10-30
 
 ### Hinzugefügt

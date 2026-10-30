@@ -4,24 +4,17 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-FormCard.FormCardPage {
+ColumnsPage {
     title: "Fertig"
 
     Component.onCompleted: backend.markSetupComplete()
 
     header: WizardHeader { step: 6; text: "Noch ein Handgriff in Zwift." }
 
-    ColumnLayout {
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Kirigami.Units.gridUnit * 2
-        spacing: Kirigami.Units.smallSpacing
-        Kirigami.Icon {
-            source: "data-success"
-            Layout.preferredWidth: Kirigami.Units.iconSizes.enormous
-            Layout.preferredHeight: Kirigami.Units.iconSizes.enormous
-            Layout.alignment: Qt.AlignHCenter
-        }
-        Kirigami.Heading { text: "Zwift ist bereit"; level: 1; Layout.alignment: Qt.AlignHCenter }
+    PageHero {
+        iconName: "data-success"
+        title: "Zwift ist bereit"
+        text: "Ab jetzt startet Zwift mit einem Klick, in der Übersicht oder im Startmenü unter Zwift (Tretlager)."
     }
 
     FormCard.FormHeader { title: "Einmalig in Zwift: Gekoppelte Geräte" }
@@ -44,8 +37,6 @@ FormCard.FormCardPage {
             icon.name: "dialog-information"
         }
     }
-
-    Item { implicitHeight: Kirigami.Units.gridUnit }
 
     footer: WizardFooter {
         nextText: "Zur Übersicht"

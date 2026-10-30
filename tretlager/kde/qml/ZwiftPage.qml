@@ -4,7 +4,7 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-FormCard.FormCardPage {
+ColumnsPage {
     id: page
     title: "Zwift einrichten"
 
@@ -20,11 +20,7 @@ FormCard.FormCardPage {
 
     LogDialog { id: logDialog; text: page.st.log }
 
-    Kirigami.InlineMessage {
-        Layout.fillWidth: true
-        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Kirigami.Units.largeSpacing
+    PageMessage {
         visible: page.st.result === "error"
         type: Kirigami.MessageType.Error
         text: page.st.error + " Bereits Erledigtes bleibt erhalten."
@@ -33,11 +29,7 @@ FormCard.FormCardPage {
             Kirigami.Action { text: "Protokoll"; icon.name: "view-list-text"; onTriggered: logDialog.open() }
         ]
     }
-    Kirigami.InlineMessage {
-        Layout.fillWidth: true
-        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Kirigami.Units.largeSpacing
+    PageMessage {
         visible: page.st.result === "done"
         type: Kirigami.MessageType.Positive
         text: "Zwift ist eingerichtet."
@@ -112,8 +104,6 @@ FormCard.FormCardPage {
             onClicked: logDialog.open()
         }
     }
-
-    Item { implicitHeight: Kirigami.Units.gridUnit }
 
     footer: WizardFooter {
         skipText: page.st.running ? "Abbrechen" : ""

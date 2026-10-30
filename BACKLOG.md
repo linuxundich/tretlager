@@ -51,8 +51,8 @@
 - [x] Bridge auf wählbaren Adapter umstellen (0.6.3; Umschalten, fehlender Adapter und Rückfall
   auf tinytin geprüft, mit echtem USB-Stick noch nicht)
 - [ ] Mit echtem USB-Bluetooth-Stick testen: HRM-Pro Plus über den Stick, Umstecken während der Fahrt
-- [ ] Sensorseite: Schalter *Sensor-Bridge* sieht unter Plasma ausgeschaltet aus, obwohl `checked` true ist
-  (Darstellung, gesehen 30.10. auf tinytin)
+- [ ] Sensorseite: Schalter *Sensor-Bridge* sah unter Plasma ausgeschaltet aus, obwohl `checked` true war
+  (30.10., noch FormCardPage); seit dem neuen Seitengerüst (0.6.4) richtig dargestellt, beobachten
 - [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)
 - [x] Zwift koppelt KICKR (Leistung, Trittfrequenz) und Pulsgurt über DIRCON, Werte realistisch (2026-10-29)
 - [x] ERG und Steigungssimulation über FTMS-Control-Point (Antwort in der Schreib-Antwort, 2026-10-29)

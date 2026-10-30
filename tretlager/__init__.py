@@ -1,6 +1,6 @@
 """Tretlager – Zwift unter Linux einrichten, starten und mit Sensoren verbinden."""
 
-__version__ = "0.6.3"  # muss zur obersten Version im CHANGELOG passen (build-deb.sh prüft)
+__version__ = "0.6.4"  # muss zur obersten Version im CHANGELOG passen (build-deb.sh prüft)
 
 APP_ID = "de.linuxundich.Tretlager"
 BRIDGE_BUS_NAME = "de.linuxundich.Tretlager.Bridge"

@@ -4,7 +4,7 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-FormCard.FormCardPage {
+ColumnsPage {
     id: page
     title: "System prüfen"
 
@@ -19,13 +19,12 @@ FormCard.FormCardPage {
         }
     ]
 
+    // Direkt geöffnet (Seitenleiste → Einrichtung prüfen) ohne laufende Prüfung: gleich prüfen.
+    Component.onCompleted: if (!backend.busy && backend.checks.length === 0) backend.runChecks()
+
     header: WizardHeader { step: 1; text: "Nur lesend, am System ändert sich nichts." }
 
-    Kirigami.InlineMessage {
-        Layout.fillWidth: true
-        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Kirigami.Units.largeSpacing
+    PageMessage {
         visible: !backend.busy && backend.overall !== ""
         type: backend.overall === "fail" ? Kirigami.MessageType.Error
             : backend.overall === "warn" ? Kirigami.MessageType.Warning
@@ -96,8 +95,6 @@ FormCard.FormCardPage {
             }
         }
     }
-
-    Item { implicitHeight: Kirigami.Units.gridUnit }
 
     footer: WizardFooter {
         nextEnabled: !backend.busy && backend.overall !== "" && backend.overall !== "fail"

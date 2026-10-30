@@ -4,7 +4,7 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-FormCard.FormCardPage {
+ColumnsPage {
     id: page
     title: "System vorbereiten"
 
@@ -23,36 +23,29 @@ FormCard.FormCardPage {
 
     LogDialog { id: logDialog; text: page.prep.log }
 
-    component Message: Kirigami.InlineMessage {
-        Layout.fillWidth: true
-        Layout.maximumWidth: Kirigami.Units.gridUnit * 30
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Kirigami.Units.largeSpacing
-    }
-
-    Message {
+    PageMessage {
         visible: !backend.planBusy && page.plan.nothing_to_do === true
         type: Kirigami.MessageType.Positive
         text: "WineHQ-Quelle und alle Pakete sind schon vorhanden. Hier gibt es nichts zu tun."
     }
-    Message {
+    PageMessage {
         visible: (page.plan.error || "") !== ""
         type: Kirigami.MessageType.Error
         text: page.plan.error || ""
         actions: [Kirigami.Action { text: "Erneut versuchen"; icon.name: "view-refresh"; onTriggered: backend.loadPlan() }]
     }
-    Message {
+    PageMessage {
         visible: (page.plan.removals || []).length > 0
         type: Kirigami.MessageType.Error
         text: "APT müsste dafür Pakete entfernen (" + (page.plan.removals || []).join(", ") + "). Das macht Tretlager nicht. Die Ursache steht im Protokoll."
     }
-    Message {
+    PageMessage {
         visible: page.prep.result === "error"
         type: Kirigami.MessageType.Error
         text: page.prep.error
         actions: [Kirigami.Action { text: "Protokoll"; icon.name: "view-list-text"; onTriggered: logDialog.open() }]
     }
-    Message {
+    PageMessage {
         visible: page.prep.result === "done"
         type: Kirigami.MessageType.Positive
         text: "System vorbereitet."
@@ -60,7 +53,6 @@ FormCard.FormCardPage {
 
     FormCard.FormCard {
         visible: backend.planBusy
-        Layout.topMargin: Kirigami.Units.gridUnit
         FormCard.FormPlaceholderMessageDelegate {
             icon.name: "system-search"
             text: "Nötige Änderungen werden ermittelt …"
@@ -68,78 +60,80 @@ FormCard.FormCardPage {
         }
     }
 
-    // --- Plan ---
-    FormCard.FormHeader {
-        visible: page.showPlan
-        title: "Änderungen am System"
-        trailing: Kirigami.ContextualHelpButton {
-            toolTipText: "Unverändert bleiben: keine 32-Bit-Architektur, kein Systemupgrade, keine Grafiktreiber, "
-                + "nichts wird entfernt. TUXEDO OS legt vor und nach der Installation automatisch einen "
-                + "Schnappschuss an."
-        }
-    }
-    FormCard.FormCard {
-        visible: page.showPlan
-        FormCard.FormTextDelegate {
-            visible: page.plan.add_source === true
-            text: "Paketquelle WineHQ"
-            description: (page.plan.uri || "") + "\nSchlüssel " + page.groups(page.plan.fingerprint)
-            icon.name: "repository"
-        }
-        FormCard.FormDelegateSeparator { visible: page.plan.add_source === true }
-        FormCard.FormTextDelegate {
-            text: "Download"
-            description: page.mb(page.plan.download_bytes || 0) + " für " + (page.plan.packages || []).length + " Pakete"
-            icon.name: "download"
-        }
-    }
+    leftCards: [
+        // --- Plan ---
+        FormCard.FormHeader {
+            visible: page.showPlan
+            title: "Änderungen am System"
+            trailing: Kirigami.ContextualHelpButton {
+                toolTipText: "Unverändert bleiben: keine 32-Bit-Architektur, kein Systemupgrade, keine Grafiktreiber, "
+                    + "nichts wird entfernt. TUXEDO OS legt vor und nach der Installation automatisch einen "
+                    + "Schnappschuss an."
+            }
+        },
+        FormCard.FormCard {
+            visible: page.showPlan
+            FormCard.FormTextDelegate {
+                visible: page.plan.add_source === true
+                text: "Paketquelle WineHQ"
+                description: (page.plan.uri || "") + "\nSchlüssel " + page.groups(page.plan.fingerprint)
+                icon.name: "repository"
+            }
+            FormCard.FormDelegateSeparator { visible: page.plan.add_source === true }
+            FormCard.FormTextDelegate {
+                text: "Download"
+                description: page.mb(page.plan.download_bytes || 0) + " für " + (page.plan.packages || []).length + " Pakete"
+                icon.name: "download"
+            }
+        },
 
-    FormCard.FormHeader { visible: page.showPlan; title: "Pakete" }
-    FormCard.FormCard {
-        visible: page.showPlan
-        Repeater {
-            model: page.plan.packages || []
-            delegate: FormCard.FormTextDelegate {
-                required property var modelData
-                text: modelData.name
-                description: modelData.version
-                icon.name: "package-x-generic"
-                trailing: Controls.Label {
-                    text: modelData.size > 0 ? page.mb(modelData.size) : ""
-                    color: Kirigami.Theme.disabledTextColor
+        // --- Fortschritt ---
+        FormCard.FormHeader { visible: page.prep.running || page.prep.result !== ""; title: "Fortschritt" },
+        FormCard.FormCard {
+            visible: page.prep.running || page.prep.result !== ""
+            FormCard.AbstractFormDelegate {
+                hoverEnabled: false
+                focusPolicy: Qt.NoFocus
+                contentItem: ColumnLayout {
+                    spacing: Kirigami.Units.smallSpacing
+                    Controls.Label { text: page.prep.step; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    Controls.ProgressBar {
+                        Layout.fillWidth: true
+                        from: 0; to: 100
+                        value: page.prep.percent
+                        indeterminate: visible && page.prep.running && page.prep.percent === 0
+                    }
+                }
+            }
+            FormCard.FormDelegateSeparator { visible: page.prep.log !== "" }
+            FormCard.FormButtonDelegate {
+                visible: page.prep.log !== ""
+                text: "Protokoll …"
+                icon.name: "view-list-text"
+                onClicked: logDialog.open()
+            }
+        }
+    ]
+
+    rightCards: [
+        FormCard.FormHeader { visible: page.showPlan; title: "Pakete" },
+        FormCard.FormCard {
+            visible: page.showPlan
+            Repeater {
+                model: page.plan.packages || []
+                delegate: FormCard.FormTextDelegate {
+                    required property var modelData
+                    text: modelData.name
+                    description: modelData.version
+                    icon.name: "package-x-generic"
+                    trailing: Controls.Label {
+                        text: modelData.size > 0 ? page.mb(modelData.size) : ""
+                        color: Kirigami.Theme.disabledTextColor
+                    }
                 }
             }
         }
-    }
-
-    // --- Fortschritt ---
-    FormCard.FormHeader { visible: page.prep.running || page.prep.result !== ""; title: "Fortschritt" }
-    FormCard.FormCard {
-        visible: page.prep.running || page.prep.result !== ""
-        FormCard.AbstractFormDelegate {
-            hoverEnabled: false
-            focusPolicy: Qt.NoFocus
-            contentItem: ColumnLayout {
-                spacing: Kirigami.Units.smallSpacing
-                Controls.Label { text: page.prep.step; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Controls.ProgressBar {
-                    Layout.fillWidth: true
-                    from: 0; to: 100
-                    value: page.prep.percent
-                    indeterminate: visible && page.prep.running && page.prep.percent === 0
-                }
-            }
-        }
-        FormCard.FormDelegateSeparator { visible: page.prep.log !== "" }
-        FormCard.FormButtonDelegate {
-            visible: page.prep.log !== ""
-            text: "Protokoll …"
-            icon.name: "view-list-text"
-            onClicked: logDialog.open()
-        }
-    }
-
-    Item { implicitHeight: Kirigami.Units.gridUnit }
+    ]
 
     footer: WizardFooter {
         nextText: page.done ? "Weiter" : "Änderungen vornehmen …"
