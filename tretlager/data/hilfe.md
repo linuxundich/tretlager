@@ -30,6 +30,10 @@ Der Assistent führt in sechs Schritten durch alles:
   Tretlager geöffnet ist, damit Trainer und Gurt beim Aufsteigen bereit sind.
 - Vor dem Start sucht Tretlager nach einem Zwift-Update und sichert vorher die Zwift-Umgebung.
 - Während Zwift läuft, ist Tretlager minimiert; nach dem Beenden räumt es auf.
+- Auf Notebooks das Netzteil vor dem Start anschließen und während der Fahrt angeschlossen
+  lassen. Ein Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber zum Absturz bringen, und auf
+  Akku drosselt die Grafikkarte stark. Tretlager weist darauf hin und meldet Treiberfehler nach
+  der Fahrt.
 
 ## Sensoren in Zwift koppeln
 
@@ -65,6 +69,7 @@ Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.**
 | Verbindung bricht oft ab | Rechner näher an den Trainer stellen oder USB-Bluetooth-Stick mit Verlängerung nutzen |
 | Zwift findet die Sensoren nicht | Seitenleiste → *Sensoren*: Läuft die Bridge, sind die Geräte verbunden? |
 | Bild unscharf unter Plasma | *Systemeinstellungen* → *Anzeige* → *Legacy-Anwendungen (X11)*: *Skalierung selbst anwenden* |
+| Zwift hängt nach dem Ab- oder Anstecken des Netzteils | Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten; hängt es weiter, Rechner neu starten. Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören (im Journal „NVRM: Xid“) |
 | Sitzung abgelaufen | In der Übersicht *Anmelden …* wählen und im Browser neu anmelden |
 | Zwift startet nach einem Update nicht | Seitenleiste → *Einrichtung prüfen*; die Sicherung vor dem Update bleibt erhalten |
 

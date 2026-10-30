@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__
 from .i18n import LocalizedContext
-from ..core import bridgectl, instance, launch, login, prepare, setup, state, systemcheck
+from ..core import bridgectl, instance, launch, login, power, prepare, setup, state, systemcheck
 
 # Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
 # bleibt nur der Weg über den eigenen Browser.
@@ -433,8 +433,32 @@ class Backend(QObject):
 
     def _init_launch(self) -> None:
         self._launch = {"busy": False, "zwiftRunning": False, "text": "", "error": "", "needLogin": False,
-                        "log": "", "version": "", "remote": "", "renderer": "", "login": ""}
+                        "log": "", "version": "", "remote": "", "renderer": "", "login": "",
+                        "onBattery": power.on_ac() is False, "powerChanged": False, "gpuErrors": ""}
         self._launchEvent.connect(self._on_launch_event)
+        self._ac_at_start: bool | None = None
+        # Stromquelle beobachten: Hinweis im Akkubetrieb, Wechsel während Start und Fahrt merken.
+        self._power_timer = QTimer(self)
+        self._power_timer.setInterval(2000)
+        self._power_timer.timeout.connect(self._check_power)
+        self._power_timer.start()
+
+    def _check_power(self) -> None:
+        ac = power.on_ac()
+        ev = {}
+        if (ac is False) != self._launch["onBattery"]:
+            ev["onBattery"] = ac is False
+        active = self._launch["busy"] or self._launch["zwiftRunning"]
+        if active and self._ac_at_start is not None and ac is not None and ac != self._ac_at_start \
+                and not self._launch["powerChanged"]:
+            ev["powerChanged"] = True
+            self._on_launch_event({"logline": "Stromversorgung gewechselt: " + ("Netz" if ac else "Akku")})
+            threading.Thread(target=power.notify, daemon=True, args=(
+                "Stromversorgung gewechselt",
+                "Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt Zwift, "
+                "Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten.")).start()
+        if ev:
+            self._on_launch_event(ev)
 
     @Property("QVariantMap", notify=launchChanged)
     def launchInfo(self) -> dict:
@@ -512,7 +536,10 @@ class Backend(QObject):
     def startZwift(self) -> None:
         if self._launch["busy"] or self._launch["zwiftRunning"]:
             return
-        self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": "Start vorbereiten"})
+        self._ac_at_start = power.on_ac()
+        started_at = time.time()
+        self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": "Start vorbereiten",
+                               "powerChanged": False, "gpuErrors": ""})
         launcher = launch.Launcher(progress=lambda t: self._launchEvent.emit({"text": t}),
                                    log=lambda t: self._launchEvent.emit({"logline": t}))
 
@@ -525,6 +552,7 @@ class Backend(QObject):
             except (launch.LaunchError, bridgectl.BridgeError, login.LoginError, setup.SetupError) as e:
                 self._launchEvent.emit({"busy": False, "error": str(e), "text": ""})
                 launcher.after_exit()
+                self._report_gpu_errors(started_at)
                 return
             except Exception as e:  # nur den Typ melden: Ausnahmen können Befehlszeilen enthalten
                 self._launchEvent.emit({"busy": False, "error": f"Unerwarteter Fehler ({type(e).__name__})", "text": ""})
@@ -534,9 +562,17 @@ class Backend(QObject):
                 time.sleep(5)
             launcher.after_exit()
             self._launchEvent.emit({"zwiftRunning": False, "text": "Zwift beendet"})
+            self._report_gpu_errors(started_at)
             self.refreshOverview()
         threading.Thread(target=work, daemon=True).start()
 
+
+    def _report_gpu_errors(self, since: float) -> None:
+        """Nach der Fahrt: Hat der NVIDIA-Treiber Fehler gemeldet? (läuft im Arbeits-Thread)"""
+        codes = power.nvidia_xids(since)
+        if codes:
+            text = power.describe_xids(codes)
+            self._launchEvent.emit({"gpuErrors": text, "logline": "NVIDIA-Treiber meldete " + text})
 
     # --- Nur eine Instanz ---
 

@@ -50,6 +50,35 @@ Kirigami.ScrollablePage {
         Kirigami.InlineMessage {
             Layout.fillWidth: true
             Layout.bottomMargin: Kirigami.Units.largeSpacing
+            visible: page.la.gpuErrors !== "" && !page.la.zwiftRunning
+            type: Kirigami.MessageType.Error
+            text: "Der Grafiktreiber hat bei der letzten Fahrt Fehler gemeldet (" + page.la.gpuErrors + "). "
+                + (page.la.powerChanged ? "Kurz davor wechselte die Stromversorgung zwischen Netz und Akku; das ist die "
+                                          + "wahrscheinliche Ursache. " : "")
+                + "Zwift mit angeschlossenem Netzteil neu starten; hängt es weiter, den Rechner neu starten."
+            actions: [Kirigami.Action { text: "Protokoll"; icon.name: "view-list-text"; onTriggered: logDialog.open() }]
+        }
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Kirigami.Units.largeSpacing
+            visible: page.la.powerChanged && page.la.gpuErrors === ""
+            type: Kirigami.MessageType.Warning
+            text: page.la.zwiftRunning || page.la.busy
+                ? "Die Stromversorgung hat während des Starts gewechselt. Hängt Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
+                : "Die Stromversorgung hat während der letzten Fahrt gewechselt. Ein Wechsel zwischen Netz und Akku kann den Grafiktreiber stören; das Netzteil am besten vor dem Start anschließen und während der Fahrt angeschlossen lassen."
+        }
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Kirigami.Units.largeSpacing
+            visible: page.la.onBattery && !page.la.zwiftRunning && !page.la.powerChanged && page.la.gpuErrors === ""
+            type: Kirigami.MessageType.Warning
+            text: "Der Rechner läuft auf Akku. Zwift am besten mit angeschlossenem Netzteil starten und es während der "
+                + "Fahrt angeschlossen lassen: Ein Wechsel zwischen Netz und Akku kann den Grafiktreiber zum Absturz "
+                + "bringen, und auf Akku drosselt die Grafikkarte stark."
+        }
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Kirigami.Units.largeSpacing
             visible: page.anyUnstable
             type: Kirigami.MessageType.Warning
             text: "Ein Sensor verliert oft die Verbindung. Meist steht der Rechner zu weit vom Trainer entfernt."

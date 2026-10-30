@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-10-30
+
+### Hinzugefügt
+- Hinweise zur Stromversorgung auf Notebooks (`tretlager/core/power.py`). Anlass: Auf tinytin hing
+  Zwift, nachdem während des Starts das Netzteil gezogen bzw. gesteckt wurde; der NVIDIA-Treiber
+  meldete dabei Dutzende „Xid 69“. Die Grafik wechselt nicht auf den Intel-Chip, das TCC-Profil
+  bleibt gleich; vermutlich stellt nvidia-powerd das Leistungsbudget um.
+  - Übersicht im Akkubetrieb: Empfehlung, mit Netzteil zu starten und es angeschlossen zu lassen.
+  - Wechsel der Stromquelle während Start oder Fahrt: Desktop-Benachrichtigung und Warnung mit
+    Abhilfe (Alt+F4, mit Netzteil neu starten).
+  - Nach der Fahrt: Meldet der NVIDIA-Treiber Fehler im Kernel-Journal, zeigt die Übersicht sie mit
+    wahrscheinlicher Ursache an.
+- Hilfe: Abschnitt zum Netzteil und Tabelleneintrag „Zwift hängt nach dem Ab- oder Anstecken“.
+
 ## [0.6.0] - 2026-10-30
 
 ### Geändert
