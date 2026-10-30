@@ -21,6 +21,19 @@
   <url type="homepage">https://linuxundich.de/</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.9.0" date="2026-10-30">
+      <description>
+        <p>More reliable sensor bridge and simpler updates.</p>
+        <ul>
+          <li>An absent sensor no longer blocks Bluetooth for the others; short dropouts keep the device paired in Zwift.</li>
+          <li>Before every start Tretlager checks the setup and adapts the Zwift environment to a new Wine.</li>
+          <li>The last proven Wine version is kept and can be used again after an update.</li>
+          <li>Download progress from the Zwift manifest for the first installation and for updates.</li>
+          <li>Overview with readiness, prominent start button and sensor values as key figures.</li>
+          <li>Notice: not for races, values from the bridge are not guaranteed.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.8.0" date="2026-10-30"/>
   </releases>
 </component>

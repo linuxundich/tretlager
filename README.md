@@ -9,7 +9,7 @@ was Zwift braucht (eigenes Wine, winetricks, Werkzeuge). Plan und Stand in
 [docs/flatpak.md](docs/flatpak.md). Entwickelt und getestet auf TUXEDO OS Forky (Plasma) auf
 tinytin; Plasma ist das Hauptziel, GNOME soll funktionieren.
 
-**Stand (2026-10-30):** 0.8.0 als Flatpak auf tinytin; Zwift läuft (Opt-in-Token-Login, NVIDIA
+**Stand (2026-10-30):** 0.9.0 als Flatpak auf tinytin; Zwift läuft (Opt-in-Token-Login, NVIDIA
 per GLX + PRIME-Offload), die **Sensor-Bridge** koppelt Trainer und Pulsgurt über Wahoo Direct
 Connect, ohne Companion App. Machbarkeit in [FEASIBILITY.md](FEASIBILITY.md), Bedienkonzept in
 [docs/bedienkonzept.md](docs/bedienkonzept.md), QA-Audit in

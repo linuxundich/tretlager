@@ -1,6 +1,6 @@
 # Backlog
 
-## Offene Entscheidungen (vor Phase D)
+## Entscheidungen
 
 - [x] **E1 Wine-Quelle.** Freigegeben 2026-10-29 für tinytin (T2). Debian forky hat kein Wine. Empfehlung: WineHQ-Repo (`winehq-devel`,
   Suite forky) über einen pkexec-Helfer mit fester Aktion, festgenageltem Schlüssel und
@@ -9,16 +9,16 @@
 - [x] **E2 Anmeldung.** Christoph 2026-10-29: Browser-Anmeldung wird als ausdrückliche Option mit
   Hinweis auf AGB §5 angeboten (offizielle Anmeldung geht unter Wine nicht, siehe T2). Start per
   `RunFromProcess` (Spiel als Kind des Launchers) gehört dazu.
-- [ ] **E3 Sensoren.** Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
+- [x] **E3 Sensoren.** Umgesetzt (tretlager/bridge, seit 0.8.0 per D-Bus-Aktivierung statt systemd). Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
   DIRCON statt qdomyos-zwift. Projekt-Lizenz GPL-3, damit qdomyos-Protokollcode als Referenz
   übernommen werden darf.
 - [x] **E4 Desktop.** Christoph 2026-10-29: GTK4/libadwaita oder Qt/Plasma, beides erlaubt.
   Umsetzung wie bei Stafette: Kern als UI-freie Python-Bibliothek (Diagnose, Installation,
   Updates, Bridge-Steuerung), darauf GTK/libadwaita und Qt/Kirigami. Welche Oberfläche zuerst
   kommt, entscheidet Phase C; der Zielrechner tinytin läuft mit Plasma.
-- [ ] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
+- [x] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
   mit PRIME-Offload, Treiber 580, AX201). Geräte: Wahoo KICKR V4, Garmin HRM-Pro Plus
-  (BLE + ANT+), eingebauter Adapter. Keine weiteren Sensoren.
+  (BLE + ANT+), eingebauter Adapter; dazu Wahoo TICKR und USB-Stick TP-Link UB500 (30.10.).
 - [x] **E6 Sprache.** Python (Kern, Bridge), Debian-Paket.
 - [x] **E8 Bezug.** Christoph 2026-10-29: vorerst nur ein lokal gebautes Debian-Paket; später eine
   Paketquelle auf bender (dort läuft schon das Arch-Repo `pacman-repo`).
@@ -34,15 +34,15 @@
 ## Phasen
 
 - [x] A Machbarkeit (Recherche) – [FEASIBILITY.md](FEASIBILITY.md)
-- [ ] D' Machbarkeitstests T1–T7 (T1 Signatur weitgehend erledigt 2026-10-29) vor der Installationslogik (siehe FEASIBILITY.md, Abschnitt 9)
-- [ ] B Systemdiagnose rein lesend (os-release, sysfs/DRM, nvidia-smi, EGL-Test, BlueZ per D-Bus,
+- [x] D' Machbarkeitstests T1–T7 (FEASIBILITY.md, Abschnitt 9): Zwift, Grafik, Anmeldung und Bridge laufen auf tinytin (29./30.10.)
+- [x] B Systemdiagnose rein lesend (core/systemcheck.py; im Flatpak ohne Debian-Annahmen) (os-release, sysfs/DRM, nvidia-smi, EGL-Test, BlueZ per D-Bus,
   Wine-Version + Stub-Prüfung, Platz, vorhandene Prefixe)
 - [x] ~~C GTK4-Prototyp~~ entfällt: Christoph 2026-10-30, es bleibt bei der Kirigami-Oberfläche
-- [ ] D Installation: PackageKit (Simulation + Installation), pkexec-Helfer für WineHQ-Quelle,
-  Download + Authenticode, Prefix, Launcher, Zustandsautomat mit Wiederaufnahme
-- [ ] E Bridge BLE → DIRCON mit echter Hardware (Leistung, Kadenz, ERG, Puls)
-- [ ] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Abgleich vor dem Start; Plan docs/updates.md)
-- [ ] G Ende-zu-Ende auf frischem TUXEDO OS Forky
+- [x] ~~D Installation: PackageKit~~ im Flatpak entfallen (Wine im Paket); umgesetzt sind (Simulation + Installation), pkexec-Helfer für WineHQ-Quelle,
+  Download + Authenticode, Prefix, Launcher, Schritte mit Wiederaufnahme (core/setup.py)
+- [x] E Bridge BLE → DIRCON mit echter Hardware (Leistung, Kadenz, ERG, Puls; Testfahrten 29./30.10.)
+- [x] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Abgleich vor dem Start, Fortschritt; Plan docs/updates.md, 0.9.0)
+- [ ] G Ende-zu-Ende auf frischem TUXEDO OS Forky → aufgegangen in F5 (Flatpak-Abnahme)
 - [ ] später: ANT+ nativ in der Bridge (openant/libusb)
 
 ## Bridge (T5/T6)
@@ -70,10 +70,10 @@
   root); Bridge könnte bei hängender Dienstsuche gezielt Disconnect + Cache leeren
 - [ ] Nach dem Umschalten braucht der erste Verbindungsversuch des HRM-Pro manchmal eine Runde
   mehr (unvollständige Dienstsuche → Wartezeit wächst); ggf. Wartezeit nach Adapterwechsel zurücksetzen
-- [ ] Paket-Update startet die laufende Bridge nicht neu (alte Version läuft weiter bis zum
-  Neustart); postinst oder Hinweis in Tretlager
-- [ ] Sensorseite: Schalter *Sensor-Bridge* sah unter Plasma ausgeschaltet aus, obwohl `checked` true war
-  (30.10., noch FormCardPage); seit dem neuen Seitengerüst (0.6.4) richtig dargestellt, beobachten
+- [x] Paket-Update startet die laufende Bridge nicht neu → im Flatpak gelöst: Tretlager startet eine
+  ältere Bridge beim Öffnen neu (Versionsvergleich, seit 0.8.0; setzt eine neue Versionsnummer voraus)
+- [x] Sensorseite: Schalter *Sensor-Bridge* sah unter Plasma ausgeschaltet aus, obwohl `checked` true war
+  (30.10., noch FormCardPage); seit dem neuen Seitengerüst (0.6.4) richtig dargestellt, seitdem nicht wieder gesehen
 - [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)
 - [x] Zwift koppelt KICKR (Leistung, Trittfrequenz) und Pulsgurt über DIRCON, Werte realistisch (2026-10-29)
 - [x] ERG und Steigungssimulation über FTMS-Control-Point (Antwort in der Schreib-Antwort, 2026-10-29)
@@ -98,10 +98,11 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] Breeze-Warnungen „ProgressBar.qml: Cannot read property 'top' of null“ beim Seitenaufbau klären
 - [x] M5 Sensoren-Seite (Bridge über D-Bus) + Hauptfenster „Zwift starten“ — auf tinytin: Start mit Token aus dem Schlüsselbund, NVIDIA, Fenster per KWin maximiert, Auflösung bleibt, Launcher-Reste beendet (2026-10-29)
 - [x] Sicherheit: Token nie in Befehlszeilen/Protokollen (Datei + `--token=@`), Abmelden beendet die Sitzung bei Zwift
-- [ ] Bridge-Neustart beim Einspielen trennt Sensoren kurz – beim Paket-Update Zwift-Lauf beachten
+- [x] Bridge-Neustart beim Einspielen trennt Sensoren kurz → Neustart nur, wenn Zwift nicht läuft (0.8.0)
 - [x] Ende einer Zwift-Sitzung: Bridge stoppt, wenn nicht im Autostart (beim Direktstart geprüft)
 - [x] M6a Debian-Paket `tretlager` (`build-aux/build-deb.sh`), 0.2.0 auf tinytin installiert, Bridge aus dem Paket läuft (2026-10-29)
-- [ ] M6b Ende-zu-Ende auf frischem TUXEDO OS forky (VM `tuxedo-os-forky`: Ablauf ohne NVIDIA/Bluetooth; Polkit-Passwort und Zwift-Anmeldung durch Christoph)
+- [x] ~~M6b Ende-zu-Ende Debian-Paket~~ entfällt (Debian-Paket eingestellt) → F5; frische Erstinstallation
+  im Flatpak auf tinytin zweimal durchgelaufen (30.10., 15 min)
 - [x] Direktstart „Zwift (Tretlager)“ auf tinytin geprüft: Start nach 15 s, NVIDIA, Fenster/Auflösung ok, kein Token im Journal, nach der Fahrt Tretlager beendet, Bridge gestoppt (2026-10-29)
 - [x] Nur eine Tretlager-Instanz (zweiter Aufruf nutzt das vorhandene Fenster; 0.3.0)
 - [x] Paketquelle auf bender (Debian): `services/pacman-repo/publish-deb.sh`, `http://bender:8095/debian` (0.3.0)
@@ -122,7 +123,7 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] F2 Code (0.8.0): Bridge per D-Bus-Aktivierung + Quit, Autostart-Portal, Bridge-Version, gdbus, Assistent ohne Vorbereiten
 - [ ] Autostart der Bridge über das Background-Portal nach einem Neustart von tinytin prüfen
 - [ ] F2b Distributionsunabhängig: Systemprüfung ohne Debian-Annahmen, Avahi-Prüfung, GNOME-Rückfälle (Maximieren, DPI)
-- [ ] F3 Umstieg auf tinytin: Debian-Paket entfernt (30.10.); Zwift-Präfix (36 GB inkl. Sicherungen) unter ~/.local/share/tretlager übernehmen oder löschen
+- [x] F3 Umstieg auf tinytin: Debian-Paket entfernt, alte Paketdaten (36 GB) gelöscht (30.10.)
 - [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
 - [ ] F5 Abnahme: frisches TUXEDO OS, Fedora KDE + GNOME, Arch, lange Fahrt; Debian-Quelle auf bender abschalten
 
@@ -144,7 +145,7 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
 - [x] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
 - [x] U-03 Startknopf größer, Live-Werte als Kennzahlen (im HIG-Rahmen); Hervorhebung unter echtem Plasma noch ansehen (Bildschirm war gesperrt)
-- [ ] Metainfo: Screenshots und Release-Beschreibungen
+- [ ] Metainfo: Screenshots (Release-Beschreibung seit 0.9.0)
 
 ## Updates (docs/updates.md)
 

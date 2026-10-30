@@ -4,11 +4,14 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-30
+
+QA-Audit (`docs/qa-audit-2026-10-30.md`), Update-Plan ohne Schnappschüsse (`docs/updates.md`),
+überarbeitete Übersicht und Hinweis „Nicht für Rennen“.
+
 ### Geändert
 - Programmsymbol mit silbernen Kettenblättern und dunkler Kante: Das frühere, ganz dunkle Symbol war
   auf einem dunklen Plasma-Panel kaum zu erkennen.
-
-### Geändert
 - Updates ohne Schnappschüsse (Plan in `docs/updates.md`): Vor jedem Start gleicht Tretlager die
   Einrichtung ab. Nach einem Tretlager-Update mit neuem Wine passt `wineboot -u` die
   Zwift-Umgebung an, und der Grafiktest läuft erneut; fehlende Windows-Komponenten oder Teile von
