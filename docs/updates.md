@@ -68,18 +68,26 @@ Grafiktest, dann Zwift nach 47 s; normaler Start ohne Änderung: Zwift nach 16 s
   Version fahren. Ist die Zwift-Umgebung kaputt, legt *Einrichtung prüfen* sie neu an; nur das
   Spiel (≈ 5 GB) wird dann erneut geladen.
 
-## Fortschritt beim Zwift-Update
+## Fortschritt beim Zwift-Update und bei der Erstinstallation
 
 `Zwift_ver_cur.xml` nennt das Manifest der neuen Version (`Zwift_<Version>_<Hash>_manifest.xml`,
 gleicher Ordner beim CDN, ≈ 5 MB, ≈ 20 000 Dateien mit Pfad und Größe). Tretlager vergleicht es
 mit dem Zwift-Ordner: Fehlende oder anders große Dateien ergeben die Menge, die zu laden ist.
-Während der Launcher lädt, zählt Tretlager alle 3 s, wie viel davon in voller Größe angekommen
-ist, und zeigt „… 1,2 von 3,4 GB“ mit Fortschrittsbalken (höchstens 99 %, bis die Versionsdatei
-wechselt). Ohne Manifest (offline, anderes Format) bleibt es bei der Zeit: „seit 3 Minuten“.
+Der Launcher lädt zuerst in einen Zwischenordner (`drive_c/users/<Name>/AppData/Local/Temp/Zwift/Downloads`)
+und verschiebt am Ende alles auf einmal in den Zwift-Ordner. Tretlager zählt deshalb alle 3 s
+beides: was im Zwischenordner liegt (ohne Reste eines abgebrochenen Ladens) und was schon fertig
+im Zwift-Ordner angekommen ist, und zeigt „… 1,2 von 3,4 GB“ mit Fortschrittsbalken (höchstens 99 %,
+bis die Versionsdatei wechselt). Ohne Manifest (offline, anderes Format) bleibt es bei der Zeit: „seit 3 Minuten“.
 Gleich große, geänderte Dateien zählt das nicht mit; die Anzeige ist ein Richtwert.
 
-Auf tinytin mit der aktuellen Version geprüft: 0 von 19 903 Dateien fehlen, Abgleich 1 s. Mit
-einem echten Zwift-Update noch nicht gesehen (keins erschienen).
+Dasselbe gilt für die Erstinstallation (Einrichtungsschritt *Zwift laden*, `setup.Game`): Statt
+geschätzter 4,9 GB zeigt sie die Größe laut Manifest. Ohne Manifest schätzt sie wie bisher über
+die Größe des Zwift-Ordners („etwa“). Gemeinsamer Code in `core/manifest.py`.
+
+Auf tinytin geprüft (30.10.): mit der aktuellen Version 0 von 19 903 Dateien fehlend, Abgleich 1 s;
+bei einer echten Erstinstallation 0 → 99 % gleichmäßig in 9 Minuten (5,1 GB, ≈ 10 MB/s). Ohne den
+Zwischenordner stand die Anzeige 9 Minuten bei 0 % und sprang dann auf 99 %. Ein echtes
+Zwift-Update ist noch nicht erschienen; es läuft über denselben Launcher und Zwischenordner.
 
 ## Ablauf für eine neue Tretlager-Version
 

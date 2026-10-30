@@ -34,8 +34,9 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   Fehlerbehebung, bekannte Grenzen.
 
 ### Hinzugefügt
-- Fortschritt beim Zwift-Update: Tretlager liest das Manifest der neuen Version, vergleicht es mit
-  dem Zwift-Ordner und zeigt „… 1,2 von 3,4 GB“ mit Fortschrittsbalken; ohne Manifest die Dauer.
+- Fortschritt beim Zwift-Update und bei der Erstinstallation: Tretlager liest das Manifest der
+  Zwift-Version, vergleicht es mit dem Zwift-Ordner und zeigt „… 1,2 von 3,4 GB“ mit
+  Fortschrittsbalken (`core/manifest.py`); ohne Manifest die Dauer bzw. wie bisher eine Schätzung.
 - Vorige Wine-Version: Tretlager hebt die zuletzt bewährte Wine-Version auf (genau eine, ≈ 500 MB).
   Nach einem Tretlager-Update mit neuem Wine startet *Vorige Wine-Version nutzen* in der Übersicht
   Zwift wieder mit der alten; nach zwei Fahrten mit dem neuen Wine ersetzt es die Kopie.

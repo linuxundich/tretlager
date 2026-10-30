@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from . import display, paths, state, systemcheck, wine
+from . import display, manifest, paths, state, systemcheck, wine
 from ..i18n import _
 
 INSTALLER_URL = "https://cdn.zwift.com/app/ZwiftSetup.exe"
@@ -294,7 +294,12 @@ class Game(Step):
         return (paths.ZWIFT_DIR / "ZwiftApp.exe").exists() and bool(game_version())
 
     def run(self, ctx: Context) -> None:
-        start_size = dir_size(paths.ZWIFT_DIR)
+        # Fortschritt aus dem Zwift-Manifest (wie beim Update); ohne Manifest geschätzt über die
+        # Größe des Zwift-Ordners.
+        tracker = manifest.UpdateProgress()
+        if tracker.total:
+            ctx.log(_("Zwift: {gb} GB zu laden").format(gb=f"{tracker.total / 10**9:.1f}"))
+        start_size = 0 if tracker.total else dir_size(paths.ZWIFT_DIR)
         ctx.log("$ wine start ZwiftLauncher.exe SilentLaunch")
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=ctx.wine_env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -305,10 +310,16 @@ class Game(Step):
                 if ctx.cancel.is_set():
                     raise SetupError(_("Abgebrochen"))
                 time.sleep(3)
-                size = dir_size(paths.ZWIFT_DIR)
-                loaded = max(size - start_size, 0)
-                ctx.progress(self.id, min(99, 100 * loaded / GAME_SIZE_BYTES),
-                             _("{loaded} von etwa {total} GB").format(loaded=f"{loaded / 10**9:.1f}", total=f"{GAME_SIZE_BYTES / 10**9:.1f}"))
+                if tracker.total:
+                    loaded = size = tracker.loaded()
+                    text = _("{loaded} von {total} GB")
+                    total = tracker.total
+                else:
+                    size = dir_size(paths.ZWIFT_DIR)
+                    loaded, total = max(size - start_size, 0), GAME_SIZE_BYTES
+                    text = _("{loaded} von etwa {total} GB")
+                ctx.progress(self.id, min(99, 100 * loaded / total),
+                             text.format(loaded=f"{loaded / 10**9:.1f}", total=f"{total / 10**9:.1f}"))
                 if size != last:
                     last, stable_since = size, time.monotonic()
                 if self.done(ctx) and time.monotonic() - stable_since > 15:

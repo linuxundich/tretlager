@@ -88,3 +88,55 @@ def test_update_progress_unknown_without_manifest(tmp_path):
     def offline(*_a, **_kw):
         raise OSError("offline")
     assert launch.UpdateProgress(offline, tmp_path).percent() == -1
+
+
+def test_first_install_progress_from_manifest(tmp_path, monkeypatch):
+    """Erstinstallation: Fortschritt aus dem Manifest statt geschätzter 4,9 GB."""
+    from tretlager.core import manifest, setup
+    z = tmp_path / "Zwift"
+    z.mkdir()
+    monkeypatch.setattr(paths, "ZWIFT_DIR", z)
+    monkeypatch.setattr(setup.subprocess, "Popen", lambda *a, **kw: None)
+    monkeypatch.setattr(setup.Context, "wineserver_kill", lambda self: None)
+    missing = [(z / "a.wad", 100), (z / "ZwiftApp.exe", 300)]
+    monkeypatch.setattr(manifest, "UpdateProgress",
+                        lambda: type("P", (), {"missing": missing, "total": 400,
+                                               "loaded": lambda self: manifest.loaded_bytes(missing)})())
+    steps = iter([lambda: (z / "a.wad").write_bytes(b"x" * 100),
+                  lambda: (z / "ZwiftApp.exe").write_bytes(b"x" * 300),
+                  lambda: ((z / "Zwift_ver_cur_filename.txt").write_text("v.xml"),
+                           (z / "v.xml").write_text('<Zwift sversion="1.2"/>'))])
+    clock = [0.0]
+
+    def fake_sleep(s):
+        clock[0] += s
+        next(steps, lambda: None)()
+    monkeypatch.setattr(setup.time, "sleep", fake_sleep)
+    monkeypatch.setattr(setup.time, "monotonic", lambda: clock[0])
+    seen = []
+    ctx = setup.Context(progress=lambda step, pct, text: seen.append((round(pct), text)))
+    setup.Game().run(ctx)
+    assert seen[0][0] == 25 and seen[1][0] == 99  # 100 % erst mit der Versionsdatei
+    assert all("etwa" not in text for _pct, text in seen)  # keine Schätzung, das Manifest kennt die Größe
+
+
+def test_update_progress_counts_launcher_staging(tmp_path):
+    """Der Launcher lädt nach Temp\\Zwift\\Downloads und verschiebt erst am Ende (tinytin, 30.10.)."""
+    prefix = tmp_path / "prefix"
+    z = prefix / "drive_c" / "Program Files (x86)" / "Zwift"
+    staging = prefix / "drive_c" / "users" / "testt" / "AppData" / "Local" / "Temp" / "Zwift" / "Downloads"
+    z.mkdir(parents=True)
+    staging.mkdir(parents=True)
+    (staging / "rest-vom-letzten-mal").write_bytes(b"x" * 50)  # zählt nicht
+
+    def opener(req, timeout=0):
+        body = MANIFEST if req.full_url.endswith("manifest.xml") else '<Zwift manifest="Zwift_1.0.2_ab_manifest.xml"/>'
+        return io.BytesIO(body.encode())
+    p = launch.UpdateProgress(opener, z, prefix)
+    assert p.total == 450 and p.percent() == 0
+    (staging / "chunk").write_bytes(b"x" * 225)  # halb geladen, noch im Zwischenordner
+    assert p.percent() == 50
+    (staging / "chunk").unlink()  # verschoben: jetzt fertig im Zwift-Ordner
+    (z / "ZwiftApp.exe").write_bytes(b"x" * 100)
+    (z / "same.dll").write_bytes(b"x" * 50)
+    assert round(p.percent()) == 33

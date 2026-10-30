@@ -15,15 +15,13 @@ import shutil
 import subprocess
 import tempfile
 import time
-import urllib.request
 from pathlib import Path
 from typing import Callable
 
 from . import bridgectl, display, login, paths, setup, state, wine
+from .manifest import UpdateProgress, remote_version  # noqa: F401 (auch für Aufrufer von launch)
 from ..i18n import _, ngettext
 
-VER_CUR_URL = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml"
-MANIFEST_BASE = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/"
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
 
@@ -34,76 +32,6 @@ class NeedLogin(Exception):
 
 class LaunchError(Exception):
     """Fehler mit einem Satz für den Nutzer."""
-
-
-def _fetch(url: str, opener=urllib.request.urlopen, timeout: int = 20) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "Tretlager"})
-    with opener(req, timeout=timeout) as r:  # noqa: S310 (feste https-URL beim Zwift-CDN)
-        return r.read().decode(errors="ignore")
-
-
-def _attr(text: str, name: str) -> str:
-    m = re.search(rf'{name}="([^"]+)"', text)
-    return m.group(1) if m else ""
-
-
-def remote_version(opener=urllib.request.urlopen) -> str:
-    return _attr(_fetch(VER_CUR_URL, opener), "sversion")
-
-
-def manifest_files(manifest: str) -> list[tuple[str, int]]:
-    """Dateien laut Zwift-Manifest: (Pfad relativ zum Zwift-Ordner, Größe in Byte)."""
-    return [(path.replace("\\", "/"), int(length)) for path, length in
-            re.findall(r"<path>([^<]+)</path>\s*<length>(\d+)</length>", manifest)]
-
-
-def missing_files(files: list[tuple[str, int]], zwift_dir: Path) -> list[tuple[Path, int]]:
-    """Was dem Zwift-Ordner zur neuen Version fehlt: Dateien, die fehlen oder anders groß sind.
-    Gleich große, aber geänderte Dateien bleiben unerkannt; für die Anzeige genügt das."""
-    out = []
-    for rel, length in files:
-        path = zwift_dir / rel
-        try:
-            if path.stat().st_size == length:
-                continue
-        except OSError:
-            pass
-        out.append((path, length))
-    return out
-
-
-def loaded_bytes(missing: list[tuple[Path, int]]) -> int:
-    """Wie viel der fehlenden Dateien inzwischen in voller Größe da ist."""
-    done = 0
-    for path, length in missing:
-        try:
-            if path.stat().st_size == length:
-                done += length
-        except OSError:
-            pass
-    return done
-
-
-class UpdateProgress:
-    """Fortschritt eines Zwift-Updates aus dem Manifest der neuen Version (cdn.zwift.com)."""
-
-    def __init__(self, opener=urllib.request.urlopen, zwift_dir: Path | None = None):
-        self.missing: list[tuple[Path, int]] = []
-        self.total = 0
-        try:
-            name = _attr(_fetch(VER_CUR_URL, opener), "manifest")
-            if name and re.fullmatch(r"[\w.\-]+\.xml", name):
-                manifest = _fetch(MANIFEST_BASE + name, opener, timeout=60)
-                self.missing = missing_files(manifest_files(manifest), zwift_dir or paths.ZWIFT_DIR)
-                self.total = sum(length for _p, length in self.missing)
-        except (OSError, ValueError):
-            pass  # ohne Manifest bleibt es bei der Zeitanzeige
-
-    def percent(self) -> float:
-        """0–100, oder -1, wenn unbekannt."""
-        if not self.total:
-            return -1
-        return min(99.0, 100 * loaded_bytes(self.missing) / self.total)
 
 
 def wine_tasks(env: dict) -> dict[str, int]:
@@ -280,7 +208,7 @@ class Launcher:
                 time.sleep(3)
                 pct = tracker.percent()
                 if pct >= 0:
-                    done = pct / 100 * tracker.total
+                    done = tracker.loaded()
                     self.progress(_("{title}: {done} von {total} GB").format(
                         title=title, done=f"{done / 10**9:.1f}", total=f"{tracker.total / 10**9:.1f}"), pct)
                 else:

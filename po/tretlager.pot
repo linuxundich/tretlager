@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 15:17+0100\n"
+"POT-Creation-Date: 2026-10-30 15:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,116 +121,116 @@ msgstr ""
 msgid "unbekannter Chip"
 msgstr ""
 
-#: tretlager/core/launch.py:180
+#: tretlager/core/launch.py:108
 msgid "KWin-Skript ließ sich nicht laden"
 msgstr ""
 
-#: tretlager/core/launch.py:206
+#: tretlager/core/launch.py:134
 msgid "Sensor-Bridge prüfen"
 msgstr ""
 
-#: tretlager/core/launch.py:208
+#: tretlager/core/launch.py:136
 msgid "Anmeldung prüfen"
 msgstr ""
 
-#: tretlager/core/launch.py:216
+#: tretlager/core/launch.py:144
 #, python-brace-format
 msgid "Wine-DPI an den Bildschirm angepasst: {dpi}"
 msgstr ""
 
-#: tretlager/core/launch.py:217
+#: tretlager/core/launch.py:145
 msgid "Zwift starten"
 msgstr ""
 
-#: tretlager/core/launch.py:219
+#: tretlager/core/launch.py:147
 msgid "Fenster anpassen"
 msgstr ""
 
-#: tretlager/core/launch.py:221 tretlager/kde/app.py:636
+#: tretlager/core/launch.py:149 tretlager/kde/app.py:636
 msgid "Zwift läuft"
 msgstr ""
 
-#: tretlager/core/launch.py:225
+#: tretlager/core/launch.py:153
 msgid "Sensor-Bridge nicht installiert, Start ohne Sensoren"
 msgstr ""
 
-#: tretlager/core/launch.py:229
+#: tretlager/core/launch.py:157
 msgid "Sensor-Bridge gestartet"
 msgstr ""
 
-#: tretlager/core/launch.py:241
+#: tretlager/core/launch.py:169
 msgid "Neues Wine mit Tretlager: wieder mit der mitgelieferten Version"
 msgstr ""
 
-#: tretlager/core/launch.py:247 tretlager/core/launch.py:248
+#: tretlager/core/launch.py:175 tretlager/core/launch.py:176
 #, python-brace-format
 msgid "Einrichtung ergänzen: {step}"
 msgstr ""
 
-#: tretlager/core/launch.py:252
+#: tretlager/core/launch.py:180
 msgid "Einrichtung prüfen"
 msgstr ""
 
-#: tretlager/core/launch.py:254
+#: tretlager/core/launch.py:182
 msgid "Die Einrichtung ließ sich nicht abgleichen."
 msgstr ""
 
-#: tretlager/core/launch.py:261
+#: tretlager/core/launch.py:189
 #, python-brace-format
 msgid "Update-Prüfung nicht möglich: {error}"
 msgstr ""
 
-#: tretlager/core/launch.py:268
+#: tretlager/core/launch.py:196
 #, python-brace-format
 msgid "Zwift wird aktualisiert ({old} → {new})"
 msgstr ""
 
-#: tretlager/core/launch.py:272
+#: tretlager/core/launch.py:200
 #, python-brace-format
 msgid "Zwift-Update: {gb} GB zu laden"
 msgstr ""
 
-#: tretlager/core/launch.py:284
+#: tretlager/core/launch.py:212
 #, python-brace-format
 msgid "{title}: {done} von {total} GB"
 msgstr ""
 
-#: tretlager/core/launch.py:288
+#: tretlager/core/launch.py:216
 #, python-brace-format
 msgid "{title}, seit {n} Minute"
 msgid_plural "{title}, seit {n} Minuten"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/core/launch.py:291
+#: tretlager/core/launch.py:219
 #, python-brace-format
 msgid "Zwift aktualisiert auf {version}"
 msgstr ""
 
-#: tretlager/core/launch.py:294
+#: tretlager/core/launch.py:222
 msgid ""
 "Das Zwift-Update wurde nicht fertig. Beim nächsten Start setzt Tretlager es "
 "fort."
 msgstr ""
 
-#: tretlager/core/launch.py:310
+#: tretlager/core/launch.py:238
 msgid "Hilfsprogramm zum Starten ließ sich nicht übersetzen."
 msgstr ""
 
-#: tretlager/core/launch.py:333
+#: tretlager/core/launch.py:261
 msgid "Der Zwift-Launcher startet nicht."
 msgstr ""
 
-#: tretlager/core/launch.py:350
+#: tretlager/core/launch.py:278
 #, python-brace-format
 msgid "Zwift ließ sich nicht starten (RunFromProcess, Code {code})."
 msgstr ""
 
-#: tretlager/core/launch.py:353
+#: tretlager/core/launch.py:281
 msgid "Zwift ließ sich nicht starten (Zeitüberschreitung)."
 msgstr ""
 
-#: tretlager/core/launch.py:375
+#: tretlager/core/launch.py:303
 msgid "Sensor-Bridge gestoppt"
 msgstr ""
 
@@ -338,7 +338,7 @@ msgstr ""
 msgid "Abgebrochen oder keine Berechtigung erteilt"
 msgstr ""
 
-#: tretlager/core/setup.py:113 tretlager/core/setup.py:306
+#: tretlager/core/setup.py:113 tretlager/core/setup.py:311
 msgid "Abgebrochen"
 msgstr ""
 
@@ -431,45 +431,55 @@ msgstr ""
 msgid "Zwift laden (etwa 5 GB)"
 msgstr ""
 
-#: tretlager/core/setup.py:311
+#: tretlager/core/setup.py:301
 #, python-brace-format
-msgid "{loaded} von etwa {total} GB"
+msgid "Zwift: {gb} GB zu laden"
 msgstr ""
 
 #: tretlager/core/setup.py:315
 #, python-brace-format
+msgid "{loaded} von {total} GB"
+msgstr ""
+
+#: tretlager/core/setup.py:320
+#, python-brace-format
+msgid "{loaded} von etwa {total} GB"
+msgstr ""
+
+#: tretlager/core/setup.py:326
+#, python-brace-format
 msgid "Zwift {version} geladen"
 msgstr ""
 
-#: tretlager/core/setup.py:317
+#: tretlager/core/setup.py:328
 msgid "Zwift wurde nicht vollständig geladen (Zeitüberschreitung)."
 msgstr ""
 
-#: tretlager/core/setup.py:340
+#: tretlager/core/setup.py:351
 msgid "Grafik einrichten"
 msgstr ""
 
-#: tretlager/core/setup.py:357
+#: tretlager/core/setup.py:368
 msgid "Grafiktest übersetzen"
 msgstr ""
 
-#: tretlager/core/setup.py:363
+#: tretlager/core/setup.py:374
 msgid "Grafiktest ausführen"
 msgstr ""
 
-#: tretlager/core/setup.py:371
+#: tretlager/core/setup.py:382
 msgid "Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."
 msgstr ""
 
-#: tretlager/core/setup.py:373
+#: tretlager/core/setup.py:384
 msgid "Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"
 msgstr ""
 
-#: tretlager/core/setup.py:389
+#: tretlager/core/setup.py:400
 msgid "schon erledigt"
 msgstr ""
 
-#: tretlager/core/setup.py:399
+#: tretlager/core/setup.py:410
 #, python-brace-format
 msgid "Unerwarteter Fehler: {error}"
 msgstr ""
