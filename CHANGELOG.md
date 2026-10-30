@@ -4,6 +4,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Dezente Silhouette einer Radgruppe hinter dem Seitenkopf von Übersicht und Willkommensseite:
+  drei Tonstufen aus einem Foto (`build-aux/make-backdrop.py`), in der Textfarbe des Farbschemas
+  mit 7–9 % Deckkraft, passt zu Hell und Dunkel.
+
 ## [0.9.0] - 2026-10-30
 
 QA-Audit (`docs/qa-audit-2026-10-30.md`), Update-Plan ohne Schnappschüsse (`docs/updates.md`),

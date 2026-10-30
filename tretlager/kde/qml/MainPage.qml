@@ -9,6 +9,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 ColumnsPage {
     id: page
     title: i18n("Übersicht")
+    backdrop: true
 
     readonly property var la: backend.launchInfo
     readonly property var se: backend.sensors

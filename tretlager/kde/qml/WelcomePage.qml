@@ -7,6 +7,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 ColumnsPage {
     id: page
     title: i18n("Willkommen")
+    backdrop: true
 
     PageHero {
         title: i18n("Zwift unter Linux")

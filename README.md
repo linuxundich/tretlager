@@ -156,7 +156,10 @@ Version steht in `CHANGELOG.md`.
 ## Lizenz und Hinweis
 
 Tretlager steht unter der GPL-3.0-or-later (`LICENSE`), das gilt auch für das Symbol
-(`build-aux/make-icon.py`). Tretlager ist kein Produkt von Zwift Inc. und wird von Zwift nicht
+(`build-aux/make-icon.py`). Die Hintergrundgrafik `tretlager/data/backdrop.png` erzeugt
+`build-aux/make-backdrop.py` aus einem Foto, das nicht im Repository liegt
+(`build-aux/make-backdrop.py foto.jpg`).
+Tretlager ist kein Produkt von Zwift Inc. und wird von Zwift nicht
 unterstützt; die Benutzung erfolgt auf eigene Gefahr. Zwift, .NET Framework, WebView2 und die
 übrigen Windows-Komponenten sind unfreie Software. Tretlager liefert sie nicht mit, die
 Einrichtung lädt sie beim Hersteller. Die Übersicht aller Komponenten und Lizenzen steht in der
