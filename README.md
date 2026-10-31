@@ -13,7 +13,8 @@
 </p>
 
 <p align="center">
-  Flatpak: build from source &nbsp;·&nbsp; Releases: planned &nbsp;·&nbsp;
+  <a href="https://github.com/linuxundich/tretlager/releases/latest"><strong>Download Flatpak</strong></a>
+  &nbsp;·&nbsp; Flathub: not planned &nbsp;·&nbsp;
   <a href="docs/HARDWARE.md">Tested hardware</a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
@@ -162,12 +163,31 @@ Speed and Cadence, Heart Rate) should work but are untested. ANT+ is not support
 ## Install
 
 > [!NOTE]
-> There is no ready-made download yet. Tretlager targets current distributions with Flatpak;
-> TUXEDO OS with Plasma is the main target, GNOME works. Fedora, Ubuntu and openSUSE are planned
-> but untested.
+> Tretlager targets current distributions with Flatpak. TUXEDO OS with Plasma is the main
+> target, GNOME works. Fedora, Ubuntu and openSUSE are planned but untested; reports are welcome.
 
-You need Flatpak with Flathub, BlueZ with a Bluetooth LE adapter, `avahi-daemon` and a Secret
-Service keyring (KWallet or GNOME Keyring). Then build and install the Flatpak:
+Your system needs Flatpak with the Flathub remote, BlueZ with a Bluetooth LE adapter, a running
+`avahi-daemon` and a Secret Service keyring (KWallet or GNOME Keyring). Tretlager brings
+everything else, including its own Wine.
+
+1. Download `tretlager-<version>-x86_64.flatpak` from the
+   [latest release](https://github.com/linuxundich/tretlager/releases/latest).
+2. Install it:
+
+```sh
+flatpak install --user tretlager-*.flatpak
+```
+
+Flatpak fetches the KDE 6.11 runtime from Flathub if it is missing, and on NVIDIA systems the
+matching driver extension. Start Tretlager from the application menu and follow the assistant;
+setting up Wine and downloading Zwift takes about 15 minutes. Bundles don't update themselves,
+so check the Releases page for new versions and install the new bundle the same way.
+
+To remove Tretlager including the Zwift installation (about 10 GB), run
+`flatpak uninstall --delete-data de.linuxundich.Tretlager`. Sign out in Tretlager first to remove
+the Zwift session from your keyring.
+
+### Build it yourself
 
 ```sh
 git clone https://github.com/linuxundich/tretlager.git
@@ -175,8 +195,7 @@ cd tretlager
 build-aux/flatpak/build.sh
 ```
 
-The first build compiles Wine and takes a while (about 15 minutes on 20 cores). Start Tretlager
-from the application menu and follow the assistant.
+The first build compiles Wine and takes a while (about 15 minutes on 20 cores).
 
 ## More
 

@@ -4,7 +4,11 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-31
+
 ### Added
+- First public release: Flatpak bundle `tretlager-0.10.0-x86_64.flatpak` on the GitHub releases
+  page.
 - Public repository on GitHub (linuxundich/tretlager) with an English project page as the
   README (features, screenshots, demo video 3:43 in `docs/tretlager-demo.mp4`) and
   `docs/HARDWARE.md` (tested computers, graphics cards, systems, sensors and versions). The

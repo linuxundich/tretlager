@@ -20,9 +20,24 @@
       to Zwift correctly. Do not use Tretlager for races or competitions with results.</p>
   </description>
   <launchable type="desktop-id">de.linuxundich.Tretlager.desktop</launchable>
-  <url type="homepage">https://linuxundich.de/</url>
+  <url type="homepage">https://github.com/linuxundich/tretlager</url>
+  <url type="bugtracker">https://github.com/linuxundich/tretlager/issues</url>
+  <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.10.0" date="2026-10-31">
+      <description>
+        <p>First public release.</p>
+        <ul>
+          <li>Warnings on first start: not an official Zwift app, at your own risk, not for races.</li>
+          <li>Works outside Plasma: Breeze style, follows light/dark mode and the desktop font on GNOME.</li>
+          <li>Sign-in window fixed in the Flatpak.</li>
+          <li>Graphics setup notices when an NVIDIA card is switched on or off.</li>
+          <li>The sensor bridge connects the trainer first and gives up on absent sensors sooner.</li>
+          <li>English is the source language; German translation included.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.9.0" date="2026-10-30">
       <description>
         <p>More reliable sensor bridge and simpler updates.</p>
