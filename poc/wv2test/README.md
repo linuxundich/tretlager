@@ -1,7 +1,7 @@
-# WebView2-Test unter Wine
+# WebView2 test under Wine
 
-Kleine C#-Programme, die WebView2 getrennt vom Zwift-Launcher prüfen (T2, 2026-10-29).
-Gebaut mit dem `csc.exe` aus dem winetricks-.NET-4.8 im Prefix, gegen das NuGet-Paket
+Small C# programs that test WebView2 separately from the Zwift launcher (T2, 2026-10-29).
+Built with the `csc.exe` from the winetricks .NET 4.8 in the prefix, against the NuGet package
 `Microsoft.Web.WebView2` 1.0.4314.35 (`lib/net462`, `runtimes/win-x64/native/WebView2Loader.dll`).
 
     F='C:\windows\Microsoft.NET\Framework64\v4.0.30319'
@@ -13,5 +13,5 @@ Gebaut mit dem `csc.exe` aus dem winetricks-.NET-4.8 im Prefix, gegen das NuGet-
       /r:"$F\WPF\PresentationFramework.dll" /r:"$F\WPF\PresentationCore.dll" \
       /r:"$F\WPF\WindowsBase.dll" /r:System.Xaml.dll WV2Wpf.cs
 
-`WV2Wpf.exe hwnd` nutzt das klassische WPF-Steuerelement `WebView2`, `WV2Wpf.exe comp` das
-`WebView2CompositionControl` des Launchers 1.2.
+`WV2Wpf.exe hwnd` uses the classic WPF control `WebView2`, `WV2Wpf.exe comp` uses the
+`WebView2CompositionControl` of launcher 1.2.

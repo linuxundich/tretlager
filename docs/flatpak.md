@@ -1,172 +1,172 @@
-# Tretlager als Flatpak – Phasenplan
+# Tretlager as a Flatpak – phase plan
 
-Stand 2026-10-30. **Primärziel:** Tretlager als Flatpak, das distributionsunabhängig auf modernen
-Distributionen läuft (nicht zwingend überall) und alles mitbringt, was Zwift braucht (Wine,
-winetricks, Werkzeuge, Python-Pakete). Ein Systemupdate kann die getestete Wine-Version nicht mehr
-ändern, der Schritt *Vorbereiten* (WineHQ-Quelle, Passwort, APT) entfällt. Das Debian-Paket ist
-eingestellt (auf tinytin am 30.10. entfernt) und wird nicht mehr weiterentwickelt.
+As of 2026-10-30. **Primary goal:** Tretlager as a Flatpak that runs independently of the
+distribution on modern distributions (not necessarily everywhere) and brings everything Zwift needs
+(Wine, winetricks, tools, Python packages). A system update can no longer change the tested Wine
+version, and the *Prepare* step (WineHQ repository, password, APT) goes away. The Debian package is
+discontinued (removed from tinytin on Oct 30) and is no longer developed.
 
-### Was „moderne Distribution“ heißt
+### What “modern distribution” means
 
-- Flatpak ≥ 1.14 (Background-Portal, `--allow=multiarch`), xdg-desktop-portal mit KDE- oder
-  GNOME-Backend, BlueZ ≥ 5.6x, Avahi (für die Ankündigung an Zwift), PipeWire oder PulseAudio.
-- Wayland-Sitzung mit XWayland oder X11; NVIDIA mit proprietärem Treiber, für den es die
-  passende Flathub-Erweiterung gibt, oder Mesa (Intel/AMD).
-- Ziel-Tests: TUXEDO OS (Plasma), Fedora (KDE und GNOME), Arch, Ubuntu 26.04 LTS.
-- Was nur unter Plasma geht (KWin-Skript zum Maximieren, XWayland-Skalierung aus `kwinrc`),
-  bekommt unter GNOME einen sinnvollen Rückfall statt eines Fehlers.
+- Flatpak ≥ 1.14 (Background portal, `--allow=multiarch`), xdg-desktop-portal with a KDE or
+  GNOME backend, BlueZ ≥ 5.6x, Avahi (for announcing to Zwift), PipeWire or PulseAudio.
+- Wayland session with XWayland, or X11; NVIDIA with the proprietary driver for which a matching
+  Flathub extension exists, or Mesa (Intel/AMD).
+- Target tests: TUXEDO OS (Plasma), Fedora (KDE and GNOME), Arch, Ubuntu 26.04 LTS.
+- Whatever only works under Plasma (KWin script for maximizing, XWayland scaling from `kwinrc`)
+  gets a sensible fallback under GNOME instead of an error.
 
-## Was schon geklärt ist (Flathub, 30.10.)
+## What is already settled (Flathub, Oct 30)
 
-| Baustein | Stand | Quelle |
+| Component | Status | Source |
 |---|---|---|
-| Laufzeit | `org.kde.Platform//6.11` mit Kirigami (KF6) | `flatpak remote-ls flathub` |
-| PySide6 + QtWebEngine | `io.qt.PySide.BaseApp//6.11` (PySide 6.11.x, muss zur Qt-Patchversion der Laufzeit passen, siehe README *Flatpak*), baut auf `io.qt.qtwebengine.BaseApp//6.11` und KDE 6.11 auf → PySide6, Kirigami und WebEngine in einer Umgebung | `flatpak remote-info --show-metadata` |
-| NVIDIA | `org.freedesktop.Platform.GL.nvidia-580-178-04` passt zum Treiber von tinytin; Flatpak installiert die passende Erweiterung selbst | `flatpak remote-ls` |
-| tinytin | Flatpak 1.18.4, Flathub als Systemquelle eingerichtet | `flatpak --version` |
-| Verteilung | Nicht über Flathub (Flathub verbietet KI-erstellte Manifeste und Einreichungen), sondern eigene Quelle auf bender wie bei den anderen Apps | Arbeitsregel |
+| Runtime | `org.kde.Platform//6.11` with Kirigami (KF6) | `flatpak remote-ls flathub` |
+| PySide6 + QtWebEngine | `io.qt.PySide.BaseApp//6.11` (PySide 6.11.x, must match the Qt patch version of the runtime, see README *Flatpak*), builds on `io.qt.qtwebengine.BaseApp//6.11` and KDE 6.11 → PySide6, Kirigami and WebEngine in one environment | `flatpak remote-info --show-metadata` |
+| NVIDIA | `org.freedesktop.Platform.GL.nvidia-580-178-04` matches tinytin's driver; Flatpak installs the matching extension by itself | `flatpak remote-ls` |
+| tinytin | Flatpak 1.18.4, Flathub set up as a system remote | `flatpak --version` |
+| Distribution | Not via Flathub (Flathub forbids AI-generated manifests and submissions), but my own repository on bender, as with the other apps | working rule |
 
-## Offene Kernfragen (entscheiden über das Vorhaben)
+## Open core questions (they decide the project)
 
-1. ~~Kirigami Addons~~ – geklärt: in `org.kde.Platform//6.11` enthalten (1.13.1).
-2. **Wine in der KDE-Laufzeit.** `org.winehq.Wine` ist eine eigenständige App auf der
-   Freedesktop-Laufzeit und lässt sich nicht einbinden. Plan: Wine als WoW64-Build ins Paket
-   (Kron4ek `wine-11.20-amd64-wow64.tar.xz`, Prüfsumme fest im Manifest). WoW64 braucht keine
-   32-Bit-Bibliotheken, also keine `Compat.i386`-/`GL32`-Erweiterungen. **Risiko:** Laufen
-   .NET 4.8, WebView2 und der Zwift-Launcher unter WoW64 genauso wie unter dem bisherigen
-   `winehq-devel` 11.20 (klassisch mit 32-Bit-Teil)? Ausweichweg: Wine selbst im Manifest bauen
-   bzw. ein klassischer Build mit `Compat.i386` (prüfen, ob es diese Erweiterung zur KDE-Laufzeit
-   gibt).
-3. **NVIDIA in der Sandbox.** Mit `--device=dri` und der GL-Erweiterung sollte Zwift per
-   PRIME-Offload (`__NV_PRIME_RENDER_OFFLOAD`, `__GLX_VENDOR_LIBRARY_NAME=nvidia`) auf der RTX
-   laufen; Gegenprobe mit dem vorhandenen Grafiktest (`gltest`).
-4. **Bridge in der Sandbox.** bleak über `org.bluez` (System-Bus), mDNS über Avahi, DIRCON auf
-   127.0.0.1. Findet Zwift (im selben Flatpak) die Geräte wie bisher?
+1. ~~Kirigami Addons~~ – settled: included in `org.kde.Platform//6.11` (1.13.1).
+2. **Wine in the KDE runtime.** `org.winehq.Wine` is a standalone app on the Freedesktop runtime
+   and cannot be embedded. Plan: Wine as a WoW64 build in the package (Kron4ek
+   `wine-11.20-amd64-wow64.tar.xz`, checksum pinned in the manifest). WoW64 needs no 32-bit
+   libraries, so no `Compat.i386`/`GL32` extensions. **Risk:** do .NET 4.8, WebView2 and the
+   Zwift launcher run under WoW64 just as under the previous `winehq-devel` 11.20 (classic, with a
+   32-bit part)? Fallback: build Wine in the manifest ourselves, or a classic build with
+   `Compat.i386` (check whether this extension exists for the KDE runtime).
+3. **NVIDIA in the sandbox.** With `--device=dri` and the GL extension, Zwift should run on the RTX
+   via PRIME offload (`__NV_PRIME_RENDER_OFFLOAD`, `__GLX_VENDOR_LIBRARY_NAME=nvidia`); cross-check
+   with the existing graphics test (`gltest`).
+4. **Bridge in the sandbox.** bleak via `org.bluez` (system bus), mDNS via Avahi, DIRCON on
+   127.0.0.1. Does Zwift (in the same Flatpak) find the devices as before?
 
-## Phasen
+## Phases
 
-### F0 Machbarkeit auf tinytin (vor jeder Umbauarbeit)
+### F0 Feasibility on tinytin (before any rework)
 
-Wegwerf-Manifest (`build-aux/flatpak/spike/`, nach F0 durch das echte Manifest ersetzt), installiert
-auf tinytin aus einer Einzeldatei. Der laufende Tretlager (Debian-Paket) bleibt unangetastet;
-die Bridge des Pakets während der Tests stoppen.
+Throwaway manifest (`build-aux/flatpak/spike/`, replaced by the real manifest after F0), installed
+on tinytin from a single-file bundle. The running Tretlager (Debian package) stays untouched; stop
+the package's bridge during the tests.
 
-- [x] a) Oberfläche: PySide-BaseApp + Tretlager-Quellen → Fenster, FormCards, Plasma-Stil;
-      Anmeldefenster (WebEngine) zeigt die Zwift-Seite.
-- [x] b) Wine: fertige Kron4ek-WoW64-Builds stürzen in **jeder** Flatpak-Laufzeit ab
-      (`virtual_init`, Code 139), das offizielle `org.winehq.Wine//wow64` läuft → Wine 11.20 aus den
-      Quellen gebaut (mingw-w64-Erweiterung 25.08, `--enable-archs=i386,x86_64`). Braucht
-      `--allow=multiarch` (sonst bleibt `syswow64` leer). corefonts, .NET 4.8, WebView2 ok.
-- [x] c) Zwift: Launcher und Spiel im neuen Präfix, Grafiktest „NVIDIA GeForce RTX 3050 Ti“
-      (OpenGL 4.6, 580.178.04) über die GL-Erweiterung; Start mit Token aus dem Schlüsselbund.
-      Offen: Kopie des bestehenden Präfixes gegen das Flatpak-Wine.
-- [x] d) Bridge im Flatpak: BlueZ (UB500), Avahi, D-Bus-Name; Zwift im Flatpak koppelt KICKR
-      (automatisch) und HRM-Pro.
-- [x] e) sysfs (Netzteil, Bluetooth-Chip), Schlüsselbund, Benachrichtigungen (gdbus), KWin-Skript
-      (nach Korrektur, Skript in `$XDG_RUNTIME_DIR/app/<ID>`).
+- [x] a) UI: PySide BaseApp + Tretlager sources → window, FormCards, Plasma style; sign-in window
+      (WebEngine) shows the Zwift page.
+- [x] b) Wine: prebuilt Kron4ek WoW64 builds crash in **every** Flatpak runtime (`virtual_init`,
+      code 139), the official `org.winehq.Wine//wow64` runs → built Wine 11.20 from source
+      (mingw-w64 extension 25.08, `--enable-archs=i386,x86_64`). Needs `--allow=multiarch`
+      (otherwise `syswow64` stays empty). corefonts, .NET 4.8, WebView2 ok.
+- [x] c) Zwift: launcher and game in the new prefix, graphics test “NVIDIA GeForce RTX 3050 Ti”
+      (OpenGL 4.6, 580.178.04) via the GL extension; start with the token from the keyring.
+      Open: copy of the existing prefix against the Flatpak Wine.
+- [x] d) Bridge in the Flatpak: BlueZ (UB500), Avahi, D-Bus name; Zwift in the Flatpak pairs the
+      KICKR (automatically) and the HRM-Pro.
+- [x] e) sysfs (power supply, Bluetooth chip), keyring, notifications (gdbus), KWin script
+      (after a fix, script in `$XDG_RUNTIME_DIR/app/<ID>`).
 
-**Ergebnis F0 (30.10.): machbar.** Eine echte Fahrt fehlt noch, alle Bausteine laufen. Erkenntnisse für
+**Result of F0 (Oct 30): feasible.** A real ride is still missing; all components work. Lessons for
 F1/F2:
 
-- In der Sandbox fehlen `busctl`, `systemctl`, `journalctl`, `bluetoothctl`: `bridgectl`,
-  Systemprüfung (Bluetooth) und Adapterliste auf `gdbus` bzw. dbus-fast umstellen.
-- Systemprüfung: Betriebssystem aus `/run/host/os-release`; NVIDIA über `/proc/driver/nvidia/version`
-  (`/sys/module/nvidia` fehlt); Wine „im Paket“.
-- `--socket=x11` statt `fallback-x11` (Wine nähme sonst den Wayland-Treiber).
-- Kirigami Addons 1.13.1 ist in `org.kde.Platform//6.11`, kein eigenes Modul nötig.
-- Bauen auf tinytin (20 Kerne): Wine-Modul dauert dort einige Minuten.
+- The sandbox lacks `busctl`, `systemctl`, `journalctl`, `bluetoothctl`: switch `bridgectl`, the
+  system check (Bluetooth) and the adapter list to `gdbus` or dbus-fast.
+- System check: operating system from `/run/host/os-release`; NVIDIA via
+  `/proc/driver/nvidia/version` (`/sys/module/nvidia` is missing); Wine “included in the package”.
+- `--socket=x11` instead of `fallback-x11` (otherwise Wine would pick the Wayland driver).
+- Kirigami Addons 1.13.1 is in `org.kde.Platform//6.11`, no separate module needed.
+- Building on tinytin (20 cores): the Wine module takes a few minutes there.
 
-**Ausstiegskriterium:** eine echte Fahrt mit dem Spike-Flatpak. Scheitert b) oder c), Wine im
-Manifest selbst bauen (F0 wiederholen) oder das Vorhaben zurückstellen.
+**Exit criterion:** a real ride with the spike Flatpak. If b) or c) fails, build Wine in the
+manifest ourselves (repeat F0) or shelve the project.
 
-### F1 Manifest und Bau – erledigt (0.8.0, 30.10.)
+### F1 Manifest and build – done (0.8.0, Oct 30)
 
-- `build-aux/flatpak/de.linuxundich.Tretlager.yml`, Basis `io.qt.PySide.BaseApp//6.11`,
-  Laufzeit `org.kde.Platform//6.11`.
-- Module: Kirigami Addons; Python-Pakete (bleak, dbus-fast, SecretStorage samt
-  Abhängigkeiten, per `flatpak-pip-generator`); Wine (Tarball, Prüfsumme); winetricks (fest wie
-  bisher, Prüfsumme); cabextract; osslsigncode; Tretlager selbst (inkl. `po/update.sh --build`).
-- `finish-args` (Entwurf):
+- `build-aux/flatpak/de.linuxundich.Tretlager.yml`, base `io.qt.PySide.BaseApp//6.11`,
+  runtime `org.kde.Platform//6.11`.
+- Modules: Kirigami Addons; Python packages (bleak, dbus-fast, SecretStorage with dependencies,
+  via `flatpak-pip-generator`); Wine (tarball, checksum); winetricks (pinned as before, checksum);
+  cabextract; osslsigncode; Tretlager itself (incl. `po/update.sh --build`).
+- `finish-args` (draft):
   - `--share=network`, `--share=ipc`, `--socket=wayland`, `--socket=fallback-x11`,
     `--socket=pulseaudio`, `--device=dri`
   - `--system-talk-name=org.bluez`, `--system-talk-name=org.freedesktop.Avahi`
   - `--talk-name=org.freedesktop.secrets`, `--talk-name=org.freedesktop.Notifications`,
     `--talk-name=org.kde.KWin`
-  - Bus-Name der Bridge `de.linuxundich.Tretlager.Bridge` beginnt mit der App-ID und ist damit
-    ohne eigene Freigabe erlaubt.
-- `build-aux/flatpak/build.sh` wie bei Freisteller/Kulisse (lokale Quelle `repo/`).
+  - The bridge's bus name `de.linuxundich.Tretlager.Bridge` starts with the app ID and is
+    therefore allowed without a separate permission.
+- `build-aux/flatpak/build.sh` as with Freisteller/Kulisse (local repository `repo/`).
 
-### F2 Anpassungen im Code (Erkennung über `/.flatpak-info`) – erledigt (0.8.0)
+### F2 Code changes (detection via `/.flatpak-info`) – done (0.8.0)
 
-Umgesetzt: Bridge per D-Bus-Aktivierung (statt Portal-Spawn: der Sitzungsbus startet die
-exportierte Dienstdatei als eigene Instanz) und `Quit`, Autostart über das Background-Portal,
-Bridge-Version mit Neustart nach Update, gdbus statt busctl/systemctl, Assistent ohne
-*Vorbereiten*, Systemprüfung mit Host-os-release und Avahi. Auf tinytin geprüft: Aktivierung,
-`Quit`, Start aus der Oberfläche, Systemprüfung alles grün. Offen: NVIDIA-Fehler nach der Fahrt
-(kein Journal in der Sandbox) entfallen; Autostart über das Portal noch nicht nach einem Neustart
-geprüft.
+Implemented: bridge via D-Bus activation (instead of a portal spawn: the session bus starts the
+exported service file as a separate instance) and `Quit`, autostart via the Background portal,
+bridge version with restart after an update, gdbus instead of busctl/systemctl, assistant without
+*Prepare*, system check with the host's os-release and Avahi. Verified on tinytin: activation,
+`Quit`, start from the UI, system check all green. Open: NVIDIA errors after the ride (no journal
+in the sandbox) are dropped; autostart via the portal not yet verified after a reboot.
 
-- **Assistent ohne *Vorbereiten*:** Polkit-Helfer, APT-Plan und WineHQ-Prüfung nur im
-  Debian-Paket; im Flatpak fünf Schritte. Systemprüfung: Wine „im Paket enthalten“.
-- **Wine-Pfade:** `/app/wine/bin` statt `/opt/wine-devel`; Umgebung in `setup`/`launch` zentral.
-- **Bridge ohne systemd:** `bridgectl` startet die Bridge als eigene Flatpak-Instanz über das
-  Portal (`org.freedesktop.portal.Flatpak.Spawn`), damit sie unabhängig vom Fenster läuft.
-  *Beim Anmelden starten* über das Background-Portal (`RequestBackground`, autostart) statt
+- **Assistant without *Prepare*:** polkit helper, APT plan and WineHQ check only in the Debian
+  package; five steps in the Flatpak. System check: Wine “included in the package”.
+- **Wine paths:** `/app/wine/bin` instead of `/opt/wine-devel`; environment centralized in
+  `setup`/`launch`.
+- **Bridge without systemd:** `bridgectl` starts the bridge as a separate Flatpak instance via
+  the portal (`org.freedesktop.portal.Flatpak.Spawn`) so that it runs independently of the window.
+  *Start at login* via the Background portal (`RequestBackground`, autostart) instead of
   `systemctl --user enable`.
-- **Bridge-Version:** Die Bridge meldet ihre Version; startet Tretlager nach einem Update mit
-  einer älteren laufenden Bridge, startet es sie neu, solange Zwift nicht läuft (löst auch das
-  Problem des Debian-Pakets).
-- **NVIDIA-Fehler nach der Fahrt:** Das Kernel-Journal ist in der Sandbox nicht lesbar. Meldung
-  im Flatpak weglassen; Warnung beim Wechsel der Stromquelle bleibt (sysfs).
-- **Speicherorte:** Vorschlag `--filesystem=xdg-data/tretlager`, `xdg-config/tretlager`,
-  `xdg-cache/tretlager`, `xdg-state/tretlager` → dieselben Pfade wie das Debian-Paket, keine
-  Umzüge, Präfix und Einstellungen bleiben. Alternative (sauberer, aber mit Umzug von 8,6 GB):
-  Sandbox-Pfade unter `~/.var/app/de.linuxundich.Tretlager/`.
+- **Bridge version:** the bridge reports its version; if Tretlager starts after an update with an
+  older bridge still running, it restarts the bridge as long as Zwift is not running (also solves
+  the Debian package's problem).
+- **NVIDIA errors after the ride:** the kernel journal is not readable in the sandbox. Drop the
+  message in the Flatpak; the warning on switching the power source stays (sysfs).
+- **Storage locations:** proposal `--filesystem=xdg-data/tretlager`, `xdg-config/tretlager`,
+  `xdg-cache/tretlager`, `xdg-state/tretlager` → the same paths as the Debian package, no moves,
+  prefix and settings stay. Alternative (cleaner, but with a move of 8.6 GB): sandbox paths under
+  `~/.var/app/de.linuxundich.Tretlager/`.
 
-### F2b Distributionsunabhängigkeit
+### F2b Distribution independence
 
-- Systemprüfung ohne Debian-Annahmen: Betriebssystem nur noch anzeigen (aus
-  `/run/host/os-release`), nicht mehr als „Zielsystem“ werten; Prüfungen auf Flatpak-Fähigkeiten
-  (Portal, Avahi, BlueZ, GPU) statt auf Pakete.
-- Hilfe und Texte ohne TUXEDO-/APT-Bezug, wo es nicht ums Debian-Paket geht.
-- Avahi fehlt auf manchen Distributionen standardmäßig: Prüfung mit verständlicher Abhilfe, ggf.
-  Ankündigung ohne Avahi (eigenes mDNS) als Ausweg.
-- GNOME: Fenster maximieren ohne KWin (Wine-Registry bzw. Vollbild), DPI aus der Fensterskalierung.
+- System check without Debian assumptions: only display the operating system (from
+  `/run/host/os-release`), no longer rate it as “target system”; check for Flatpak capabilities
+  (portal, Avahi, BlueZ, GPU) instead of packages.
+- Help and texts without references to TUXEDO/APT, except where they concern the Debian package.
+- Avahi is missing by default on some distributions: check with an understandable remedy, possibly
+  announcing without Avahi (own mDNS) as a way out.
+- GNOME: maximize the window without KWin (Wine registry or fullscreen), DPI from the window
+  scaling.
 
-### F3 Umstieg vom Debian-Paket
+### F3 Migration from the Debian package
 
-- Anleitung bzw. kleines Skript: Bridge-Dienst stoppen und abschalten, `apt remove tretlager`
-  (Daten bleiben), Flatpak installieren. Optional WineHQ-Quelle und `winehq-devel` entfernen.
-- Auf tinytin durchspielen: Zwift, Anmeldung (Schlüsselbund), Bridge-Einstellungen inkl.
-  UB500 und pausiertem TICKR müssen ohne Neueinrichtung weiterlaufen.
+- Instructions or a small script: stop and disable the bridge service, `apt remove tretlager`
+  (data stays), install the Flatpak. Optionally remove the WineHQ repository and `winehq-devel`.
+- Run through on tinytin: Zwift, sign-in (keyring), bridge settings incl. UB500 and the paused
+  TICKR must keep working without being set up again.
 
-### F4 Verteilung über bender
+### F4 Distribution via bender
 
-- Flatpak-Quelle neben pacman-repo und Debian-Quelle (nginx Port 8095, Pfad `/flatpak`),
-  `services/pacman-repo/publish-flatpak.sh`, `.flatpakrepo`-Datei.
-- Eigener GPG-Schlüssel für die Quelle (über HTTP ohne Signatur wäre jede Änderung unterwegs
-  unbemerkt).
-- README: Installation per `flatpak remote-add` + `flatpak install`.
+- Flatpak repository next to pacman-repo and the Debian repository (nginx port 8095, path
+  `/flatpak`), `services/pacman-repo/publish-flatpak.sh`, `.flatpakrepo` file.
+- Dedicated GPG key for the repository (over HTTP without a signature, any change in transit would
+  go unnoticed).
+- README: installation via `flatpak remote-add` + `flatpak install`.
 
-### F5 Abnahme
+### F5 Acceptance
 
-- [ ] Frisches TUXEDO OS forky (VM `tuxedo-os-forky`, Ablauf ohne NVIDIA/Bluetooth; Polkit
-      entfällt, Zwift-Anmeldung durch Christoph) – ersetzt BACKLOG M6b.
-- [ ] Eine zweite Distribution mit Plasma (z. B. Fedora KDE in einer VM).
-- [ ] Fahrt ≥ 30 min auf tinytin, Netzteil ab/an, ohne Netz.
-- [ ] Danach: Debian-Paket einfrieren (nur noch Fehlerbehebungen) oder einstellen.
+- [ ] Fresh TUXEDO OS forky (VM `tuxedo-os-forky`, run without NVIDIA/Bluetooth; polkit not
+      needed, Zwift sign-in done by me) – replaces BACKLOG M6b.
+- [ ] A second distribution with Plasma (e.g. Fedora KDE in a VM).
+- [ ] Ride ≥ 30 min on tinytin, power supply unplugged/plugged in, without network.
+- [ ] Then: freeze the Debian package (bug fixes only) or discontinue it.
 
-## Was sich für den Nutzer ändert
+## What changes for the user
 
-- Kein Passwort, keine Paketquelle von WineHQ, keine APT-Änderungen am System.
-- Download einmalig größer: KDE-Laufzeit und PySide-Basis (zusammen gut 1 GB, teilen sich andere
-  KDE-Flatpaks) plus Wine (~ 200 MB). Zwift selbst (~ 5 GB) wie bisher.
-- Updates über `flatpak update` bzw. Discover statt APT.
-- Entfällt: Meldung von NVIDIA-Treiberfehlern nach der Fahrt.
+- No password, no WineHQ package repository, no APT changes to the system.
+- One-time download is larger: KDE runtime and PySide base (together a good 1 GB, shared with other
+  KDE Flatpaks) plus Wine (~ 200 MB). Zwift itself (~ 5 GB) as before.
+- Updates via `flatpak update` or Discover instead of APT.
+- Dropped: reporting of NVIDIA driver errors after the ride.
 
-## Quellen
+## Sources
 
-- Flathub: `flatpak remote-ls/remote-info flathub` (30.10.2026)
-- Kron4ek Wine-Builds, Release 11.20 mit WoW64-Tarballs: https://github.com/Kron4ek/Wine-Builds/releases/tag/11.20
-- KDE-Doku Flatpak-Manifeste: https://develop.kde.org/docs/packaging/flatpak/manifest/
-- Kirigami Addons als eigenes Flatpak-Modul (Beispiel Angelfish): https://lxr.kde.org/source/network/angelfish/flatpak/kirigami-addons.json
+- Flathub: `flatpak remote-ls/remote-info flathub` (2026-10-30)
+- Kron4ek Wine builds, release 11.20 with WoW64 tarballs: https://github.com/Kron4ek/Wine-Builds/releases/tag/11.20
+- KDE documentation on Flatpak manifests: https://develop.kde.org/docs/packaging/flatpak/manifest/
+- Kirigami Addons as a separate Flatpak module (example Angelfish): https://lxr.kde.org/source/network/angelfish/flatpak/kirigami-addons.json

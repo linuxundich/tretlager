@@ -182,9 +182,10 @@ from the application menu and follow the assistant.
 
 - [Tested hardware and software](docs/HARDWARE.md) in detail
 - [Changelog](CHANGELOG.md) · [Backlog](BACKLOG.md)
-- Technical notes, design documents and the QA audit are written in German:
-  [technical notes](docs/technik.md), [Flatpak plan](docs/flatpak.md),
-  [updates](docs/updates.md), [feasibility study](FEASIBILITY.md)
+- [Technical notes](docs/technical-notes.md): requirements, everyday use, troubleshooting, development
+- Background: [feasibility study](FEASIBILITY.md), [UX concept](docs/ux-concept.md),
+  [Flatpak plan](docs/flatpak.md), [updates](docs/updates.md),
+  [QA audit](docs/qa-audit-2026-10-30.md)
 - Found a bug or tested other hardware? [Open an issue](https://github.com/linuxundich/tretlager/issues)
 
 ## Use of AI

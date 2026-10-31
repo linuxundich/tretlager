@@ -1,109 +1,113 @@
-# Updates – Zwift und alles, was Tretlager mitbringt
+# Updates – Zwift and everything Tretlager brings along
 
-Stand 2026-10-30. Grundsatz: **keine Schnappschüsse** (nicht jeder Rechner hat Btrfs, und eine
-volle Kopie der Zwift-Umgebung kostet 7–9 GB). Stattdessen hat jede Abhängigkeit genau einen
-Update-Weg, und Tretlager gleicht vor jedem Start ab, ob die Zwift-Umgebung zum installierten
-Tretlager passt. Zurück geht es über Flatpak, nicht über Kopien.
+As of 2026-10-30. Principle: **no snapshots** (not every computer has Btrfs, and a full copy of the
+Zwift environment costs 7–9 GB). Instead, every dependency has exactly one update path, and before
+every start Tretlager checks whether the Zwift environment matches the installed Tretlager. Rolling
+back happens via Flatpak, not via copies.
 
-## Bausteine und ihr Update-Weg
+## Components and their update path
 
-| Baustein | Woher | Wie er aktuell wird | Was Tretlager danach tut |
+| Component | Source | How it gets updated | What Tretlager does afterwards |
 |---|---|---|---|
-| Tretlager (Python, QML, Bridge) | eigenes Flatpak | `flatpak update` bzw. Discover/GNOME Software aus der eigenen Quelle (F4, bender, GPG) | laufende Bridge älterer Version neu starten (`restart_if_outdated`, nicht während einer Fahrt) |
-| Wine 11.x | im Flatpak, aus den Quellen gebaut | nur mit einer neuen Tretlager-Version (Version im Manifest) | Abgleich vor dem Start: `wineboot -u`, Grafiktest wiederholen |
-| cabextract, osslsigncode, bleak, dbus-fast, SecretStorage | im Flatpak, feste Version + Prüfsumme | nur mit einer neuen Tretlager-Version | – |
-| KDE-Laufzeit 6.11, PySide-BaseApp 6.11 | Flathub | `flatpak update` (Fehlerbehebungen innerhalb 6.11); Wechsel auf 6.12 nur mit neuer Tretlager-Version | – |
-| NVIDIA-Treiber in der Sandbox (`GL.nvidia-…`) | Flathub | Flatpak installiert die zum Systemtreiber passende Erweiterung selbst | – |
-| winetricks | GitHub, fester Commit + SHA-256 im Code | nur mit einer neuen Tretlager-Version | – |
-| Windows-Komponenten (.NET 4.8, WebView2, Schriften, d3dcompiler_47) | Microsoft u. a. über winetricks | neue oder andere Komponenten nur mit einer neuen Tretlager-Version (`VERBS`) | Abgleich installiert fehlende Komponenten |
-| Zwift-Launcher und Spiel | Zwift | Zwift selbst: Tretlager startet vor jeder Fahrt den Launcher unsichtbar (`SilentLaunch`), wenn `Zwift_ver_cur.xml` eine neuere Version meldet | zeigt den Fortschritt (siehe unten), wartet bis zu 15 min, bis die Version auf der Platte steht, startet dann |
-| Zwift-Sitzung (Token) | Zwift | Tretlager erneuert sie selbst (6 h Zugriff, 8 Tage Erneuerung) | sonst Anmeldung |
+| Tretlager (Python, QML, bridge) | own Flatpak | `flatpak update` or Discover/GNOME Software from my own repository (F4, bender, GPG) | restarts a running bridge of an older version (`restart_if_outdated`, not during a ride) |
+| Wine 11.x | in the Flatpak, built from source | only with a new Tretlager version (version in the manifest) | reconciliation before the start: `wineboot -u`, repeat the graphics test |
+| cabextract, osslsigncode, bleak, dbus-fast, SecretStorage | in the Flatpak, pinned version + checksum | only with a new Tretlager version | – |
+| KDE runtime 6.11, PySide BaseApp 6.11 | Flathub | `flatpak update` (bug fixes within 6.11); switch to 6.12 only with a new Tretlager version | – |
+| NVIDIA driver in the sandbox (`GL.nvidia-…`) | Flathub | Flatpak installs the extension matching the system driver by itself | – |
+| winetricks | GitHub, pinned commit + SHA-256 in the code | only with a new Tretlager version | – |
+| Windows components (.NET 4.8, WebView2, fonts, d3dcompiler_47) | Microsoft and others via winetricks | new or different components only with a new Tretlager version (`VERBS`) | reconciliation installs missing components |
+| Zwift launcher and game | Zwift | Zwift itself: before every ride, Tretlager starts the launcher invisibly (`SilentLaunch`) if `Zwift_ver_cur.xml` reports a newer version | shows the progress (see below), waits up to 15 min until the version is on disk, then starts |
+| Zwift session (token) | Zwift | Tretlager renews it by itself (6 h access, 8 days refresh) | otherwise sign-in |
 
-Wine und alles andere im Flatpak wird also **nie** hinter Tretlagers Rücken aktualisiert. Eine neue
-Wine-Version kommt nur mit einer Tretlager-Version, die damit getestet ist. Das ersetzt die frühere
-Regel E10 („immer die neueste winehq-devel“), die für das Debian-Paket galt.
+So Wine and everything else in the Flatpak is **never** updated behind Tretlager's back. A new Wine
+version only comes with a Tretlager version that has been tested with it. This replaces the earlier
+rule E10 (“always the latest winehq-devel”), which applied to the Debian package.
 
-## Vor jedem Start: Einrichtung abgleichen
+## Before every start: reconcile the setup
 
-`Launcher.reconcile()` führt alle Einrichtungsschritte aus `core/setup.py` aus. Jeder prüft mit
-`done()` am echten System, ob er erledigt ist; im Normalfall dauert der Abgleich unter einer
-Sekunde (keine Programme, nur Dateien und `wine --version`).
+`Launcher.reconcile()` runs all setup steps from `core/setup.py`. Each one uses `done()` to check
+against the real system whether it is complete; normally the reconciliation takes less than a
+second (no programs, only files and `wine --version`).
 
-| Schritt | gilt als erledigt, wenn … | sonst |
+| Step | counts as done if … | otherwise |
 |---|---|---|
-| Installer | der Zwift-Launcher schon installiert ist (oder der geprüfte Installer im Cache liegt) | laden, Signatur prüfen |
-| Wine-Umgebung | sie existiert **und** mit dem jetzigen Wine angelegt/angepasst wurde (`state.json` → `prefix.wine`) | `wineboot -u` (neues Wine) bzw. anlegen |
-| Komponenten | alle Verben aus `VERBS` in `winetricks.log` des Präfixes stehen | fehlende über winetricks |
-| Launcher | `ZwiftLauncher.exe` vorhanden | Installer ausführen |
-| Spiel | `ZwiftApp.exe` und Versionsdatei vorhanden | über den Launcher laden (Reparatur) |
-| Grafik | der Grafiktest mit dem jetzigen Wine gelaufen ist | Grafiktest |
+| Installer | the Zwift launcher is already installed (or the verified installer is in the cache) | download, verify signature |
+| Wine environment | it exists **and** was created/updated with the current Wine (`state.json` → `prefix.wine`) | `wineboot -u` (new Wine) or create it |
+| Components | all verbs from `VERBS` are listed in the prefix's `winetricks.log` | missing ones via winetricks |
+| Launcher | `ZwiftLauncher.exe` present | run the installer |
+| Game | `ZwiftApp.exe` and version file present | download via the launcher (repair) |
+| Graphics | the graphics test ran with the current Wine | graphics test |
 
-Schlägt ein Schritt fehl, startet Zwift nicht, und die Übersicht zeigt den Satz des Schritts.
+If a step fails, Zwift does not start, and the overview shows that step's message.
 
-`wineboot -u` läuft mit `WINEDLLOVERRIDES="mscoree,mshtml="` und höchstens 5 Minuten: Ohne die
-Variable öffnet Wine einen unsichtbaren Dialog zur Mono-/Gecko-Installation und wartet (auf tinytin
-hing es so über 10 Minuten). Die Variable gilt nur für diesen Aufruf; .NET bleibt an.
+`wineboot -u` runs with `WINEDLLOVERRIDES="mscoree,mshtml="` and for at most 5 minutes: without
+the variable, Wine opens an invisible dialog for the Mono/Gecko installation and waits (on tinytin
+it hung like this for over 10 minutes). The variable applies only to this call; .NET stays on.
 
-Gemessen auf tinytin (30.10., vorgetäuschter Wechsel 11.19 → 11.20): Abgleich mit Anpassung und
-Grafiktest, dann Zwift nach 47 s; normaler Start ohne Änderung: Zwift nach 16 s.
+Measured on tinytin (Oct 30, simulated switch 11.19 → 11.20): reconciliation with update and
+graphics test, then Zwift after 47 s; normal start without changes: Zwift after 16 s.
 
-## Zurück, wenn ein Update etwas kaputt macht
+## Rolling back when an update breaks something
 
-- **Wine (in Tretlager):** Tretlager hebt genau eine Wine-Version auf, die zuletzt bewährte
-  (`~/.var/app/de.linuxundich.Tretlager/data/tretlager/wine-bewaehrt`, gut 500 MB, `core/wine.py`).
-  - Nach der ersten Fahrt (≥ 5 min) wird das mitgelieferte Wine kopiert.
-  - Bringt ein Tretlager-Update ein neues Wine, bleibt die Kopie der alten Version stehen. In der
-    Übersicht erscheint unter *Zwift* der Schalter *Vorige Wine-Version nutzen*; der Abgleich passt
-    die Zwift-Umgebung dann an die alte Version an (`wineboot -u`, Grafiktest).
-  - Nach zwei Fahrten mit dem neuen Wine gilt es als bewährt und ersetzt die Kopie. Fahrten mit der
-    alten Version zählen dafür nicht.
-  - Kommt mit dem nächsten Tretlager-Update wieder ein anderes Wine, schaltet Tretlager zurück auf
-    das mitgelieferte (es kann das Problem beheben).
+- **Wine (in Tretlager):** Tretlager keeps exactly one Wine version, the last proven one
+  (`~/.var/app/de.linuxundich.Tretlager/data/tretlager/wine-bewaehrt`, a good 500 MB,
+  `core/wine.py`).
+  - After the first ride (≥ 5 min), the bundled Wine is copied.
+  - If a Tretlager update brings a new Wine, the copy of the old version stays. In the overview,
+    the switch *Use previous Wine version* appears under *Zwift*; the reconciliation then adapts
+    the Zwift environment to the old version (`wineboot -u`, graphics test).
+  - After two rides with the new Wine, it counts as proven and replaces the copy. Rides with the
+    old version do not count for this.
+  - If the next Tretlager update brings yet another Wine, Tretlager switches back to the bundled
+    one (it may fix the problem).
 
-- **Tretlager/Wine:** `flatpak remote-info --log tretlager-origin de.linuxundich.Tretlager` zeigt die
-  Versionen, `flatpak update --commit=<ältere> de.linuxundich.Tretlager` holt die vorige zurück
-  (mit ihrem Wine), `flatpak mask de.linuxundich.Tretlager` hält sie fest. Der Abgleich passt die
-  Zwift-Umgebung dann wieder an die ältere Wine-Version an.
-- **Zwift:** Ein Zurück gibt es nicht und braucht es nicht – Zwift lässt nur mit der aktuellen
-  Version fahren. Ist die Zwift-Umgebung kaputt, legt *Einrichtung prüfen* sie neu an; nur das
-  Spiel (≈ 5 GB) wird dann erneut geladen.
+- **Tretlager/Wine:** `flatpak remote-info --log tretlager-origin de.linuxundich.Tretlager` shows
+  the versions, `flatpak update --commit=<older> de.linuxundich.Tretlager` brings back the previous
+  one (with its Wine), `flatpak mask de.linuxundich.Tretlager` pins it. The reconciliation then
+  adapts the Zwift environment back to the older Wine version.
+- **Zwift:** there is no rollback and none is needed – Zwift only lets you ride with the current
+  version. If the Zwift environment is broken, *Check setup* recreates it; only the game
+  (≈ 5 GB) is downloaded again.
 
-## Fortschritt beim Zwift-Update und bei der Erstinstallation
+## Progress during a Zwift update and the first installation
 
-`Zwift_ver_cur.xml` nennt das Manifest der neuen Version (`Zwift_<Version>_<Hash>_manifest.xml`,
-gleicher Ordner beim CDN, ≈ 5 MB, ≈ 20 000 Dateien mit Pfad und Größe). Tretlager vergleicht es
-mit dem Zwift-Ordner: Fehlende oder anders große Dateien ergeben die Menge, die zu laden ist.
-Der Launcher lädt zuerst in einen Zwischenordner (`drive_c/users/<Name>/AppData/Local/Temp/Zwift/Downloads`)
-und verschiebt am Ende alles auf einmal in den Zwift-Ordner. Tretlager zählt deshalb alle 3 s
-beides: was im Zwischenordner liegt (ohne Reste eines abgebrochenen Ladens) und was schon fertig
-im Zwift-Ordner angekommen ist, und zeigt „… 1,2 von 3,4 GB“ mit Fortschrittsbalken (höchstens 99 %,
-bis die Versionsdatei wechselt). Ohne Manifest (offline, anderes Format) bleibt es bei der Zeit: „seit 3 Minuten“.
-Gleich große, geänderte Dateien zählt das nicht mit; die Anzeige ist ein Richtwert.
+`Zwift_ver_cur.xml` names the manifest of the new version (`Zwift_<Version>_<Hash>_manifest.xml`,
+same folder on the CDN, ≈ 5 MB, ≈ 20,000 files with path and size). Tretlager compares it with the
+Zwift folder: missing files or files of a different size make up the amount to download.
+The launcher first downloads into a staging folder (`drive_c/users/<Name>/AppData/Local/Temp/Zwift/Downloads`)
+and at the end moves everything into the Zwift folder at once. Tretlager therefore counts both
+every 3 s: what is in the staging folder (without leftovers of an aborted download) and what has
+already arrived in the Zwift folder, and shows “… 1.2 of 3.4 GB” with a progress bar (at most 99 %,
+until the version file changes). Without a manifest (offline, different format) it falls back to
+the elapsed time: “for 3 minutes”.
+Changed files of the same size are not counted; the display is an estimate.
 
-Dasselbe gilt für die Erstinstallation (Einrichtungsschritt *Zwift laden*, `setup.Game`): Statt
-geschätzter 4,9 GB zeigt sie die Größe laut Manifest. Ohne Manifest schätzt sie wie bisher über
-die Größe des Zwift-Ordners („etwa“). Gemeinsamer Code in `core/manifest.py`.
+The same applies to the first installation (setup step *Download Zwift*, `setup.Game`): instead of
+an estimated 4.9 GB it shows the size according to the manifest. Without a manifest it estimates as
+before from the size of the Zwift folder (“about”). Shared code in `core/manifest.py`.
 
-Auf tinytin geprüft (30.10.): mit der aktuellen Version 0 von 19 903 Dateien fehlend, Abgleich 1 s;
-bei einer echten Erstinstallation 0 → 99 % gleichmäßig in 9 Minuten (5,1 GB, ≈ 10 MB/s). Ohne den
-Zwischenordner stand die Anzeige 9 Minuten bei 0 % und sprang dann auf 99 %. Ein echtes
-Zwift-Update ist noch nicht erschienen; es läuft über denselben Launcher und Zwischenordner.
+Verified on tinytin (Oct 30): with the current version, 0 of 19,903 files missing, reconciliation
+1 s; during a real first installation 0 → 99 % evenly in 9 minutes (5.1 GB, ≈ 10 MB/s). Without
+the staging folder, the display stayed at 0 % for 9 minutes and then jumped to 99 %. A real Zwift
+update has not been released yet; it goes through the same launcher and staging folder.
 
-## Ablauf für eine neue Tretlager-Version
+## Procedure for a new Tretlager version
 
-1. Version in `tretlager/__init__.py` und CHANGELOG anheben (sonst startet die Bridge nach dem Update
-   nicht neu), Metainfo-`<release>` ergänzen.
-2. Wine anheben (optional): URL und SHA-256 im Manifest; auf tinytin bauen.
-3. Auf tinytin: Abgleich mit bestehender Umgebung (Wine-Anpassung, Grafiktest), Zwift starten,
-   kurze Fahrt mit Trainer und Puls, Zwift-Update falls gerade eins ansteht.
-4. In die Flatpak-Quelle auf bender veröffentlichen (F4).
+1. Bump the version in `tretlager/__init__.py` and the CHANGELOG (otherwise the bridge does not
+   restart after the update), add the metainfo `<release>`.
+2. Bump Wine (optional): URL and SHA-256 in the manifest; build on tinytin.
+3. On tinytin: reconciliation with the existing environment (Wine update, graphics test), start
+   Zwift, short ride with trainer and heart rate, Zwift update if one happens to be pending.
+4. Publish to the Flatpak repository on bender (F4).
 
-## Offen
+## Open
 
-- [ ] Tretlager meldet selbst, wenn eine neue Version bereitsteht (Flatpak-Portal
-  `CreateUpdateMonitor` / `Update`) – bewusst offen, Verteilung über Flathub ist nicht geplant.
-- [x] Fortschritt beim Zwift-Update aus dem Manifest (bei einem echten Update beobachten).
-- [x] Vorige Wine-Version aufbewahren (eine) und wählbar.
-- [ ] Eine Windows-Komponente gezielt erneuern (z. B. neuere WebView2), wenn Zwift sie verlangt:
-  Revisionsmarke je Verb, dann `winetricks --force <verb>` im Abgleich.
-- [ ] Flatpak-Quelle auf bender mit GPG (F4), erst dann gibt es `flatpak update` für Tretlager.
+- [ ] Tretlager reports by itself when a new version is available (Flatpak portal
+  `CreateUpdateMonitor` / `Update`) – deliberately left open, distribution via Flathub is not
+  planned.
+- [x] Progress during a Zwift update from the manifest (observe during a real update).
+- [x] Keep the previous Wine version (one) and make it selectable.
+- [ ] Renew a specific Windows component (e.g. a newer WebView2) when Zwift requires it: revision
+  marker per verb, then `winetricks --force <verb>` in the reconciliation.
+- [ ] Flatpak repository on bender with GPG (F4); only then is there `flatpak update` for
+  Tretlager.

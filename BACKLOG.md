@@ -1,184 +1,184 @@
 # Backlog
 
-## Entscheidungen
+## Decisions
 
-- [x] **E1 Wine-Quelle.** Freigegeben 2026-10-29 für tinytin (T2). Debian forky hat kein Wine. Empfehlung: WineHQ-Repo (`winehq-devel`,
-  Suite forky) über einen pkexec-Helfer mit fester Aktion, festgenageltem Schlüssel und
-  ausdrücklicher Zustimmung. Alternative: umu-launcher + Proton im Benutzerverzeichnis (kein
-  root, aber Steam-Runtime-Container und weniger erprobt mit Zwift).
-- [x] **E2 Anmeldung.** Christoph 2026-10-29: Browser-Anmeldung wird als ausdrückliche Option mit
-  Hinweis auf AGB §5 angeboten (offizielle Anmeldung geht unter Wine nicht, siehe T2). Start per
-  `RunFromProcess` (Spiel als Kind des Launchers) gehört dazu.
-- [x] **E3 Sensoren.** Umgesetzt (tretlager/bridge, seit 0.8.0 per D-Bus-Aktivierung statt systemd). Eigene schlanke Bridge (Python, bleak, Benutzer-systemd-Dienst) BlueZ →
-  DIRCON statt qdomyos-zwift. Projekt-Lizenz GPL-3, damit qdomyos-Protokollcode als Referenz
-  übernommen werden darf.
-- [x] **E4 Desktop.** Christoph 2026-10-29: GTK4/libadwaita oder Qt/Plasma, beides erlaubt.
-  Umsetzung wie bei Stafette: Kern als UI-freie Python-Bibliothek (Diagnose, Installation,
-  Updates, Bridge-Steuerung), darauf GTK/libadwaita und Qt/Kirigami. Welche Oberfläche zuerst
-  kommt, entscheidet Phase C; der Zielrechner tinytin läuft mit Plasma.
-- [x] **E5 Testhardware.** Rechner geklärt: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
-  mit PRIME-Offload, Treiber 580, AX201). Geräte: Wahoo KICKR V4, Garmin HRM-Pro Plus
-  (BLE + ANT+), eingebauter Adapter; dazu Wahoo TICKR und USB-Stick TP-Link UB500 (30.10.).
-- [x] **E6 Sprache.** Python (Kern, Bridge), Debian-Paket.
-- [x] **E8 Bezug.** Christoph 2026-10-29: vorerst nur ein lokal gebautes Debian-Paket; später eine
-  Paketquelle auf bender (dort läuft schon das Arch-Repo `pacman-repo`).
-- [x] **E9 Oberfläche zuerst.** Christoph 2026-10-29: Kirigami (Ziel Plasma). Die GTK-Oberfläche der
-  Bridge bleibt bestehen und wird später an den Kern angepasst.
-- [x] **E10 Wine-Politik.** Christoph 2026-10-29: immer die neueste `winehq-devel`, kein Pinning.
-  Folge: Tretlager prüft nach jedem Wine-Update selbst (GL-Test, Start-Test) und meldet Brüche.
-  Im Flatpak (seit 0.8.0) kommt Wine mit der Tretlager-Version; „neueste Wine“ heißt dort: Wine im
-  Manifest mit jeder Tretlager-Version anheben und vorher testen. Nach dem Wechsel gleicht Tretlager
-  die Umgebung selbst ab (docs/updates.md).
-- [ ] **E7 Name.** Arbeitstitel „Tretlager“.
+- [x] **E1 Wine source.** Approved 2026-10-29 for tinytin (T2). Debian forky has no Wine. Recommendation: WineHQ repo (`winehq-devel`,
+  suite forky) via a pkexec helper with a fixed action, a pinned key and
+  explicit consent. Alternative: umu-launcher + Proton in the user directory (no
+  root, but Steam Runtime container and less proven with Zwift).
+- [x] **E2 Sign-in.** My decision 2026-10-29: browser sign-in is offered as an explicit option with
+  a reference to ToS §5 (the official sign-in does not work under Wine, see T2). Starting via
+  `RunFromProcess` (game as a child of the launcher) is part of it.
+- [x] **E3 Sensors.** Implemented (tretlager/bridge, since 0.8.0 via D-Bus activation instead of systemd). Own lean bridge (Python, bleak, systemd user service) BlueZ →
+  DIRCON instead of qdomyos-zwift. Project licence GPL-3, so that qdomyos protocol code may be
+  adopted as a reference.
+- [x] **E4 Desktop.** My decision 2026-10-29: GTK4/libadwaita or Qt/Plasma, both allowed.
+  Implementation as in Stafette: core as a UI-free Python library (diagnostics, installation,
+  updates, bridge control), with GTK/libadwaita and Qt/Kirigami on top. Which UI comes
+  first is decided in phase C; the target machine tinytin runs Plasma.
+- [x] **E5 Test hardware.** Machine settled: `testt@tinytin` (forky, Plasma, Intel + RTX 3050 Ti
+  with PRIME offload, driver 580, AX201). Devices: Wahoo KICKR V4, Garmin HRM-Pro Plus
+  (BLE + ANT+), built-in adapter; plus Wahoo TICKR and USB stick TP-Link UB500 (Oct 30).
+- [x] **E6 Language.** Python (core, bridge), Debian package.
+- [x] **E8 Distribution.** My decision 2026-10-29: for now only a locally built Debian package; later a
+  package source on bender (the Arch repo `pacman-repo` already runs there).
+- [x] **E9 UI first.** My decision 2026-10-29: Kirigami (target Plasma). The GTK UI of the
+  bridge stays and will be adapted to the core later.
+- [x] **E10 Wine policy.** My decision 2026-10-29: always the latest `winehq-devel`, no pinning.
+  Consequence: Tretlager checks itself after every Wine update (GL test, start test) and reports breakage.
+  In the Flatpak (since 0.8.0), Wine comes with the Tretlager version; “latest Wine” there means: bump Wine in the
+  manifest with every Tretlager version and test beforehand. After the switch, Tretlager reconciles
+  the environment by itself (docs/updates.md).
+- [ ] **E7 Name.** Working title “Tretlager”.
 
-## Phasen
+## Phases
 
-- [x] A Machbarkeit (Recherche) – [FEASIBILITY.md](FEASIBILITY.md)
-- [x] D' Machbarkeitstests T1–T7 (FEASIBILITY.md, Abschnitt 9): Zwift, Grafik, Anmeldung und Bridge laufen auf tinytin (29./30.10.)
-- [x] B Systemdiagnose rein lesend (core/systemcheck.py; im Flatpak ohne Debian-Annahmen) (os-release, sysfs/DRM, nvidia-smi, EGL-Test, BlueZ per D-Bus,
-  Wine-Version + Stub-Prüfung, Platz, vorhandene Prefixe)
-- [x] ~~C GTK4-Prototyp~~ entfällt: Christoph 2026-10-30, es bleibt bei der Kirigami-Oberfläche
-- [x] ~~D Installation: PackageKit~~ im Flatpak entfallen (Wine im Paket); umgesetzt sind (Simulation + Installation), pkexec-Helfer für WineHQ-Quelle,
-  Download + Authenticode, Prefix, Launcher, Schritte mit Wiederaufnahme (core/setup.py)
-- [x] E Bridge BLE → DIRCON mit echter Hardware (Leistung, Kadenz, ERG, Puls; Testfahrten 29./30.10.)
-- [x] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, Abgleich vor dem Start, Fortschritt; Plan docs/updates.md, 0.9.0)
-- [ ] G Ende-zu-Ende auf frischem TUXEDO OS Forky → aufgegangen in F5 (Flatpak-Abnahme)
-- [ ] später: ANT+ nativ in der Bridge (openant/libusb)
+- [x] A Feasibility (research) – [FEASIBILITY.md](FEASIBILITY.md)
+- [x] D' Feasibility tests T1–T7 (FEASIBILITY.md, section 9): Zwift, graphics, sign-in and bridge run on tinytin (Oct 29/30)
+- [x] B Read-only system diagnostics (core/systemcheck.py; in the Flatpak without Debian assumptions) (os-release, sysfs/DRM, nvidia-smi, EGL test, BlueZ via D-Bus,
+  Wine version + stub check, space, existing prefixes)
+- [x] ~~C GTK4 prototype~~ dropped: my decision 2026-10-30, it stays with the Kirigami UI
+- [x] ~~D Installation: PackageKit~~ dropped in the Flatpak (Wine in the package); implemented are (simulation + installation), pkexec helper for the WineHQ source,
+  download + Authenticode, prefix, launcher, steps with resume (core/setup.py)
+- [x] E Bridge BLE → DIRCON with real hardware (power, cadence, ERG, heart rate; test rides Oct 29/30)
+- [x] F Updates (SilentLaunch, `Zwift_ver_cur.xml`, reconciliation before the start, progress; plan docs/updates.md, 0.9.0)
+- [ ] G End-to-end on a fresh TUXEDO OS Forky → merged into F5 (Flatpak acceptance)
+- [ ] later: native ANT+ in the bridge (openant/libusb)
 
 ## Bridge (T5/T6)
 
-- [x] Bridge-Kern (DIRCON, GATT-Proxy, avahi, D-Bus, systemd-Benutzerdienst)
-- [x] Oberfläche: Dienst an/aus, Autostart, Geräte suchen/hinzufügen/entfernen, Live-Werte
-- [ ] HRM-Pro Plus auf tinytin: LE-1M-Gegenprobe (`btmgmt phy`), sonst USB-Bluetooth-Stick testen
-  (Warnung seit 0.6.2 über `core/btcompat.py`; bei neuen Befunden dort ergänzen)
-- [x] Bridge auf wählbaren Adapter umstellen (0.6.3; Umschalten, fehlender Adapter und Rückfall
-  auf tinytin geprüft, mit echtem USB-Stick noch nicht)
-- [x] Mit echtem USB-Bluetooth-Stick testen (30.10., TP-Link UB500): HRM-Pro Plus über den Stick ok,
-  Umschalten, Aus- und Einschalten des Sticks ok
-- [ ] Stick während einer Fahrt in Zwift abziehen (echtes Abziehen statt Ausschalten)
-- [ ] HRM-Pro Plus über UB500 unzuverlässig: am 30.10. vormittags zweimal verbunden (nach 40–120 s),
-  mittags trotz Signal (−74 dBm), ohne Handy-Bluetooth, allein getragen und nach Neustart des Sticks
-  nur Zeitüberschreitungen; KICKR am selben Stick sofort verbunden. Ansätze: btmon-Mitschnitt (root),
-  LE-1M erzwingen (`btmgmt phy`), Verbindungsparameter/Timeout der Bridge, zweiter Stick anderer Bauart.
-  Nach Neustart von tinytin sofort wieder verbunden (30 s, 62 Schläge/min) → hängender Zustand in BlueZ
-  oder im Controller (Stick-Neustart per Powered reichte nicht). Beim nächsten Mal zuerst
-  `systemctl restart bluetooth` probieren; ggf. Tretlager-Hinweis „Bluetooth neu starten“ bei Gerät, das
-  gefunden wird, aber dauerhaft nicht verbindet.
-  Live-Test 30.10. 12:3x (Flatpak): wieder hängend, BlueZ meldet am UB500 `Connected=true`,
-  `ServicesResolved=false` → die GATT-Dienstsuche hängt wie am AX201, auch nach RemoveDevice und
-  Stick-Neustecken. Nächster Schritt: btmon-Mitschnitt und LE-1M erzwingen (`btmgmt --index 1 phy`,
-  root); Bridge könnte bei hängender Dienstsuche gezielt Disconnect + Cache leeren
-- [ ] Nach dem Umschalten braucht der erste Verbindungsversuch des HRM-Pro manchmal eine Runde
-  mehr (unvollständige Dienstsuche → Wartezeit wächst); ggf. Wartezeit nach Adapterwechsel zurücksetzen
-- [x] Paket-Update startet die laufende Bridge nicht neu → im Flatpak gelöst: Tretlager startet eine
-  ältere Bridge beim Öffnen neu (Versionsvergleich, seit 0.8.0; setzt eine neue Versionsnummer voraus)
-- [x] Sensorseite: Schalter *Sensor-Bridge* sah unter Plasma ausgeschaltet aus, obwohl `checked` true war
-  (30.10., noch FormCardPage); seit dem neuen Seitengerüst (0.6.4) richtig dargestellt, seitdem nicht wieder gesehen
-- [x] TICKR mit sauberem Signal prüfen (Elektroden angefeuchtet: Werte wie Pulsuhr)
-- [x] Zwift koppelt KICKR (Leistung, Trittfrequenz) und Pulsgurt über DIRCON, Werte realistisch (2026-10-29)
-- [x] ERG und Steigungssimulation über FTMS-Control-Point (Antwort in der Schreib-Antwort, 2026-10-29)
-- [ ] Oberfläche: Hinweis bei hängender Dienstsuche („Gurt kurz abklipsen“) statt endlos „Verbinde …“
-- [ ] Oberfläche: Plasma-Feinschliff (Symbole geprüft, Entfernen-Knopf neu)
-- [x] Netzwechsel: Verbindungen mit verschwundener lokaler Adresse schließen
-- [ ] Ohne jede Netzverbindung testen (Ankündigung auf lo vorhanden)
-- [ ] Längere Fahrt (≥ 30 min) auf Stabilität prüfen
-- [x] Netzwechsel während der Fahrt: Ankündigung auf 127.0.0.1, Lauschen nur auf Loopback (2026-10-29)
-- [ ] Netzwechsel-Test wiederholen: Kabel ab/an während der Fahrt
+- [x] Bridge core (DIRCON, GATT proxy, avahi, D-Bus, systemd user service)
+- [x] UI: service on/off, autostart, search/add/remove devices, live values
+- [ ] HRM-Pro Plus on tinytin: LE 1M cross-check (`btmgmt phy`), otherwise test a USB Bluetooth stick
+  (warning since 0.6.2 via `core/btcompat.py`; add new findings there)
+- [x] Switch the bridge to a selectable adapter (0.6.3; switching, missing adapter and fallback
+  verified on tinytin, not yet with a real USB stick)
+- [x] Test with a real USB Bluetooth stick (Oct 30, TP-Link UB500): HRM-Pro Plus via the stick ok,
+  switching, turning the stick off and on ok
+- [ ] Pull the stick during a ride in Zwift (real unplugging instead of switching off)
+- [ ] HRM-Pro Plus via UB500 unreliable: on the morning of Oct 30 connected twice (after 40–120 s),
+  at midday despite signal (−74 dBm), without phone Bluetooth, worn alone and after restarting the stick
+  only timeouts; KICKR on the same stick connected immediately. Approaches: btmon capture (root),
+  force LE 1M (`btmgmt phy`), connection parameters/timeout of the bridge, a second stick of a different make.
+  After restarting tinytin, connected again immediately (30 s, 62 bpm) → stuck state in BlueZ
+  or in the controller (restarting the stick via Powered was not enough). Next time try
+  `systemctl restart bluetooth` first; possibly a Tretlager notice “Restart Bluetooth” for a device that is
+  found but never connects.
+  Live test Oct 30 12:3x (Flatpak): stuck again, BlueZ reports `Connected=true` on the UB500,
+  `ServicesResolved=false` → GATT service discovery hangs as on the AX201, even after RemoveDevice and
+  replugging the stick. Next step: btmon capture and force LE 1M (`btmgmt --index 1 phy`,
+  root); the bridge could do a targeted disconnect + clear cache when service discovery hangs
+- [ ] After switching, the first connection attempt of the HRM-Pro sometimes needs one more round
+  (incomplete service discovery → wait time grows); possibly reset the wait time after an adapter change
+- [x] Package update does not restart the running bridge → solved in the Flatpak: Tretlager restarts an
+  older bridge on opening (version comparison, since 0.8.0; requires a new version number)
+- [x] Sensors page: the *Sensor bridge* switch looked off under Plasma although `checked` was true
+  (Oct 30, still FormCardPage); rendered correctly since the new page layout (0.6.4), not seen again since
+- [x] Check TICKR with a clean signal (electrodes moistened: values like the heart rate watch)
+- [x] Zwift pairs KICKR (power, cadence) and heart rate strap via DIRCON, values realistic (2026-10-29)
+- [x] ERG and gradient simulation via FTMS control point (response in the write response, 2026-10-29)
+- [ ] UI: notice on hanging service discovery (“unclip the strap briefly”) instead of an endless “Connecting …”
+- [ ] UI: Plasma polish (icons checked, remove button new)
+- [x] Network change: close connections whose local address has disappeared
+- [ ] Test without any network connection (announcement on lo present)
+- [ ] Check a longer ride (≥ 30 min) for stability
+- [x] Network change during the ride: announcement on 127.0.0.1, listening only on loopback (2026-10-29)
+- [ ] Repeat the network change test: cable off/on during the ride
 
-## Bedienung (Konzept: docs/bedienkonzept.md)
+## Operation (concept: docs/ux-concept.md)
 
-- [x] Entscheidungen: E2 ja, lokales .deb (später bender), Kirigami zuerst, neueste Wine (2026-10-29)
-Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + Kirigami `tretlager/kde`):
+- [x] Decisions: E2 yes, local .deb (later bender), Kirigami first, latest Wine (2026-10-29)
+Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigami `tretlager/kde`):
 
-- [x] M1 Systemprüfung im Kern (ohne root) + Kirigami-Gerüst: Willkommen, Prüfseite mit Ampel (auf tinytin geprüft 2026-10-29)
-- [x] M2 Vorbereiten: Polkit-Helfer `setup-system` (WineHQ-Quelle, Paketliste per APT-Simulation), Seite mit Änderungsliste — auf tinytin mit Polkit-Dialog ausgeführt (2026-10-29, nach Fix des gpg-Arbeitsverzeichnisses)
-- [x] M3 Zwift einrichten (Kern): Schritte mit Wiederaufnahme, Download + Signatur, Prefix, winetricks, Launcher, Spiel, GL-Test — auf tinytin Ende-zu-Ende in 459 s, zweiter Lauf 2 s (2026-10-29)
-- [x] M3 Seite „Zwift einrichten“ in der Oberfläche durchgeklickt (alle Schritte „schon erledigt“)
-- [x] M4 Anmeldung: Browser-Anmeldung mit Hinweis, Übernahme aus der Zwischenablage, Token im Schlüsselbund (ksecretd), Erneuerung — auf tinytin geprüft (2026-10-29)
-- [ ] Breeze-Warnungen „ProgressBar.qml: Cannot read property 'top' of null“ beim Seitenaufbau klären
-- [x] M5 Sensoren-Seite (Bridge über D-Bus) + Hauptfenster „Zwift starten“ — auf tinytin: Start mit Token aus dem Schlüsselbund, NVIDIA, Fenster per KWin maximiert, Auflösung bleibt, Launcher-Reste beendet (2026-10-29)
-- [x] Sicherheit: Token nie in Befehlszeilen/Protokollen (Datei + `--token=@`), Abmelden beendet die Sitzung bei Zwift
-- [x] Bridge-Neustart beim Einspielen trennt Sensoren kurz → Neustart nur, wenn Zwift nicht läuft (0.8.0)
-- [x] Ende einer Zwift-Sitzung: Bridge stoppt, wenn nicht im Autostart (beim Direktstart geprüft)
-- [x] M6a Debian-Paket `tretlager` (`build-aux/build-deb.sh`), 0.2.0 auf tinytin installiert, Bridge aus dem Paket läuft (2026-10-29)
-- [x] ~~M6b Ende-zu-Ende Debian-Paket~~ entfällt (Debian-Paket eingestellt) → F5; frische Erstinstallation
-  im Flatpak auf tinytin zweimal durchgelaufen (30.10., 15 min)
-- [x] Direktstart „Zwift (Tretlager)“ auf tinytin geprüft: Start nach 15 s, NVIDIA, Fenster/Auflösung ok, kein Token im Journal, nach der Fahrt Tretlager beendet, Bridge gestoppt (2026-10-29)
-- [x] Nur eine Tretlager-Instanz (zweiter Aufruf nutzt das vorhandene Fenster; 0.3.0)
-- [x] Paketquelle auf bender (Debian): `services/pacman-repo/publish-deb.sh`, `http://bender:8095/debian` (0.3.0)
-- [x] Reichweite: Hinweis in der Oberfläche bei häufigen Abbrüchen (≥ 3 in 10 min) mit Abhilfe (0.3.0)
-- [x] Oberfläche: Schalter „Im Netz anbieten“ (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
-- [x] ~~GTK-Oberfläche der Bridge nachziehen~~ entfällt: GTK-Oberfläche in 0.5.1 entfernt (Christoph 2026-10-30)
+- [x] M1 System check in the core (without root) + Kirigami skeleton: Welcome, check page with traffic lights (verified on tinytin 2026-10-29)
+- [x] M2 Prepare: Polkit helper `setup-system` (WineHQ source, package list via APT simulation), page with list of changes — run on tinytin with the Polkit dialog (2026-10-29, after fixing the gpg working directory)
+- [x] M3 Set up Zwift (core): steps with resume, download + signature, prefix, winetricks, launcher, game, GL test — end-to-end on tinytin in 459 s, second run 2 s (2026-10-29)
+- [x] M3 Page “Set up Zwift” clicked through in the UI (all steps “already done”)
+- [x] M4 Sign-in: browser sign-in with notice, takeover from the clipboard, token in the keyring (ksecretd), renewal — verified on tinytin (2026-10-29)
+- [ ] Clarify Breeze warnings “ProgressBar.qml: Cannot read property 'top' of null” while building pages
+- [x] M5 Sensors page (bridge via D-Bus) + main window “Start Zwift” — on tinytin: start with token from the keyring, NVIDIA, window maximised via KWin, resolution kept, launcher leftovers ended (2026-10-29)
+- [x] Security: token never on command lines/in logs (file + `--token=@`), signing out ends the session at Zwift
+- [x] Bridge restart on install briefly disconnects sensors → restart only if Zwift is not running (0.8.0)
+- [x] End of a Zwift session: bridge stops if not in autostart (verified with direct start)
+- [x] M6a Debian package `tretlager` (`build-aux/build-deb.sh`), 0.2.0 installed on tinytin, bridge from the package runs (2026-10-29)
+- [x] ~~M6b End-to-end Debian package~~ dropped (Debian package discontinued) → F5; fresh first installation
+  in the Flatpak ran through twice on tinytin (Oct 30, 15 min)
+- [x] Direct start “Zwift (Tretlager)” verified on tinytin: start after 15 s, NVIDIA, window/resolution ok, no token in the journal, Tretlager quit after the ride, bridge stopped (2026-10-29)
+- [x] Only one Tretlager instance (second invocation uses the existing window; 0.3.0)
+- [x] Package source on bender (Debian): `services/pacman-repo/publish-deb.sh`, `http://bender:8095/debian` (0.3.0)
+- [x] Range: notice in the UI on frequent dropouts (≥ 3 in 10 min) with a remedy (0.3.0)
+- [x] UI: switch “Offer on the network” (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
+- [x] ~~Update the bridge's GTK UI~~ dropped: GTK UI removed in 0.5.1 (my decision 2026-10-30)
 
-## Sprachen
+## Languages
 
-- [x] Englische Oberfläche (0.7.0, gettext, `po/en.po`)
-- [ ] Neue Texte: `po/update.sh` (auf dem Arch-Rechner mit gettext), Übersetzung in `po/en.po`
-  ergänzen; `tests/test_i18n.py` meldet Lücken
+- [x] English UI (0.7.0, gettext, `po/en.po`)
+- [ ] New strings: `po/update.sh` (on the Arch machine with gettext), add the translation to `po/en.po`;
+  `tests/test_i18n.py` reports gaps
 
-## Flatpak (Plan: docs/flatpak.md)
+## Flatpak (plan: docs/flatpak.md)
 
-- [x] F0 Machbarkeit auf tinytin (30.10.): alle Bausteine laufen (Wine aus Quellen, multiarch); offen: echte Fahrt, Kopie des bestehenden Präfixes
-- [x] F1 Manifest und Bau (0.8.0): Wine aus Quellen, Python-Wheels fest, Metainfo, build.sh auf tinytin
-- [x] F2 Code (0.8.0): Bridge per D-Bus-Aktivierung + Quit, Autostart-Portal, Bridge-Version, gdbus, Assistent ohne Vorbereiten
-- [ ] Autostart der Bridge über das Background-Portal nach einem Neustart von tinytin prüfen
-- [ ] F2b Distributionsunabhängig: Systemprüfung ohne Debian-Annahmen, Avahi-Prüfung, GNOME-Rückfälle (Maximieren, DPI)
-- [x] F3 Umstieg auf tinytin: Debian-Paket entfernt, alte Paketdaten (36 GB) gelöscht (30.10.)
-- [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
-- [ ] F5 Abnahme: frisches TUXEDO OS, Fedora KDE + GNOME, Arch, lange Fahrt; Debian-Quelle auf bender abschalten
-- [x] **Startabbruch auf nanhlanu (Arch, GNOME 51, 31.10.):** Bundle (master ce6b144, auf tinytin gebaut) installiert in 19 s, startet aber nicht: `QtCore.abi3.so: undefined symbol _ZN14QObjectPrivateC2E16QtPrivate_6_11_2, version Qt_6_PRIVATE_API`. nanhlanu hat `org.kde.Platform//6.11` vom 31.10. (Commit fb23e178), tinytin einen älteren (76fa01ac). PySide aus `io.qt.PySide.BaseApp` hängt an der privaten Qt-API der Patch-Version → jedes Laufzeit-Update kann Tretlager brechen. Lösung suchen: gegen aktuelle Laufzeit + BaseApp neu bauen, Laufzeit-Commit pinnen oder PySide selbst gegen die Laufzeit bauen; Startfehler sichtbar machen (kein Fenster, kein Log). Behoben: gegen BaseApp 6.11.3 (Testbau #47) gebaut, Hinweis beim Startabbruch
-- [ ] BaseApp auf tinytin zurück auf Flathub stable, sobald flathub/io.qt.PySide.BaseApp#47 gemergt ist (`flatpak uninstall --user io.qt.PySide.BaseApp//6.11` + `flatpak install --user flathub io.qt.PySide.BaseApp//6.11`), dann neu bauen
-- [x] Absturz bei der Anmeldung im Flatpak (nanhlanu 31.10.): `QtWebEngineProcess` nicht gefunden → Variablen im Manifest; eingebettete Zwift-Seite öffnet sich
-- [x] GNOME: Symbole fehlten (Portal meldet Adwaita, nicht in der KDE-Laufzeit) → Plasma-Plattformthema außerhalb von Plasma (Breeze)
-- [x] GNOME: Hell/Dunkel von GNOME übernehmen: `KDE_COLOR_SCHEME_PATH` + Palette aus Breeze(Dark).colors, Portal-Signal für den Wechsel (kdeglobals-Wege scheitern: im Flatpak liest das Plasma-Thema nur das Portal)
-- [x] GNOME: Schrift von GNOME (Portal `font-name`, Adwaita Sans 12) statt Noto Sans
-- [x] nanhlanu: Grafiktest auf der GTX 1050 nach envycontrol hybrid + GL.nvidia-580-196-07 (--user) ok (31.10.)
-- [ ] nanhlanu: Zwift-Fahrt auf der GTX 1050. Erster Versuch 31.10. 16:13–16:25: Zwift auf der GTX 1050 (60 FPS), findet KICKR + TICKR per mDNS sofort (16:14:09); Kopplung erst 16:24 (Leistung, dann Puls; Puls erreichte die Bridge nie). Netzteil 16:13 an, 16:24:09 ab → 20 FPS, Zwift friert 16:25:12 ein (Log bricht ab), kein Xid. TLP auf nanhlanu: Akku = PCIE_ASPM powersave, RUNTIME_PM_ENABLE=00:01.0 (Port der GTX 1050) → Verdacht wie tinytin: Stromquellenwechsel während der Fahrt. Wiederholen: durchgehend am Netzteil, Steuerung von Hand koppeln
-- [ ] Frisches Zwift-Präfix: Zwift koppelt nur die gewählte Rolle (Power); Cadence + Controllable Trainer kommen auf tinytin nur aus gespeicherten Kopplungen („Reconnected and selected“). Beim ersten Mal von Hand wählen → Hinweis in Hilfe/Fertig-Seite; prüfen, ob die Controllable-Liste über DIRCON den KICKR zeigt (Christoph: „Widerstand nicht gefunden“)
-- [ ] „Protokoll des letzten Starts“: Kopplungszeilen und FPS aus Zwifts Log.txt übernehmen (ohne Tokens), damit Befunde wie dieser ohne SSH sichtbar sind
-- [ ] GNOME: Hell/Dunkel-Wechsel im laufenden Betrieb am echten Desktop prüfen (offscreen per Aufruf geprüft)
-- [ ] Vor jeder Veröffentlichung (F4): Qt-Version von Laufzeit und BaseApp vergleichen; nach einem Qt-Patch-Update der Laufzeit zügig neu bauen und veröffentlichen, sonst startet Tretlager bei den Nutzern nicht
+- [x] F0 Feasibility on tinytin (Oct 30): all building blocks work (Wine from source, multiarch); open: a real ride, copy of the existing prefix
+- [x] F1 Manifest and build (0.8.0): Wine from source, Python wheels pinned, metainfo, build.sh on tinytin
+- [x] F2 Code (0.8.0): bridge via D-Bus activation + Quit, autostart portal, bridge version, gdbus, assistant without Prepare
+- [ ] Check autostart of the bridge via the Background portal after a reboot of tinytin
+- [ ] F2b Distribution-independent: system check without Debian assumptions, Avahi check, GNOME fallbacks (maximise, DPI)
+- [x] F3 Switch-over on tinytin: Debian package removed, old package data (36 GB) deleted (Oct 30)
+- [ ] F4 Flatpak source on bender with GPG key
+- [ ] F5 Acceptance: fresh TUXEDO OS, Fedora KDE + GNOME, Arch, long ride; switch off the Debian source on bender
+- [x] **Startup abort on nanhlanu (Arch, GNOME 51, Oct 31):** bundle (master ce6b144, built on tinytin) installs in 19 s but does not start: `QtCore.abi3.so: undefined symbol _ZN14QObjectPrivateC2E16QtPrivate_6_11_2, version Qt_6_PRIVATE_API`. nanhlanu has `org.kde.Platform//6.11` from Oct 31 (commit fb23e178), tinytin an older one (76fa01ac). PySide from `io.qt.PySide.BaseApp` depends on the private Qt API of the patch version → any runtime update can break Tretlager. Find a solution: rebuild against the current runtime + BaseApp, pin the runtime commit, or build PySide ourselves against the runtime; make startup errors visible (no window, no log). Fixed: built against BaseApp 6.11.3 (test build #47), notice on startup abort
+- [ ] Switch BaseApp on tinytin back to Flathub stable once flathub/io.qt.PySide.BaseApp#47 is merged (`flatpak uninstall --user io.qt.PySide.BaseApp//6.11` + `flatpak install --user flathub io.qt.PySide.BaseApp//6.11`), then rebuild
+- [x] Crash at sign-in in the Flatpak (nanhlanu Oct 31): `QtWebEngineProcess` not found → variables in the manifest; embedded Zwift page opens
+- [x] GNOME: icons were missing (portal reports Adwaita, not in the KDE runtime) → Plasma platform theme outside Plasma (Breeze)
+- [x] GNOME: take over light/dark from GNOME: `KDE_COLOR_SCHEME_PATH` + palette from Breeze(Dark).colors, portal signal for the switch (kdeglobals approaches fail: in the Flatpak the Plasma theme only reads the portal)
+- [x] GNOME: font from GNOME (portal `font-name`, Adwaita Sans 12) instead of Noto Sans
+- [x] nanhlanu: graphics test on the GTX 1050 after envycontrol hybrid + GL.nvidia-580-196-07 (--user) ok (Oct 31)
+- [ ] nanhlanu: Zwift ride on the GTX 1050. First attempt Oct 31 16:13–16:25: Zwift on the GTX 1050 (60 FPS), finds KICKR + TICKR via mDNS immediately (16:14:09); pairing only at 16:24 (power, then heart rate; heart rate never reached the bridge). Power adapter on at 16:13, off at 16:24:09 → 20 FPS, Zwift freezes at 16:25:12 (log stops), no Xid. TLP on nanhlanu: battery = PCIE_ASPM powersave, RUNTIME_PM_ENABLE=00:01.0 (port of the GTX 1050) → suspicion as on tinytin: power source change during the ride. Repeat: on the power adapter throughout, pair controls by hand
+- [ ] Fresh Zwift prefix: Zwift only pairs the selected role (Power); on tinytin, Cadence + Controllable Trainer only come from saved pairings (“Reconnected and selected”). Select by hand the first time → notice in Help/Done page; check whether the Controllable list via DIRCON shows the KICKR (my note: “resistance not found”)
+- [ ] “Log of the last start”: take over pairing lines and FPS from Zwift's Log.txt (without tokens), so that findings like this one are visible without SSH
+- [ ] GNOME: check light/dark switching while running on a real desktop (verified offscreen via call)
+- [ ] Before every release (F4): compare the Qt version of runtime and BaseApp; after a Qt patch update of the runtime, rebuild and publish promptly, otherwise Tretlager does not start for users
 
-## Hinweise in der App
+## In-app notices
 
-- [x] Haftungshinweis zur Sensor-Bridge ergänzen (Christoph 30.10.): Zwift ist womöglich nicht
-  glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die manipuliert werden
-  könnten. Deshalb klar: Nutzung auf eigene Gefahr – nicht dass jemand seine mit viel Schweiß
-  erstrampelten XP und Drops verliert (Kontosperre bzw. Zurücksetzen nicht ausgeschlossen).
-  Ergänzt den Hinweis „Nicht für Rennen“ (Willkommen, Übersicht, Über Tretlager, Hilfe, README,
-  Metainfo); Ton locker, aber eindeutig.
-- [x] Beim ersten Start eine Warnung, die man bestätigen muss (Christoph 30.10.), mit allen
-  Haftungshinweisen zusammen: Tretlager ist keine offizielle Zwift-App und wird von Zwift nicht
-  unterstützt; Nutzung auf eigene Gefahr (XP und Drops); nicht für Rennen, keine Garantie für die
-  Werte der Sensor-Bridge; Anmeldung über eigenes Fenster widerspricht den Zwift-Nutzungsbedingungen.
-  Bestätigung im Zustand merken; erneut zeigen, wenn sich der Hinweistext ändert (Versionsmarke).
+- [x] Add a liability notice about the sensor bridge (my decision Oct 30): Zwift may not be
+  happy that a software bridge sends data to Zwift that could be
+  manipulated. Therefore make it clear: use at your own risk – so nobody loses the XP and drops
+  they earned with a lot of sweat (account suspension or reset cannot be ruled out).
+  Complements the “Not for races” notice (Welcome, Overview, About Tretlager, Help, README,
+  metainfo); tone relaxed but unambiguous.
+- [x] On first start, a warning that must be accepted (my decision Oct 30), with all
+  liability notices together: Tretlager is not an official Zwift app and is not supported by Zwift;
+  use at your own risk (XP and drops); not for races, no guarantee for the
+  values of the sensor bridge; signing in through Tretlager's own window contradicts Zwift's terms of use.
+  Remember the acceptance in the state; show it again when the notice text changes (version marker).
 
-## Sicherheit
+## Security
 
-- [ ] Zwift bekommt das Token als Befehlszeilenargument (`ZwiftApp.exe --token={…}`); es steht damit in der
-  Prozessliste und ist für jeden lokalen Benutzer lesbar (`ps`). Prüfen, ob RunFromProcess das Token
-  anders übergeben kann (Datei/Pipe) oder ob Zwift es nur so annimmt; sonst in der Hilfe erwähnen.
-  (Gesehen 30.10. beim Flatpak-Test; nie `pgrep -fa Zwift` o. Ä. ausgeben.)
+- [ ] Zwift receives the token as a command line argument (`ZwiftApp.exe --token={…}`); it therefore appears in the
+  process list and is readable by every local user (`ps`). Check whether RunFromProcess can pass the token
+  differently (file/pipe) or whether Zwift only accepts it this way; otherwise mention it in the help.
+  (Seen Oct 30 during the Flatpak test; never print `pgrep -fa Zwift` or similar.)
 
-## QA-Audit 2026-10-30 (docs/qa-audit-2026-10-30.md)
+## QA audit 2026-10-30 (docs/qa-audit-2026-10-30.md)
 
-- [x] B-01 abwesender Sensor blockierte Bluetooth 40 s (gemessen, behoben)
-- [x] Z-01/Z-02, L-01, L-02, B-02, B-03, U-01, U-02, S-01, I-01, I-02 behoben
-- [x] B-04 Gerät bei kurzem BLE-Abbruch 45 s für Zwift halten (live mit getrenntem KICKR geprüft)
-- [ ] B-05 Standby/Resume und Stick-Abziehen während der Fahrt testen
-- [ ] F-01 `--talk-name=org.kde.KWin` ersetzen oder begründen (nur zum Maximieren)
-- [ ] Bridge-Zustand per QtDBus-Signal `Changed` statt gdbus-Abfrage; `Backend` aufteilen
-- [x] C-01 `setup.Context.run`: Timeout auch ohne Ausgabe durchsetzen
-- [x] C-02 DIRCON: Sendepuffer begrenzen, wenn Zwift nicht liest
-- [x] U-03 Startknopf größer, Live-Werte als Kennzahlen (im HIG-Rahmen); Hervorhebung unter echtem Plasma noch ansehen (Bildschirm war gesperrt)
-- [ ] Metainfo: Screenshots (Release-Beschreibung seit 0.9.0)
+- [x] B-01 absent sensor blocked Bluetooth for 40 s (measured, fixed)
+- [x] Z-01/Z-02, L-01, L-02, B-02, B-03, U-01, U-02, S-01, I-01, I-02 fixed
+- [x] B-04 keep the device for Zwift for 45 s on a short BLE dropout (verified live with a disconnected KICKR)
+- [ ] B-05 test standby/resume and pulling the stick during the ride
+- [ ] F-01 replace or justify `--talk-name=org.kde.KWin` (only for maximising)
+- [ ] Bridge state via QtDBus signal `Changed` instead of gdbus polling; split up `Backend`
+- [x] C-01 `setup.Context.run`: enforce the timeout even without output
+- [x] C-02 DIRCON: limit the send buffer when Zwift is not reading
+- [x] U-03 Larger start button, live values as key figures (within the HIG); still look at the highlighting under real Plasma (screen was locked)
+- [ ] Metainfo: screenshots (release description since 0.9.0)
 
 ## Updates (docs/updates.md)
 
-- [x] Keine Schnappschüsse; Einrichtung vor jedem Start abgleichen (Wine-Wechsel → `wineboot -u` + Grafiktest)
-- [ ] Neue Tretlager-Version im Programm melden (Flatpak-Portal) – bewusst offen, kein Flathub geplant (Christoph 30.10.)
-- [x] Fortschritt beim Zwift-Update aus dem Zwift-Manifest
-- [ ] Fortschritt bei einem echten Zwift-Update beobachten
-- [x] Vorige Wine-Version aufbewahren (eine) und in der Übersicht wählbar
-- [ ] Windows-Komponente gezielt erneuern (Revisionsmarke je Verb, `winetricks --force`)
-- [ ] Echten Wine-Wechsel auf tinytin durchspielen (Tretlager mit anderer Wine-Version bauen)
+- [x] No snapshots; reconcile the setup before every start (Wine change → `wineboot -u` + graphics test)
+- [ ] Report a new Tretlager version in the program (Flatpak portal) – deliberately open, no Flathub planned (my decision Oct 30)
+- [x] Progress during the Zwift update from the Zwift manifest
+- [ ] Observe the progress during a real Zwift update
+- [x] Keep the previous Wine version (one) and make it selectable in Overview
+- [ ] Renew a Windows component selectively (revision marker per verb, `winetricks --force`)
+- [ ] Run through a real Wine switch on tinytin (build Tretlager with a different Wine version)

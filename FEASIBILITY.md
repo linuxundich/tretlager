@@ -1,580 +1,577 @@
-# Machbarkeitsanalyse (Phase A)
+# Feasibility analysis (Phase A)
 
-Stand: 2026-10-29. Reine Recherche: Web, Quelltexte, Paketarchive. Noch nichts ist auf echter
-Hardware getestet.
+As of: 2026-10-29. Research only: web, source code, package archives. Nothing has been tested on
+real hardware yet.
 
-Kennzeichnung:
-- **[Q]** belegt durch eine Primärquelle (Quelltext, offizielle Seite, Paketarchiv)
-- **[F]** nur ein Forums- oder Community-Bericht
-- **[S]** eigener Schluss
+Labels:
+- **[Q]** backed by a primary source (source code, official page, package archive)
+- **[F]** only a forum or community report
+- **[S]** my own conclusion
 
-Bewertung je Teilbereich: **offiziell unterstützt** · **funktioniert** (mehrfach berichtet) ·
-**experimentell** · **geht nicht**.
+Rating per area: **officially supported** · **works** (reported several times) ·
+**experimental** · **does not work**.
 
-## Kurzfassung
+## Summary
 
-| Teilbereich | Bewertung | Kern |
+| Area | Rating | Gist |
 |---|---|---|
-| Zwift-Client unter Linux | **experimentell** (offiziell nicht unterstützt) | Windows-Client läuft unter Wine 11.x mit WebView2 und dotnet48; jede Launcher-Version kann das brechen |
-| Wine auf Forky | **funktioniert nur über WineHQ** | Debians `wine` ist seit 2026-03-24 nicht mehr in testing; WineHQ hat eine `forky`-Suite mit 11.0 und 11.20, reines WoW64 ohne i386 |
-| Bezug des Installers | **funktioniert** | öffentliche URL `https://cdn.zwift.com/app/ZwiftSetup.exe`, ohne Anmeldung; Authenticode-Prüfung möglich, Signierer noch nicht geprüft |
-| Anmeldung | **größtes Produktrisiko** | Die WebView2-Anmeldung des Launchers 1.2.0 rendert unter Wine nicht; netbrain umgeht das mit einem nachgebauten OAuth-Login, das kollidiert mit Grundsatz 7 und den Zwift-AGB |
-| Grafik / NVIDIA | **funktioniert** | ZwiftApp nutzt **OpenGL 3.1**, nicht Direct3D, also ist DXVK überflüssig; NVIDIA braucht den EGL/GLX-Schalter von Wine |
-| BLE direkt aus Zwift | **geht nicht** | Wine 11.20: GATT lesen ja, Benachrichtigungen und Schreiben sind Stubs, kein Leistungsstrom, kein ERG |
-| BLE über eigene Bridge (DIRCON) | **funktioniert** (Zwift-Seite), Bridge **experimentell** | Zwift erkennt Wahoo-„Direct Connect“-Geräte im LAN auch unter Wine; eine Bridge BlueZ → DIRCON überträgt FTMS samt ERG, Leistung und Kadenz |
-| ANT+ in Wine | **geht nicht** | `winusb.dll` ist in Wine fast nur Stubs; ANT+ ginge höchstens nativ in der Bridge |
-| Updates | **funktioniert** mit Vorbehalt | Launcher `SilentLaunch` aktualisiert; Versionsdatei `Zwift_ver_cur.xml` hat Prüfsummen |
-| Companion App nötig? | **nein**, mit Bridge | Die Bridge ersetzt Companion als Weg für Sensoren |
+| Zwift client on Linux | **experimental** (not officially supported) | The Windows client runs under Wine 11.x with WebView2 and dotnet48; any launcher version can break that |
+| Wine on Forky | **works only via WineHQ** | Debian's `wine` has not been in testing since 2026-03-24; WineHQ has a `forky` suite with 11.0 and 11.20, pure WoW64 without i386 |
+| Getting the installer | **works** | public URL `https://cdn.zwift.com/app/ZwiftSetup.exe`, no sign-in required; Authenticode verification possible, signer not yet checked |
+| Sign-in | **biggest product risk** | The WebView2 sign-in of launcher 1.2.0 does not render under Wine; netbrain works around it with a re-implemented OAuth login, which conflicts with principle 7 and Zwift's terms of service |
+| Graphics / NVIDIA | **works** | ZwiftApp uses **OpenGL 3.1**, not Direct3D, so DXVK is unnecessary; NVIDIA needs Wine's EGL/GLX switch |
+| BLE directly from Zwift | **does not work** | Wine 11.20: GATT reads yes, notifications and writes are stubs, no power stream, no ERG |
+| BLE via own bridge (DIRCON) | **works** (Zwift side), bridge **experimental** | Zwift detects Wahoo “Direct Connect” devices on the LAN even under Wine; a BlueZ → DIRCON bridge carries FTMS including ERG, power and cadence |
+| ANT+ in Wine | **does not work** | `winusb.dll` in Wine is almost entirely stubs; ANT+ could at most work natively in the bridge |
+| Updates | **works** with caveats | Launcher `SilentLaunch` updates; the version file `Zwift_ver_cur.xml` has checksums |
+| Companion app needed? | **no**, with the bridge | The bridge replaces Companion as the path for sensors |
 
-**Fazit:** Das Vorhaben ist machbar, aber nicht so, wie der Auftrag es annimmt.
-1. Die Sensoren erreichen Zwift nicht direkt über Wine. Ohne Companion App führt der einzige
-   Weg über eine eigene Bridge, die sich als Wahoo-Direct-Connect-Gerät ausgibt.
-2. Wine kommt aus dem WineHQ-Repo, nicht aus Debian.
-3. Ob sich ein normaler Mensch ohne Tricks anmelden kann, ist offen und muss als Erstes
-   getestet werden.
+**Conclusion:** The project is feasible, but not in the way the brief assumes.
+1. The sensors do not reach Zwift directly through Wine. Without the Companion app, the only
+   path is an own bridge that presents itself as a Wahoo Direct Connect device.
+2. Wine comes from the WineHQ repo, not from Debian.
+3. Whether an ordinary person can sign in without tricks is open and must be tested first.
 
-## 1. Zwift unter Linux
+## 1. Zwift on Linux
 
-### 1.1 Plattformen
-- [Q] Unterstützt sind Windows 10 64 Bit oder neuer, macOS ab 10.14.4, Android, iOS/iPadOS und
-  Apple TV. Windows on ARM ist ausdrücklich ausgeschlossen. Linux, VMs und Wine kommen nicht vor.
+### 1.1 Platforms
+- [Q] Supported are Windows 10 64-bit or newer, macOS 10.14.4 or later, Android, iOS/iPadOS and
+  Apple TV. Windows on ARM is explicitly excluded. Linux, VMs and Wine are not mentioned.
   https://support.zwift.com/es/supported-devices-to-run-zwift-H1Cj9QbeB.md
-- [Q] Zu Linux gibt es nur alte Forumsantworten, nach denen kein Linux-Client geplant ist.
+- [Q] On Linux there are only old forum replies saying that no Linux client is planned.
   https://forums.zwift.com/t/no-linux-support-yet/14041
 
-### 1.2 Aufbau des Clients
-- [Q] `ZwiftSetup.exe` installiert nur `ZwiftLauncher.exe`. Der Launcher lädt das eigentliche
-  Spiel `ZwiftApp.exe` nach (CI-Log: „Updating Zwift from version none to 1.124.0“).
+### 1.2 How the client is built
+- [Q] `ZwiftSetup.exe` only installs `ZwiftLauncher.exe`. The launcher then downloads the actual
+  game `ZwiftApp.exe` (CI log: “Updating Zwift from version none to 1.124.0”).
   https://github.com/netbrain/zwift/issues/420
-- [Q] Die Anmeldung läuft über WebView2 (Edge-Engine) im Launcher.
-- [Q] Laut Kommentar in netbrains `src/run_zwift.sh` gibt es unter Wine drei Probleme:
-  1. Der Launcher zeigt die Anmeldeseite nicht.
-  2. Er startet `ZwiftApp.exe` nicht.
-  3. Startet man `ZwiftApp.exe` allein, ruft das Spiel wieder den Launcher auf.
+- [Q] Sign-in runs through WebView2 (Edge engine) in the launcher.
+- [Q] According to a comment in netbrain's `src/run_zwift.sh`, there are three problems under Wine:
+  1. The launcher does not show the sign-in page.
+  2. It does not start `ZwiftApp.exe`.
+  3. If you start `ZwiftApp.exe` on its own, the game calls the launcher again.
 
   https://github.com/netbrain/zwift/blob/master/src/run_zwift.sh
 
-### 1.3 Referenzprojekt netbrain/zwift (Unlicense)
-Das ist der verbreitetste Weg und läuft als Podman- oder Docker-Container. [Q] aus dem Dockerfile:
-- Basis Debian trixie, **WineHQ wine-devel 11.20** (seit PR #422 vom 2026-10-24, vorher 9.9)
-- winetricks auf einen Commit gepinnt, wegen des noch unveröffentlichten Verbs `webview2`
-- Verben `corefonts dotnet48 d3dcompiler_47 webview2`, Mono und Gecko aus
-- winbind (`ntlm_auth`), **kein DXVK**
+### 1.3 Reference project netbrain/zwift (Unlicense)
+This is the most common approach and runs as a Podman or Docker container. [Q] from the Dockerfile:
+- Base Debian trixie, **WineHQ wine-devel 11.20** (since PR #422 of 2026-10-24, previously 9.9)
+- winetricks pinned to a commit because of the not yet released verb `webview2`
+- Verbs `corefonts dotnet48 d3dcompiler_47 webview2`, Mono and Gecko off
+- winbind (`ntlm_auth`), **no DXVK**
 
-Start, [Q] aus `run_zwift.sh`:
+Start, [Q] from `run_zwift.sh`:
 1. `wine start ZwiftLauncher.exe SilentLaunch`
-2. die PID des Launchers ermitteln
-3. `ZwiftApp.exe --token=<json>` per `runfromprocess-rs.exe` als Kindprozess des Launchers starten
-4. Launcher und Crash-Handler beenden
+2. determine the launcher's PID
+3. start `ZwiftApp.exe --token=<json>` via `runfromprocess-rs.exe` as a child process of the launcher
+4. terminate the launcher and the crash handler
 
-Das Token kommt aus `zwift-auth.sh` (siehe Abschnitt 3).
+The token comes from `zwift-auth.sh` (see section 3).
 
-Zum Vergleich: [Q] umu-launcher (Proton außerhalb von Steam) führt einen Eintrag `umu-zwift` mit
-derselben winetricks-Liste. Es gibt keinen Beleg, dass Proton das Problem mit dem Launcher löst.
+For comparison: [Q] umu-launcher (Proton outside of Steam) has an entry `umu-zwift` with the same
+winetricks list. There is no evidence that Proton solves the launcher problem.
 https://github.com/Open-Wine-Components/umu-protonfixes/blob/master/gamefixes-umu/umu-zwift.py
 
-### 1.4 Aktuelle Brüche, die Wartungslast zeigen
-- [Q] **Launcher 1.2.0** (Oktober 2026) stürzte unter Wine sofort ab (`RoGetActivationFactory`).
-  Workaround in netbrain-PR #421: `wineserver -k` nach der Installation. Laut demselben PR
-  rendert der WebView2-Inhalt weiterhin nicht. Zwift erzwingt das Update auf 1.2.0.
+### 1.4 Recent breakages that show the maintenance burden
+- [Q] **Launcher 1.2.0** (October 2026) crashed immediately under Wine (`RoGetActivationFactory`).
+  Workaround in netbrain PR #421: `wineserver -k` after installation. According to the same PR,
+  the WebView2 content still does not render. Zwift enforces the update to 1.2.0.
   https://github.com/netbrain/zwift/issues/420
-- [Q] Bei Zwift 1.117–1.122 ließen Festplatten-Cache-Fehler (4390, `ERROR_NOT_A_REPARSE_POINT`)
-  das Spiel einfrieren: https://github.com/netbrain/zwift/issues/402
-- [S] Wine hinkt jedem Launcher-Release hinterher. Die App muss eine Matrix „getestete
-  Launcher- und Zwift-Version × Wine-Version“ mitführen und unbekannte Kombinationen als
-  ungetestet anzeigen.
+- [Q] With Zwift 1.117–1.122, disk cache errors (4390, `ERROR_NOT_A_REPARSE_POINT`) made the game
+  freeze: https://github.com/netbrain/zwift/issues/402
+- [S] Wine lags behind every launcher release. The app has to keep a matrix “tested launcher and
+  Zwift version × Wine version” and show unknown combinations as untested.
 
-## 2. Wine und Pakete auf TUXEDO OS Forky
+## 2. Wine and packages on TUXEDO OS Forky
 
-- [Q] `wine`, `wine64`, `libwine` und `winetricks` sind **seit 2026-03-24 nicht in testing**.
-  Mehrere RC-Bugs blockieren sie. `dxvk` fehlt seit 2026-10-15, `wine-development` gibt es seit
-  2025 gar nicht mehr.
+- [Q] `wine`, `wine64`, `libwine` and `winetricks` have **not been in testing since 2026-03-24**.
+  Several RC bugs block them. `dxvk` has been missing since 2026-10-15, `wine-development` no
+  longer exists at all since 2025.
   https://tracker.debian.org/pkg/wine · https://tracker.debian.org/pkg/winetricks
-- [Q] **WineHQ** hat eine Suite `forky`: `winehq-stable 11.0.0.0~forky-1`, `winehq-devel` und
-  `winehq-staging` 11.20. Für amd64 ist Wine 11 ein einzelnes Paket ohne i386-Abhängigkeit
-  (neuer WoW64-Modus). `dpkg --add-architecture i386` entfällt damit.
-  **Auf tinytin bestätigt (2026-10-29):** Quelle nur mit `Architectures: amd64`, dann
-  `apt-get install --install-recommends winehq-devel` → 6 neue Pakete (wine-devel, winehq-devel,
-  libasound2-plugins, libodbc2, libodbccr2, dazu osslsigncode), 289 MB Download, 1,8 GB belegt,
-  **kein i386-Paket**, `wine --version` = wine-11.20.
+- [Q] **WineHQ** has a `forky` suite: `winehq-stable 11.0.0.0~forky-1`, `winehq-devel` and
+  `winehq-staging` 11.20. On amd64, Wine 11 is a single package without an i386 dependency
+  (new WoW64 mode). `dpkg --add-architecture i386` is therefore not needed.
+  **Confirmed on tinytin (2026-10-29):** source with `Architectures: amd64` only, then
+  `apt-get install --install-recommends winehq-devel` → 6 new packages (wine-devel, winehq-devel,
+  libasound2-plugins, libodbc2, libodbccr2, plus osslsigncode), 289 MB download, 1.8 GB used,
+  **no i386 package**, `wine --version` = wine-11.20.
   https://dl.winehq.org/wine-builds/debian/dists/forky/
-- [Q] TUXEDO-Repo `deb.tuxedocomputers.com/debian`:
-  - Suite `forky` mit `tuxedo-drivers`, `tuxedo-control-center` und `nvidia-driver-assistant`
-  - Suite `forky-nvidia` mit Pinning auf NVIDIA **580**
+- [Q] TUXEDO repo `deb.tuxedocomputers.com/debian`:
+  - suite `forky` with `tuxedo-drivers`, `tuxedo-control-center` and `nvidia-driver-assistant`
+  - suite `forky-nvidia` with pinning to NVIDIA **580**
 
-  Debians eigene NVIDIA-550-Pakete sollen am 2026-11-08 aus testing fliegen. Welche Quelle die
-  580er tatsächlich liefert, muss am Zielrechner geklärt werden (`/etc/apt/sources.list.d`).
-- [Q] **TUXEDO OS Forky bringt Plasma 6.7 mit, nicht GNOME.**
+  Debian's own NVIDIA 550 packages are due to be removed from testing on 2026-11-08. Which source
+  actually delivers the 580 drivers has to be clarified on the target machine
+  (`/etc/apt/sources.list.d`).
+- [Q] **TUXEDO OS Forky ships Plasma 6.7, not GNOME.**
   https://linuxiac.com/tuxedo-os-debian-based-open-beta-is-now-available-for-testing/
-  Der Auftrag nennt GNOME. → Entscheidung E4.
-- [Q] PackageKit 1.4.0 mit eingebautem apt-Backend ist in forky. Plasma Discover hängt davon ab,
-  also ist es vorinstalliert. `gi.repository.PackageKitGlib` kann:
-  - Pakete auflösen
-  - mit `SIMULATE` die Änderungsliste ermitteln
-  - mit Polkit-Nachfrage installieren
+  The brief says GNOME. → Decision E4.
+- [Q] PackageKit 1.4.0 with a built-in apt backend is in forky. Plasma Discover depends on it,
+  so it is preinstalled. `gi.repository.PackageKitGlib` can:
+  - resolve packages
+  - determine the list of changes with `SIMULATE`
+  - install with a Polkit prompt
 
-  **Nicht** möglich sind Fremdquellen samt Schlüssel einrichten (WineHQ) und
-  `--add-architecture`. Dafür braucht es einen eigenen kleinen pkexec-Helfer mit fester Aktion.
+  It can **not** set up third-party sources including keys (WineHQ) or run `--add-architecture`.
+  That requires a small dedicated pkexec helper with a fixed action.
 
-## 3. Bezug des Installers und Anmeldung
+## 3. Getting the installer and signing in
 
 ### 3.1 Installer
-- [Q] `https://cdn.zwift.com/app/ZwiftSetup.exe` ist öffentlich und ohne Anmeldung erreichbar.
-  HEAD am 2026-10-29: 200, 34 028 992 Byte, Last-Modified 2026-10-19. Dieselbe URL nutzen
-  netbrain und Lutris seit mindestens 2022. Der Inhalt wechselt mit jedem Launcher-Release.
-  → Weg 1 aus dem Auftrag (offizielle Download-URL) ist erfüllt.
-- [Q] Zwift veröffentlicht keinen Hashwert für den Installer.
-- [S] Die Echtheit lässt sich deshalb nur über die **Authenticode-Signatur** prüfen:
-  - Werkzeug: `osslsigncode verify` (Paket 2.14 in forky)
-  - mit eigener CA-Datei der Microsoft-Code-Signing-Wurzeln, denn Debians CA-Bündel enthält sie
-    nicht
-  - zusätzlich den Signierer (Subject) festnageln
-  - **Test T1 vom 2026-10-29:** Installer mit 34 028 992 Byte, SHA-256 `dd10bb62…333f9d`
-    - Signatur: Authenticode (PKCS#7, Revision 2.0) mit **EV-Code-Signing-Zertifikat**
-    - Signierer: `CN=Zwift, Inc.`, `O=Zwift, Inc.`, Delaware, Registriernummer `5463328`,
-      Long Beach CA. Gültig 2024-03-16 bis **2027-03-16**.
-    - Kette: SSL.com EV Code Signing Intermediate CA RSA R3 → SSL.com EV Root Certification
-      Authority RSA R2. Die Wurzel **steht im normalen System-CA-Speicher** (Mozilla); eine eigene
-      Microsoft-CA-Datei ist also nicht nötig.
-    - Der selbst berechnete Authenticode-Hash (SHA-256 über die Datei ohne Prüfsumme und
-      Signaturtabelle) steht in der Signatur, die Datei ist also unverändert signiert.
-    - `osslsigncode 2.14 verify -CAfile /etc/ssl/certs/ca-certificates.crt -TSA-CAfile …` auf
-      tinytin: Signatur ok, CRL ok (crls.ssl.com), „Succeeded“. Signiert und zeitgestempelt am
-      2026-10-15 23:21 UTC von der TSA SSL.com Timestamping Unit 2025 E1 (Kette bis SSL.com
-      Root Certification Authority RSA, ebenfalls im System-CA-Speicher).
-    - Gegenprobe: In einer Kopie wurde 1 Byte geändert, `verify` meldet „Failed“.
-    - **T1 erledigt.** Die App kann `osslsigncode` (Debian-Paket) nutzen; die CRL-Abfrage geht
-      über HTTP an SSL.com und muss in der Datenschutz-Übersicht stehen (abschaltbar per
+- [Q] `https://cdn.zwift.com/app/ZwiftSetup.exe` is public and reachable without signing in.
+  HEAD on 2026-10-29: 200, 34,028,992 bytes, Last-Modified 2026-10-19. netbrain and Lutris have
+  used the same URL since at least 2022. The content changes with every launcher release.
+  → Path 1 from the brief (official download URL) is satisfied.
+- [Q] Zwift does not publish a hash for the installer.
+- [S] Authenticity can therefore only be checked via the **Authenticode signature**:
+  - tool: `osslsigncode verify` (package 2.14 in forky)
+  - with a separate CA file of the Microsoft code signing roots, because Debian's CA bundle does
+    not include them
+  - additionally pin the signer (subject)
+  - **Test T1 of 2026-10-29:** installer with 34,028,992 bytes, SHA-256 `dd10bb62…333f9d`
+    - Signature: Authenticode (PKCS#7, revision 2.0) with an **EV code signing certificate**
+    - Signer: `CN=Zwift, Inc.`, `O=Zwift, Inc.`, Delaware, registration number `5463328`,
+      Long Beach CA. Valid 2024-03-16 to **2027-03-16**.
+    - Chain: SSL.com EV Code Signing Intermediate CA RSA R3 → SSL.com EV Root Certification
+      Authority RSA R2. The root **is in the regular system CA store** (Mozilla), so a separate
+      Microsoft CA file is not needed.
+    - The Authenticode hash I computed myself (SHA-256 over the file without checksum and
+      signature table) matches the one in the signature, so the file is signed unmodified.
+    - `osslsigncode 2.14 verify -CAfile /etc/ssl/certs/ca-certificates.crt -TSA-CAfile …` on
+      tinytin: signature ok, CRL ok (crls.ssl.com), “Succeeded”. Signed and timestamped on
+      2026-10-15 23:21 UTC by the TSA SSL.com Timestamping Unit 2025 E1 (chain up to SSL.com
+      Root Certification Authority RSA, also in the system CA store).
+    - Counter-check: 1 byte was changed in a copy, `verify` reports “Failed”.
+    - **T1 done.** The app can use `osslsigncode` (Debian package); the CRL lookup goes over
+      HTTP to SSL.com and must be listed in the privacy overview (can be turned off with
       `-ignore-crl`).
-    - Folge für die App: Das Blatt-Zertifikat **nicht** per Fingerprint festnageln, es läuft
-      2027 ab. Stattdessen Kette gegen den System-CA-Speicher prüfen und dazu Subject-Felder
-      (CN, O, Registriernummer) sowie Code-Signing-EKU verlangen.
-- [Q] Für Spiel-Updates gibt es `https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml`
-  mit `sversion` (derzeit 1.124.0), `manifest_checksum` und `ver_cur_checksum`. Damit lässt sich
-  die installierte Version gegen den Stand des Anbieters vergleichen.
+    - Consequence for the app: do **not** pin the leaf certificate by fingerprint, it expires in
+      2027. Instead verify the chain against the system CA store and additionally require the
+      subject fields (CN, O, registration number) and the code signing EKU.
+- [Q] For game updates there is `https://cdn.zwift.com/gameassets/Zwift_Updates_Root/Zwift_ver_cur.xml`
+  with `sversion` (currently 1.124.0), `manifest_checksum` and `ver_cur_checksum`. This makes it
+  possible to compare the installed version with the vendor's current state.
 
-### 3.2 Anmeldung – der kritische Punkt
-- [Q] netbrains `zwift-auth.sh` meldet sich mit Benutzername und Passwort an. Es gibt sich dabei
-  als Launcher aus (`client_id=Game_Launcher`) und spielt den OAuth-Code-Flow gegen
-  `secure.zwift.com` durch:
-  1. das HTML-Formular auslesen
-  2. das Passwort absenden
-  3. den Code gegen ein Token tauschen
-  4. `ZwiftApp.exe --token=…` aufrufen
-- [Q] Die Zwift-AGB (Stand 2026-06-02, §5) verbieten unter anderem, Authentifizierungs- oder
-  Sicherheitsmaßnahmen zu umgehen, Skripte und automatisierte Programme zu nutzen und Programme
-  ohne Erlaubnis mit der Plattform interagieren zu lassen.
+### 3.2 Sign-in – the critical point
+- [Q] netbrain's `zwift-auth.sh` signs in with username and password. It poses as the launcher
+  (`client_id=Game_Launcher`) and plays through the OAuth code flow against
+  `secure.zwift.com`:
+  1. parse the HTML form
+  2. submit the password
+  3. exchange the code for a token
+  4. call `ZwiftApp.exe --token=…`
+- [Q] Zwift's terms of service (as of 2026-06-02, §5) prohibit, among other things,
+  circumventing authentication or security measures, using scripts and automated programs, and
+  letting programs interact with the platform without permission.
   https://support.zwift.com/en_us/terms-of-service-HJt7VBYyH.md
-- [S] Der nachgebaute Login ist keine Umgehung der Authentifizierung, denn der Nutzer meldet sich
-  mit eigenen Daten an. Er ist aber eine **nicht dokumentierte private Schnittstelle** und
-  automatisiert, verstößt also gegen Grundsatz 7 und §5 xi/xiii. **Diesen Weg baue ich nicht
-  ein.**
-- [S] Auch der Start per `runfromprocess` (Spiel als Kind des Launchers ausgeben) ist eine
-  Grauzone. Er umgeht keine Schutzmaßnahme, täuscht aber die Prozess-Abstammung vor. Er wird
-  nur eingesetzt, wenn er nötig ist, und dann dokumentiert. → Entscheidung E2.
-- **Zulässiger Weg:** Der offizielle Launcher zeigt seine WebView2-Anmeldung, der Nutzer meldet
-  sich dort selbst an, und der Launcher startet das Spiel. netbrain notierte am 2026-01-25
-  „webview2 in zwift launcher works“, beim Launcher 1.2.0 rendert sie nicht mehr. **Ob das mit
-  Wine 11.20 und Launcher 1.2.x auf Forky geht, ist der erste Test in Phase D.** Geht es nicht,
-  kann die App Zwift ehrlicherweise nur „installieren, aber nicht starten“.
+- [S] The re-implemented login does not circumvent authentication, because users sign in with
+  their own credentials. It is, however, an **undocumented private interface** and automated, so
+  it violates principle 7 and §5 xi/xiii. **I am not building this path in.**
+- [S] Starting via `runfromprocess` (passing the game off as a child of the launcher) is a grey
+  area as well. It does not circumvent any protection measure, but it fakes the process lineage.
+  It is only used if it is necessary, and then documented. → Decision E2.
+- **Permissible path:** The official launcher shows its WebView2 sign-in, users sign in there
+  themselves, and the launcher starts the game. netbrain noted on 2026-01-25
+  “webview2 in zwift launcher works”; with launcher 1.2.0 it no longer renders. **Whether this
+  works with Wine 11.20 and launcher 1.2.x on Forky is the first test in Phase D.** If it does not,
+  the app can honestly only “install, but not start” Zwift.
 
-## 4. Grafik und NVIDIA
+## 4. Graphics and NVIDIA
 
-- [Q] ZwiftApp verlangt **OpenGL 3.1**. Zwifts eigene Fehlermeldung lautet „OpenGL 3.1 is
-  required“. https://support.zwift.com/en_us/opengl-error-on-windows-Skpfw62fB.md
-- [S] Damit ist **DXVK für das Spiel überflüssig**. Wine reicht OpenGL an den Host-Treiber durch.
-  `d3dcompiler_47` braucht vermutlich nur WebView2. Der Prüfpunkt „DXVK/Vulkan“ im Auftrag
-  schrumpft: Vulkan ist für das Spiel nicht nötig, eventuell aber für WebView2 (GPU-Beschleunigung
-  des Launchers), das ist zu testen.
-- [Q] Wine nutzt seit 10.17 EGL für OpenGL. Mit dem proprietären NVIDIA-Treiber braucht netbrain
-  entweder `__EGL_VENDOR_LIBRARY_FILENAMES=""` oder den Rückweg auf GLX (Registry
-  `UseEGL=N`, Schalter `WINE_DISABLE_EGL`). Natives Wayland geht auf NVIDIA nicht, XWayland ja.
+- [Q] ZwiftApp requires **OpenGL 3.1**. Zwift's own error message reads “OpenGL 3.1 is
+  required”. https://support.zwift.com/en_us/opengl-error-on-windows-Skpfw62fB.md
+- [S] This makes **DXVK unnecessary for the game**. Wine passes OpenGL through to the host
+  driver. `d3dcompiler_47` is probably only needed by WebView2. The “DXVK/Vulkan” checkpoint in the
+  brief shrinks: Vulkan is not needed for the game, but possibly for WebView2 (GPU acceleration of
+  the launcher); that needs testing.
+- [Q] Since 10.17, Wine uses EGL for OpenGL. With the proprietary NVIDIA driver, netbrain needs
+  either `__EGL_VENDOR_LIBRARY_FILENAMES=""` or the fallback to GLX (registry `UseEGL=N`, switch
+  `WINE_DISABLE_EGL`). Native Wayland does not work on NVIDIA, XWayland does.
   https://github.com/netbrain/zwift/issues/404
-- [S] Die Diagnose muss deshalb unterscheiden:
-  1. Karte vorhanden: sysfs `/sys/class/drm/*/device/vendor` = `0x10de`
-  2. Treiber geladen: `/sys/module/nvidia/version`
-  3. OpenGL tatsächlich beschleunigt: Renderer-String über EGL/GLX, nicht llvmpipe
-  4. 32 Bit: entfällt bei WoW64 (zu bestätigen)
-- [Q] Maschinenlesbare Quellen:
+- [S] The diagnostics therefore have to distinguish:
+  1. card present: sysfs `/sys/class/drm/*/device/vendor` = `0x10de`
+  2. driver loaded: `/sys/module/nvidia/version`
+  3. OpenGL actually accelerated: renderer string via EGL/GLX, not llvmpipe
+  4. 32-bit: not applicable with WoW64 (to be confirmed)
+- [Q] Machine-readable sources:
   - `nvidia-smi --query-gpu=… --format=csv,noheader`
-  - `vulkaninfo --json` oder direkt `vkEnumeratePhysicalDevices`
-  - für OpenGL am besten ein eigener kleiner EGL-Test statt `eglinfo` parsen
-- Secure Boot und DKMS: Die App ändert daran nichts. Sie meldet nur, wenn das Modul nicht geladen
-  ist und Secure Boot aktiv ist (`mokutil --sb-state`), und verweist auf TUXEDOs Weg.
+  - `vulkaninfo --json` or `vkEnumeratePhysicalDevices` directly
+  - for OpenGL, preferably a small dedicated EGL test instead of parsing `eglinfo`
+- Secure Boot and DKMS: the app does not change anything there. It only reports when the module
+  is not loaded and Secure Boot is active (`mokutil --sb-state`), and points to TUXEDO's procedure.
 
-## 5. Sensoren: BLE und ANT+
+## 5. Sensors: BLE and ANT+
 
-### 5.1 Direkter BLE-Zugriff aus Wine – geht nicht
-- [Q] Wine 11.0 (Januar 2026): `winebth.sys` über BlueZ-D-Bus. Scannen, Koppeln und erste
-  GATT-Dienste sind über die Win32-BLE-API sichtbar.
+### 5.1 Direct BLE access from Wine – does not work
+- [Q] Wine 11.0 (January 2026): `winebth.sys` via the BlueZ D-Bus. Scanning, pairing and first
+  GATT services are visible through the Win32 BLE API.
   https://raw.githubusercontent.com/wine-mirror/wine/wine-11.0/ANNOUNCE.md
-- [Q] Stand Wine 11.20 (master):
-  - Win32 vorhanden: `BluetoothGATTGetServices`, `GetCharacteristics`, `GetCharacteristicValue`
-  - Win32 noch Stubs: `BluetoothGATTRegisterEvent` (Benachrichtigungen),
-    `BluetoothGATTSetCharacteristicValue` (Schreiben) und `BluetoothGATTSetDescriptorValue`
+- [Q] State of Wine 11.20 (master):
+  - Win32 present: `BluetoothGATTGetServices`, `GetCharacteristics`, `GetCharacteristicValue`
+  - Win32 still stubs: `BluetoothGATTRegisterEvent` (notifications),
+    `BluetoothGATTSetCharacteristicValue` (writes) and `BluetoothGATTSetDescriptorValue`
     (CCCD)
-  - WinRT: `GetCharacteristics` und der Advertisement-Watcher liefern `E_NOTIMPL`
+  - WinRT: `GetCharacteristics` and the advertisement watcher return `E_NOTIMPL`
 
   https://github.com/wine-mirror/wine/blob/master/dlls/bluetoothapis/bluetoothapis.spec
-- [S] Ohne Benachrichtigungen fließen keine Leistungs- und Pulswerte, ohne Schreiben gibt es kein
-  ERG. Welche API Zwift nutzt (vermutlich WinRT), ist nicht belegt, ändert aber nichts: Beide Wege
-  sind unvollständig.
-- [F] Kein Bericht, dass Zwift unter Wine BLE-Sensoren direkt sieht. Debian-13-Nutzer im
-  Februar 2026: „not properly identifying BLE Equipment“.
+- [S] Without notifications, no power or heart rate values flow; without writes, there is no
+  ERG. Which API Zwift uses (probably WinRT) is not proven, but it makes no difference: both paths
+  are incomplete.
+- [F] No report of Zwift seeing BLE sensors directly under Wine. A Debian 13 user in
+  February 2026: “not properly identifying BLE Equipment”.
   https://forums.zwift.com/t/how-to-zwift-on-debian-linux/591025
-- Folge laut Auftrag (Abschnitt 8): Der direkte Zugriff ist nachweislich nicht möglich, also ist
-  eine Bridge zu prüfen. Die Diagnose der App weist das mit einem eigenen Test aus (Wine-Version
-  plus Stub-Liste), statt es zu behaupten.
+- Consequence according to the brief (section 8): direct access is demonstrably impossible, so a
+  bridge has to be evaluated. The app's diagnostics show this with a test of their own (Wine
+  version plus stub list) instead of just claiming it.
 
-### 5.2 Bridge über Wahoo Direct Connect (DIRCON) – der tragfähige Weg
-- [Q/F] Zwift unterstützt offiziell Trainer mit „Direct Connect“ (Wahoo DIRCON). Das ist GATT
-  über TCP im LAN, angekündigt per mDNS `_wahoo-fitness-tnp._tcp`.
-- [F] Das funktioniert auch unter Wine:
-  - Kickr V5/V6 unter Debian 11 mit Wine 7.18 (2022)
-  - im Februar 2026 unter Debian 13 im netbrain-Container
-  - im Juli 2025 mit Host-Netz
+### 5.2 Bridge via Wahoo Direct Connect (DIRCON) – the viable path
+- [Q/F] Zwift officially supports trainers with “Direct Connect” (Wahoo DIRCON). This is GATT
+  over TCP on the LAN, announced via mDNS `_wahoo-fitness-tnp._tcp`.
+- [F] This also works under Wine:
+  - Kickr V5/V6 on Debian 11 with Wine 7.18 (2022)
+  - in February 2026 on Debian 13 in the netbrain container
+  - in July 2025 with host networking
 
   https://forums.zwift.com/t/how-to-zwift-on-debian-linux/591025
-- [Q] Wines `dnsapi`-mDNS sind Stubs. [S] Zwift sucht also mit eigenem Multicast-Code; Multicast
-  muss das Spiel erreichen. Bei nativem Wine ohne Container ist das gegeben.
-- [Q] Wahoo veröffentlicht keine Protokollspezifikation. Die beste Referenz ist qdomyos-zwift
-  (GPL-3.0, aktiv), `src/devices/dircon/`:
-  - 6-Byte-Kopf
-  - Nachrichten für Dienste und Charakteristika suchen, lesen, schreiben, Benachrichtigung
-    einschalten und unaufgeforderte Benachrichtigung
-  - qdomyos stellt FTMS (0x1826) mit Control Point 0x2AD9 bereit, also **ERG**, dazu Cycling
-    Power (0x1818), CSC (0x1816) und Puls (0x180D) als eigene mDNS-Instanz.
+- [Q] Wine's `dnsapi` mDNS functions are stubs. [S] So Zwift discovers with its own multicast
+  code; multicast must reach the game. With native Wine without a container, that is the case.
+- [Q] Wahoo does not publish a protocol specification. The best reference is qdomyos-zwift
+  (GPL-3.0, active), `src/devices/dircon/`:
+  - 6-byte header
+  - messages for discovering services and characteristics, reading, writing, enabling
+    notifications, and unsolicited notifications
+  - qdomyos provides FTMS (0x1826) with control point 0x2AD9, i.e. **ERG**, plus Cycling
+    Power (0x1818), CSC (0x1816) and heart rate (0x180D) as a separate mDNS instance.
 
   https://github.com/cagnulein/qdomyos-zwift/tree/master/src/devices/dircon
-- Rechtliche Einordnung [S]:
-  - DIRCON ist eine von Zwift angebotene Verbindungsart. Die Bridge verhält sich wie ein
-    Wahoo-Gerät.
-  - Sie berührt keine Zwift-Binärdatei, keine Anmeldung und keine Server-Schnittstelle.
-  - Das Protokoll ist durch Interoperabilitäts-Analyse bekannt, nicht dokumentiert.
-  - Damit erfüllt sie die Bedingungen aus Abschnitt 8 bis auf „dokumentierte Schnittstelle“, dort
-    nur teilweise.
-  - Code aus qdomyos (GPL-3) darf übernommen werden, wenn das Projekt GPL-3 wird.
-- Offene Fragen, nur mit Hardware zu klären:
-  1. **Nimmt Zwift Puls über eine DIRCON-Instanz an?** Echte Kickr liefern keinen Puls, deshalb
-     brauchten bisherige Nutzer dafür Companion.
-  2. Findet Zwift eine DIRCON-Instanz auf **demselben Rechner** (mDNS-Loopback)?
-  3. Stabilität und Latenz von ERG über die Kette BLE → Bridge → TCP → Wine.
-  4. Gleichzeitiger Zugriff: Die Bridge hält die BLE-Verbindung exklusiv; Zwift sieht den
-     Trainer nur über die Bridge.
+- Legal assessment [S]:
+  - DIRCON is a connection type offered by Zwift. The bridge behaves like a Wahoo device.
+  - It does not touch any Zwift binary, any sign-in or any server interface.
+  - The protocol is known through interoperability analysis, not documented.
+  - It therefore meets the conditions from section 8 except for “documented interface”, which it
+    meets only partially.
+  - Code from qdomyos (GPL-3) may be reused if the project becomes GPL-3.
+- Open questions that can only be answered with hardware:
+  1. **Does Zwift accept heart rate via a DIRCON instance?** Real Kickrs do not provide heart
+     rate, which is why previous users needed Companion for it.
+  2. Does Zwift find a DIRCON instance on **the same machine** (mDNS loopback)?
+  3. Stability and latency of ERG over the chain BLE → bridge → TCP → Wine.
+  4. Concurrent access: the bridge holds the BLE connection exclusively; Zwift sees the trainer
+     only through the bridge.
 
 ### 5.3 ANT+
-- [Q] Wines `winusb.dll` hat außer `WinUsb_Free` nur Stubs (unverändert seit 2022). Die
-  Windows-Treiber der ANT-Sticks (libusb-win32, SiLabs, WHQL) laden in Wine nicht.
+- [Q] Apart from `WinUsb_Free`, Wine's `winusb.dll` has only stubs (unchanged since 2022). The
+  Windows drivers of the ANT sticks (libusb-win32, SiLabs, WHQL) do not load in Wine.
   https://github.com/wine-mirror/wine/blob/master/dlls/winusb/winusb.spec
-- [F] Es gibt keinen einzigen Erfolgsbericht. Nutzer weichen auf eine VM mit USB-Durchreichung aus.
-- [S] **ANT+ in Wine: geht nicht.** Möglich wäre später: Die Bridge liest ANT+ nativ unter Linux
-  (libusb, z. B. die Python-Bibliothek `openant`) und reicht die Werte über DIRCON weiter.
-  Erst nach BLE.
+- [F] There is not a single success report. Users fall back to a VM with USB passthrough.
+- [S] **ANT+ in Wine: does not work.** A possible later option: the bridge reads ANT+ natively on
+  Linux (libusb, e.g. the Python library `openant`) and passes the values on via DIRCON.
+  Only after BLE.
 
 ## 6. Updates
 
-- [Q] netbrain vergleicht die lokale `Zwift_ver_cur.xml` mit der vom CDN. Ist sie anders, startet
-  es den Launcher mit `SilentLaunch` und wartet bis zu 5 Minuten auf die neue Version.
-- [S] Das nutzt den offiziellen Updateweg und ist zulässig. Die App übernimmt das Prinzip:
-  - Version vorher und nachher festhalten
-  - freien Platz prüfen
-  - vor dem Update einen Btrfs- oder Kopie-Schnappschuss des Wine-Prefix anbieten. TUXEDO OS
-    legt per Snapper ohnehin Schnappschüsse an, aber nur vom System, nicht von `~`.
-- Laufzeit-Updates (Wine aus WineHQ) laufen über APT und damit über die Systemupdates. Die App
-  zeigt nur, ob die installierte Wine-Version in der getesteten Matrix steht, und warnt vor einem
-  ungetesteten Sprung.
+- [Q] netbrain compares the local `Zwift_ver_cur.xml` with the one from the CDN. If it differs, it
+  starts the launcher with `SilentLaunch` and waits up to 5 minutes for the new version.
+- [S] This uses the official update path and is permissible. The app adopts the principle:
+  - record the version before and after
+  - check free space
+  - before the update, offer a Btrfs or copy snapshot of the Wine prefix. TUXEDO OS creates
+    snapshots via Snapper anyway, but only of the system, not of `~`.
+- Runtime updates (Wine from WineHQ) go through APT and thus through the system updates. The app
+  only shows whether the installed Wine version is in the tested matrix and warns about an
+  untested jump.
 
-## 7. Was der Auftrag ändert
+## 7. What changes compared to the brief
 
-| Annahme im Auftrag | Befund | Folge |
+| Assumption in the brief | Finding | Consequence |
 |---|---|---|
-| Debian-Pakete bevorzugen | Wine fehlt in forky | WineHQ-Quelle mit ausdrücklicher Zustimmung (E1) |
-| DXVK, 32-Bit-Bibliotheken prüfen | OpenGL-Spiel, WoW64 | entfällt weitgehend; Diagnose auf OpenGL/EGL ausrichten |
-| direkte BLE-Verbindung aus Zwift | Wine-GATT unvollständig | DIRCON-Bridge als eigener Benutzerdienst (E3) |
-| ANT+ optional | in Wine unmöglich | „nicht unterstützt“; später nativ in der Bridge |
-| GNOME/Wayland | Forky-Standard ist Plasma | Zielrechner klären (E4) |
-| Login über offiziellen Weg | WebView2 rendert evtl. nicht | erster Test; kein nachgebauter Login (E2) |
+| Prefer Debian packages | Wine is missing in forky | WineHQ source with explicit consent (E1) |
+| Check DXVK, 32-bit libraries | OpenGL game, WoW64 | largely not applicable; focus diagnostics on OpenGL/EGL |
+| Direct BLE connection from Zwift | Wine GATT incomplete | DIRCON bridge as a separate user service (E3) |
+| ANT+ optional | impossible in Wine | “not supported”; later natively in the bridge |
+| GNOME/Wayland | Forky default is Plasma | clarify target machine (E4) |
+| Sign-in via the official path | WebView2 may not render | first test; no re-implemented login (E2) |
 
-## 8. Risiken
+## 8. Risks
 
-| # | Risiko | Wahrscheinlichkeit | Wirkung | Gegenmaßnahme |
+| # | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|
-| R1 | Launcher-Anmeldung rendert unter Wine nicht | hoch | Start unmöglich ohne Grauzonen-Trick | Test T2 zuerst; WebView2-Varianten und Wine-Versionen durchprobieren; ehrlich melden |
-| R2 | Zwift-Update bricht Wine-Kompatibilität | hoch (regelmäßig) | Start bricht ab | Versionsmatrix, Prefix-Schnappschuss vor Update, Wiederherstellen |
-| R3 | Zwift nimmt Puls über DIRCON nicht an | mittel | Pulsgurt fehlt | Test T6; sonst Puls als „nicht unterstützt“ kennzeichnen |
-| R4 | DIRCON auf demselben Host wird nicht gefunden | mittel | Bridge nutzlos | Test T5; Ausweich: Bridge auf eigener IP (Netz-Namespace, Raspberry Pi) |
-| R5 | WineHQ-Quelle ändert Schlüssel oder Pakete | gering | Installation scheitert | Schlüssel-Fingerprint festnageln, Fehler erklären |
-| R6 | NVIDIA-EGL-Probleme | mittel | schwarzes Bild/Absturz | EGL/GLX-Schalter automatisch testen |
-| R7 | Zwift ändert AGB oder sperrt Wine | gering | Projekt endet | keine Umgehung einbauen, damit nichts zu sperren ist |
+| R1 | Launcher sign-in does not render under Wine | high | Start impossible without a grey-area trick | Test T2 first; try WebView2 variants and Wine versions; report honestly |
+| R2 | Zwift update breaks Wine compatibility | high (regularly) | Start fails | Version matrix, prefix snapshot before update, restore |
+| R3 | Zwift does not accept heart rate via DIRCON | medium | No heart rate strap | Test T6; otherwise mark heart rate as “not supported” |
+| R4 | DIRCON on the same host is not found | medium | Bridge useless | Test T5; fallback: bridge on its own IP (network namespace, Raspberry Pi) |
+| R5 | WineHQ source changes keys or packages | low | Installation fails | Pin the key fingerprint, explain errors |
+| R6 | NVIDIA EGL problems | medium | Black screen/crash | Test the EGL/GLX switch automatically |
+| R7 | Zwift changes its terms or blocks Wine | low | Project ends | Build in no circumvention, so there is nothing to block |
 
-## 9. Machbarkeitstests für Phase D (vor der Installationslogik)
+## 9. Feasibility tests for Phase D (before the installation logic)
 
-| Test | Wo | Frage |
+| Test | Where | Question |
 |---|---|---|
-| T1 ✔ | beliebig | Authenticode von `ZwiftSetup.exe`: Signierer, Kette, Zeitstempel |
-| T2 ◐ | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: rendert die Anmeldung im Launcher 1.2.x? startet er das Spiel selbst? |
-| T3 ✔ | Forky + NVIDIA | OpenGL-Renderer in Wine = NVIDIA? EGL oder GLX nötig? fps auf Watopia |
-| T4 | Forky-VM | Prefix-Einrichtung idempotent, Abbruch/Wiederaufnahme |
-| T5 | Forky + BLE | Bridge-Prototyp (FTMS) auf demselben Host: findet Zwift das Gerät? |
-| T6 | Forky + Trainer + Gurt | Leistung, Kadenz, ERG, Steigungssimulation, Puls über DIRCON |
-| T7 | Forky | Update per `SilentLaunch`, danach Version aus `Zwift_ver_cur.xml` |
+| T1 ✔ | any | Authenticode of `ZwiftSetup.exe`: signer, chain, timestamp |
+| T2 ◐ | Forky + NVIDIA | WineHQ 11.20 + winetricks webview2: does the sign-in render in launcher 1.2.x? Does it start the game itself? |
+| T3 ✔ | Forky + NVIDIA | OpenGL renderer in Wine = NVIDIA? EGL or GLX needed? fps in Watopia |
+| T4 | Forky VM | Prefix setup idempotent, abort/resume |
+| T5 | Forky + BLE | Bridge prototype (FTMS) on the same host: does Zwift find the device? |
+| T6 | Forky + trainer + strap | Power, cadence, ERG, gradient simulation, heart rate via DIRCON |
+| T7 | Forky | Update via `SilentLaunch`, then version from `Zwift_ver_cur.xml` |
 
-T2, T3, T5 und T6 brauchen den Zielrechner mit NVIDIA, einen BLE-Adapter und echte Geräte.
-smokki hat nur Intel-Grafik; die VM `tuxedo-os-forky` hat keine NVIDIA-Karte.
+T2, T3, T5 and T6 need the target machine with NVIDIA, a BLE adapter and real devices.
+smokki only has Intel graphics; the VM `tuxedo-os-forky` has no NVIDIA card.
 
-### Zielrechner tinytin (`testt@tinytin`, lesend geprüft am 2026-10-29)
+### Target machine tinytin (`testt@tinytin`, checked read-only on 2026-10-29)
 
-| Punkt | Befund |
+| Item | Finding |
 |---|---|
-| System | TUXEDO OS (Debian base), `VERSION_CODENAME=forky`, Kernel 7.2.7.1-tuxedo |
-| Desktop | **KDE Plasma 6.7.4, Wayland**; libadwaita 1.10 ist installiert, GNOME nicht |
-| Grafik | **Hybrid:** Intel Iris Xe (Alder Lake-P) + NVIDIA GeForce RTX 3050 Ti Laptop, 4 GB |
-| NVIDIA-Treiber | 580.178.04 geladen; `nvidia-driver-libs 580.178.04-1tux1` aus `txos.tuxedocomputers.com/debian` (dort auch 595 und 610), Runtime-D3 an |
-| GL/Vulkan | EGL-Hersteller nvidia + mesa, Vulkan-ICD nvidia + intel |
-| Secure Boot | aus |
-| Bluetooth | Intel AX201, Adapter `tinytin` bei BlueZ 5.87 |
-| ANT+ | kein Stick |
-| Wine | nicht installiert; i386 ist als Fremdarchitektur schon aktiv |
-| PackageKit | 1.4.0 installiert |
-| Platz/RAM | 920 GB frei, 31 GB RAM |
+| System | TUXEDO OS (Debian base), `VERSION_CODENAME=forky`, kernel 7.2.7.1-tuxedo |
+| Desktop | **KDE Plasma 6.7.4, Wayland**; libadwaita 1.10 is installed, GNOME is not |
+| Graphics | **Hybrid:** Intel Iris Xe (Alder Lake-P) + NVIDIA GeForce RTX 3050 Ti Laptop, 4 GB |
+| NVIDIA driver | 580.178.04 loaded; `nvidia-driver-libs 580.178.04-1tux1` from `txos.tuxedocomputers.com/debian` (595 and 610 there as well), runtime D3 on |
+| GL/Vulkan | EGL vendors nvidia + mesa, Vulkan ICDs nvidia + intel |
+| Secure Boot | off |
+| Bluetooth | Intel AX201, adapter `tinytin` with BlueZ 5.87 |
+| ANT+ | no stick |
+| Wine | not installed; i386 is already active as a foreign architecture |
+| PackageKit | 1.4.0 installed |
+| Space/RAM | 920 GB free, 31 GB RAM |
 
-Geräte: **Wahoo KICKR V4** (Smart-Trainer) und **Garmin HRM-Pro Plus** (Pulsgurt, BLE und ANT+),
-verbunden über den eingebauten AX201.
+Devices: **Wahoo KICKR V4** (smart trainer) and **Garmin HRM-Pro Plus** (heart rate strap, BLE and
+ANT+), connected via the built-in AX201.
 
-Folgen für die Geräte [S], vor T5 auf der Hardware zu prüfen:
-- Ein KICKR V4 hat kein eingebautes Direct Connect (das kam mit späteren Modellen). Die Bridge
-  ist also ohnehin der Weg, ein echtes DIRCON-Gerät gibt es nicht als Vergleich.
-- Der V4 bietet FTMS mit Control Point (geprüft, siehe T5-Vorbereitung unten).
-- Der HRM-Pro Plus erlaubt mehrere BLE-Verbindungen gleichzeitig. Die Bridge kann ihn also
-  halten, während eine Uhr mitläuft.
+Consequences for the devices [S], to be checked on the hardware before T5:
+- A KICKR V4 has no built-in Direct Connect (that came with later models). The bridge is
+  therefore the way to go anyway; there is no real DIRCON device for comparison.
+- The V4 offers FTMS with a control point (checked, see T5 preparation below).
+- The HRM-Pro Plus allows several BLE connections at the same time. So the bridge can hold it
+  while a watch is also connected.
 
-Folgen für den Rechner:
-- Auf dem Hybrid-Notebook läuft die Plasma-Sitzung auf der Intel-GPU. Zwift muss mit
-  **PRIME-Offload** auf die NVIDIA-Karte: `__NV_PRIME_RENDER_OFFLOAD=1` und
-  `__GLX_VENDOR_LIBRARY_NAME=nvidia` für GLX bzw. `__EGL_VENDOR_LIBRARY_FILENAMES` mit
-  `10_nvidia.json` für EGL.
-- Die Grafikdiagnose muss deshalb melden, *welche* GPU den OpenGL-Kontext von Wine tatsächlich
-  bekommt. „NVIDIA-Treiber geladen“ reicht nicht. Das gehört zu T3.
-- Die Oberfläche läuft unter Plasma; libadwaita funktioniert dort, sieht aber nach GNOME aus (E4).
+Consequences for the machine:
+- On the hybrid notebook, the Plasma session runs on the Intel GPU. Zwift has to use
+  **PRIME offload** to the NVIDIA card: `__NV_PRIME_RENDER_OFFLOAD=1` and
+  `__GLX_VENDOR_LIBRARY_NAME=nvidia` for GLX, or `__EGL_VENDOR_LIBRARY_FILENAMES` with
+  `10_nvidia.json` for EGL.
+- The graphics diagnostics must therefore report *which* GPU actually gets Wine's OpenGL context.
+  “NVIDIA driver loaded” is not enough. This is part of T3.
+- The UI runs under Plasma; libadwaita works there but looks like GNOME (E4).
 
-## 10. Lizenzen der Fremdkomponenten
+## 10. Licenses of third-party components
 
-| Komponente | Lizenz | Nutzung |
+| Component | License | Use |
 |---|---|---|
-| Wine (WineHQ) | LGPL-2.1+ | Laufzeit, Systempaket |
-| winetricks | LGPL-2.1+ | einmalig zum Einrichten (WebView2, dotnet48, corefonts) |
-| WebView2, .NET 4.8, Core Fonts | Microsoft-EULA | lädt winetricks vom Hersteller, nicht mitgeliefert |
-| netbrain/zwift | Unlicense | nur Referenz |
-| qdomyos-zwift | GPL-3.0 | Protokollreferenz; Übernahme nur bei GPL-3 |
-| bleak | MIT | BLE in der Bridge (python3-bleak 3.0.2 in forky) |
-| Zwift | proprietär | wird nur über den offiziellen Weg geladen und nie verändert |
+| Wine (WineHQ) | LGPL-2.1+ | runtime, system package |
+| winetricks | LGPL-2.1+ | once, for setup (WebView2, dotnet48, corefonts) |
+| WebView2, .NET 4.8, Core Fonts | Microsoft EULA | downloaded by winetricks from the vendor, not bundled |
+| netbrain/zwift | Unlicense | reference only |
+| qdomyos-zwift | GPL-3.0 | protocol reference; reuse only under GPL-3 |
+| bleak | MIT | BLE in the bridge (python3-bleak 3.0.2 in forky) |
+| Zwift | proprietary | only downloaded via the official path and never modified |
 
-## 11. Ergebnisse der Machbarkeitstests
+## 11. Results of the feasibility tests
 
-### T2 (Teil 1), tinytin, 2026-10-29
+### T2 (part 1), tinytin, 2026-10-29
 
-Aufbau:
-- WineHQ `wine-devel 11.20~forky-1`, nur amd64 (WoW64)
-- Prefix `~/.local/share/tretlager/prefix-t2`, ohne Mono und Gecko
-- winetricks `20260125-next` (Commit f3890f6) mit `corefonts dotnet48 d3dcompiler_47 webview2`.
-  Zusätzlich nötig war das Paket **`cabextract`**, das winetricks voraussetzt.
-- Skripte in `~/tretlager-t2/` auf tinytin, jeweils als eigene `systemd-run --user`-Unit
+Setup:
+- WineHQ `wine-devel 11.20~forky-1`, amd64 only (WoW64)
+- Prefix `~/.local/share/tretlager/prefix-t2`, without Mono and Gecko
+- winetricks `20260125-next` (commit f3890f6) with `corefonts dotnet48 d3dcompiler_47 webview2`.
+  The package **`cabextract`**, which winetricks requires, was also needed.
+- Scripts in `~/tretlager-t2/` on tinytin, each as its own `systemd-run --user` unit
 
-| Schritt | Ergebnis |
+| Step | Result |
 |---|---|
 | Prefix + winetricks | ok, **297 s** |
 | `ZwiftSetup.exe /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL` | ok, rc 0 |
-| `ZwiftLauncher.exe SilentLaunch` (ohne Anmeldung) | lädt das Spiel: **Zwift 1.124.0 (167761)**, 4,9 GB, in etwa 1–2 min; der Launcher bleibt danach untätig im Hintergrund |
-| Versionsdatei | `Zwift_ver_cur.xml` wird zu `Zwift_ver_cur.<build>.xml` umbenannt, der Name steht in `Zwift_ver_cur_filename.txt` (UTF-16/NUL) |
-| WebView2-Runtime | **109.0.1518.140**, die letzte Win7-Version; winetricks setzt `msedgewebview2.exe` auf Win7 (Wine-Bug 58921) |
-| Launcher normal starten (Anmeldung) | **scheitert.** Log: „EnsureCoreWebView2Async“ → „Main Window Visible: True“ → Prozess endet nach etwa 20 s mit rc 0. Es erscheint kein Fenster und kein WebView2-Datenordner. Mit `--no-sandbox --disable-gpu` dasselbe |
+| `ZwiftLauncher.exe SilentLaunch` (without sign-in) | downloads the game: **Zwift 1.124.0 (167761)**, 4.9 GB, in about 1–2 min; the launcher then stays idle in the background |
+| Version file | `Zwift_ver_cur.xml` is renamed to `Zwift_ver_cur.<build>.xml`, the name is stored in `Zwift_ver_cur_filename.txt` (UTF-16/NUL) |
+| WebView2 runtime | **109.0.1518.140**, the last Win7 version; winetricks sets `msedgewebview2.exe` to Win7 (Wine bug 58921) |
+| Starting the launcher normally (sign-in) | **fails.** Log: “EnsureCoreWebView2Async” → “Main Window Visible: True” → process exits after about 20 s with rc 0. No window and no WebView2 data folder appear. Same with `--no-sandbox --disable-gpu` |
 
-Am Binary bestätigt:
-- `BleWin10Lib.dll` nutzt **WinRT-BLE** (`BluetoothLEAdvertisementWatcher`,
+Confirmed in the binary:
+- `BleWin10Lib.dll` uses **WinRT BLE** (`BluetoothLEAdvertisementWatcher`,
   `GattDeviceServicesResult`, `GattReadClientCharacteristicConfigurationDescriptorResult`).
-  Das sind genau die Teile, die in Wine `E_NOTIMPL` liefern.
-- `ZwiftApp.exe` enthält `_wahoo-fitness-tnp._tcp.local.` (DIRCON) und
+  These are exactly the parts that return `E_NOTIMPL` in Wine.
+- `ZwiftApp.exe` contains `_wahoo-fitness-tnp._tcp.local.` (DIRCON) and
   `_zwift-protocol._tcp.local.`.
-- Daneben liegen `ANT_DLL.dll` und ein „Windows ANT Dongle Driver“.
+- Next to it are `ANT_DLL.dll` and a “Windows ANT Dongle Driver”.
 
-Zwischenstand: Installieren und Aktualisieren funktionieren ohne Anmeldung über den offiziellen
-Weg. **Die offizielle Anmeldung im Launcher funktioniert mit dieser Kombination nicht.** Das
-deckt sich mit netbrain (#420/#421).
+Interim status: installing and updating work without signing in via the official path. **The
+official sign-in in the launcher does not work with this combination.** This matches netbrain
+(#420/#421).
 
-Nächste Varianten für T2:
-1. neuere WebView2-Runtime (Fixed Version) im Win10-Modus
+Next variants for T2:
+1. newer WebView2 runtime (Fixed Version) in Win10 mode
 2. `wine-staging` 11.20
-3. umu-launcher + Proton/GE-Proton, das eigene WebView2-Fixes mitbringt
-4. Wine-Trace (`+loaddll,+combase`) zur Ursache
+3. umu-launcher + Proton/GE-Proton, which ships its own WebView2 fixes
+4. Wine trace (`+loaddll,+combase`) to find the cause
 
-### T2 (Teil 2): neueres WebView2, tinytin, 2026-10-29
+### T2 (part 2): newer WebView2, tinytin, 2026-10-29
 
-Wine-Bug 58921: WebView2 nutzt ab Windows 8.1 DirectComposition. Vanilla Wine liefert
-`DCompositionCreateDevice` → `E_NOTIMPL` (Stand 11.18), deshalb der Win7-Zwang in winetricks.
-wine-staging hat einen DComp-Patchsatz, mit dem ähnliche WebView2-Apps wieder rendern.
+Wine bug 58921: from Windows 8.1 on, WebView2 uses DirectComposition. Vanilla Wine returns
+`DCompositionCreateDevice` → `E_NOTIMPL` (as of 11.18), hence the forced Win7 mode in winetricks.
+wine-staging has a DComp patch set with which similar WebView2 apps render again.
 https://bugs.winehq.org/show_bug.cgi?id=58921
 
-| Versuch (Klon `prefix-t2b`, per Btrfs-Reflink in 0,4 s) | Ergebnis |
+| Attempt (clone `prefix-t2b`, via Btrfs reflink in 0.4 s) | Result |
 |---|---|
-| Win7-Override entfernt, Bootstrapper erneut | installiert wieder 109 |
-| 109 entfernt, Evergreen-Standalone x64 (215 MB, signiert „Microsoft Corporation“) | EdgeUpdate bricht ab mit `0x80040902`, 109 bleibt |
-| Fixed-Version-CAB **156.0.4314.50 x64** (offizielles CDN, cabextract), `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER`, Win10, wine-devel 11.20 | Launcher endet wie vorher still nach ~20 s, rc 0 |
+| Win7 override removed, bootstrapper again | installs 109 again |
+| 109 removed, Evergreen standalone x64 (215 MB, signed “Microsoft Corporation”) | EdgeUpdate aborts with `0x80040902`, 109 stays |
+| Fixed Version CAB **156.0.4314.50 x64** (official CDN, cabextract), `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER`, Win10, wine-devel 11.20 | Launcher exits silently after ~20 s as before, rc 0 |
 
 Trace (`+seh,+loaddll,+process`):
-- `WebView2Loader.dll` und `EmbeddedBrowserWebView.dll` aus 156 werden geladen.
-- **Es wird nie ein `msedgewebview2.exe` gestartet.**
-- Es gibt mehrere .NET-Ausnahmen (`e0434352`), danach endet der Launcher ohne eigene Logzeile.
+- `WebView2Loader.dll` and `EmbeddedBrowserWebView.dll` from 156 are loaded.
+- **No `msedgewebview2.exe` is ever started.**
+- There are several .NET exceptions (`e0434352`), after which the launcher exits without a log
+  line of its own.
 
-Folge: Am Alter der Runtime liegt es nicht. WebView2 kommt unter vanilla Wine 11.20 gar nicht
-bis zum Browser-Prozess.
+Consequence: the age of the runtime is not the cause. Under vanilla Wine 11.20, WebView2 never
+even gets to the browser process.
 
-Nebenbefund: Microsofts Code-Signing-Wurzeln stehen nicht im System-CA-Speicher. Prüft die App
-WebView2-Downloads selbst, braucht sie eine eigene Microsoft-CA-Datei; bei Zwift reicht der
-System-Speicher.
+Side finding: Microsoft's code signing roots are not in the system CA store. If the app verifies
+WebView2 downloads itself, it needs its own Microsoft CA file; for Zwift the system store is
+sufficient.
 
-Nächster Schritt: derselbe Test mit `wine-staging` 11.20 (`/opt/wine-staging`, parallel zu
-wine-devel installierbar).
+Next step: the same test with `wine-staging` 11.20 (`/opt/wine-staging`, installable alongside
+wine-devel).
 
-### T2 (Teil 3): wine-staging, tinytin, 2026-10-29
+### T2 (part 3): wine-staging, tinytin, 2026-10-29
 
-- `wine-staging 11.20` aus WineHQ, nach `/opt/wine-staging`, parallel zu wine-devel.
-- Erster Start im Klon: Staging aktualisiert den Prefix (`wine.inf`). Dabei bleibt ein Dialog
-  „rundll32 … This application could not be started“ hängen, bis jemand am Bildschirm *Nein*
-  klickt. Die App muss den Prefix deshalb immer mit derselben Wine-Version betreiben oder die
-  Aktualisierung selbst unbeaufsichtigt anstoßen.
-- Launcher mit WebView2 156 (Fixed Version, Win10): **gleiches Bild wie bei vanilla.**
-  „EnsureCoreWebView2Async“, danach kein `msedgewebview2.exe`, nach ~20 s Ende mit rc 0.
+- `wine-staging 11.20` from WineHQ, into `/opt/wine-staging`, alongside wine-devel.
+- First start in the clone: Staging updates the prefix (`wine.inf`). In the process a dialog
+  “rundll32 … This application could not be started” hangs until someone at the screen clicks
+  *No*. The app must therefore always run the prefix with the same Wine version or trigger the
+  update itself unattended.
+- Launcher with WebView2 156 (Fixed Version, Win10): **same picture as with vanilla.**
+  “EnsureCoreWebView2Async”, then no `msedgewebview2.exe`, exit after ~20 s with rc 0.
 
-Stand bei netbrain (#420/#421, 2026-10-23): Der Absturz von Launcher 1.2 ist umgangen, „the
-webview2 content in the launcher still does not render“. Niemand berichtet eine funktionierende
-Launcher-Anmeldung mit 1.2 unter Wine.
+Status at netbrain (#420/#421, 2026-10-23): the crash of launcher 1.2 is worked around, “the
+webview2 content in the launcher still does not render”. Nobody reports a working launcher
+sign-in with 1.2 under Wine.
 
-**Zwischenergebnis T2:** Die offizielle Anmeldung ist mit Launcher 1.2 unter Wine 11.20 derzeit
-nicht möglich: vanilla und Staging, WebView2 109 und 156 getestet. Installieren und Aktualisieren
-gehen.
+**Interim result T2:** the official sign-in is currently not possible with launcher 1.2 under
+Wine 11.20: vanilla and Staging, WebView2 109 and 156 tested. Installing and updating work.
 
-Mögliche nächste Schritte:
-1. Proton per umu-launcher im Benutzerverzeichnis (kein root, eigene WebView2-Fixes von Valve/GE)
-2. WebView2 getrennt vom Launcher testen (Microsoft-Beispiel-App), um Launcher- und Wine-Problem
-   zu trennen; ggf. Fehlerbericht an Wine
-3. nachgebauter Token-Login (netbrain): technisch erprobt, aber AGB-Risiko → nur auf
-   ausdrückliche Entscheidung (E2)
-4. abwarten: App installiert und aktualisiert, meldet Start ehrlich als „derzeit nicht möglich“
+Possible next steps:
+1. Proton via umu-launcher in the home directory (no root, Valve's/GE's own WebView2 fixes)
+2. test WebView2 separately from the launcher (Microsoft sample app) to separate the launcher
+   problem from the Wine problem; possibly a bug report to Wine
+3. re-implemented token login (netbrain): technically proven, but a terms-of-service risk → only
+   on an explicit decision (E2)
+4. wait: the app installs and updates, and honestly reports starting as “currently not possible”
 
-### T2 (Teil 4): Proton per umu-launcher, tinytin, 2026-10-29
+### T2 (part 4): Proton via umu-launcher, tinytin, 2026-10-29
 
-- umu-launcher **1.4.4** als Zipapp (SHA-256 aus dem Release geprüft) und **GE-Proton11-11**
-  (SHA-512 geprüft, basiert auf Wine 11.0 Staging). Beides liegt in
-  `~/.local/share/tretlager/runtimes/`, ohne root.
-- `GAMEID=umu-zwift`: Der protonfix installiert `corefonts dotnet48 d3dcompiler_47 webview2`
-  selbst, mit winetricks 20260125-next. Prefix plus Setup dauern **250 s**, dazu kommt beim
-  ersten Mal der Download der Steam Runtime.
-- Das Spiel wurde per Reflink aus `prefix-t2` übernommen; nichts neu geladen.
-- Launcher unter Proton mit WebView2 109/Win7: **endet still nach ~20 s, rc 0**, kein
-  WebView2-Datenordner.
-- Mit WebView2 156 Fixed Version und Win10: dasselbe.
+- umu-launcher **1.4.4** as a zipapp (SHA-256 from the release verified) and **GE-Proton11-11**
+  (SHA-512 verified, based on Wine 11.0 Staging). Both live in
+  `~/.local/share/tretlager/runtimes/`, without root.
+- `GAMEID=umu-zwift`: the protonfix installs `corefonts dotnet48 d3dcompiler_47 webview2` itself,
+  with winetricks 20260125-next. Prefix plus setup take **250 s**, plus the download of the Steam
+  Runtime the first time.
+- The game was taken over from `prefix-t2` via reflink; nothing was downloaded again.
+- Launcher under Proton with WebView2 109/Win7: **exits silently after ~20 s, rc 0**, no
+  WebView2 data folder.
+- With WebView2 156 Fixed Version and Win10: the same.
 
-**Gesamtergebnis T2 (sechs Kombinationen):**
+**Overall result T2 (six combinations):**
 
-| Laufzeit | WebView2 109 (Win7) | WebView2 156 (Win10) |
+| Runtime | WebView2 109 (Win7) | WebView2 156 (Win10) |
 |---|---|---|
 | WineHQ wine-devel 11.20 | ✗ | ✗ |
 | WineHQ wine-staging 11.20 | – | ✗ |
 | GE-Proton11-11 (umu) | ✗ | ✗ |
 
-In keiner Kombination startet der Launcher 1.2 einen WebView2-Browser-Prozess; er endet ohne
-Fehlermeldung. **Die offizielle Anmeldung ist unter Wine derzeit nicht möglich.**
-Installieren und Aktualisieren funktionieren in allen Laufzeiten.
+In none of the combinations does launcher 1.2 start a WebView2 browser process; it exits without
+an error message. **The official sign-in is currently not possible under Wine.**
+Installing and updating work in all runtimes.
 
-### T2 (Teil 5): WebView2 getrennt vom Launcher, tinytin, 2026-10-29
+### T2 (part 5): WebView2 separately from the launcher, tinytin, 2026-10-29
 
-Test-Apps in `poc/wv2test/` (C#, kompiliert mit `csc.exe` aus .NET 4.8 im Prefix, NuGet
+Test apps in `poc/wv2test/` (C#, compiled with `csc.exe` from .NET 4.8 in the prefix, NuGet
 `Microsoft.Web.WebView2` 1.0.4314.35), wine-devel 11.20, WebView2 109:
 
-| Test | Ergebnis |
+| Test | Result |
 |---|---|
-| WinForms `WebView2` | Init OK, Browser-Prozess läuft, `example.com` geladen und **sichtbar gerendert** |
-| WPF `WebView2` (HWND-basiert) | Init OK, Navigation OK |
-| WPF **`WebView2CompositionControl`** | Absturz: `TypeLoadException: Could not find Windows Runtime type 'Windows.UI.Composition.ContainerVisual'` in `TryInitializeD3DImage()` |
+| WinForms `WebView2` | init OK, browser process running, `example.com` loaded and **visibly rendered** |
+| WPF `WebView2` (HWND-based) | init OK, navigation OK |
+| WPF **`WebView2CompositionControl`** | crash: `TypeLoadException: Could not find Windows Runtime type 'Windows.UI.Composition.ContainerVisual'` in `TryInitializeD3DImage()` |
 
-`ZwiftLauncher.exe` ist eine WPF-App (.NET Framework 4.7.2) und enthält
-`WebView2CompositionControl`. Es gibt keinen Schalter in `ZwiftLauncher.exe.config`; der Launcher
-versucht es zweimal („deleting user data and retrying“) und gibt dann auf.
+`ZwiftLauncher.exe` is a WPF app (.NET Framework 4.7.2) and contains
+`WebView2CompositionControl`. There is no switch in `ZwiftLauncher.exe.config`; the launcher
+tries twice (“deleting user data and retrying”) and then gives up.
 
-**Ursache T2:** Ab Launcher 1.2 zeichnet Zwift die Anmeldeseite mit dem
-`WebView2CompositionControl`. Das braucht die WinRT-API `Windows.UI.Composition`, die Wine
-(vanilla, Staging, Proton) nicht hat. WebView2 selbst läuft unter Wine. Das passt zu den
-früheren Meldungen „webview2 in zwift launcher works“ (Januar 2026, älterer Launcher).
+**Cause of T2:** from launcher 1.2 on, Zwift draws the sign-in page with the
+`WebView2CompositionControl`. That needs the WinRT API `Windows.UI.Composition`, which Wine
+(vanilla, Staging, Proton) does not have. WebView2 itself runs under Wine. This fits the earlier
+reports “webview2 in zwift launcher works” (January 2026, older launcher).
 
-Folgen:
-- Eine Lösung über die offizielle Anmeldung bräuchte entweder `Windows.UI.Composition` in Wine
-  (groß, Fehlerbericht lohnt sich mit diesem Minimalbeispiel) oder dass Zwift zum klassischen
-  Steuerelement zurückkehrt bzw. darauf ausweicht (Rückmeldung an Zwift möglich).
-- Einen Launcher-Patch baut Tretlager nicht (Grundsatz: Zwift-Dateien bleiben unverändert).
+Consequences:
+- A solution via the official sign-in would need either `Windows.UI.Composition` in Wine (large;
+  a bug report with this minimal example is worthwhile) or Zwift returning to, or falling back
+  on, the classic control (feedback to Zwift possible).
+- Tretlager does not build a launcher patch (principle: Zwift files stay unmodified).
 
-### T2b: Opt-in-Token-Login, T3: Grafik, tinytin, 2026-10-29
+### T2b: opt-in token login, T3: graphics, tinytin, 2026-10-29
 
-**Zwift läuft auf tinytin.** Weg (`poc/token-login/`):
-1. Anmeldung im System-Browser auf `secure.zwift.com` mit `client_id=Game_Launcher`. Christoph
-   meldet sich selbst an; das Skript sieht das Passwort nie.
-2. Der Browser landet auf `launcher.zwift.com/launcher?state=…&code=…` und zeigt „Bad Request“.
-   Die Adresse wird ins Terminal kopiert, der Code ist nur kurz gültig.
-3. Code gegen Token tauschen (`/openid-connect/token`). Das Token liegt in `$XDG_RUNTIME_DIR` und
-   wird nach dem Start gelöscht.
-4. `ZwiftLauncher.exe SilentLaunch`, dann `ZwiftApp.exe --token=…` als **Kind des Launchers**
-   über ein eigenes `RunFromProcess.exe` (C#, `PROC_THREAD_ATTRIBUTE_PARENT_PROCESS`, mit
-   csc.exe im Prefix gebaut). Danach Launcher und Crash-Handler beenden.
+**Zwift runs on tinytin.** Path (`poc/token-login/`):
+1. Sign-in in the system browser on `secure.zwift.com` with `client_id=Game_Launcher`. I sign
+   in myself; the script never sees the password.
+2. The browser lands on `launcher.zwift.com/launcher?state=…&code=…` and shows “Bad Request”.
+   The address is copied into the terminal; the code is only valid briefly.
+3. Exchange the code for a token (`/openid-connect/token`). The token is stored in
+   `$XDG_RUNTIME_DIR` and deleted after the start.
+4. `ZwiftLauncher.exe SilentLaunch`, then `ZwiftApp.exe --token=…` as a **child of the launcher**
+   via a custom `RunFromProcess.exe` (C#, `PROC_THREAD_ATTRIBUTE_PARENT_PROCESS`, built with
+   csc.exe in the prefix). Then terminate the launcher and the crash handler.
 
-Ohne den richtigen Elternprozess startet `ZwiftApp.exe` den Launcher neu. Dieser stürzt dann ab
+Without the right parent process, `ZwiftApp.exe` restarts the launcher. That then crashes
 (`AccessViolationException` in `ZwiftPatcher.patcher_CheckExperimentation`).
 
-Einordnung: Der Weg nutzt die nicht dokumentierte Launcher-Anmeldung und täuscht den
-Elternprozess vor (AGB §5, Grundsatz 7). Er ist ein **Test für Christophs eigenes Konto auf
-dessen ausdrückliche Entscheidung**, kein beschlossener Bestandteil der App (E2 bleibt offen).
+Assessment: this path uses the undocumented launcher sign-in and fakes the parent process
+(terms of service §5, principle 7). It is a **test for my own account on my explicit
+decision**, not an agreed part of the app (E2 remains open).
 
-**T3 Grafik** (`poc/gltest/GLTest.cs`, gleicher WGL-Weg wie GLFW in Zwift):
+**T3 graphics** (`poc/gltest/GLTest.cs`, same WGL path as GLFW in Zwift):
 
-| Variante | Ergebnis |
+| Variant | Result |
 |---|---|
-| Wine-Standard (EGL) | Intel Iris Xe, OpenGL 4.6 Mesa 26.1.6 |
-| EGL + `__EGL_VENDOR_LIBRARY_FILENAMES=10_nvidia.json` + Offload | **kein Pixelformat** → Zwift „OpenGL 3.1 required“ |
-| EGL, Vendor leer (netbrain) | Intel |
+| Wine default (EGL) | Intel Iris Xe, OpenGL 4.6 Mesa 26.1.6 |
+| EGL + `__EGL_VENDOR_LIBRARY_FILENAMES=10_nvidia.json` + offload | **no pixel format** → Zwift “OpenGL 3.1 required” |
+| EGL, vendor empty (netbrain) | Intel |
 | GLX (`HKCU\Software\Wine\X11 Driver\UseEGL=N`) | Intel |
 | **GLX + `__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia`** | **NVIDIA RTX 3050 Ti, OpenGL 4.6.0, 580.178.04** |
 
-Im Spiel: `ZwiftApp.exe` mit 3,3 GB VRAM und 58 % SM-Last auf der NVIDIA-Karte; im Log steht
-„GPU … NVIDIA GeForce RTX 3050 Ti Laptop GPU“. Die App muss auf Hybrid-Rechnern also GLX und
-PRIME-Offload setzen und das mit diesem GL-Test nachweisen.
+In the game: `ZwiftApp.exe` with 3.3 GB VRAM and 58 % SM load on the NVIDIA card; the log says
+“GPU … NVIDIA GeForce RTX 3050 Ti Laptop GPU”. So on hybrid machines the app has to set GLX and
+PRIME offload and prove it with this GL test.
 
-**Sensoren im Spiel:** `BLE_LOAD_FAIL; library="BleWin10Lib_fallback.dll", windowsBuild=19045`
-→ „Native BLE unavailable, deferring scan“ → „Starting ANT+ scan“. Wie erwartet findet Zwift
-kein Bluetooth. Weiter geht es mit T5 (Bridge).
+**Sensors in the game:** `BLE_LOAD_FAIL; library="BleWin10Lib_fallback.dll", windowsBuild=19045`
+→ “Native BLE unavailable, deferring scan” → “Starting ANT+ scan”. As expected, Zwift finds no
+Bluetooth. Next up is T5 (bridge).
 
-Nebenbefunde:
-- Zwift schreibt Sentry-Absturzberichte (`AppData/Local/Zwift/.sentry`). Das gehört in die
-  Datenschutz-Übersicht; es stammt von Zwift, nicht von Tretlager.
-- Beim ersten Start fehlen Welten-Daten („Watopia not found“). Das Spiel lief trotzdem; ob es
-  sie nachlädt, ist noch zu prüfen.
+Side findings:
+- Zwift writes Sentry crash reports (`AppData/Local/Zwift/.sentry`). This belongs in the privacy
+  overview; it comes from Zwift, not from Tretlager.
+- On the first start, world data is missing (“Watopia not found”). The game ran anyway; whether
+  it downloads the data later still needs checking.
 
-### Fenster und Auflösung, tinytin, 2026-10-29
+### Window and resolution, tinytin, 2026-10-29
 
-- Zwift im Vollbild hat über Wine/XRandR den **Modus des Panels umgestellt** (2880×1800 →
-  2560×1600). Zusammen mit Plasmas X11-Skalierung (1,6) war das Bild verzerrt. Abhilfe im
-  Prefix: `HKCU\Software\Wine\X11 Driver\UseXRandR=N`. Den Modus stellt man mit
-  `kscreen-doctor output.eDP-1.mode.1` zurück.
-- Danach war das Bild in Ordnung, aber das Fenster (2872×1766 bei y=44) lag unter der
-  Plasma-Leiste, und die unteren Knöpfe waren verdeckt. Ein Doppelklick auf die Titelleiste
-  (KWin maximiert) behebt das. Die App muss Zwift maximiert oder im Vollbild starten.
-- Für ein scharfes Bild unter Plasma mit Skalierung braucht es *Legacy-Anwendungen (X11) →
-  Skalierung selbst anwenden*. Das ist eine Desktop-Einstellung; die App weist nur darauf hin.
+- In fullscreen, Zwift **switched the panel's mode** via Wine/XRandR (2880×1800 →
+  2560×1600). Together with Plasma's X11 scaling (1.6), the picture was distorted. Fix in the
+  prefix: `HKCU\Software\Wine\X11 Driver\UseXRandR=N`. The mode can be reset with
+  `kscreen-doctor output.eDP-1.mode.1`.
+- After that the picture was fine, but the window (2872×1766 at y=44) was under the Plasma
+  panel, and the lower buttons were hidden. Double-clicking the title bar (KWin maximizes) fixes
+  this. The app has to start Zwift maximized or in fullscreen.
+- A sharp picture under Plasma with scaling requires *Legacy Applications (X11) → Apply scaling
+  themselves*. That is a desktop setting; the app only points it out.
 
-### T5 Vorbereitung: GATT-Inventar der Testgeräte, tinytin, 2026-10-29
+### T5 preparation: GATT inventory of the test devices, tinytin, 2026-10-29
 
-BlueZ 5.87 ohne root (`bluetoothctl`, `busctl`). Kurz verbunden, ausgelesen, getrennt.
+BlueZ 5.87 without root (`bluetoothctl`, `busctl`). Connected briefly, read out, disconnected.
 
-**Wahoo KICKR V4** (`Wahoo KICKR C058`, kündigt 0x1818 und 0x1826 an):
+**Wahoo KICKR V4** (`Wahoo KICKR C058`, advertises 0x1818 and 0x1826):
 
-| Dienst | Charakteristik | Eigenschaften |
+| Service | Characteristic | Properties |
 |---|---|---|
 | FTMS 0x1826 | 0x2ACC Fitness Machine Feature | read |
 | | 0x2AD2 Indoor Bike Data | notify |
@@ -586,124 +583,124 @@ BlueZ 5.87 ohne root (`bluetoothctl`, `busctl`). Kurz verbunden, ausgelesen, get
 | Cycling Power 0x1818 | 0x2A63 Measurement | notify |
 | | 0x2A65 Feature, 0x2A5D Sensor Location | read |
 | | 0x2A66 Control Point | write, indicate |
-| | `A026E005` Wahoo-ERG-Erweiterung | write, indicate |
+| | `A026E005` Wahoo ERG extension | write, indicate |
 | User Data 0x181C | 0x2A98 Weight | read, write |
-| Wahoo-eigen `EE01/EE03/EE06/EE0B` | `A026E002/04/0A/23/37` | notify, write-without-response |
+| Wahoo proprietary `EE01/EE03/EE06/EE0B` | `A026E002/04/0A/23/37` | notify, write-without-response |
 
-Der V4 kann also **FTMS mit Control Point**. ERG und Steigungssimulation gehen über den
-Standard und brauchen nicht Wahoos eigene Erweiterung.
+So the V4 supports **FTMS with a control point**. ERG and gradient simulation work via the
+standard and do not need Wahoo's proprietary extension.
 
 **Garmin HRM-Pro Plus** (`HRMPro+:462237`): Heart Rate 0x180D (0x2A37 notify, 0x2A38 read),
-Battery 0x180F, Running Speed and Cadence 0x1814, Garmin-eigen `2401`. Er nimmt mehrere
-Verbindungen an (nach erneutem Scan verbunden).
+Battery 0x180F, Running Speed and Cadence 0x1814, Garmin proprietary `2401`. It accepts several
+connections (connected after a fresh scan).
 
-Folge für die Bridge: Sie muss für FTMS, Cycling Power und Heart Rate die Charakteristika 1:1
-über DIRCON weiterreichen, einschließlich Indications des Control Points. Wahoo-eigene Dienste
-braucht Zwift über FTMS nicht (zu prüfen, ob Zwift sie bevorzugt, wenn sie sichtbar sind).
+Consequence for the bridge: it must pass through the characteristics for FTMS, Cycling Power and
+Heart Rate 1:1 via DIRCON, including the control point's indications. Zwift does not need Wahoo's
+proprietary services via FTMS (to be checked whether Zwift prefers them when they are visible).
 
-### T5/T6: Bridge mit echten Geräten, tinytin, 2026-10-29
+### T5/T6: bridge with real devices, tinytin, 2026-10-29
 
-Bridge (`tretlager/bridge`) und Oberfläche (`tretlager/ui`) als Benutzerinstallation
-(`build-aux/install-user.sh`), Dienst `tretlager-bridge.service`.
+Bridge (`tretlager/bridge`) and UI (`tretlager/ui`) as a user installation
+(`build-aux/install-user.sh`), service `tretlager-bridge.service`.
 
-| Gerät | Ergebnis |
+| Device | Result |
 |---|---|
-| Wahoo KICKR V4 | stabil verbunden, FTMS und Cycling Power gespiegelt, mDNS „Wahoo KICKR FE2E“ auf 36866, Live-Werte in der Oberfläche |
-| Wahoo TICKR (`DC:1E:D3:39:2C:8D`) | verbindet, gelegentliche Abbrüche mit Wiederverbindung; **Werte zu hoch** (88–133 statt 54–66 laut Uhr) |
-| Garmin HRM-Pro Plus | auf tinytin **keine Dienstsuche** (verbunden, `ServicesResolved` bleibt aus), danach kündigt sich der Gurt bis zum Neuanlegen nicht mehr an |
+| Wahoo KICKR V4 | stable connection, FTMS and Cycling Power mirrored, mDNS “Wahoo KICKR FE2E” on 36866, live values in the UI |
+| Wahoo TICKR (`DC:1E:D3:39:2C:8D`) | connects, occasional drops with reconnection; **values too high** (88–133 instead of 54–66 according to the watch) |
+| Garmin HRM-Pro Plus | on tinytin **no service discovery** (connected, `ServicesResolved` never comes), afterwards the strap stops advertising until it is put on again |
 
-Befunde:
-- **TICKR:** Die Rohdaten (0x2A37) zeigen, dass der Gurt selbst falsch zählt. Neben plausiblen
-  RR-Intervallen von 0,7–1,0 s kommen immer wieder 0,17–0,31 s vor, oft ist ein Schlag in zwei
-  geteilt (0,48 + 0,21 s). Das spricht für ein gestörtes Signal (Elektrodenkontakt, Sitz,
-  zweiter Gurt). Die Bridge reicht die Bytes unverändert weiter; ihr Decoder ist korrekt.
-- **HRM-Pro Plus:** Von smokki aus (AX200, Firmware 193-33.24, Arch-Kernel 7.2.11) ist er in 3 s
-  verbunden und aufgelöst (31 GATT-Objekte). Auf tinytin (AX201 `ibt-0040-4150`, Firmware
-  202-5.26 vom Mai 2026, Kernel 7.2.7.1-tuxedo) hängt die Dienstsuche, auch ohne Bridge, nach
-  einem Reset des Adapters und mit gelöschtem BlueZ-Cache. Im Kernel-Log steht mehrfach
-  `Bluetooth: hci0: ACL packet for unknown connection handle`. Vermutung: Nach dem Verbinden
-  aushandeln von LE 2M oder größeren Datenpaketen verträgt der Gurt nicht. Gegenprobe:
-  `btmgmt phy` auf LE 1M begrenzen (braucht root).
-- **Bridge-Fehler, die dabei behoben wurden:** BlueZ verbindet bzw. scannt pro Adapter nur eines
-  gleichzeitig („Operation already in progress“) → gemeinsame Sperre. Eine abgebrochene
-  Verbindung muss getrennt werden, sonst wirbt das Gerät nicht mehr. Scheiternde Geräte werden
-  mit wachsender Pause (bis 60 s) erneut versucht.
+Findings:
+- **TICKR:** the raw data (0x2A37) shows that the strap itself counts wrong. Besides plausible
+  RR intervals of 0.7–1.0 s, values of 0.17–0.31 s keep appearing; often one beat is split in two
+  (0.48 + 0.21 s). This points to a disturbed signal (electrode contact, fit, a second strap). The
+  bridge passes the bytes through unchanged; its decoder is correct.
+- **HRM-Pro Plus:** from smokki (AX200, firmware 193-33.24, Arch kernel 7.2.11) it is connected
+  and resolved in 3 s (31 GATT objects). On tinytin (AX201 `ibt-0040-4150`, firmware 202-5.26
+  from May 2026, kernel 7.2.7.1-tuxedo) service discovery hangs, also without the bridge, after a
+  reset of the adapter and with the BlueZ cache cleared. The kernel log repeatedly shows
+  `Bluetooth: hci0: ACL packet for unknown connection handle`. Assumption: the strap cannot cope
+  with negotiating LE 2M or larger data packets after connecting. Counter-check: limit
+  `btmgmt phy` to LE 1M (needs root).
+- **Bridge bugs fixed along the way:** BlueZ only connects or scans one thing at a time per
+  adapter (“Operation already in progress”) → shared lock. An aborted connection has to be
+  disconnected, otherwise the device stops advertising. Failing devices are retried with a
+  growing pause (up to 60 s).
 
-### T5/T6: Zwift über die Bridge, tinytin, 2026-10-29 abends — funktioniert
+### T5/T6: Zwift via the bridge, tinytin, 2026-10-29 evening — works
 
-- Zwift findet die Bridge-Geräte per mDNS (`[WFTNP] CreateWFTNPDevice for "Wahoo HRM 2C8D"`,
-  `found service UUID 0x180D`) und verbindet sich per TCP mit der Bridge **auf demselben
-  Rechner**. Damit sind die Risiken R4 (gleicher Host) und R3 (Puls über DIRCON) ausgeräumt.
-- Gekoppelt und bestätigt: **Leistungsquelle = Wahoo KICKR FE2E**, **Herzfrequenz = Wahoo HRM
-  2C8D** (TICKR), Trittfrequenz über den KICKR. Christoph auf dem Trainer: Watt und
-  Trittfrequenz realistisch.
-- Aufzeichnung der Bridge (5-s-Raster): beim Treten 40–51 W, 39–44 U/min, 10–13 km/h, in den
-  Pausen 0; Puls 73–96 bpm; beide Geräte durchgehend verbunden, je ein Zwift-Client.
-- Netzwechsel (Kabel → WLAN): Zwifts TCP-Verbindungen hingen an der verschwundenen Adresse
-  und stauten sich, Zwift verlor die Geräte. Behoben: Die Bridge schließt Verbindungen, deren
-  lokale Adresse weg ist (Prüfung alle 3 s); Zwift verbindet sich dann über die neue Adresse.
-- Noch offen: steuerbarer Trainer (Steigung, ERG über FTMS Control Point 0x2AD9), längere
-  Fahrt, Verhalten ohne jede Netzverbindung.
+- Zwift finds the bridge devices via mDNS (`[WFTNP] CreateWFTNPDevice for "Wahoo HRM 2C8D"`,
+  `found service UUID 0x180D`) and connects via TCP to the bridge **on the same machine**. This
+  rules out risks R4 (same host) and R3 (heart rate via DIRCON).
+- Paired and confirmed: **power source = Wahoo KICKR FE2E**, **heart rate = Wahoo HRM 2C8D**
+  (TICKR), cadence via the KICKR. Me on the trainer: watts and cadence realistic.
+- Bridge recording (5 s grid): while pedalling 40–51 W, 39–44 rpm, 10–13 km/h, 0 during the
+  pauses; heart rate 73–96 bpm; both devices connected throughout, one Zwift client each.
+- Network change (cable → Wi-Fi): Zwift's TCP connections were stuck on the address that had
+  disappeared and piled up; Zwift lost the devices. Fixed: the bridge closes connections whose
+  local address is gone (checked every 3 s); Zwift then reconnects via the new address.
+- Still open: controllable trainer (gradient, ERG via FTMS control point 0x2AD9), longer ride,
+  behaviour without any network connection.
 
-### T6: Steigung und ERG über die Bridge, tinytin, 2026-10-29 21:05–21:15 — funktioniert
+### T6: gradient and ERG via the bridge, tinytin, 2026-10-29 21:05–21:15 — works
 
-- Fehler vorher: Zwift wartete auf die Antwort des FTMS Control Points und setzte den Trainer
-  immer wieder zurück (`[FTMS] Request took too long, resetting trainer`). Ursache: Die Bridge
-  schickte in der DIRCON-Schreib-Antwort nur ein Echo des Befehls. Zwift erwartet dort die
-  Antwort des Geräts (`0x80, Opcode, Ergebnis`), wie qdomyos-zwift sie liefert. Behoben: Die
-  Bridge wartet bis 3 s auf die Indication des KICKR und gibt sie in der Schreib-Antwort zurück;
-  Benachrichtigungen gehen an alle DIRCON-Clients (qdomyos-Standard).
-- Fahrt (Christoph): Fahrten, Steigung und ERG-Modus fühlten sich richtig an.
-- Control Point in 15 min: `80 11 01` (Steigungssimulation) 75×, `80 05 01` (ERG-Zielleistung)
-  3×, dazu `80 00 01` (Steuerung), `80 01 01` (Reset), `80 07 01` (Start); keine fehlende
-  Antwort, kein „took too long“ mehr nach der Korrektur.
-- Herzfrequenz fiel einmal aus: Beim Umstecken des Netzwerkkabels riss Zwifts Verbindung zur
-  Kabel-Adresse ab (`Error connecting … 192.168.0.55:36867 [995]`); Zwift verband sich nach
-  wenigen Sekunden neu. Der TICKR selbst blieb per Bluetooth verbunden. Bei zwei Adressen
-  bindet Zwift Geräte an unterschiedliche Adressen (Trainer per WLAN, Gurt per Kabel).
-- **Behoben (21:25):** Standardmäßig kündigt die Bridge ihre Geräte jetzt unter 127.0.0.1 an
-  (avahi `AddAddress` für `tretlager-<port>.local` mit `NO_REVERSE`, Dienst mit diesem Host) und
-  lauscht nur auf Loopback. Zwift unter Wine verbindet sich darüber (`127.0.0.1:36866/36867`).
-  Kabel/WLAN-Wechsel betreffen die Verbindung Zwift–Bridge nicht mehr, und der Trainer ist im
-  LAN nicht steuerbar. Für Zwift auf anderen Geräten gibt es `"local_only": false` in
-  `~/.config/tretlager/bridge.json` (noch ohne Schalter in der Oberfläche).
+- Bug before: Zwift waited for the FTMS control point's response and kept resetting the trainer
+  (`[FTMS] Request took too long, resetting trainer`). Cause: in the DIRCON write response, the
+  bridge only sent an echo of the command. Zwift expects the device's response there
+  (`0x80, opcode, result`), as qdomyos-zwift provides it. Fixed: the bridge waits up to 3 s for
+  the KICKR's indication and returns it in the write response; notifications go to all DIRCON
+  clients (qdomyos default).
+- Ride (me): rides, gradient and ERG mode felt right.
+- Control point in 15 min: `80 11 01` (gradient simulation) 75×, `80 05 01` (ERG target power)
+  3×, plus `80 00 01` (request control), `80 01 01` (reset), `80 07 01` (start); no missing
+  response, no more “took too long” after the fix.
+- Heart rate dropped out once: when the network cable was replugged, Zwift's connection to the
+  cable address broke off (`Error connecting … 192.168.0.55:36867 [995]`); Zwift reconnected
+  after a few seconds. The TICKR itself stayed connected via Bluetooth. With two addresses, Zwift
+  binds devices to different addresses (trainer via Wi-Fi, strap via cable).
+- **Fixed (21:25):** by default the bridge now advertises its devices under 127.0.0.1 (avahi
+  `AddAddress` for `tretlager-<port>.local` with `NO_REVERSE`, service with this host) and only
+  listens on loopback. Zwift under Wine connects through it (`127.0.0.1:36866/36867`).
+  Cable/Wi-Fi changes no longer affect the Zwift–bridge connection, and the trainer cannot be
+  controlled from the LAN. For Zwift on other devices there is `"local_only": false` in
+  `~/.config/tretlager/bridge.json` (no switch in the UI yet).
 
-### M3: Einrichtung durch den Kern, tinytin, 2026-10-29 spät — funktioniert
+### M3: setup by the core, tinytin, 2026-10-29 late — works
 
-`tretlager/core/setup.py` mit frischem Prefix `~/.local/share/tretlager/prefix`, ohne Zutun:
+`tretlager/core/setup.py` with a fresh prefix `~/.local/share/tretlager/prefix`, unattended:
 
-| Schritt | Dauer |
+| Step | Duration |
 |---|---|
-| Installer laden, Signatur prüfen (osslsigncode, Signierer Zwift, Inc. / 5463328) | ~1 s |
-| Wine-Umgebung (`wineboot -u`, Mono/Gecko aus) | 15 s |
-| winetricks (Commit f3890f6, SHA-256 geprüft): corefonts, dotnet48, d3dcompiler_47, webview2 | 281 s |
-| Launcher (`/VERYSILENT`, danach `wineserver -k`) | 15 s |
-| Spiel per `SilentLaunch` (Zwift 1.124.0) | 127 s |
-| Grafik: `UseEGL=N`, `UseXRandR=N`, GL-Test → NVIDIA RTX 3050 Ti, OpenGL 4.6.0 | 20 s |
-| **gesamt** | **459 s** |
+| Download installer, verify signature (osslsigncode, signer Zwift, Inc. / 5463328) | ~1 s |
+| Wine environment (`wineboot -u`, Mono/Gecko off) | 15 s |
+| winetricks (commit f3890f6, SHA-256 verified): corefonts, dotnet48, d3dcompiler_47, webview2 | 281 s |
+| Launcher (`/VERYSILENT`, then `wineserver -k`) | 15 s |
+| Game via `SilentLaunch` (Zwift 1.124.0) | 127 s |
+| Graphics: `UseEGL=N`, `UseXRandR=N`, GL test → NVIDIA RTX 3050 Ti, OpenGL 4.6.0 | 20 s |
+| **total** | **459 s** |
 
-Zweiter Lauf: alle Schritte als erledigt erkannt, 2 s. Gefundener Fehler beim Schreiben:
-`WINEDLLOVERRIDES=mscoree,mshtml=` darf nur für `wineboot` gelten, sonst ist .NET (winetricks,
-`csc.exe`) abgeschaltet.
+Second run: all steps recognised as done, 2 s. Bug found while writing it:
+`WINEDLLOVERRIDES=mscoree,mshtml=` may only apply to `wineboot`, otherwise .NET (winetricks,
+`csc.exe`) is disabled.
 
-### M4: Anmeldung im Assistenten, tinytin, 2026-10-29 spät — funktioniert
+### M4: sign-in in the assistant, tinytin, 2026-10-29 late — works
 
-- Seite *Anmeldung*: offizielle Anmeldung als „derzeit nicht möglich“ erklärt; Browser-Anmeldung
-  erst nach Haken bei „auf eigenes Risiko“ (AGB §5). Tretlager öffnet die Zwift-Seite im
-  Standardbrowser; nach dem Kopieren der Rücksprungadresse übernimmt es den Code selbst aus der
-  Zwischenablage (Christoph: „hat geklappt“).
-- Token im Secret Service (Plasma: ksecretd über `python3-secretstorage`), nicht in Dateien.
-- Erneuerung über `grant_type=refresh_token` geprüft: danach 359 min Zugriff, 7 Tage Erneuerung.
+- Page *Sign-in*: the official sign-in is explained as “currently not possible”; browser sign-in
+  only after ticking “at your own risk” (terms of service §5). Tretlager opens the Zwift page in
+  the default browser; after the redirect address is copied, it picks up the code from the
+  clipboard by itself (my verdict: “worked”).
+- Token in the Secret Service (Plasma: ksecretd via `python3-secretstorage`), not in files.
+- Renewal via `grant_type=refresh_token` verified: afterwards 359 min of access, 7 days of
+  renewal.
 
-### M5: Start aus dem Hauptfenster, tinytin, 2026-10-29 nachts — funktioniert
+### M5: start from the main window, tinytin, 2026-10-29 night — works
 
-- Erster Versuch: Zwift startete, aber der Startaufruf lief in eine Zeitüberschreitung (Zwift
-  erbte die Ausgabe-Pipe). Pythons Fehlermeldung mit dem Token in der Befehlszeile landete im
-  Protokoll der Oberfläche. Log gelöscht, Sitzung bei Zwift beendet (Erneuerung danach
-  abgelehnt), Ursache behoben: Token per 0600-Datei auf tmpfs, `RunFromProcess` liest
-  `--token=@Datei`, keine Pipes, keine Tracebacks mit Befehlszeilen.
-- Außerdem stellte Zwift trotz `UseXRandR=N` die Auflösung auf 2560×1600 um; zusätzlich
-  `UseXVidMode=N` behebt das (wird bei jedem Start gesetzt).
-- Zweiter Versuch nach Neuanmeldung: nur `ZwiftApp.exe` läuft, Auflösung 2880×1800, Fenster
-  2880×1686 ab y=44 (KWin-Skript), `nvidia-smi pmon`: ZwiftApp.exe Typ G, 66 % SM, 3,4 GB;
-  kein Token im Protokoll, Übergabedatei gelöscht; in Zwift alle vier Sensorkacheln verbunden.
+- First attempt: Zwift started, but the start call ran into a timeout (Zwift inherited the output
+  pipe). Python's error message with the token in the command line ended up in the UI's log.
+  Log deleted, session at Zwift ended (renewal rejected afterwards), cause fixed: token via a
+  0600 file on tmpfs, `RunFromProcess` reads `--token=@file`, no pipes, no tracebacks with
+  command lines.
+- In addition, Zwift switched the resolution to 2560×1600 despite `UseXRandR=N`; additionally
+  setting `UseXVidMode=N` fixes this (set on every start).
+- Second attempt after signing in again: only `ZwiftApp.exe` running, resolution 2880×1800,
+  window 2880×1686 from y=44 (KWin script), `nvidia-smi pmon`: ZwiftApp.exe type G, 66 % SM,
+  3.4 GB; no token in the log, hand-over file deleted; in Zwift all four sensor tiles connected.
