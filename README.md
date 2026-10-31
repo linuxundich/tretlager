@@ -44,8 +44,10 @@ Tretlager bringt Wine, winetricks, Python-Pakete und Werkzeuge mit. Vom System k
   Schlüsselbund) für die Zwift-Sitzung.
 - x86-64, eine Wayland-Sitzung mit XWayland oder X11; NVIDIA mit proprietärem Treiber oder Mesa.
 
-Getestet ist bisher nur TUXEDO OS Forky mit Plasma 6.7 (tinytin). Fedora, Ubuntu, openSUSE, Arch
-und GNOME sind Ziel, aber ungeprüft (Phase F5 in [docs/flatpak.md](docs/flatpak.md)).
+Getestet sind TUXEDO OS Forky mit Plasma 6.7 (tinytin) und Arch mit GNOME 51 auf Intel-Grafik
+(nanhlanu, 31.10.: Installation, Einrichtung von Wine und Zwift, Anmeldeseite; Fahrt noch offen).
+Unter GNOME zeigt Tretlager den Breeze-Stil. Fedora, Ubuntu und openSUSE sind Ziel, aber ungeprüft
+(Phase F5 in [docs/flatpak.md](docs/flatpak.md)).
 
 ## Alltag mit dem Flatpak
 

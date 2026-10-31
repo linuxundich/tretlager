@@ -20,7 +20,17 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 - Passt PySide nicht zur Qt der installierten Laufzeit, meldet Tretlager das per Benachrichtigung
   und im Protokoll, statt still ohne Fenster zu enden.
 
+### Geändert
+- Außerhalb von Plasma (etwa GNOME) nutzt Tretlager im Flatpak das Plasma-Plattformthema: Breeze-Stil
+  und vollständige Breeze-Symbole. Vorher meldete das Portal das GNOME-Symbolthema Adwaita, das in
+  der KDE-Laufzeit fehlt: Status- und Schrittsymbole blieben leer, Knöpfe im Fusion-Stil, Titel der
+  Fensterleiste in Monospace.
+
 ### Behoben
+- Absturz beim Öffnen der Anmeldung im Flatpak (SIGABRT): Qt fand den `QtWebEngineProcess` aus dem
+  BaseApp nicht. `QTWEBENGINEPROCESS_PATH` und `QTWEBENGINE_DICTIONARIES_PATH` stehen jetzt im
+  Manifest (und als Vorgabe im Programm). Auf tinytin fiel das nicht auf, weil die Sitzung noch aus
+  der Zeit des Debian-Pakets im Schlüsselbund lag.
 - Start auf Systemen mit der KDE-Laufzeit 6.11 vom 31.10. (Qt 6.11.3): gebaut gegen das
   PySide-BaseApp 6.11.3 (Flathub-Testbau aus flathub/io.qt.PySide.BaseApp#47, bis es gemergt ist).
   Vorher brach Tretlager auf nanhlanu (Arch) mit `undefined symbol …QtPrivate_6_11_2` ab.

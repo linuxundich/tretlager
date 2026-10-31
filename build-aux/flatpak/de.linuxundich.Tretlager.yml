@@ -31,6 +31,9 @@ finish-args:
   # XWayland-Skalierung für die DPI der Wine-Fenster (nur lesen)
   - --filesystem=xdg-config/kwinrc:ro
   - --env=PATH=/app/wine/bin:/app/bin:/usr/bin
+  # Anmeldefenster: WebEngine aus dem BaseApp, Qt sucht den Hilfsprozess sonst nur unter /usr (Absturz)
+  - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
+  - --env=QTWEBENGINE_DICTIONARIES_PATH=/app/qtwebengine_dictionaries
 modules:
   # Kirigami Addons (1.13.1, mit FormCard) und der Plasma-Stil sind schon in org.kde.Platform 6.11.
 

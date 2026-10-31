@@ -703,7 +703,17 @@ def main() -> int:
     start = "--start" in sys.argv[1:]
     if instance.forward("start" if start else "show"):
         return 0
+    if bridgectl.IN_FLATPAK and "KDE" not in os.environ.get("XDG_CURRENT_DESKTOP", "").upper():
+        # Außerhalb von Plasma meldet das Portal das Symbolthema des Desktops (GNOME: Adwaita), das in
+        # der KDE-Laufzeit fehlt: Status-, Schritt- und Knopfsymbole blieben leer, Steuerelemente im
+        # Fusion-Stil. Das Plasma-Plattformthema bringt Breeze (Stil, Symbole, Farben) vollständig mit.
+        os.environ.setdefault("QT_QPA_PLATFORMTHEME", "kde")
     if QtWebEngineQuick is not None:
+        if bridgectl.IN_FLATPAK:
+            # WebEngine kommt aus dem BaseApp (/app), Qt sucht den Hilfsprozess aber nur in den Pfaden
+            # der Laufzeit (/usr) und bricht ohne ihn beim ersten WebEngineView ab (SIGABRT)
+            os.environ.setdefault("QTWEBENGINEPROCESS_PATH", "/app/bin/QtWebEngineProcess")
+            os.environ.setdefault("QTWEBENGINE_DICTIONARIES_PATH", "/app/qtwebengine_dictionaries")
         QtWebEngineQuick.initialize()  # muss vor der QGuiApplication laufen
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Tretlager")

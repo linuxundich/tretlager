@@ -128,6 +128,10 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] F5 Abnahme: frisches TUXEDO OS, Fedora KDE + GNOME, Arch, lange Fahrt; Debian-Quelle auf bender abschalten
 - [x] **Startabbruch auf nanhlanu (Arch, GNOME 51, 31.10.):** Bundle (master ce6b144, auf tinytin gebaut) installiert in 19 s, startet aber nicht: `QtCore.abi3.so: undefined symbol _ZN14QObjectPrivateC2E16QtPrivate_6_11_2, version Qt_6_PRIVATE_API`. nanhlanu hat `org.kde.Platform//6.11` vom 31.10. (Commit fb23e178), tinytin einen älteren (76fa01ac). PySide aus `io.qt.PySide.BaseApp` hängt an der privaten Qt-API der Patch-Version → jedes Laufzeit-Update kann Tretlager brechen. Lösung suchen: gegen aktuelle Laufzeit + BaseApp neu bauen, Laufzeit-Commit pinnen oder PySide selbst gegen die Laufzeit bauen; Startfehler sichtbar machen (kein Fenster, kein Log). Behoben: gegen BaseApp 6.11.3 (Testbau #47) gebaut, Hinweis beim Startabbruch
 - [ ] BaseApp auf tinytin zurück auf Flathub stable, sobald flathub/io.qt.PySide.BaseApp#47 gemergt ist (`flatpak uninstall --user io.qt.PySide.BaseApp//6.11` + `flatpak install --user flathub io.qt.PySide.BaseApp//6.11`), dann neu bauen
+- [x] Absturz bei der Anmeldung im Flatpak (nanhlanu 31.10.): `QtWebEngineProcess` nicht gefunden → Variablen im Manifest; eingebettete Zwift-Seite öffnet sich
+- [x] GNOME: Symbole fehlten (Portal meldet Adwaita, nicht in der KDE-Laufzeit) → Plasma-Plattformthema außerhalb von Plasma (Breeze)
+- [ ] GNOME: Hell/Dunkel von GNOME übernehmen (Portal `org.freedesktop.appearance color-scheme`); eigene kdeglobals über XDG_CONFIG_DIRS griff im Test nicht, `kdeglobals` in der Sandbox ist ein schreibgeschützter Platzhalter der Host-Datei
+- [ ] GNOME: Schrift von GNOME (Adwaita Sans) statt Noto Sans aus dem Plasma-Thema prüfen
 - [ ] Vor jeder Veröffentlichung (F4): Qt-Version von Laufzeit und BaseApp vergleichen; nach einem Qt-Patch-Update der Laufzeit zügig neu bauen und veröffentlichen, sonst startet Tretlager bei den Nutzern nicht
 
 ## Hinweise in der App
