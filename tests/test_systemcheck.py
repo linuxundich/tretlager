@@ -146,6 +146,7 @@ def test_nvidia_in_flatpak_without_gl_extension(tmp_path):
     (root / ".flatpak-info").write_text("[Application]\n")
     checks = sc.check_graphics(root)
     assert checks[0].status == sc.FAIL and "flatpak update" in checks[0].summary
+    assert checks[1].status == sc.WARN  # Hybrid-Zeile verspricht die NVIDIA nicht
     assert not sc.nvidia_usable(root)
     (root / "usr/lib/x86_64-linux-gnu/GL/nvidia-580-196-07").mkdir(parents=True)
     assert sc.check_graphics(root)[0].status == sc.OK

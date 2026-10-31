@@ -132,7 +132,8 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] GNOME: Symbole fehlten (Portal meldet Adwaita, nicht in der KDE-Laufzeit) → Plasma-Plattformthema außerhalb von Plasma (Breeze)
 - [x] GNOME: Hell/Dunkel von GNOME übernehmen: `KDE_COLOR_SCHEME_PATH` + Palette aus Breeze(Dark).colors, Portal-Signal für den Wechsel (kdeglobals-Wege scheitern: im Flatpak liest das Plasma-Thema nur das Portal)
 - [x] GNOME: Schrift von GNOME (Portal `font-name`, Adwaita Sans 12) statt Noto Sans
-- [ ] nanhlanu: Zwift auf der GTX 1050 (envycontrol hybrid, GL.nvidia-580-196-07) praktisch prüfen
+- [x] nanhlanu: Grafiktest auf der GTX 1050 nach envycontrol hybrid + GL.nvidia-580-196-07 (--user) ok (31.10.)
+- [ ] nanhlanu: Zwift-Fahrt auf der GTX 1050 (nvidia-smi zeigt den Prozess)
 - [ ] GNOME: Hell/Dunkel-Wechsel im laufenden Betrieb am echten Desktop prüfen (offscreen per Aufruf geprüft)
 - [ ] Vor jeder Veröffentlichung (F4): Qt-Version von Laufzeit und BaseApp vergleichen; nach einem Qt-Patch-Update der Laufzeit zügig neu bauen und veröffentlichen, sonst startet Tretlager bei den Nutzern nicht
 

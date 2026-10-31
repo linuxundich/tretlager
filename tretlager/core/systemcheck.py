@@ -170,10 +170,15 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
                                 _("NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen.") + hint,
                                 details, action="nvidia-help"))
         if others:
-            checks.append(Check("hybrid", _("Hybrid-Grafik"), OK,
-                                _("Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"),
-                                [_("Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)").format(
-                                    vendor=next((g.vendor for g in gpus if g.boot_vga), others[0].vendor))]))
+            display_vendor = next((g.vendor for g in gpus if g.boot_vga), others[0].vendor)
+            if nvidia_usable(root):
+                checks.append(Check("hybrid", _("Hybrid-Grafik"), OK,
+                                    _("Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"),
+                                    [_("Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)").format(vendor=display_vendor)]))
+            else:
+                checks.append(Check("hybrid", _("Hybrid-Grafik"), WARN,
+                                    _("Notebook mit zwei Grafikchips – Zwift läuft auf {vendor}, bis die NVIDIA-Karte nutzbar ist").format(
+                                        vendor=display_vendor)))
     else:
         g = gpus[0]
         checks.append(Check("graphics", _("Grafik"), WARN,

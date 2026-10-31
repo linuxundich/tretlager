@@ -36,6 +36,8 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   NVIDIA per envycontrol zugeschaltet); PRIME-Offload nur, wenn Treiber und Flatpak-GL-Erweiterung
   vorhanden sind. Die Systemprüfung meldet eine fehlende Erweiterung (`flatpak update`) und weist bei
   reiner Intel-Grafik auf abgeschaltete NVIDIA-Karten hin; Hilfe „Zwift auf der NVIDIA-Karte“.
+  Die Zeile „Hybrid-Grafik“ verspricht die NVIDIA nur noch, wenn sie nutzbar ist. Auf nanhlanu
+  (GTX 1050, envycontrol hybrid) erkannt: Grafiktest danach „NVIDIA GeForce GTX 1050“, OpenGL 4.6.
 
 ### Behoben
 - Absturz beim Öffnen der Anmeldung im Flatpak (SIGABRT): Qt fand den `QtWebEngineProcess` aus dem
