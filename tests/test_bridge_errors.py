@@ -16,6 +16,12 @@ def test_find_timeout_short_and_separate():
     assert device.FIND_TIMEOUT <= 10 < device.CONNECT_TIMEOUT
 
 
+def test_connect_timeout_long_only_for_slow_sensors():
+    assert device.connect_timeout("TICKR 9029") == device.CONNECT_TIMEOUT == 20.0
+    assert device.connect_timeout("HRM-Pro+:123456") == device.SLOW_CONNECT_TIMEOUT
+    assert device.connect_timeout("") == device.CONNECT_TIMEOUT
+
+
 # --- B-03: verständliche Fehlertexte der Bridge ---
 
 @pytest.mark.parametrize("exc,text,not_found", [

@@ -27,8 +27,12 @@ NOT_FOUND_DELAY = 10.0
 # Hinweis „Verbindung instabil“: so viele Abbrüche oder Fehlversuche in diesem Zeitraum.
 UNSTABLE_EVENTS = 3
 UNSTABLE_WINDOW = 600.0
-# Verbinden plus Dienstsuche; der Garmin HRM-Pro Plus braucht dafür mehr als 20 s.
-CONNECT_TIMEOUT = 40.0
+# Verbinden plus Dienstsuche. Die Versuche laufen nacheinander (connect_lock): Ein hängender
+# Versuch hält alle anderen Geräte so lange auf (nanhlanu 31.10.: TICKR 40 s, KICKR wartete mit).
+# Nur der Garmin HRM-Pro Plus braucht für die Dienstsuche mehr als 20 s.
+CONNECT_TIMEOUT = 20.0
+SLOW_CONNECT_TIMEOUT = 40.0
+SLOW_CONNECT_NAMES = ("HRM-Pro",)
 # So lange bleibt ein Gerät nach einem Abbruch für Zwift angekündigt und der DIRCON-Server offen.
 # Zwift behält die Kopplung und bekommt nach dem Wiederverbinden einfach wieder Daten; sonst
 # verschwindet das Gerät aus Zwift und muss neu gefunden werden (QA-Audit B-04).
@@ -38,6 +42,11 @@ GRACE = 45.0
 # will, und die Suche in der Oberfläche warteten dann bis zu einer Minute (gemessen 30.10.).
 # Werbende Sensoren senden mehrmals pro Sekunde, 8 s reichen.
 FIND_TIMEOUT = 8.0
+def connect_timeout(name: str) -> float:
+    """Zeitlimit für Verbinden und Dienstsuche; lang nur für bekannt langsame Sensoren."""
+    return SLOW_CONNECT_TIMEOUT if any(n.lower() in (name or "").lower() for n in SLOW_CONNECT_NAMES) else CONNECT_TIMEOUT
+
+
 # BlueZ baut pro Adapter nur eine Verbindung gleichzeitig auf („Operation already in progress“).
 connect_lock = asyncio.Lock()
 
@@ -245,7 +254,7 @@ class BridgedDevice:
             if device is None:
                 raise BleakDeviceNotFoundError(self.cfg.address, f"Device with address {self.cfg.address} was not found.")
             client = BleakClient(device, disconnected_callback=lambda _c: self._disconnected.set(),
-                                 timeout=CONNECT_TIMEOUT, bluez=bluez)
+                                 timeout=connect_timeout(self.cfg.name), bluez=bluez)
             self._client = client  # auch bei Fehlschlag in _teardown trennen
             await client.connect()
         services = self._collect_services(client)

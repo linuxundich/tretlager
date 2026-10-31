@@ -64,7 +64,9 @@ class Bridge(ServiceInterface):
     # --- Lebenszyklus ---
 
     def start_devices(self) -> None:
-        for cfg in self.config.devices:
+        # Trainer zuerst: Die Verbindungen entstehen nacheinander, ein schlafender Gurt soll den
+        # Trainer nicht aufhalten.
+        for cfg in sorted(self.config.devices, key=lambda c: c.role != "trainer"):
             if cfg.enabled:
                 self._start(cfg.address)
 

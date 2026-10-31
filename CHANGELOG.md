@@ -30,6 +30,9 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
   notification and in the log instead of silently exiting without a window.
 
 ### Changed
+- Sensor bridge: connects the trainer first and gives up on a sensor after 20 s instead of
+  40 s (only the Garmin HRM-Pro keeps 40 s for its slow service discovery). On nanhlanu a sleeping
+  TICKR held up the KICKR for 40 s.
 - Outside Plasma (e.g. GNOME), Tretlager in the Flatpak uses the Plasma platform theme: Breeze style
   and the complete Breeze icons. Previously the portal reported the GNOME icon theme Adwaita, which
   is missing from the KDE runtime: status and step icons stayed empty, buttons in Fusion style,
