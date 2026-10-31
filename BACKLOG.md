@@ -183,3 +183,23 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
 - [x] Keep the previous Wine version (one) and make it selectable in Overview
 - [ ] Renew a Windows component selectively (revision marker per verb, `winetricks --force`)
 - [ ] Run through a real Wine switch on tinytin (build Tretlager with a different Wine version)
+
+## Next features (2026-10-31)
+
+- [ ] **Use the Companion app instead of the bridge.** Option to switch off the sensor bridge completely
+  and pair trainer and heart rate strap through the Zwift Companion app on the phone instead.
+  - Setting in Sensors (or Overview): “Sensors via: Tretlager bridge / Companion app”
+  - With Companion: never start the bridge (no D-Bus activation, no autostart, no DIRCON announcement),
+    skip the Bluetooth checks in the system check, adapt start page and help (phone and PC in the same network)
+  - Check whether Zwift under Wine finds the Companion app at all (network, mDNS from the prefix)
+- [ ] **MyWhoosh support.** Same workflow as for Zwift, only for MyWhoosh: system check, dependencies,
+  download, installation, updates, setup in its own prefix. Start through Tretlager, with a choice
+  between Zwift and MyWhoosh when both are installed.
+  - Feasibility first (like FEASIBILITY.md for Zwift): does MyWhoosh run under Wine (graphics API, anti-cheat,
+    sign-in), where does the Windows installer come from (Store or direct download), how are updates detected,
+    does MyWhoosh accept sensors via DIRCON from the bridge (otherwise: Companion/link app only)
+  - Core: separate the game-specific parts (`setup`, updates, start, sign-in) behind a common interface
+    instead of copying them; Zwift becomes one implementation
+  - UI: game selection in the assistant (set up one or both), start button per game or a selection on start;
+    texts and liability notices no longer Zwift-only
+  - Naming: app description and README mention both games
