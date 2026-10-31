@@ -17,6 +17,13 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 - Dezente Silhouette einer Radgruppe hinter dem Seitenkopf von Übersicht und Willkommensseite:
   drei Tonstufen aus einem Foto (`build-aux/make-backdrop.py`), in der Textfarbe des Farbschemas
   mit 7–9 % Deckkraft, passt zu Hell und Dunkel.
+- Passt PySide nicht zur Qt der installierten Laufzeit, meldet Tretlager das per Benachrichtigung
+  und im Protokoll, statt still ohne Fenster zu enden.
+
+### Behoben
+- Start auf Systemen mit der KDE-Laufzeit 6.11 vom 31.10. (Qt 6.11.3): gebaut gegen das
+  PySide-BaseApp 6.11.3 (Flathub-Testbau aus flathub/io.qt.PySide.BaseApp#47, bis es gemergt ist).
+  Vorher brach Tretlager auf nanhlanu (Arch) mit `undefined symbol …QtPrivate_6_11_2` ab.
 
 ## [0.9.0] - 2026-10-30
 

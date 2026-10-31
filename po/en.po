@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 22:36+0100\n"
+"POT-Creation-Date: 2026-10-31 14:03+0100\n"
 "PO-Revision-Date: 2026-10-30 09:30+0100\n"
 "Last-Translator: Christoph Langner\n"
 "Language-Team: English\n"
@@ -719,6 +719,18 @@ msgid ""
 msgstr ""
 "Avahi is not running – Zwift will not find the sensors. Remedy: install the "
 "avahi package and start the avahi-daemon service."
+
+#: tretlager/kde/__main__.py:13
+msgid "Tretlager startet nicht"
+msgstr "Tretlager cannot start"
+
+#: tretlager/kde/__main__.py:14
+msgid ""
+"Die Programmbibliotheken passen nicht zur installierten KDE-Laufzeit. Bitte "
+"Tretlager aktualisieren (flatpak update). Details im Protokoll."
+msgstr ""
+"The program libraries do not match the installed KDE runtime. Please update "
+"Tretlager (flatpak update). Details are in the log."
 
 #: tretlager/kde/app.py:137
 msgid "Berechtigung anfragen …"

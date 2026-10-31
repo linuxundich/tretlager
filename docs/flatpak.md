@@ -21,7 +21,7 @@ eingestellt (auf tinytin am 30.10. entfernt) und wird nicht mehr weiterentwickel
 | Baustein | Stand | Quelle |
 |---|---|---|
 | Laufzeit | `org.kde.Platform//6.11` mit Kirigami (KF6) | `flatpak remote-ls flathub` |
-| PySide6 + QtWebEngine | `io.qt.PySide.BaseApp//6.11` (PySide 6.11.2, wie auf tinytin), baut auf `io.qt.qtwebengine.BaseApp//6.11` und KDE 6.11 auf → PySide6, Kirigami und WebEngine in einer Umgebung | `flatpak remote-info --show-metadata` |
+| PySide6 + QtWebEngine | `io.qt.PySide.BaseApp//6.11` (PySide 6.11.x, muss zur Qt-Patchversion der Laufzeit passen, siehe README *Flatpak*), baut auf `io.qt.qtwebengine.BaseApp//6.11` und KDE 6.11 auf → PySide6, Kirigami und WebEngine in einer Umgebung | `flatpak remote-info --show-metadata` |
 | NVIDIA | `org.freedesktop.Platform.GL.nvidia-580-178-04` passt zum Treiber von tinytin; Flatpak installiert die passende Erweiterung selbst | `flatpak remote-ls` |
 | tinytin | Flatpak 1.18.4, Flathub als Systemquelle eingerichtet | `flatpak --version` |
 | Verteilung | Nicht über Flathub (Flathub verbietet KI-erstellte Manifeste und Einreichungen), sondern eigene Quelle auf bender wie bei den anderen Apps | Arbeitsregel |

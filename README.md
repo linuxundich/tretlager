@@ -135,6 +135,13 @@ Braucht `flatpak-builder` sowie (lädt `build.sh` selbst) `org.kde.Sdk//6.11`,
 den Quellen gebaut (auf tinytin einige Minuten). Neue Python-Abhängigkeiten:
 `build-aux/flatpak/gen-python-deps.py` schreibt `python-deps.json` neu.
 
+**Qt-Patchversion:** PySide im BaseApp ist an die private Qt-API genau der Qt-Version gebunden, gegen
+die es gebaut wurde (`QObjectPrivate(QtPrivate_6_11_N)`). Hebt Flathub die KDE-Laufzeit auf eine
+neue Qt-Patchversion, startet ein altes Tretlager nicht mehr, bis das BaseApp nachgezogen ist und
+Tretlager neu gebaut wurde. Beim Bauen deshalb Laufzeit, SDK und BaseApp auf denselben Stand
+bringen (`flatpak info --user io.qt.PySide.BaseApp//6.11` → Version = Qt der Laufzeit). Startet
+Tretlager so nicht, meldet es das per Benachrichtigung und im Protokoll.
+
 Die Sensor-Bridge startet per D-Bus-Aktivierung als eigene Instanz:
 `flatpak run --command=tretlager-bridge de.linuxundich.Tretlager` startet sie von Hand.
 
