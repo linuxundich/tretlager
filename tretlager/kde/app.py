@@ -12,7 +12,8 @@ from PySide6.QtCore import Property, QObject, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
-from .. import APP_ID, __version__
+from .. import APP_ID, __version__, build_id
+from . import desktopstyle
 from .i18n import LocalizedContext
 from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
@@ -535,6 +536,11 @@ class Backend(QObject):
         return __version__
 
     @Property(str, constant=True)
+    def build(self) -> str:
+        """Kurzkennung des installierten Flatpak-Baus (wie `flatpak info`), sonst leer."""
+        return build_id()
+
+    @Property(str, constant=True)
     def licenseText(self) -> str:
         """Volltext der GPL für die Infoseite: Debian-Systemkopie, sonst LICENSE aus dem Quellbaum."""
         for path in (Path("/usr/share/common-licenses/GPL-3"), Path(__file__).resolve().parents[2] / "LICENSE"):
@@ -703,11 +709,14 @@ def main() -> int:
     start = "--start" in sys.argv[1:]
     if instance.forward("start" if start else "show"):
         return 0
-    if bridgectl.IN_FLATPAK and "KDE" not in os.environ.get("XDG_CURRENT_DESKTOP", "").upper():
+    restyle = desktopstyle.wanted(in_flatpak=bridgectl.IN_FLATPAK)
+    if restyle:
         # Außerhalb von Plasma meldet das Portal das Symbolthema des Desktops (GNOME: Adwaita), das in
         # der KDE-Laufzeit fehlt: Status-, Schritt- und Knopfsymbole blieben leer, Steuerelemente im
         # Fusion-Stil. Das Plasma-Plattformthema bringt Breeze (Stil, Symbole, Farben) vollständig mit.
-        os.environ.setdefault("QT_QPA_PLATFORMTHEME", "kde")
+        # Fest setzen, nicht nur vorgeben: Flatpak reicht ein QT_QPA_PLATFORMTHEME des Hosts durch
+        # (etwa qt5ct aus ~/.bash_profile), das in der Sandbox fehlt.
+        os.environ["QT_QPA_PLATFORMTHEME"] = "kde"
     if QtWebEngineQuick is not None:
         if bridgectl.IN_FLATPAK:
             # WebEngine kommt aus dem BaseApp (/app), Qt sucht den Hilfsprozess aber nur in den Pfaden
@@ -720,6 +729,8 @@ def main() -> int:
     app.setOrganizationDomain("linuxundich.de")
     app.setDesktopFileName(APP_ID)
     app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
+    if restyle:
+        desktopstyle.DesktopStyle(app).start()  # Hell/Dunkel und Schrift vom Desktop
     engine = QQmlApplicationEngine()
     localized = LocalizedContext()  # i18n-Funktionen für Kirigami Addons
     engine.rootContext().setContextObject(localized)
@@ -734,7 +745,7 @@ def main() -> int:
         window.screenChanged.connect(lambda _s, w=window: display.set_scale(w.devicePixelRatio()))
     if not engine.rootObjects():
         return 1
-    applog.info("Start %s%s%s", __version__, " (Flatpak)" if bridgectl.IN_FLATPAK else "", " --start" if start else "")
+    applog.info("Start %s%s%s", __version__, f" (Flatpak, Build {build_id()})" if bridgectl.IN_FLATPAK else "", " --start" if start else "")
     app.aboutToQuit.connect(backend.on_quit)
     code = app.exec()
     applog.info("Beendet (Code %s)", code)

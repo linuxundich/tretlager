@@ -12,6 +12,7 @@ ColumnsPage {
     PageHero {
         title: i18n("Zwift unter Linux")
         text: i18n("Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. Die Einrichtung führt in %1 Schritten durch alles.", applicationWindow().stepIds.length)
+        VersionLabel {}
     }
 
     leftCards: [

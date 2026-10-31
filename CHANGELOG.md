@@ -17,6 +17,8 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 - Dezente Silhouette einer Radgruppe hinter dem Seitenkopf von Übersicht und Willkommensseite:
   drei Tonstufen aus einem Foto (`build-aux/make-backdrop.py`), in der Textfarbe des Farbschemas
   mit 7–9 % Deckkraft, passt zu Hell und Dunkel.
+- Versionsanzeige mit Build-Kennung des Flatpaks (*Version 0.9.0 · Build 6a84bf1*, wie bei
+  `flatpak info`) auf Willkommen und *Über Tretlager*, auch im Protokoll beim Start.
 - Passt PySide nicht zur Qt der installierten Laufzeit, meldet Tretlager das per Benachrichtigung
   und im Protokoll, statt still ohne Fenster zu enden.
 
@@ -24,7 +26,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 - Außerhalb von Plasma (etwa GNOME) nutzt Tretlager im Flatpak das Plasma-Plattformthema: Breeze-Stil
   und vollständige Breeze-Symbole. Vorher meldete das Portal das GNOME-Symbolthema Adwaita, das in
   der KDE-Laufzeit fehlt: Status- und Schrittsymbole blieben leer, Knöpfe im Fusion-Stil, Titel der
-  Fensterleiste in Monospace.
+  Fensterleiste in Monospace. Das Thema wird fest gesetzt, weil Flatpak ein
+  `QT_QPA_PLATFORMTHEME` des Hosts durchreicht (auf nanhlanu `qt5ct` aus `~/.bash_profile`).
+- Außerhalb von Plasma folgt Tretlager der Hell/Dunkel-Einstellung des Desktops (Portal
+  `org.freedesktop.appearance`, auch beim Umschalten im laufenden Betrieb) und übernimmt die
+  Schrift von GNOME (`tretlager/kde/desktopstyle.py`).
 
 ### Behoben
 - Absturz beim Öffnen der Anmeldung im Flatpak (SIGABRT): Qt fand den `QtWebEngineProcess` aus dem

@@ -19,6 +19,7 @@ ColumnsPage {
     PageHero {
         title: i18n("Tretlager %1", backend.version)
         text: i18n("Zwift unter Linux einrichten, aktuell halten und mit Trainer und Pulsgurt verbinden.\nTretlager ist ein privates Projekt und kein Programm von Zwift Inc. Zwift unterstützt den Betrieb unter Linux nicht. Die Benutzung erfolgt auf eigene Gefahr.")
+        VersionLabel {}
         Controls.Label {
             text: i18n("© 2026 Christoph Langner · GPL-3.0-or-later")
             color: Kirigami.Theme.disabledTextColor

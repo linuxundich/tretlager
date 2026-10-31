@@ -130,8 +130,9 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [ ] BaseApp auf tinytin zurück auf Flathub stable, sobald flathub/io.qt.PySide.BaseApp#47 gemergt ist (`flatpak uninstall --user io.qt.PySide.BaseApp//6.11` + `flatpak install --user flathub io.qt.PySide.BaseApp//6.11`), dann neu bauen
 - [x] Absturz bei der Anmeldung im Flatpak (nanhlanu 31.10.): `QtWebEngineProcess` nicht gefunden → Variablen im Manifest; eingebettete Zwift-Seite öffnet sich
 - [x] GNOME: Symbole fehlten (Portal meldet Adwaita, nicht in der KDE-Laufzeit) → Plasma-Plattformthema außerhalb von Plasma (Breeze)
-- [ ] GNOME: Hell/Dunkel von GNOME übernehmen (Portal `org.freedesktop.appearance color-scheme`); eigene kdeglobals über XDG_CONFIG_DIRS griff im Test nicht, `kdeglobals` in der Sandbox ist ein schreibgeschützter Platzhalter der Host-Datei
-- [ ] GNOME: Schrift von GNOME (Adwaita Sans) statt Noto Sans aus dem Plasma-Thema prüfen
+- [x] GNOME: Hell/Dunkel von GNOME übernehmen: `KDE_COLOR_SCHEME_PATH` + Palette aus Breeze(Dark).colors, Portal-Signal für den Wechsel (kdeglobals-Wege scheitern: im Flatpak liest das Plasma-Thema nur das Portal)
+- [x] GNOME: Schrift von GNOME (Portal `font-name`, Adwaita Sans 12) statt Noto Sans
+- [ ] GNOME: Hell/Dunkel-Wechsel im laufenden Betrieb am echten Desktop prüfen (offscreen per Aufruf geprüft)
 - [ ] Vor jeder Veröffentlichung (F4): Qt-Version von Laufzeit und BaseApp vergleichen; nach einem Qt-Patch-Update der Laufzeit zügig neu bauen und veröffentlichen, sonst startet Tretlager bei den Nutzern nicht
 
 ## Hinweise in der App

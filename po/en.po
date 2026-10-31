@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 14:03+0100\n"
+"POT-Creation-Date: 2026-10-31 15:18+0100\n"
 "PO-Revision-Date: 2026-10-30 09:30+0100\n"
 "Last-Translator: Christoph Langner\n"
 "Language-Team: English\n"
@@ -153,7 +153,7 @@ msgstr "Start Zwift"
 msgid "Fenster anpassen"
 msgstr "Adjusting the window"
 
-#: tretlager/core/launch.py:149 tretlager/kde/app.py:651
+#: tretlager/core/launch.py:149 tretlager/kde/app.py:657
 msgid "Zwift läuft"
 msgstr "Zwift is running"
 
@@ -732,37 +732,37 @@ msgstr ""
 "The program libraries do not match the installed KDE runtime. Please update "
 "Tretlager (flatpak update). Details are in the log."
 
-#: tretlager/kde/app.py:137
+#: tretlager/kde/app.py:138
 msgid "Berechtigung anfragen …"
 msgstr "Requesting permission…"
 
-#: tretlager/kde/app.py:157
+#: tretlager/kde/app.py:158
 #, python-brace-format
 msgid "Fertig: {wine}"
 msgstr "Done: {wine}"
 
-#: tretlager/kde/app.py:159
+#: tretlager/kde/app.py:160
 msgid "Unbekannter Fehler"
 msgstr "Unknown error"
 
-#: tretlager/kde/app.py:163
+#: tretlager/kde/app.py:164
 #, python-brace-format
 msgid "Helfer beendet mit Code {code}"
 msgstr "Helper exited with code {code}"
 
-#: tretlager/kde/app.py:516
+#: tretlager/kde/app.py:517
 msgid "Stromversorgung gewechselt: Netz"
 msgstr "Power source changed: AC"
 
-#: tretlager/kde/app.py:516
+#: tretlager/kde/app.py:517
 msgid "Stromversorgung gewechselt: Akku"
 msgstr "Power source changed: battery"
 
-#: tretlager/kde/app.py:518
+#: tretlager/kde/app.py:519
 msgid "Stromversorgung gewechselt"
 msgstr "Power source changed"
 
-#: tretlager/kde/app.py:519
+#: tretlager/kde/app.py:520
 msgid ""
 "Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt "
 "Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."
@@ -770,7 +770,7 @@ msgstr ""
 "Switching between AC and battery can upset the NVIDIA driver. If Zwift "
 "hangs, close it with Alt+F4 and restart it with the power adapter connected."
 
-#: tretlager/kde/app.py:543
+#: tretlager/kde/app.py:549
 msgid ""
 "GNU General Public License, Version 3 oder später: https://www.gnu.org/"
 "licenses/gpl-3.0.html"
@@ -778,52 +778,52 @@ msgstr ""
 "GNU General Public License, version 3 or later: https://www.gnu.org/licenses/"
 "gpl-3.0.html"
 
-#: tretlager/kde/app.py:557
+#: tretlager/kde/app.py:563
 msgid "Sensor-Bridge nach Update neu gestartet"
 msgstr "Sensor bridge restarted after an update"
 
-#: tretlager/kde/app.py:606
+#: tretlager/kde/app.py:612
 msgid "gültig"
 msgstr "valid"
 
-#: tretlager/kde/app.py:606
+#: tretlager/kde/app.py:612
 msgid "wird beim Start erneuert"
 msgstr "renewed at start"
 
-#: tretlager/kde/app.py:607
+#: tretlager/kde/app.py:613
 msgid "abgelaufen – bitte neu anmelden"
 msgstr "expired – please sign in again"
 
-#: tretlager/kde/app.py:608
+#: tretlager/kde/app.py:614
 msgid "nicht angemeldet"
 msgstr "not signed in"
 
-#: tretlager/kde/app.py:611
+#: tretlager/kde/app.py:617
 #, python-brace-format
 msgid ", Erneuerung noch {n} Tag"
 msgid_plural ", Erneuerung noch {n} Tage"
 msgstr[0] ", renewal for {n} more day"
 msgstr[1] ", renewal for {n} more days"
 
-#: tretlager/kde/app.py:630
+#: tretlager/kde/app.py:636
 msgid "Start vorbereiten"
 msgstr "Preparing the start"
 
-#: tretlager/kde/app.py:648
+#: tretlager/kde/app.py:654
 #, python-brace-format
 msgid "Unerwarteter Fehler ({name})"
 msgstr "Unexpected error ({name})"
 
-#: tretlager/kde/app.py:669
+#: tretlager/kde/app.py:675
 #, python-brace-format
 msgid "{version} als bewährte Wine-Version aufbewahrt"
 msgstr "{version} kept as the proven Wine version"
 
-#: tretlager/kde/app.py:672
+#: tretlager/kde/app.py:678
 msgid "Zwift beendet"
 msgstr "Zwift closed"
 
-#: tretlager/kde/app.py:690
+#: tretlager/kde/app.py:696
 #, python-brace-format
 msgid "NVIDIA-Treiber meldete {errors}"
 msgstr "NVIDIA driver reported {errors}"
@@ -881,79 +881,79 @@ msgstr ""
 "Tretlager is a private project and not a program by Zwift Inc. Zwift does "
 "not support running on Linux. Use at your own risk."
 
-#: tretlager/kde/qml/AboutPage.qml:23
+#: tretlager/kde/qml/AboutPage.qml:24
 msgid "© 2026 Christoph Langner · GPL-3.0-or-later"
 msgstr "© 2026 Christoph Langner · GPL-3.0-or-later"
 
-#: tretlager/kde/qml/AboutPage.qml:31
+#: tretlager/kde/qml/AboutPage.qml:32
 msgid "Lizenz"
 msgstr "License"
 
-#: tretlager/kde/qml/AboutPage.qml:45
+#: tretlager/kde/qml/AboutPage.qml:46
 msgid "Qt und PySide6"
 msgstr "Qt and PySide6"
 
-#: tretlager/kde/qml/AboutPage.qml:45
+#: tretlager/kde/qml/AboutPage.qml:46
 msgid "Oberfläche"
 msgstr "User interface"
 
-#: tretlager/kde/qml/AboutPage.qml:46
+#: tretlager/kde/qml/AboutPage.qml:47
 msgid "KDE Kirigami und Kirigami Addons"
 msgstr "KDE Kirigami and Kirigami Addons"
 
-#: tretlager/kde/qml/AboutPage.qml:46
+#: tretlager/kde/qml/AboutPage.qml:47
 msgid "Oberfläche im Plasma-Stil"
 msgstr "Plasma-style user interface"
 
-#: tretlager/kde/qml/AboutPage.qml:47
+#: tretlager/kde/qml/AboutPage.qml:48
 msgid "Bleak"
 msgstr "Bleak"
 
-#: tretlager/kde/qml/AboutPage.qml:47 tretlager/kde/qml/AboutPage.qml:48
+#: tretlager/kde/qml/AboutPage.qml:48 tretlager/kde/qml/AboutPage.qml:49
 msgid "MIT"
 msgstr "MIT"
 
-#: tretlager/kde/qml/AboutPage.qml:47
+#: tretlager/kde/qml/AboutPage.qml:48
 msgid "Bluetooth Low Energy über BlueZ"
 msgstr "Bluetooth Low Energy via BlueZ"
 
-#: tretlager/kde/qml/AboutPage.qml:48
+#: tretlager/kde/qml/AboutPage.qml:49
 msgid "D-Bus für Bridge und Avahi"
 msgstr "D-Bus for the bridge and Avahi"
 
-#: tretlager/kde/qml/AboutPage.qml:49
+#: tretlager/kde/qml/AboutPage.qml:50
 msgid "SecretStorage"
 msgstr "SecretStorage"
 
-#: tretlager/kde/qml/AboutPage.qml:49
+#: tretlager/kde/qml/AboutPage.qml:50
 msgid "BSD-3-Clause"
 msgstr "BSD-3-Clause"
 
-#: tretlager/kde/qml/AboutPage.qml:49
+#: tretlager/kde/qml/AboutPage.qml:50
 msgid "Zwift-Sitzung im Schlüsselbund"
 msgstr "Zwift session in the keyring"
 
-#: tretlager/kde/qml/AboutPage.qml:50
+#: tretlager/kde/qml/AboutPage.qml:51
 msgid "Wine (WineHQ)"
 msgstr "Wine (WineHQ)"
 
-#: tretlager/kde/qml/AboutPage.qml:50
+#: tretlager/kde/qml/AboutPage.qml:51
 msgid "führt den Windows-Client von Zwift aus"
 msgstr "runs the Zwift Windows client"
 
-#: tretlager/kde/qml/AboutPage.qml:51
+#: tretlager/kde/qml/AboutPage.qml:52
 msgid "richtet Windows-Komponenten im Wine-Präfix ein"
 msgstr "installs Windows components in the Wine prefix"
 
-#: tretlager/kde/qml/AboutPage.qml:55
+#: tretlager/kde/qml/AboutPage.qml:56
 msgid "Was das bedeutet"
 msgstr "What this means"
 
-#: tretlager/kde/qml/AboutPage.qml:58
+#: tretlager/kde/qml/AboutPage.qml:59
 msgid "Kein Support von Zwift"
 msgstr "No support from Zwift"
 
-#: tretlager/kde/qml/AboutPage.qml:59
+#: tretlager/kde/qml/AboutPage.qml:60
 msgid ""
 "Zwift unterstützt Linux und Wine nicht. Probleme an Tretlager melden, nicht "
 "an Zwift."
@@ -961,11 +961,11 @@ msgstr ""
 "Zwift does not support Linux or Wine. Report problems to Tretlager, not to "
 "Zwift."
 
-#: tretlager/kde/qml/AboutPage.qml:64
+#: tretlager/kde/qml/AboutPage.qml:65
 msgid "Anmeldung über den Browser"
 msgstr "Sign-in outside the launcher"
 
-#: tretlager/kde/qml/AboutPage.qml:65
+#: tretlager/kde/qml/AboutPage.qml:66
 msgid ""
 "Umgeht den offiziellen Launcher und widerspricht den Zwift-"
 "Nutzungsbedingungen. Einschränkungen bis hin zur Sperre des Kontos lassen "
@@ -974,11 +974,11 @@ msgstr ""
 "Bypasses the official launcher and contradicts Zwift's terms of service. "
 "Restrictions up to a suspended account cannot be ruled out."
 
-#: tretlager/kde/qml/AboutPage.qml:70
+#: tretlager/kde/qml/AboutPage.qml:71
 msgid "Zwift bleibt unverändert"
 msgstr "Zwift stays unmodified"
 
-#: tretlager/kde/qml/AboutPage.qml:71
+#: tretlager/kde/qml/AboutPage.qml:72
 msgid ""
 "Tretlager verändert keine Zwift-Dateien und umgeht weder Kopierschutz noch "
 "Abo-Prüfung. Ohne gültiges Zwift-Abo ist keine Fahrt möglich."
@@ -987,12 +987,12 @@ msgstr ""
 "protection nor the subscription check. Riding requires a valid Zwift "
 "subscription."
 
-#: tretlager/kde/qml/AboutPage.qml:76 tretlager/kde/qml/SensorsPage.qml:128
+#: tretlager/kde/qml/AboutPage.qml:77 tretlager/kde/qml/SensorsPage.qml:128
 #: tretlager/kde/qml/SensorsPage.qml:135
 msgid "Sensor-Bridge"
 msgstr "Sensor bridge"
 
-#: tretlager/kde/qml/AboutPage.qml:77
+#: tretlager/kde/qml/AboutPage.qml:78
 msgid ""
 "Gibt sich gegenüber Zwift als Wahoo-Gerät mit „Direct Connect“ aus und "
 "reicht die Werte des Geräts weiter, ohne sie zu verändern."
@@ -1000,13 +1000,13 @@ msgstr ""
 "Presents itself to Zwift as a Wahoo device with “Direct Connect” and passes "
 "on the device's values without changing them."
 
-#: tretlager/kde/qml/AboutPage.qml:82 tretlager/kde/qml/WarningDialog.qml:23
-#: tretlager/kde/qml/WelcomePage.qml:44
+#: tretlager/kde/qml/AboutPage.qml:83 tretlager/kde/qml/WarningDialog.qml:23
+#: tretlager/kde/qml/WelcomePage.qml:45
 msgid "Auf eigene Gefahr"
 msgstr "At your own risk"
 
-#: tretlager/kde/qml/AboutPage.qml:83 tretlager/kde/qml/WarningDialog.qml:24
-#: tretlager/kde/qml/WelcomePage.qml:45
+#: tretlager/kde/qml/AboutPage.qml:84 tretlager/kde/qml/WarningDialog.qml:24
+#: tretlager/kde/qml/WelcomePage.qml:46
 msgid ""
 "Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten "
 "an Zwift übermittelt, die sich manipulieren ließen. Einschränkungen bis hin "
@@ -1017,12 +1017,12 @@ msgstr ""
 "be manipulated. Restrictions up to a suspended account cannot be ruled out – "
 "including the XP and drops earned with so much sweat."
 
-#: tretlager/kde/qml/AboutPage.qml:88 tretlager/kde/qml/WarningDialog.qml:25
-#: tretlager/kde/qml/WelcomePage.qml:50
+#: tretlager/kde/qml/AboutPage.qml:89 tretlager/kde/qml/WarningDialog.qml:25
+#: tretlager/kde/qml/WelcomePage.qml:51
 msgid "Nicht für Rennen"
 msgstr "Not for races"
 
-#: tretlager/kde/qml/AboutPage.qml:89
+#: tretlager/kde/qml/AboutPage.qml:90
 msgid ""
 "Es gibt keine Garantie, dass die Sensor-Bridge Leistung, Trittfrequenz und "
 "Puls vollständig und korrekt an Zwift weitergibt; Übertragungsfehler und "
@@ -1033,19 +1033,19 @@ msgstr ""
 "rate to Zwift completely and correctly; transmission errors and dropouts are "
 "possible. Do not use Tretlager for races or competitions with results."
 
-#: tretlager/kde/qml/AboutPage.qml:94
+#: tretlager/kde/qml/AboutPage.qml:95
 msgid "Warnhinweise anzeigen"
 msgstr "Show warnings"
 
-#: tretlager/kde/qml/AboutPage.qml:95
+#: tretlager/kde/qml/AboutPage.qml:96
 msgid "Die Hinweise vom ersten Start"
 msgstr "The notes from the first start"
 
-#: tretlager/kde/qml/AboutPage.qml:101
+#: tretlager/kde/qml/AboutPage.qml:102
 msgid "Keine Gewährleistung"
 msgstr "No warranty"
 
-#: tretlager/kde/qml/AboutPage.qml:102
+#: tretlager/kde/qml/AboutPage.qml:103
 msgid ""
 "Soweit gesetzlich zulässig (GPL, Abschnitte 15 und 16). Zwift, Wahoo, KICKR, "
 "TICKR und Garmin sind Marken ihrer Inhaber; Tretlager steht mit keinem "
@@ -1055,15 +1055,15 @@ msgstr ""
 "KICKR, TICKR and Garmin are trademarks of their owners; Tretlager is not "
 "affiliated with any of these companies."
 
-#: tretlager/kde/qml/AboutPage.qml:107
+#: tretlager/kde/qml/AboutPage.qml:108
 msgid "Unfreie Software, die Tretlager herunterlädt"
 msgstr "Non-free software that Tretlager downloads"
 
-#: tretlager/kde/qml/AboutPage.qml:110
+#: tretlager/kde/qml/AboutPage.qml:111
 msgid "Nicht im Paket enthalten"
 msgstr "Not included in the package"
 
-#: tretlager/kde/qml/AboutPage.qml:111
+#: tretlager/kde/qml/AboutPage.qml:112
 msgid ""
 "Die Einrichtung lädt diese Teile direkt beim Hersteller; es gelten dessen "
 "Lizenzbedingungen."
@@ -1071,22 +1071,22 @@ msgstr ""
 "The setup downloads these parts directly from the vendor; the vendor's "
 "license terms apply."
 
-#: tretlager/kde/qml/AboutPage.qml:116 tretlager/kde/qml/MainPage.qml:198
+#: tretlager/kde/qml/AboutPage.qml:117 tretlager/kde/qml/MainPage.qml:198
 msgid "Zwift"
 msgstr "Zwift"
 
-#: tretlager/kde/qml/AboutPage.qml:117
+#: tretlager/kde/qml/AboutPage.qml:118
 msgid ""
 "Zwift-Nutzungsbedingungen · das Spiel selbst, lädt Tretlager von Zwift "
 "herunter"
 msgstr ""
 "Zwift terms of service · the game itself, downloaded by Tretlager from Zwift"
 
-#: tretlager/kde/qml/AboutPage.qml:122
+#: tretlager/kde/qml/AboutPage.qml:123
 msgid ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
 msgstr ".NET Framework 4.8, WebView2, Core Fonts, d3dcompiler_47"
 
-#: tretlager/kde/qml/AboutPage.qml:123
+#: tretlager/kde/qml/AboutPage.qml:124
 msgid ""
 "Lizenzbedingungen von Microsoft · braucht der Zwift Launcher, lädt "
 "winetricks von Microsoft"
@@ -1094,11 +1094,11 @@ msgstr ""
 "Microsoft license terms · required by the Zwift launcher, downloaded by "
 "winetricks from Microsoft"
 
-#: tretlager/kde/qml/AboutPage.qml:129
+#: tretlager/kde/qml/AboutPage.qml:130
 msgid "Freie Software, auf der Tretlager aufbaut"
 msgstr "Free software Tretlager builds on"
 
-#: tretlager/kde/qml/AboutPage.qml:143
+#: tretlager/kde/qml/AboutPage.qml:144
 msgid ""
 "Beschreibung des Protokolls Wahoo „Direct Connect“ (DIRCON), nach der die "
 "Bridge umgesetzt ist"
@@ -2127,6 +2127,14 @@ msgstr ""
 msgid "Überspringen"
 msgstr "Skip"
 
+#: tretlager/kde/qml/VersionLabel.qml:8
+msgid "Version %1 · Build %2"
+msgstr "Version %1 · build %2"
+
+#: tretlager/kde/qml/VersionLabel.qml:9
+msgid "Version %1"
+msgstr "Version %1"
+
 #: tretlager/kde/qml/WarningDialog.qml:14
 msgid "Bevor es losgeht"
 msgstr "Before you start"
@@ -2143,7 +2151,7 @@ msgstr ""
 "Tretlager is a private project. Zwift does not support Linux and has nothing "
 "to do with Tretlager; report problems to Tretlager, not to Zwift."
 
-#: tretlager/kde/qml/WarningDialog.qml:26 tretlager/kde/qml/WelcomePage.qml:51
+#: tretlager/kde/qml/WarningDialog.qml:26 tretlager/kde/qml/WelcomePage.qml:52
 msgid ""
 "Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz "
 "und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung "
@@ -2193,39 +2201,39 @@ msgstr ""
 "Tretlager sets up Zwift on this computer and connects your trainer and heart "
 "rate strap. The setup guides you through everything in %1 steps."
 
-#: tretlager/kde/qml/WelcomePage.qml:18
+#: tretlager/kde/qml/WelcomePage.qml:19
 msgid "Voraussetzungen"
 msgstr "Requirements"
 
-#: tretlager/kde/qml/WelcomePage.qml:20
+#: tretlager/kde/qml/WelcomePage.qml:21
 msgid "Zwift-Konto mit Abo"
 msgstr "Zwift account with subscription"
 
-#: tretlager/kde/qml/WelcomePage.qml:22
+#: tretlager/kde/qml/WelcomePage.qml:23
 msgid "Etwa 11 GB freier Speicher"
 msgstr "About 11 GB of free disk space"
 
-#: tretlager/kde/qml/WelcomePage.qml:24
+#: tretlager/kde/qml/WelcomePage.qml:25
 msgid "Internetzugang für etwa 5 GB Download"
 msgstr "Internet access for a download of about 5 GB"
 
-#: tretlager/kde/qml/WelcomePage.qml:27
+#: tretlager/kde/qml/WelcomePage.qml:28
 msgid "Smart-Trainer und Pulsgurt mit Bluetooth"
 msgstr "Smart trainer and heart rate strap with Bluetooth"
 
-#: tretlager/kde/qml/WelcomePage.qml:28
+#: tretlager/kde/qml/WelcomePage.qml:29
 msgid "Erst bei Schritt %1 nötig"
 msgstr "Only needed at step %1"
 
-#: tretlager/kde/qml/WelcomePage.qml:35
+#: tretlager/kde/qml/WelcomePage.qml:36
 msgid "Wichtig"
 msgstr "Important"
 
-#: tretlager/kde/qml/WelcomePage.qml:38
+#: tretlager/kde/qml/WelcomePage.qml:39
 msgid "Kein offizielles Zwift-Programm"
 msgstr "Not an official Zwift program"
 
-#: tretlager/kde/qml/WelcomePage.qml:39
+#: tretlager/kde/qml/WelcomePage.qml:40
 msgid ""
 "Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der "
 "offiziellen Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser "
@@ -2235,15 +2243,15 @@ msgstr ""
 "the official source without modifying it. Signing in outside the launcher "
 "contradicts Zwift's terms of service. Use at your own risk."
 
-#: tretlager/kde/qml/WelcomePage.qml:56
+#: tretlager/kde/qml/WelcomePage.qml:57
 msgid "Über Tretlager und Lizenzen"
 msgstr "About Tretlager and licenses"
 
-#: tretlager/kde/qml/WelcomePage.qml:62
+#: tretlager/kde/qml/WelcomePage.qml:63
 msgid "Hilfe lesen"
 msgstr "Read the help"
 
-#: tretlager/kde/qml/WelcomePage.qml:70
+#: tretlager/kde/qml/WelcomePage.qml:71
 msgid "Einrichtung beginnen"
 msgstr "Start setup"
 

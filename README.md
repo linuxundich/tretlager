@@ -46,7 +46,7 @@ Tretlager bringt Wine, winetricks, Python-Pakete und Werkzeuge mit. Vom System k
 
 Getestet sind TUXEDO OS Forky mit Plasma 6.7 (tinytin) und Arch mit GNOME 51 auf Intel-Grafik
 (nanhlanu, 31.10.: Installation, Einrichtung von Wine und Zwift, Anmeldeseite; Fahrt noch offen).
-Unter GNOME zeigt Tretlager den Breeze-Stil. Fedora, Ubuntu und openSUSE sind Ziel, aber ungeprüft
+Unter GNOME zeigt Tretlager den Breeze-Stil, folgt aber Hell/Dunkel und der Schrift von GNOME. Fedora, Ubuntu und openSUSE sind Ziel, aber ungeprüft
 (Phase F5 in [docs/flatpak.md](docs/flatpak.md)).
 
 ## Alltag mit dem Flatpak
