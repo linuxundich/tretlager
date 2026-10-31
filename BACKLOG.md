@@ -133,7 +133,9 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] GNOME: Hell/Dunkel von GNOME übernehmen: `KDE_COLOR_SCHEME_PATH` + Palette aus Breeze(Dark).colors, Portal-Signal für den Wechsel (kdeglobals-Wege scheitern: im Flatpak liest das Plasma-Thema nur das Portal)
 - [x] GNOME: Schrift von GNOME (Portal `font-name`, Adwaita Sans 12) statt Noto Sans
 - [x] nanhlanu: Grafiktest auf der GTX 1050 nach envycontrol hybrid + GL.nvidia-580-196-07 (--user) ok (31.10.)
-- [ ] nanhlanu: Zwift-Fahrt auf der GTX 1050 (nvidia-smi zeigt den Prozess)
+- [ ] nanhlanu: Zwift-Fahrt auf der GTX 1050. Erster Versuch 31.10. 16:13–16:25: Zwift auf der GTX 1050 (60 FPS), findet KICKR + TICKR per mDNS sofort (16:14:09); Kopplung erst 16:24 (Leistung, dann Puls; Puls erreichte die Bridge nie). Netzteil 16:13 an, 16:24:09 ab → 20 FPS, Zwift friert 16:25:12 ein (Log bricht ab), kein Xid. TLP auf nanhlanu: Akku = PCIE_ASPM powersave, RUNTIME_PM_ENABLE=00:01.0 (Port der GTX 1050) → Verdacht wie tinytin: Stromquellenwechsel während der Fahrt. Wiederholen: durchgehend am Netzteil, Steuerung von Hand koppeln
+- [ ] Frisches Zwift-Präfix: Zwift koppelt nur die gewählte Rolle (Power); Cadence + Controllable Trainer kommen auf tinytin nur aus gespeicherten Kopplungen („Reconnected and selected“). Beim ersten Mal von Hand wählen → Hinweis in Hilfe/Fertig-Seite; prüfen, ob die Controllable-Liste über DIRCON den KICKR zeigt (Christoph: „Widerstand nicht gefunden“)
+- [ ] „Protokoll des letzten Starts“: Kopplungszeilen und FPS aus Zwifts Log.txt übernehmen (ohne Tokens), damit Befunde wie dieser ohne SSH sichtbar sind
 - [ ] GNOME: Hell/Dunkel-Wechsel im laufenden Betrieb am echten Desktop prüfen (offscreen per Aufruf geprüft)
 - [ ] Vor jeder Veröffentlichung (F4): Qt-Version von Laufzeit und BaseApp vergleichen; nach einem Qt-Patch-Update der Laufzeit zügig neu bauen und veröffentlichen, sonst startet Tretlager bei den Nutzern nicht
 
