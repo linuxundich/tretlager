@@ -1,179 +1,200 @@
-# Tretlager (Arbeitstitel)
+<p align="center">
+  <img src="tretlager/data/icons/de.linuxundich.Tretlager.svg" alt="Tretlager icon" width="128" height="128">
+</p>
 
-Native Qt-/Kirigami-Anwendung, die den offiziellen Windows-Client von **Zwift** unter Linux
-einrichtet, startet und aktuell hält: Wine, Laufzeit, Grafikdiagnose (NVIDIA), Sensoren über
-Bluetooth LE ohne Zwift Companion App.
+<h1 align="center">Tretlager</h1>
 
-**Ziel (seit 2026-10-30): ein Flatpak**, das auf modernen Distributionen läuft und alles mitbringt,
-was Zwift braucht (eigenes Wine, winetricks, Werkzeuge). Plan und Stand in
-[docs/flatpak.md](docs/flatpak.md). Entwickelt und getestet auf TUXEDO OS Forky (Plasma) auf
-tinytin; Plasma ist das Hauptziel, GNOME soll funktionieren.
+<p align="center"><strong>Zwift on Linux, set up in five steps.</strong></p>
 
-**Stand (2026-10-30):** 0.9.0 als Flatpak auf tinytin; Zwift läuft (Opt-in-Token-Login, NVIDIA
-per GLX + PRIME-Offload), die **Sensor-Bridge** koppelt Trainer und Pulsgurt über Wahoo Direct
-Connect, ohne Companion App. Machbarkeit in [FEASIBILITY.md](FEASIBILITY.md), Bedienkonzept in
-[docs/bedienkonzept.md](docs/bedienkonzept.md), QA-Audit in
-[docs/qa-audit-2026-10-30.md](docs/qa-audit-2026-10-30.md), offene Punkte in [BACKLOG.md](BACKLOG.md).
+<p align="center">
+  Tretlager installs the official Windows version of Zwift on your Linux computer, signs you in and
+  connects your smart trainer and heart rate strap over Bluetooth. No terminal, no Wine tinkering,
+  no Companion app on your phone. One button starts the ride.
+</p>
 
-**Keine offizielle Zwift-App, Nutzung auf eigene Gefahr:** Zwift ist womöglich nicht glücklich
-darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die sich manipulieren ließen.
-Einschränkungen bis hin zur Sperre des Kontos lassen sich nicht ausschließen – samt der mühsam
-erstrampelten XP und Drops. **Nicht für Rennen:** Es gibt keine Garantie, dass die Sensor-Bridge
-Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt. Beim ersten Start zeigt Tretlager
-diese Hinweise als Warnung, die bestätigt werden muss (erneut, wenn sich der Text ändert); sie
-stehen außerdem in der Übersicht unter *Zwift starten*, auf der Willkommensseite, unter
-*Über Tretlager* und in der Hilfe.
+<p align="center">
+  Flatpak: build from source &nbsp;·&nbsp; Releases: planned &nbsp;·&nbsp;
+  <a href="docs/HARDWARE.md">Tested hardware</a>
+  &nbsp;·&nbsp;
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
 
-Kernbefunde:
-- Zwift läuft nur experimentell unter Wine (11.x, im Flatpak aus den Quellen gebaut).
-- Das Spiel nutzt OpenGL 3.1, DXVK ist überflüssig.
-- Direktes BLE aus Wine geht nicht (GATT-Benachrichtigungen und Schreiben fehlen). Sensoren
-  kommen über eine eigene Bridge, die sich als Wahoo-„Direct Connect“-Gerät ausgibt.
-- Die offizielle Anmeldung im Launcher (WebView2) geht unter Wine nicht; Tretlager meldet über ein
-  eigenes Anmeldefenster an (nur nach Zustimmung, widerspricht §5 der Zwift-AGB).
+<p align="center">
+  <img src="docs/screenshots/tretlager-ride.webp" alt="Tretlager shows live power, cadence and heart rate while Zwift runs in the background" width="100%">
+</p>
 
-## Voraussetzungen auf dem Rechner
+> [!WARNING]
+> **Not an official Zwift app, use at your own risk.** Tretlager is a private project. Zwift does not
+> support Linux and has nothing to do with Tretlager. Zwift may not be happy that a software bridge
+> sends data to Zwift that could be manipulated; restrictions up to a suspended account, including
+> the XP and drops you earned, cannot be ruled out. **Not for races:** there is no guarantee that
+> the bridge passes power, cadence and heart rate to Zwift correctly. The sign-in happens outside
+> the Zwift launcher, which contradicts Zwift's terms of service. Tretlager shows these points
+> before the first start and only goes on once you accept them.
 
-Tretlager bringt Wine, winetricks, Python-Pakete und Werkzeuge mit. Vom System kommen nur:
+## See it in action
 
-- Flatpak ≥ 1.14 mit Flathub (für `org.kde.Platform//6.11`, `io.qt.PySide.BaseApp//6.11` und bei
-  NVIDIA die passende `GL.nvidia-…`-Erweiterung) und xdg-desktop-portal.
-- **BlueZ** (Bluetooth-Dienst) und ein Bluetooth-LE-Adapter, eingebaut oder als USB-Stick.
-- **Avahi** (`avahi-daemon`): Darüber findet Zwift die Sensoren. Die Systemprüfung warnt, wenn es fehlt.
-- Ein **Schlüsselbund** nach Secret-Service-Standard (KWallet/ksecretd unter Plasma, GNOME
-  Schlüsselbund) für die Zwift-Sitzung.
-- x86-64, eine Wayland-Sitzung mit XWayland oder X11; NVIDIA mit proprietärem Treiber oder Mesa.
+<a href="docs/tretlager-demo.mp4"><img src="docs/screenshots/demo-poster.webp" width="420" align="right" alt="Play the Tretlager demo video"/></a>
 
-Getestet sind TUXEDO OS Forky mit Plasma 6.7 (tinytin) und Arch mit GNOME 51 auf Intel-Grafik
-(nanhlanu, 31.10.: Installation, Einrichtung von Wine und Zwift, Anmeldeseite; Fahrt noch offen).
-Unter GNOME zeigt Tretlager den Breeze-Stil, folgt aber Hell/Dunkel und der Schrift von GNOME. Fedora, Ubuntu und openSUSE sind Ziel, aber ungeprüft
-(Phase F5 in [docs/flatpak.md](docs/flatpak.md)).
+From the first start to the finish line: Tretlager checks the system, installs Wine and Zwift by
+itself, signs in, pairs a trainer and a heart rate strap and starts Zwift on the NVIDIA graphics
+card. Zwift then finds the sensors through the bridge, and Tretlager keeps watch during the ride.
 
-## Alltag mit dem Flatpak
+[**Watch the demo**](docs/tretlager-demo.mp4) (3:43, MP4, 43 MB). The rider data in the video is
+simulated, everything else is real.
 
-- **Aktualisieren:** `flatpak update de.linuxundich.Tretlager`; Wine und alle übrigen Bausteine
-  kommen mit Tretlager. Vor jedem Start gleicht Tretlager die Zwift-Umgebung ab (neues Wine →
-  `wineboot -u` und Grafiktest) und spielt Zwift-Updates über den Zwift-Launcher ein. Keine
-  Schnappschüsse. Die zuletzt bewährte Wine-Version hebt Tretlager auf (eine, ≈ 500 MB); macht ein
-  neues Wine Probleme, startet der Schalter *Vorige Wine-Version nutzen* in der Übersicht Zwift
-  wieder damit. Plan: [docs/updates.md](docs/updates.md).
-- **Deinstallieren:** `flatpak uninstall de.linuxundich.Tretlager`; Zwift-Umgebung (gut 10 GB),
-  Einstellungen und Protokolle löscht `flatpak uninstall --delete-data de.linuxundich.Tretlager`.
-  Die Zwift-Sitzung im Schlüsselbund entfernt *Abmelden* in Tretlager vorher.
-- **Daten:** alles unter `~/.var/app/de.linuxundich.Tretlager/` – `data/tretlager/prefix`
-  (Zwift), `config/tretlager/bridge.json` (Sensoren), `.local/state/tretlager/` (Zustand,
-  Protokoll `tretlager.log`). Das Bridge-Protokoll steht im Journal:
-  `journalctl --user -t de.linuxundich.Tretlager.Bridge`.
-- **Netz:** Tretlager meldet nichts nach Hause. Verbindungen gehen nur zu Zwift (Versionsprüfung
-  `cdn.zwift.com`, Anmeldung `secure.zwift.com`, Spiel-Updates über den Zwift-Launcher), zu GitHub
-  (winetricks, einmalig) und zu den Download-Quellen von winetricks (Microsoft u. a. für Schriften,
-  .NET und WebView2, einmalig bei der Einrichtung).
+<br clear="right"/>
 
-## Fehlerbehebung
+## What it does
 
-| Problem | Abhilfe |
-|---|---|
-| Sensor bleibt bei „Sucht das Gerät …“ | Trainer kurz antreten, Gurt anfeuchten und anlegen. Nicht genutzte Sensoren *pausieren*. |
-| Sensor verbindet sich nie (Garmin HRM-Pro an Intel AX201) | Bekannte Chip-Unverträglichkeit; USB-Bluetooth-Stick einstecken und unter *Sensoren* als Adapter wählen. Hängt es danach weiter: `systemctl restart bluetooth` (root) oder Neustart. |
-| Zwift findet keine Sensoren | Bridge muss laufen (*Sensoren*), Avahi muss laufen; in Zwift „Wahoo KICKR …“ bzw. „Wahoo HRM …“ koppeln. |
-| „Kein Schlüsselbund erreichbar“ | KWallet bzw. GNOME Schlüsselbund starten und entsperren. |
-| Zwift hängt nach Wechsel Netz/Akku | NVIDIA-Treiber (Xid); Zwift mit Alt+F4 beenden, mit Netzteil neu starten. |
+### A setup assistant instead of a wiki page
 
-## Bekannte Einschränkungen
+Getting Zwift to run under Wine usually means a long list of commands, .NET installers and
+registry tweaks. Tretlager turns that into a guided setup. It checks graphics, Bluetooth, disk
+space and network first, without changing anything, and tells you what is missing.
 
-- Nur Bluetooth LE (FTMS, Cycling Power, CSC, Herzfrequenz); ANT+ nicht.
-- Tatsächlich getestet: Wahoo KICKR V4 (FTMS, ERG, Steigung), Wahoo TICKR, Garmin HRM-Pro Plus
-  (nur über USB-Stick zuverlässig). Andere Geräte mit diesen Standarddiensten sollten gehen,
-  sind aber ungeprüft.
-- Fenster maximieren und Wine-DPI aus der XWayland-Skalierung gibt es nur unter Plasma.
-- Zwift bekommt die Sitzung als Befehlszeilenargument (sichtbar in der Prozessliste, BACKLOG).
+<p align="center">
+  <img src="docs/screenshots/tretlager-welcome.webp" alt="Welcome page with requirements and the important notes" width="49%">
+  <img src="docs/screenshots/tretlager-system-check.webp" alt="System check: system, graphics, hybrid graphics, Bluetooth, Avahi, disk space, internet, Wine and Zwift" width="49%">
+</p>
 
-## Grundsätze
+### Installs Zwift by itself
 
-Keine Umgehung von Anmeldung, DRM oder Lizenzprüfung, keine veränderten Zwift-Dateien, keine
-Telemetrie, keine stillen Systemänderungen. Nicht Funktionierendes wird als solches angezeigt.
+Tretlager brings its own Wine and downloads the official Zwift installer straight from Zwift,
+verifies its signature and sets up fonts, .NET 4.8 and WebView2. Then the Zwift launcher fetches
+the 5 GB game. Tretlager shows the progress and needs about 15 minutes on a normal connection.
+Zwift's own files stay untouched.
 
-## Bridge ausprobieren (Benutzerinstallation)
+<p align="center">
+  <img src="docs/screenshots/tretlager-setup.webp" alt="Setup page: installer verified, Wine environment, Microsoft components and launcher done, game download in progress" width="80%">
+</p>
 
-    build-aux/install-user.sh          # nach ~/.local, systemd-Benutzerdienst tretlager-bridge
-    systemctl --user start tretlager-bridge
+### Signs you in
 
-Abhängigkeiten (Debian forky): `python3-bleak`, `python3-dbus-fast`, laufender `avahi-daemon`
-und BlueZ. Gesteuert wird die Bridge über die Sensoren-Seite der Kirigami-Oberfläche.
-Tests: `python -m pytest tests`.
+The sign-in page of the Zwift launcher does not work under Wine. Tretlager opens Zwift's own
+sign-in page in a private window instead and keeps the session in your desktop's keyring
+(KWallet or GNOME Keyring). You type your password into Zwift's page, never into Tretlager. This
+step is optional and only happens after you agree.
 
-## Oberfläche (Kirigami)
+### Your sensors, without a phone
 
-    PYTHONPATH=. python3 -m tretlager.kde
+Wine cannot talk to Bluetooth sensors, and the Zwift Companion app is no fun on Linux. The
+Tretlager sensor bridge connects to your smart trainer and heart rate strap over Bluetooth LE and
+offers them to Zwift on the same computer, the way a Wahoo trainer with Direct Connect would. In
+Zwift you simply pick "Wahoo KICKR …" and "Wahoo HRM …". ERG mode and climbs work, the trainer
+gets harder when the road goes up.
 
-Braucht zusätzlich `python3-pyside6.qtqml`, `python3-pyside6.qtquick`,
-`python3-pyside6.qtquickcontrols2`, `python3-pyside6.qtgui`, `qml6-module-org-kde-kirigami` und
-`qml6-module-org-kde-kirigamiaddons-formcard` (plus `-components`). Die Oberfläche folgt den
-KDE Human Interface Guidelines: Seitenleiste nach der Einrichtung, FormCards, Hilfeknöpfe,
-Assistent als linearer Ablauf. `TRETLAGER_INSTANCE=test` startet eine zweite Instanz neben der
-laufenden, etwa zum Testen aus dem Quellbaum.
+<p align="center">
+  <img src="docs/screenshots/tretlager-sensors.webp" alt="Sensors page: nearby trainers and straps, paired sensors with live values, bridge settings and troubleshooting" width="80%">
+</p>
 
-### Sprachen
+<p align="center">
+  <img src="docs/screenshots/zwift-paired-devices.webp" alt="Zwift's Paired Devices screen with power, resistance, cadence and heart rate all connected through the bridge" width="80%">
+</p>
 
-Quellsprache ist Deutsch, dazu gibt es Englisch (`po/en.po`, Hilfe in
-`tretlager/data/hilfe.en.md`). Ohne deutsche Systemsprache zeigt Tretlager Englisch;
-`TRETLAGER_LANG=en` bzw. `de` erzwingt eine Sprache. QML-Texte stehen in `i18n()`, Python-Texte
-in `_()` (Texte der Bridge in `N_()`, übersetzt erst in der Oberfläche).
+Pause a sensor you don't need today, pick a USB Bluetooth adapter if the built-in chip is
+unreliable, or let the bridge serve Zwift on another device in your network.
 
-    po/update.sh          # Texte sammeln (po/tretlager.pot), Kataloge abgleichen; braucht gettext
-    po/update.sh --build  # po/*.po → tretlager/data/locale/*.mo, reines Python (auch auf tinytin)
+### One button to ride
 
-`build-deb.sh` übersetzt die Kataloge selbst. `tests/test_i18n.py` schlägt fehl, wenn ein Text
-keine englische Übersetzung hat oder Platzhalter nicht übereinstimmen.
+The overview shows your sensors, the Zwift version, the graphics card, Wine and the sign-in at a
+glance. "Start Zwift" runs the game on the dedicated NVIDIA card of a hybrid laptop and keeps the screen resolution; on Plasma it also maximises
+the window. Tretlager waits in the background, shows live values and tidies
+up after the ride. A menu entry "Zwift (Tretlager)" starts the ride directly from the
+application launcher.
 
-## Flatpak
+<p align="center">
+  <img src="docs/screenshots/tretlager-ready.webp" alt="Overview before the ride: ready to ride, both sensors connected, Zwift up to date, NVIDIA GeForce RTX 3050 Ti" width="80%">
+</p>
 
-    build-aux/flatpak/build.sh            # auf tinytin: bauen und für den Benutzer installieren
-    build-aux/flatpak/build.sh --bundle   # zusätzlich tretlager.flatpak (Einzeldatei)
-    flatpak run de.linuxundich.Tretlager
+### Stays out of trouble
 
-Braucht `flatpak-builder` sowie (lädt `build.sh` selbst) `org.kde.Sdk//6.11`,
-`io.qt.PySide.BaseApp//6.11` und `org.freedesktop.Sdk.Extension.mingw-w64//25.08`. Wine wird aus
-den Quellen gebaut (auf tinytin einige Minuten). Neue Python-Abhängigkeiten:
-`build-aux/flatpak/gen-python-deps.py` schreibt `python-deps.json` neu.
+- Before every start Tretlager brings the Zwift environment in line and lets the Zwift launcher
+  install game updates.
+- A new Wine version comes with a new Tretlager version. The last working one is kept, and a
+  switch brings it back if Zwift misbehaves.
+- Tretlager warns when the laptop runs on battery or the power supply changes during a ride,
+  and it knows chip and sensor combinations that don't get along.
+- Help pages and troubleshooting tips are built in. The interface speaks English and German.
 
-**Qt-Patchversion:** PySide im BaseApp ist an die private Qt-API genau der Qt-Version gebunden, gegen
-die es gebaut wurde (`QObjectPrivate(QtPrivate_6_11_N)`). Hebt Flathub die KDE-Laufzeit auf eine
-neue Qt-Patchversion, startet ein altes Tretlager nicht mehr, bis das BaseApp nachgezogen ist und
-Tretlager neu gebaut wurde. Beim Bauen deshalb Laufzeit, SDK und BaseApp auf denselben Stand
-bringen (`flatpak info --user io.qt.PySide.BaseApp//6.11` → Version = Qt der Laufzeit). Startet
-Tretlager so nicht, meldet es das per Benachrichtigung und im Protokoll.
+<p align="center">
+  <img src="docs/screenshots/tretlager-warning.webp" alt="The warning dialog before the first start: not an official Zwift app, at your own risk, not for races, sign-in outside the launcher" width="80%">
+</p>
 
-Die Sensor-Bridge startet per D-Bus-Aktivierung als eigene Instanz:
-`flatpak run --command=tretlager-bridge de.linuxundich.Tretlager` startet sie von Hand.
+## How it works
 
-## Debian-Paket (eingestellt)
+1. Tretlager runs as a Flatpak with its own Wine (built from source, WoW64) and everything else
+   Zwift needs. Your system only provides Bluetooth, Avahi and a keyring.
+2. Zwift is the unmodified Windows game from Zwift's servers. It renders with OpenGL through
+   XWayland, on NVIDIA via PRIME offload.
+3. The sensor bridge talks to BlueZ on one side and speaks Wahoo's Direct Connect protocol
+   (DIRCON) to Zwift on the other, announced over mDNS on the local machine.
 
-Das Debian-Paket (bis 0.7.1) war der erste Auslieferungsweg und wird nicht weiterentwickelt; es
-bleibt nur, bis das Flatpak die Abnahme (F5) bestanden hat. Auf tinytin ist es seit 2026-10-30
-entfernt.
+No telemetry, no changed Zwift files, no bypassing of sign-in or licence checks. Network traffic
+goes only to Zwift, to GitHub for winetricks and to the download sources of winetricks (Microsoft
+fonts, .NET and WebView2) during setup.
 
-    build-aux/build-deb.sh            # → dist/tretlager_<Version>_all.deb (braucht dpkg-deb)
-    sudo apt install ./dist/tretlager_<Version>_all.deb
+The interface uses Kirigami and Kirigami Addons on PySide6, the bridge uses
+[Bleak](https://github.com/hbldh/bleak). [qdomyos-zwift](https://github.com/cagnulein/qdomyos-zwift)
+served as the reference for the DIRCON protocol.
 
-Im Heimnetz einfacher über die eigene Paketquelle auf bender (unsigniert, nur LAN):
+## Tested hardware
 
-    echo 'deb [trusted=yes] http://bender:8095/debian ./' | sudo tee /etc/apt/sources.list.d/linuxundich.list
-    sudo apt update && sudo apt install tretlager
+Tretlager is tested on two laptops with one smart trainer and two heart rate straps. Details, versions and
+known quirks are in [docs/HARDWARE.md](docs/HARDWARE.md).
 
-Neue Version veröffentlichen: Paket bauen, dann `services/pacman-repo/publish-deb.sh`.
+| | Main system | Second system |
+|---|---|---|
+| Computer | TUXEDO InfinityBook Pro Gen7, Intel Core i7-12700H, 32 GB RAM | Dell XPS 15 9560, Intel Core i7-7700HQ, 16 GB RAM |
+| Graphics | Intel Iris Xe + NVIDIA GeForce RTX 3050 Ti Laptop (driver 580.178.04) | Intel HD Graphics 630 + NVIDIA GeForce GTX 1050 Mobile (driver 580.196.07) |
+| System | TUXEDO OS (Debian forky base), KDE Plasma 6.7 on Wayland | Arch Linux, GNOME 51 on Wayland |
+| Bluetooth | Intel AX201, TP-Link UB500 USB adapter | Qualcomm Atheros QCA61x4 |
 
-Danach im Startmenü: **Tretlager** (Assistent/Hauptfenster) und **Zwift (Tretlager)** (Direktstart).
-Version steht in `CHANGELOG.md`.
+| Sensor | Connection | Status |
+|---|---|---|
+| Wahoo KICKR V4 smart trainer | Bluetooth LE (FTMS, Cycling Power) | power, cadence, ERG mode and climbs work |
+| Wahoo TICKR heart rate strap | Bluetooth LE (Heart Rate) | works |
+| Garmin HRM-Pro Plus heart rate strap | Bluetooth LE (Heart Rate) | works with the TP-Link UB500; the Intel AX201 does not connect to it |
 
-## Lizenz und Hinweis
+Other trainers and straps that use the standard Bluetooth services (FTMS, Cycling Power, Cycling
+Speed and Cadence, Heart Rate) should work but are untested. ANT+ is not supported.
 
-Tretlager steht unter der GPL-3.0-or-later (`LICENSE`), das gilt auch für das Symbol
-(`build-aux/make-icon.py`). Die Hintergrundgrafik `tretlager/data/backdrop.png` erzeugt
-`build-aux/make-backdrop.py` aus einem Foto, das nicht im Repository liegt
-(`build-aux/make-backdrop.py foto.jpg`).
-Tretlager ist kein Produkt von Zwift Inc. und wird von Zwift nicht
-unterstützt; die Benutzung erfolgt auf eigene Gefahr. Zwift, .NET Framework, WebView2 und die
-übrigen Windows-Komponenten sind unfreie Software. Tretlager liefert sie nicht mit, die
-Einrichtung lädt sie beim Hersteller. Die Übersicht aller Komponenten und Lizenzen steht in der
-App unter *Über Tretlager*.
+## Install
+
+> [!NOTE]
+> There is no ready-made download yet. Tretlager targets current distributions with Flatpak;
+> TUXEDO OS with Plasma is the main target, GNOME works. Fedora, Ubuntu and openSUSE are planned
+> but untested.
+
+You need Flatpak with Flathub, BlueZ with a Bluetooth LE adapter, `avahi-daemon` and a Secret
+Service keyring (KWallet or GNOME Keyring). Then build and install the Flatpak:
+
+```sh
+git clone https://github.com/linuxundich/tretlager.git
+cd tretlager
+build-aux/flatpak/build.sh
+```
+
+The first build compiles Wine and takes a while (about 15 minutes on 20 cores). Start Tretlager
+from the application menu and follow the assistant.
+
+## More
+
+- [Tested hardware and software](docs/HARDWARE.md) in detail
+- [Changelog](CHANGELOG.md) · [Backlog](BACKLOG.md)
+- Technical notes, design documents and the QA audit are written in German:
+  [technical notes](docs/technik.md), [Flatpak plan](docs/flatpak.md),
+  [updates](docs/updates.md), [feasibility study](FEASIBILITY.md)
+- Found a bug or tested other hardware? [Open an issue](https://github.com/linuxundich/tretlager/issues)
+
+## Use of AI
+
+Tretlager is AI-assisted. Most of the code, the icon and the translations were written with AI
+assistance, directed by me: I set the requirements, made the design decisions, reviewed the
+results and tested everything on my own trainer, heart rate straps and laptops. Commits written
+with AI assistance carry a `Co-Authored-By` line.
+
+Tretlager is free software under the [GPL-3.0-or-later](LICENSE). It is a personal project,
+not affiliated with or endorsed by Zwift, Inc. Zwift is a trademark of Zwift, Inc.; Wahoo, KICKR
+and TICKR are trademarks of Wahoo Fitness; Garmin and HRM-Pro are trademarks of Garmin Ltd. Names
+of other riders in the screenshots are blurred.

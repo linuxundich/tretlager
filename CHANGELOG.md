@@ -5,6 +5,10 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
 ## [Unreleased]
 
 ### Hinzugefügt
+- Öffentliches Repository auf GitHub (linuxundich/tretlager) mit englischer Projektseite als
+  README (Funktionen, Screenshots, Demovideo 3:43 in `docs/tretlager-demo.mp4`) und
+  `docs/HARDWARE.md` (getestete Rechner, Grafikkarten, Systeme, Sensoren und Versionen). Das
+  bisherige deutsche README steht jetzt in `docs/technik.md`.
 - Warnhinweise beim ersten Start, die bestätigt werden müssen (sonst *Beenden*): keine offizielle
   Zwift-App; auf eigene Gefahr – Zwift ist womöglich nicht glücklich über eine Software-Bridge,
   deren Daten sich manipulieren ließen, Sperre samt XP und Drops nicht ausgeschlossen; nicht für
