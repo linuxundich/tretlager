@@ -14,7 +14,7 @@ from pathlib import Path
 
 DOMAIN = "tretlager"
 LOCALEDIR = Path(__file__).resolve().parent / "data" / "locale"
-SOURCE_LANGUAGE = "de"
+SOURCE_LANGUAGE = "en"
 
 
 def system_languages(env=os.environ) -> list[str]:

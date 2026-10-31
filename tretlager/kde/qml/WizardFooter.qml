@@ -8,7 +8,7 @@ import org.kde.kirigami as Kirigami
 Controls.ToolBar {
     id: footer
     property string skipText: ""
-    property string nextText: i18n("Weiter")
+    property string nextText: i18n("Next")
     property string nextIcon: "go-next"
     property bool nextEnabled: true
     property bool nextVisible: true
@@ -28,7 +28,7 @@ Controls.ToolBar {
         // Nach abgeschlossener Einrichtung lässt sich der Assistent jederzeit verlassen.
         Controls.Button {
             visible: footer.skipText === "" && backend.setupComplete
-            text: i18n("Assistent schließen")
+            text: i18n("Close assistant")
             icon.name: "window-close"
             flat: true
             onClicked: applicationWindow().show("overview")

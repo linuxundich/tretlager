@@ -6,9 +6,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 if [ "${1:-}" != "--build" ]; then
   xgettext --from-code=UTF-8 --language=Python -k_ -kN_ -kngettext:1,2 -kpgettext:1c,2 \
-      --add-comments=Übersetzung: -o po/python.pot $(git ls-files "tretlager/*.py") tretlager/i18n.py helper/setup-system
+      --add-comments=Translators: -o po/python.pot $(git ls-files "tretlager/*.py") tretlager/i18n.py helper/setup-system
   xgettext --from-code=UTF-8 --language=JavaScript -ki18n -ki18nc:1c,2 -ki18np:1,2 \
-      --add-comments=Übersetzung: -o po/qml.pot tretlager/kde/qml/*.qml
+      --add-comments=Translators: -o po/qml.pot tretlager/kde/qml/*.qml
   msgcat --use-first po/python.pot po/qml.pot -o po/tretlager.pot
   sed -i "s/charset=CHARSET/charset=UTF-8/" po/tretlager.pot
   rm po/python.pot po/qml.pot

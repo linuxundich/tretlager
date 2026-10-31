@@ -59,16 +59,16 @@ def auth_url(state_value: str, language: str = "") -> str:
 
 # Fehlercodes aus OAuth/OpenID Connect als Satz für den Nutzer
 ERROR_TEXT = {
-    "access_denied": _("Die Anmeldung wurde abgebrochen."),
-    "login_required": _("Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden."),
-    "interaction_required": _("Zwift verlangt eine Anmeldung mit E-Mail und Passwort. Bitte erneut anmelden."),
-    "temporarily_unavailable": _("Die Zwift-Anmeldung ist gerade nicht erreichbar. Bitte später erneut versuchen."),
-    "server_error": _("Bei der Zwift-Anmeldung ist ein Fehler aufgetreten. Bitte später erneut versuchen."),
+    "access_denied": _("The sign-in was cancelled."),
+    "login_required": _("Zwift requires signing in with email and password. Please sign in again."),
+    "interaction_required": _("Zwift requires signing in with email and password. Please sign in again."),
+    "temporarily_unavailable": _("Zwift sign-in is unavailable right now. Please try again later."),
+    "server_error": _("Zwift sign-in reported an error. Please try again later."),
 }
 
 
 def _error_text(code: str) -> str:
-    return ERROR_TEXT.get(code, _("Zwift hat die Anmeldung nicht abgeschlossen (Fehler „{code}“). Bitte erneut anmelden.").format(code=code))
+    return ERROR_TEXT.get(code, _("Zwift did not complete the sign-in (error “{code}”). Please sign in again.").format(code=code))
 
 
 def parse_redirect(url: str, expected_state: str | None = None) -> str:
@@ -76,15 +76,15 @@ def parse_redirect(url: str, expected_state: str | None = None) -> str:
     url = url.strip()
     parsed = urllib.parse.urlparse(url)
     if parsed.netloc != "launcher.zwift.com" or not parsed.path.startswith("/launcher"):
-        raise LoginError(_("Das ist nicht die Adresse nach der Zwift-Anmeldung (launcher.zwift.com/launcher?…)."))
+        raise LoginError(_("This is not the address shown after signing in to Zwift (launcher.zwift.com/launcher?…)."))
     q = urllib.parse.parse_qs(parsed.query)
     if "error" in q:
         raise LoginError(_error_text(q["error"][0]))
     code = (q.get("code") or [""])[0]
     if not code:
-        raise LoginError(_("In der Adresse fehlt der Anmeldecode (code=…)."))
+        raise LoginError(_("The address is missing the sign-in code (code=…)."))
     if expected_state and (q.get("state") or [""])[0] != expected_state:
-        raise LoginError(_("Die Adresse gehört zu einer älteren Anmeldung. Bitte erneut im Browser anmelden."))
+        raise LoginError(_("The address belongs to an earlier sign-in. Please sign in again in the browser."))
     return code
 
 
@@ -96,12 +96,12 @@ def _post(form: dict, opener=urllib.request.urlopen) -> dict:
             token = json.loads(r.read())
     except urllib.error.HTTPError as e:
         if e.code in (400, 401):
-            raise LoginError(_("Zwift hat die Anmeldung abgelehnt (Code abgelaufen oder bereits benutzt).")) from None
-        raise LoginUnavailable(_("Zwift-Anmeldung nicht erreichbar (HTTP {code}).").format(code=e.code)) from None
+            raise LoginError(_("Zwift rejected the sign-in (code expired or already used).")) from None
+        raise LoginUnavailable(_("Zwift sign-in unreachable (HTTP {code}).").format(code=e.code)) from None
     except (urllib.error.URLError, TimeoutError):
-        raise LoginUnavailable(_("Zwift-Anmeldung nicht erreichbar. Besteht eine Internetverbindung?")) from None
+        raise LoginUnavailable(_("Zwift sign-in unreachable. Is there an internet connection?")) from None
     if "access_token" not in token:
-        raise LoginError(_("Unerwartete Antwort von Zwift."))
+        raise LoginError(_("Unexpected response from Zwift."))
     token["obtained_at"] = int(time.time())
     return token
 
@@ -124,9 +124,9 @@ def logout_remote(token: dict, opener=urllib.request.urlopen) -> None:
         with opener(req, timeout=30):  # noqa: S310 (feste https-URL)
             pass
     except urllib.error.HTTPError as e:
-        raise LoginError(_("Abmelden bei Zwift fehlgeschlagen (HTTP {code}).").format(code=e.code)) from None
+        raise LoginError(_("Signing out of Zwift failed (HTTP {code}).").format(code=e.code)) from None
     except (urllib.error.URLError, TimeoutError):
-        raise LoginError(_("Zwift-Anmeldung nicht erreichbar; lokal abgemeldet.")) from None
+        raise LoginError(_("Zwift sign-in unreachable; signed out locally.")) from None
 
 
 def lifetimes(token: dict, now: float | None = None) -> tuple[int, int]:
@@ -158,19 +158,19 @@ class Keyring:
         try:
             import secretstorage
         except ImportError as e:
-            raise LoginError(_("python3-secretstorage fehlt; ohne Schlüsselbund speichert Tretlager kein Token.")) from e
+            raise LoginError(_("python3-secretstorage is missing; without a keyring Tretlager does not store a token.")) from e
         try:
             conn = secretstorage.dbus_init()
             coll = secretstorage.get_default_collection(conn)
             if coll.is_locked():
                 coll.unlock()
                 if coll.is_locked():
-                    raise LoginError(_("Der Schlüsselbund ist gesperrt. Zum Starten von Zwift den Schlüsselbund entsperren."))
+                    raise LoginError(_("The keyring is locked. Unlock the keyring to start Zwift."))
         except secretstorage.exceptions.SecretStorageException:
             # Kein Secret Service (manche Desktops starten keinen) oder Entsperren abgelehnt
-            raise LoginError(_("Kein Schlüsselbund erreichbar. Tretlager speichert die Zwift-Sitzung im "
-                               "Schlüsselbund des Desktops (KWallet bzw. GNOME Schlüsselbund); dieser muss "
-                               "laufen und entsperrt sein.")) from None
+            raise LoginError(_("No keyring available. Tretlager keeps the Zwift session in the "
+                               "desktop keyring (KWallet or GNOME Keyring), which must be "
+                               "running and unlocked.")) from None
         return coll
 
     def load(self) -> dict | None:

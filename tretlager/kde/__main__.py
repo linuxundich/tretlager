@@ -10,9 +10,9 @@ except ImportError as exc:
 
     applog.warning("Start abgebrochen: %s", exc)
     print(f"tretlager: {exc}", file=sys.stderr)
-    power.notify(_("Tretlager startet nicht"),
-                 _("Die Programmbibliotheken passen nicht zur installierten KDE-Laufzeit. "
-                   "Bitte Tretlager aktualisieren (flatpak update). Details im Protokoll."))
+    power.notify(_("Tretlager cannot start"),
+                 _("The program libraries do not match the installed KDE runtime. Please "
+                   "update Tretlager (flatpak update). Details are in the log."))
     sys.exit(1)
 
 sys.exit(main())

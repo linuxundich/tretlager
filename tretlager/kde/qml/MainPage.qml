@@ -8,17 +8,17 @@ import org.kde.kirigamiaddons.formcard as FormCard
 // (Sensoren | Zwift). Auf schmalen Fenstern stehen die Spalten untereinander.
 ColumnsPage {
     id: page
-    title: i18n("Übersicht")
+    title: i18n("Overview")
     backdrop: true
 
     readonly property var la: backend.launchInfo
     readonly property var se: backend.sensors
     readonly property var incompatible: se.devices.filter(function (d) { return d.enabled && d.compat })
     readonly property string wineText: !la.wine.active ? "…"
-        : la.wine.useKept ? i18n("%1, vorige Version (mitgeliefert: %2)", la.wine.active, la.wine.bundled)
-        : la.wine.kept && la.wine.kept !== la.wine.bundled ? i18n("%1, neu mit Tretlager; %2 aufgehoben", la.wine.active, la.wine.kept)
-        : la.wine.kept ? i18n("%1, bewährt und aufgehoben", la.wine.active)
-        : i18n("%1, mit Tretlager", la.wine.active)
+        : la.wine.useKept ? i18n("%1, previous version (bundled: %2)", la.wine.active, la.wine.bundled)
+        : la.wine.kept && la.wine.kept !== la.wine.bundled ? i18n("%1, new with Tretlager; %2 kept", la.wine.active, la.wine.kept)
+        : la.wine.kept ? i18n("%1, proven and kept", la.wine.active)
+        : i18n("%1, bundled with Tretlager", la.wine.active)
     readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable && !d.compat })
     // Startbereitschaft auf einen Blick: Welche eingeschalteten Sensoren sind verbunden?
     readonly property var activeDevices: se.devices.filter(function (d) { return d.enabled })
@@ -26,13 +26,13 @@ ColumnsPage {
     readonly property bool sensorsReady: se.running && waitingDevices.length === 0
     readonly property string readinessText: {
         if (!se.running)
-            return i18n("Die Sensor-Bridge startet …")
+            return i18n("The sensor bridge is starting …")
         if (activeDevices.length === 0)
-            return i18n("Keine Sensoren eingerichtet. Zwift startet trotzdem; Sensoren lassen sich unter Sensoren hinzufügen.")
+            return i18n("No sensors set up. Zwift starts anyway; sensors can be added under Sensors.")
         if (waitingDevices.length === 0)
-            return i18np("Sensor verbunden: %2", "Alle %1 Sensoren verbunden: %2", activeDevices.length,
+            return i18np("Sensor connected: %2", "All %1 sensors connected: %2", activeDevices.length,
                          activeDevices.map(function (d) { return d.name }).join(", "))
-        return i18n("%1 von %2 Sensoren verbunden. Noch gesucht: %3 – kurz in die Pedale treten bzw. den Gurt anlegen.",
+        return i18n("%1 of %2 sensors connected. Still searching: %3 – pedal briefly or put on the strap.",
                     activeDevices.length - waitingDevices.length, activeDevices.length,
                     waitingDevices.map(function (d) { return d.name }).join(", "))
     }
@@ -44,15 +44,15 @@ ColumnsPage {
         if (backend.autoStart) backend.startZwift()
     }
 
-    LogDialog { id: logDialog; text: page.la.log; title: i18n("Protokoll des letzten Starts") }
+    LogDialog { id: logDialog; text: page.la.log; title: i18n("Log of the last start") }
 
     // --- Meldungen ---
     PageMessage {
         visible: page.la.needLogin
         type: Kirigami.MessageType.Warning
-        text: i18n("Die Zwift-Sitzung ist abgelaufen. Nach einer neuen Anmeldung im Browser startet Zwift wieder mit einem Klick.")
+        text: i18n("The Zwift session has expired. After signing in again, Zwift starts with one click again.")
         actions: [Kirigami.Action {
-            text: i18n("Anmelden …"); icon.name: "user-identity"
+            text: i18n("Sign in…"); icon.name: "user-identity"
             onTriggered: applicationWindow().pageStack.push(Qt.resolvedUrl("LoginPage.qml"))
         }]
     }
@@ -60,28 +60,28 @@ ColumnsPage {
         visible: page.la.error !== ""
         type: Kirigami.MessageType.Error
         text: page.la.error
-        actions: [Kirigami.Action { text: i18n("Protokoll"); icon.name: "view-list-text"; onTriggered: logDialog.open() }]
+        actions: [Kirigami.Action { text: i18n("Log"); icon.name: "view-list-text"; onTriggered: logDialog.open() }]
     }
     PageMessage {
         visible: page.la.gpuErrors !== "" && !page.la.zwiftRunning
         type: Kirigami.MessageType.Error
         text: (page.la.powerChanged
-               ? i18n("Der Grafiktreiber hat bei der letzten Fahrt Fehler gemeldet (%1). Kurz davor wechselte die Stromversorgung zwischen Netz und Akku; das ist die wahrscheinliche Ursache.", page.la.gpuErrors)
-               : i18n("Der Grafiktreiber hat bei der letzten Fahrt Fehler gemeldet (%1).", page.la.gpuErrors))
-            + " " + i18n("Zwift mit angeschlossenem Netzteil neu starten; hängt es weiter, den Rechner neu starten.")
-        actions: [Kirigami.Action { text: i18n("Protokoll"); icon.name: "view-list-text"; onTriggered: logDialog.open() }]
+               ? i18n("The graphics driver reported errors during the last ride (%1). Shortly before, the power source switched between AC and battery; that is the likely cause.", page.la.gpuErrors)
+               : i18n("The graphics driver reported errors during the last ride (%1).", page.la.gpuErrors))
+            + " " + i18n("Restart Zwift with the power adapter connected; if it still hangs, restart the computer.")
+        actions: [Kirigami.Action { text: i18n("Log"); icon.name: "view-list-text"; onTriggered: logDialog.open() }]
     }
     PageMessage {
         visible: page.la.powerChanged && page.la.gpuErrors === ""
         type: Kirigami.MessageType.Warning
         text: page.la.zwiftRunning || page.la.busy
-            ? i18n("Die Stromversorgung hat während des Starts gewechselt. Hängt Zwift, Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten.")
-            : i18n("Die Stromversorgung hat während der letzten Fahrt gewechselt. Ein Wechsel zwischen Netz und Akku kann den Grafiktreiber stören; das Netzteil am besten vor dem Start anschließen und während der Fahrt angeschlossen lassen.")
+            ? i18n("The power source changed during the start. If Zwift hangs, close it with Alt+F4 and restart it with the power adapter connected.")
+            : i18n("The power source changed during the last ride. Switching between AC and battery can upset the graphics driver; best connect the power adapter before starting and keep it connected during the ride.")
     }
     PageMessage {
         visible: page.la.onBattery && !page.la.zwiftRunning && !page.la.powerChanged && page.la.gpuErrors === ""
         type: Kirigami.MessageType.Warning
-        text: i18n("Der Rechner läuft auf Akku. Zwift am besten mit angeschlossenem Netzteil starten und es während der Fahrt angeschlossen lassen: Ein Wechsel zwischen Netz und Akku kann den Grafiktreiber zum Absturz bringen, und auf Akku drosselt die Grafikkarte stark.")
+        text: i18n("The computer is running on battery. Best start Zwift with the power adapter connected and keep it connected during the ride: switching between AC and battery can crash the graphics driver, and on battery the graphics card is heavily throttled.")
     }
     Repeater {
         model: page.incompatible
@@ -90,21 +90,21 @@ ColumnsPage {
             visible: true
             type: Kirigami.MessageType.Warning
             text: modelData.compat
-            actions: [Kirigami.Action { text: i18n("Sensoren"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
+            actions: [Kirigami.Action { text: i18n("Sensors"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
         }
     }
     PageMessage {
         visible: page.anyUnstable
         type: Kirigami.MessageType.Warning
-        text: i18n("Ein Sensor verliert oft die Verbindung. Meist steht der Rechner zu weit vom Trainer entfernt.")
-        actions: [Kirigami.Action { text: i18n("Sensoren"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
+        text: i18n("A sensor often loses its connection. Usually the computer is too far from the trainer.")
+        actions: [Kirigami.Action { text: i18n("Sensors"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
     }
 
     // --- Start (rahmenlos) ---
     PageHero {
-        title: page.la.zwiftRunning ? i18n("Gute Fahrt!") : page.la.busy ? i18n("Zwift startet …")
-             : page.sensorsReady ? i18n("Bereit zum Fahren") : i18n("Fast bereit")
-        text: page.la.zwiftRunning ? i18n("Tretlager wartet minimiert und räumt nach der Fahrt auf.")
+        title: page.la.zwiftRunning ? i18n("Enjoy the ride!") : page.la.busy ? i18n("Zwift is starting…")
+             : page.sensorsReady ? i18n("Ready to ride") : i18n("Almost ready")
+        text: page.la.zwiftRunning ? i18n("Tretlager waits minimised and tidies up after the ride.")
             : page.la.busy && page.la.text !== "" ? page.la.text
             : page.readinessText
         RowLayout {
@@ -113,7 +113,7 @@ ColumnsPage {
             // Die eine Hauptaktion: größer als alle anderen Knöpfe und als einziger hervorgehoben.
             Controls.Button {
                 id: startButton
-                text: page.la.zwiftRunning ? i18n("Zwift läuft") : i18n("Zwift starten")
+                text: page.la.zwiftRunning ? i18n("Zwift is running") : i18n("Start Zwift")
                 icon.name: "media-playback-start"
                 icon.width: Kirigami.Units.iconSizes.smallMedium
                 icon.height: Kirigami.Units.iconSizes.smallMedium
@@ -132,7 +132,7 @@ ColumnsPage {
                 Layout.preferredWidth: Layout.preferredHeight
             }
             Kirigami.ContextualHelpButton {
-                toolTipText: i18n("Vor dem Start prüft Tretlager die Sensor-Bridge und erneuert die Zwift-Sitzung. Nach einem Tretlager-Update passt es die Zwift-Umgebung an, und eine neue Zwift-Version spielt es über den Zwift-Launcher ein. Zwift läuft auf der leistungsstärksten Grafikkarte und in der Auflösung des Bildschirms.")
+                toolTipText: i18n("Before starting, Tretlager checks the sensor bridge and renews the Zwift session. After a Tretlager update it adapts the Zwift environment, and it installs a new Zwift version through the Zwift launcher. Zwift runs on the most powerful graphics card and at the screen's resolution.")
             }
         }
         // Fortschritt langer Schritte (Zwift-Update, Nachinstallieren), sonst unsichtbar
@@ -151,17 +151,17 @@ ColumnsPage {
             wrapMode: Text.WordWrap
             color: Kirigami.Theme.disabledTextColor
             font: Kirigami.Theme.smallFont
-            text: i18n("Keine offizielle Zwift-App, Nutzung auf eigene Gefahr. Nicht für Rennen: Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt.")
+            text: i18n("Not an official Zwift app, use at your own risk. Not for races: Tretlager does not guarantee that the sensor bridge passes power, cadence and heart rate to Zwift correctly.")
         }
     }
 
     // --- Sensoren ---
     leftCards: [
         FormCard.FormHeader {
-            title: i18n("Sensoren")
+            title: i18n("Sensors")
             maximumWidth: Infinity
             trailing: Kirigami.ContextualHelpButton {
-                toolTipText: i18n("Zwift kann unter Linux kein Bluetooth nutzen. Die Sensor-Bridge verbindet sich mit Trainer und Pulsgurt und bietet sie Zwift als Wahoo-Geräte mit „Direct Connect“ an. In Zwift einmalig unter Gekoppelte Geräte auswählen: „Wahoo KICKR …“ für Leistung, Trittfrequenz und Widerstand, „Wahoo HRM …“ für den Puls.")
+                toolTipText: i18n("Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the trainer and heart rate strap and offers them to Zwift as Wahoo devices with “Direct Connect”. Select them once in Zwift under Paired Devices: “Wahoo KICKR …” for power, cadence and resistance, “Wahoo HRM …” for heart rate.")
             }
         },
         FormCard.FormCard {
@@ -169,9 +169,9 @@ ColumnsPage {
             FormCard.FormPlaceholderMessageDelegate {
                 visible: !page.se.running || page.se.devices.length === 0
                 icon.name: "network-bluetooth"
-                text: !page.se.running ? i18n("Sensor-Bridge ist aus") : i18n("Keine Geräte eingerichtet")
-                explanation: !page.se.running ? i18n("Sie startet mit Tretlager und vor jeder Fahrt.")
-                                               : i18n("Trainer und Pulsgurt unter Sensoren hinzufügen.")
+                text: !page.se.running ? i18n("Sensor bridge is off") : i18n("No devices set up")
+                explanation: !page.se.running ? i18n("It starts with Tretlager and before every ride.")
+                                               : i18n("Add the trainer and heart rate strap under Sensors.")
             }
             Repeater {
                 model: page.se.running ? page.se.devices : []
@@ -186,7 +186,7 @@ ColumnsPage {
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: i18n("Sensoren verwalten")
+                text: i18n("Manage sensors")
                 icon.name: "configure"
                 onClicked: applicationWindow().show("sensors", { wizard: false })
             }
@@ -200,18 +200,18 @@ ColumnsPage {
             maximumWidth: Infinity
             FormCard.FormTextDelegate {
                 text: i18n("Version")
-                description: !page.la.remote ? (page.la.version || i18n("unbekannt"))
-                    : page.la.remote === page.la.version ? i18n("%1, aktuell", page.la.version)
-                    : i18n("%1, Update auf %2 beim nächsten Start", page.la.version || i18n("unbekannt"), page.la.remote)
+                description: !page.la.remote ? (page.la.version || i18n("unknown"))
+                    : page.la.remote === page.la.version ? i18n("%1, up to date", page.la.version)
+                    : i18n("%1, update to %2 at the next start", page.la.version || i18n("unknown"), page.la.remote)
                 icon.name: "update-none"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Grafik")
-                description: page.la.renderer || i18n("Noch nicht geprüft")
+                text: i18n("Graphics")
+                description: page.la.renderer || i18n("Not checked yet")
                 icon.name: "video-display"
                 trailing: Kirigami.ContextualHelpButton {
-                    toolTipText: i18n("Den Grafikweg hat Tretlager bei der Einrichtung getestet. Auf Notebooks mit zwei Grafikchips läuft Zwift auf der NVIDIA-Karte, der Desktop bleibt auf dem sparsamen Chip. Die Bildschirmauflösung bleibt unverändert.")
+                    toolTipText: i18n("Tretlager tested the graphics path during setup. On laptops with two graphics chips, Zwift runs on the NVIDIA card while the desktop stays on the power-saving chip. The screen resolution stays unchanged.")
                 }
             }
             FormCard.FormDelegateSeparator {}
@@ -220,15 +220,15 @@ ColumnsPage {
                 description: page.wineText
                 icon.name: "system-run"
                 trailing: Kirigami.ContextualHelpButton {
-                    toolTipText: i18n("Wine kommt mit Tretlager und wird mit Tretlager aktualisiert. Die zuletzt bewährte Version hebt Tretlager auf: Läuft Zwift nach einem Update schlechter, startet der Schalter darunter Zwift wieder mit ihr. Ein neues Wine gilt nach zwei Fahrten als bewährt und ersetzt dann die aufgehobene Version.")
+                    toolTipText: i18n("Wine comes with Tretlager and is updated with Tretlager. Tretlager keeps the last proven version: if Zwift runs worse after an update, the switch below starts Zwift with it again. A new Wine counts as proven after two rides and then replaces the kept version.")
                 }
             }
             FormCard.FormDelegateSeparator { visible: rollback.visible }
             FormCard.FormSwitchDelegate {
                 id: rollback
                 visible: page.la.wine.kept !== "" && page.la.wine.kept !== page.la.wine.bundled
-                text: i18n("Vorige Wine-Version nutzen")
-                description: i18n("%1 statt %2. Nur nötig, wenn Zwift seit dem letzten Tretlager-Update nicht mehr richtig läuft.",
+                text: i18n("Use previous Wine version")
+                description: i18n("%1 instead of %2. Only needed if Zwift has not run properly since the last Tretlager update.",
                                   page.la.wine.kept, page.la.wine.bundled)
                 checked: page.la.wine.useKept
                 enabled: !page.la.busy && !page.la.zwiftRunning
@@ -236,23 +236,23 @@ ColumnsPage {
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Anmeldung")
+                text: i18n("Sign-in")
                 description: page.la.login || "…"
                 icon.name: "user-identity"
                 trailing: Kirigami.ContextualHelpButton {
-                    toolTipText: i18n("Die offizielle Anmeldung funktioniert unter Linux nicht, deshalb läuft sie über ein eigenes Anmeldefenster. Das widerspricht den Zwift-Nutzungsbedingungen. Die Sitzung liegt nur im Schlüsselbund dieses Rechners.")
+                    toolTipText: i18n("The official sign-in does not work on Linux, so it runs through a separate sign-in window. This contradicts Zwift's terms of service. The session is only stored in this computer's keyring.")
                 }
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: i18n("Neu anmelden …")
+                text: i18n("Sign in again…")
                 icon.name: "view-refresh"
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("LoginPage.qml"))
             }
             FormCard.FormDelegateSeparator { visible: page.la.log !== "" }
             FormCard.FormButtonDelegate {
                 visible: page.la.log !== ""
-                text: i18n("Protokoll des letzten Starts …")
+                text: i18n("Log of the last start…")
                 icon.name: "view-list-text"
                 onClicked: logDialog.open()
             }

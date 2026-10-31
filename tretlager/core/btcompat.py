@@ -59,12 +59,12 @@ KNOWN_ISSUES = [
         chips=frozenset({"8087:0026"}),
         device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # „HRM-Pro:…“, „HRMPro+:…“
         device_name="Garmin HRM-Pro",
-        text=_("Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses Rechners ({chip}). "
-               "Er wird zwar gefunden, die Verbindung kommt aber nie zustande; an Reichweite oder "
-               "Batterie liegt das nicht. Abhilfe: einen USB-Bluetooth-Stick anschließen und unter "
-               "Sensoren als Bluetooth-Adapter wählen (getestet: TP-Link UB500) oder einen anderen "
-               "Pulsgurt nutzen, etwa einen Wahoo TICKR."),
-        short=_("Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-Bluetooth-Stick"),
+        text=_("The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
+               "({chip}). It is found, but the connection never completes; range and battery "
+               "are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as the "
+               "Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another heart "
+               "rate strap such as a Wahoo TICKR."),
+        short=_("Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth dongle"),
     ),
 ]
 
@@ -82,7 +82,7 @@ def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:
             break
         except OSError:
             continue
-    return Chip(usb_id, CHIP_NAMES.get(usb_id, f"USB {usb_id}" if usb_id else _("unbekannter Chip")))
+    return Chip(usb_id, CHIP_NAMES.get(usb_id, f"USB {usb_id}" if usb_id else _("unknown chip")))
 
 
 def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:

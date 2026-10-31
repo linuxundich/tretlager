@@ -110,11 +110,11 @@ def download(url: str, dest: Path, ctx: Context, step: str, text: str) -> None:
         done = 0
         while chunk := r.read(1 << 16):
             if ctx.cancel.is_set():
-                raise SetupError(_("Abgebrochen"))
+                raise SetupError(_("Cancelled"))
             f.write(chunk)
             done += len(chunk)
             if total:
-                ctx.progress(step, 100 * done / total, _("{text} ({done} von {total} MB)").format(text=text, done=done // 10**6, total=total // 10**6))
+                ctx.progress(step, 100 * done / total, _("{text} ({done} of {total} MB)").format(text=text, done=done // 10**6, total=total // 10**6))
     part.replace(dest)
 
 
@@ -139,7 +139,7 @@ def parse_signer(output: str) -> str:
 
 class Installer(Step):
     id = "installer"
-    title = _("Zwift-Installer laden und Signatur prüfen")
+    title = _("Download the Zwift installer and verify its signature")
     path = paths.CACHE / "ZwiftSetup.exe"
 
     def done(self, ctx: Context) -> bool:
@@ -150,24 +150,24 @@ class Installer(Step):
         return self.path.exists() and info.get("sha256") == sha256(self.path) and info.get("verified") is True
 
     def run(self, ctx: Context) -> None:
-        download(INSTALLER_URL, self.path, ctx, self.id, _("Installer laden"))
-        ctx.progress(self.id, 100, _("Signatur prüfen"))
+        download(INSTALLER_URL, self.path, ctx, self.id, _("Downloading the installer"))
+        ctx.progress(self.id, 100, _("Verifying the signature"))
         r = subprocess.run(["osslsigncode", "verify", "-in", str(self.path), "-CAfile", CA_BUNDLE,
                             "-TSA-CAfile", CA_BUNDLE], capture_output=True, text=True)
         ctx.log(r.stdout[-3000:])
         signer = parse_signer(r.stdout)
         if r.returncode != 0 or "Succeeded" not in r.stdout:
             self.path.unlink(missing_ok=True)
-            raise SetupError(_("Die Signatur des Zwift-Installers ist ungültig; die Datei wurde verworfen."))
+            raise SetupError(_("The Zwift installer's signature is invalid; the file was discarded."))
         if not all(part in signer for part in SIGNER_REQUIRED):
             self.path.unlink(missing_ok=True)
-            raise SetupError(_("Der Installer ist nicht von Zwift, Inc. signiert ({signer}).").format(signer=signer or _("unbekannt")))
+            raise SetupError(_("The installer is not signed by Zwift, Inc. ({signer}).").format(signer=signer or _("unknown")))
         state.update("installer", sha256=sha256(self.path), verified=True, signer=signer, url=INSTALLER_URL)
 
 
 class Prefix(Step):
     id = "prefix"
-    title = _("Wine-Umgebung anlegen")
+    title = _("Create the Wine environment")
 
     @staticmethod
     def exists() -> bool:
@@ -187,15 +187,15 @@ class Prefix(Step):
         paths.PREFIX.parent.mkdir(parents=True, exist_ok=True)
         # Neues Wine (Tretlager-Update): Umgebung an die neue Version anpassen, wie es Wine sonst
         # beim nächsten Programmstart unaufgefordert und mitten im Zwift-Start täte.
-        ctx.progress(self.id, 0, _("Wine passt die Umgebung an die neue Version an") if self.exists()
-                     else _("Wine richtet die Umgebung ein"))
+        ctx.progress(self.id, 0, _("Wine is adapting the environment to the new version") if self.exists()
+                     else _("Wine is setting up the environment"))
         # Nur für wineboot: Mono und Gecko nicht nachladen. Ohne die Variable öffnet wineboot einen
         # Installationsdialog und wartet (auf tinytin hing `wineboot -u` daran über 10 min). .NET und
         # WebView2 kommen über winetricks; dauerhaft gesetzt würde die Variable .NET abschalten.
         env = dict(ctx.wine_env, WINEDLLOVERRIDES="mscoree,mshtml=")
         if ctx.run(["wine", "wineboot", "-u"], env=env, timeout=WINEBOOT_TIMEOUT) != 0:
-            raise SetupError(_("Wine konnte die Umgebung nicht anpassen.") if self.exists()
-                             else _("Wine konnte die Umgebung nicht anlegen."))
+            raise SetupError(_("Wine could not adapt the environment.") if self.exists()
+                             else _("Wine could not create the environment."))
         ctx.wineserver_wait()
         state.update("prefix", wine=systemcheck.wine_version())
         # Ab jetzt in Bildschirmgröße: Installer und .NET-Einrichtung sonst winzig auf HiDPI
@@ -207,10 +207,10 @@ class Winetricks:
 
     def ensure(self, ctx: Context) -> Path:
         if not (self.path.exists() and sha256(self.path) == WINETRICKS_SHA256):
-            download(WINETRICKS_URL, self.path, ctx, Components.id, _("winetricks laden"))
+            download(WINETRICKS_URL, self.path, ctx, Components.id, _("Downloading winetricks"))
             if sha256(self.path) != WINETRICKS_SHA256:
                 self.path.unlink(missing_ok=True)
-                raise SetupError(_("winetricks hat nicht die erwartete Prüfsumme; Download verworfen."))
+                raise SetupError(_("winetricks does not have the expected checksum; download discarded."))
             self.path.chmod(0o755)
         return self.path
 
@@ -226,7 +226,7 @@ class Winetricks:
 
 class Components(Step):
     id = "components"
-    title = _("Komponenten von Microsoft (Schriften, .NET 4.8, WebView2)")
+    title = _("Microsoft components (fonts, .NET 4.8, WebView2)")
 
     def done(self, ctx: Context) -> bool:
         return set(VERBS) <= Winetricks().installed(ctx)
@@ -238,28 +238,28 @@ class Components(Step):
         base = 0.0
         for verb in VERBS:
             if verb not in have:
-                ctx.progress(self.id, base, _("{verb} installieren").format(verb=verb))
+                ctx.progress(self.id, base, _("Installing {verb}").format(verb=verb))
                 if ctx.run([str(tool), "-q", verb], cwd=paths.CACHE) != 0:
-                    raise SetupError(_("winetricks konnte „{verb}“ nicht installieren.").format(verb=verb))
+                    raise SetupError(_("winetricks could not install “{verb}”.").format(verb=verb))
                 ctx.wineserver_wait()
             base += VERB_WEIGHT[verb]
 
 
 class Launcher(Step):
     id = "launcher"
-    title = _("Zwift-Launcher installieren")
+    title = _("Install the Zwift launcher")
 
     def done(self, ctx: Context) -> bool:
         return (paths.ZWIFT_DIR / "ZwiftLauncher.exe").exists()
 
     def run(self, ctx: Context) -> None:
-        ctx.progress(self.id, 0, _("Installer läuft unbeaufsichtigt"))
+        ctx.progress(self.id, 0, _("Installer is running unattended"))
         ctx.run(["wine", str(Installer.path), "/SP-", "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/NOCANCEL"])
         time.sleep(5)
         # Launcher 1.2 stürzt sonst beim ersten Start ab (netbrain/zwift#420).
         ctx.wineserver_kill()
         if not self.done(ctx):
-            raise SetupError(_("Der Zwift-Launcher wurde nicht installiert."))
+            raise SetupError(_("The Zwift launcher was not installed."))
 
 
 def dir_size(path: Path) -> int:
@@ -288,7 +288,7 @@ def game_version(zwift_dir: Path | None = None) -> str:
 
 class Game(Step):
     id = "game"
-    title = _("Zwift laden (etwa 5 GB)")
+    title = _("Download Zwift (about 5 GB)")
 
     def done(self, ctx: Context) -> bool:
         return (paths.ZWIFT_DIR / "ZwiftApp.exe").exists() and bool(game_version())
@@ -298,7 +298,7 @@ class Game(Step):
         # Größe des Zwift-Ordners.
         tracker = manifest.UpdateProgress()
         if tracker.total:
-            ctx.log(_("Zwift: {gb} GB zu laden").format(gb=f"{tracker.total / 10**9:.1f}"))
+            ctx.log(_("Zwift: {gb} GB to download").format(gb=f"{tracker.total / 10**9:.1f}"))
         start_size = 0 if tracker.total else dir_size(paths.ZWIFT_DIR)
         ctx.log("$ wine start ZwiftLauncher.exe SilentLaunch")
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
@@ -308,24 +308,24 @@ class Game(Step):
         try:
             while time.monotonic() < deadline:
                 if ctx.cancel.is_set():
-                    raise SetupError(_("Abgebrochen"))
+                    raise SetupError(_("Cancelled"))
                 time.sleep(3)
                 if tracker.total:
                     loaded = size = tracker.loaded()
-                    text = _("{loaded} von {total} GB")
+                    text = _("{loaded} of {total} GB")
                     total = tracker.total
                 else:
                     size = dir_size(paths.ZWIFT_DIR)
                     loaded, total = max(size - start_size, 0), GAME_SIZE_BYTES
-                    text = _("{loaded} von etwa {total} GB")
+                    text = _("{loaded} of about {total} GB")
                 ctx.progress(self.id, min(99, 100 * loaded / total),
                              text.format(loaded=f"{loaded / 10**9:.1f}", total=f"{total / 10**9:.1f}"))
                 if size != last:
                     last, stable_since = size, time.monotonic()
                 if self.done(ctx) and time.monotonic() - stable_since > 15:
-                    ctx.log(_("Zwift {version} geladen").format(version=game_version()))
+                    ctx.log(_("Zwift {version} downloaded").format(version=game_version()))
                     return
-            raise SetupError(_("Zwift wurde nicht vollständig geladen (Zeitüberschreitung)."))
+            raise SetupError(_("Zwift was not fully downloaded (timed out)."))
         finally:
             ctx.wineserver_kill()
 
@@ -348,7 +348,7 @@ def parse_gltest(output: str) -> dict:
 
 class Graphics(Step):
     id = "graphics"
-    title = _("Grafik einrichten")
+    title = _("Set up graphics")
 
     def done(self, ctx: Context) -> bool:
         info = state.load().get("graphics", {})
@@ -368,13 +368,13 @@ class Graphics(Step):
         # Zwift soll die Auflösung des Desktops nicht umstellen (weder per XRandR noch per XVidMode).
         for value in WINE_DISPLAY_KEYS:
             ctx.run(["wine", "reg", "add", reg, "/v", value, "/t", "REG_SZ", "/d", "N", "/f"])
-        ctx.progress(self.id, 40, _("Grafiktest übersetzen"))
+        ctx.progress(self.id, 40, _("Compiling the graphics test"))
         work = paths.CACHE / "gltest"
         work.mkdir(parents=True, exist_ok=True)
         shutil.copy(GLTEST_SRC, work / "GLTest.cs")
         ctx.run(["wine", CSC, "/nologo", "/target:exe", "/platform:x64", "/out:GLTest.exe",
                  "/r:System.Windows.Forms.dll", "GLTest.cs"], cwd=work)
-        ctx.progress(self.id, 70, _("Grafiktest ausführen"))
+        ctx.progress(self.id, 70, _("Running the graphics test"))
         info = {"offload": hybrid}
         env = dict(ctx.wine_env, **graphics_env(info))
         r = subprocess.run(["wine", "GLTest.exe"], cwd=work, env=env, capture_output=True, text=True, timeout=120)
@@ -382,9 +382,9 @@ class Graphics(Step):
         result = parse_gltest(r.stdout)
         ctx.log(r.stdout.strip())
         if not result.get("gl_renderer"):
-            raise SetupError(_("Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."))
+            raise SetupError(_("Wine gets no OpenGL context; Zwift would not start."))
         if nvidia and "NVIDIA" not in result.get("gl_vendor", ""):
-            ctx.log(_("Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"))
+            ctx.log(_("Warning: NVIDIA present, but OpenGL does not run on it"))
         state.update("graphics", **info, **result, wine=systemcheck.wine_version(), gpus=systemcheck.gpu_signature())
 
 
@@ -400,7 +400,7 @@ def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
             return False
         try:
             if step.done(ctx):
-                on_step(step.id, "skipped", _("schon erledigt"))
+                on_step(step.id, "skipped", _("already done"))
                 continue
             on_step(step.id, "running", "")
             step.run(ctx)
@@ -410,6 +410,6 @@ def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
             return False
         except Exception as e:  # unerwartet: trotzdem verständlich melden, Details ins Protokoll
             ctx.log(f"{type(e).__name__}: {e}")
-            on_step(step.id, "error", _("Unerwarteter Fehler: {error}").format(error=e))
+            on_step(step.id, "error", _("Unexpected error: {error}").format(error=e))
             return False
     return True

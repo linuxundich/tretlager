@@ -48,21 +48,21 @@ Kirigami.ApplicationWindow {
 
         actions: [
             Kirigami.Action {
-                text: i18n("Übersicht")
+                text: i18n("Overview")
                 icon.name: "go-home"
                 checkable: true
                 checked: root.current === "overview"
                 onTriggered: root.show("overview")
             },
             Kirigami.Action {
-                text: i18n("Sensoren")
+                text: i18n("Sensors")
                 icon.name: "network-bluetooth"
                 checkable: true
                 checked: root.current === "sensors"
                 onTriggered: root.show("sensors", { wizard: false })
             },
             Kirigami.Action {
-                text: i18n("Hilfe")
+                text: i18n("Help")
                 icon.name: "help-contents"
                 checkable: true
                 checked: root.current === "help"
@@ -70,14 +70,14 @@ Kirigami.ApplicationWindow {
             },
             Kirigami.Action { separator: true },
             Kirigami.Action {
-                text: i18n("Einrichtung prüfen")
+                text: i18n("Check setup")
                 icon.name: "tools-wizard"
                 checkable: true
                 checked: root.inWizard
                 onTriggered: root.show("setup")
             },
             Kirigami.Action {
-                text: i18n("Über Tretlager")
+                text: i18n("About Tretlager")
                 icon.name: "help-about"
                 checkable: true
                 checked: root.current === "about"
@@ -103,14 +103,14 @@ Kirigami.ApplicationWindow {
     Kirigami.PromptDialog {
         id: quitDialog
         property bool confirmed: false
-        title: i18n("Zwift läuft noch")
+        title: i18n("Zwift is still running")
         subtitle: backend.flatpak
-            ? i18n("Wird Tretlager jetzt beendet, endet auch Zwift. Die Fahrt am besten zuerst in Zwift speichern und beenden; Tretlager minimiert sich während der Fahrt nur.")
-            : i18n("Tretlager räumt dann nach der Fahrt nicht auf. Die Fahrt am besten zuerst in Zwift beenden; Tretlager minimiert sich während der Fahrt nur.")
+            ? i18n("If Tretlager quits now, Zwift ends too. Best save and end the ride in Zwift first; Tretlager only minimises itself during the ride.")
+            : i18n("Tretlager will then not tidy up after the ride. Best end the ride in Zwift first; Tretlager only minimises itself during the ride.")
         standardButtons: Kirigami.Dialog.Cancel
         customFooterActions: [
             Kirigami.Action {
-                text: i18n("Trotzdem beenden")
+                text: i18n("Quit anyway")
                 icon.name: "application-exit"
                 onTriggered: { quitDialog.confirmed = true; backend.quitNow() }
             }

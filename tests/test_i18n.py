@@ -10,8 +10,8 @@ import msgfmt  # noqa: E402
 
 
 def test_language_selection(tmp_path):
-    (tmp_path / "en" / "LC_MESSAGES").mkdir(parents=True)
-    (tmp_path / "en" / "LC_MESSAGES" / "tretlager.mo").write_bytes(b"")
+    (tmp_path / "de" / "LC_MESSAGES").mkdir(parents=True)
+    (tmp_path / "de" / "LC_MESSAGES" / "tretlager.mo").write_bytes(b"")
     assert i18n.ui_language({"LANG": "de_DE.UTF-8"}, tmp_path) == "de"
     assert i18n.ui_language({"LANG": "en_GB.UTF-8"}, tmp_path) == "en"
     assert i18n.ui_language({"LANG": "fr_FR.UTF-8"}, tmp_path) == "en"  # ohne Katalog: Englisch
@@ -24,9 +24,9 @@ def _placeholders(text: str) -> set[str]:
     return set(re.findall(r"%\d|\{\w+\}", text))
 
 
-def test_english_catalog_complete_and_consistent():
+def test_german_catalog_complete_and_consistent():
     pot = (ROOT / "po" / "tretlager.pot").read_text()
-    entries = msgfmt.parse(ROOT / "po" / "en.po")
+    entries = msgfmt.parse(ROOT / "po" / "de.po")
     ids = {k.split("\x00")[0] for k in entries if k}
     pot_ids = {m for m in re.findall(r'^msgid "(.+)"$', pot, re.M)}
     missing = [m for m in pot_ids if m.replace('\\"', '"').replace("\\n", "\n") not in ids]
@@ -45,17 +45,17 @@ def test_english_catalog_complete_and_consistent():
 
 def test_msgfmt_roundtrip(tmp_path):
     import gettext
-    out = tmp_path / "en.mo"
-    msgfmt.write(msgfmt.parse(ROOT / "po" / "en.po"), out)
+    out = tmp_path / "de.mo"
+    msgfmt.write(msgfmt.parse(ROOT / "po" / "de.po"), out)
     t = gettext.GNUTranslations(out.open("rb"))
-    assert t.gettext("Sensoren in der Nähe") == "Sensors nearby"
-    assert t.ngettext(", Erneuerung noch {n} Tag", ", Erneuerung noch {n} Tage", 2) == ", renewal for {n} more days"
+    assert t.gettext("Sensors nearby") == "Sensoren in der Nähe"
+    assert t.ngettext(", renewal for {n} more day", ", renewal for {n} more days", 2) == ", Erneuerung noch {n} Tage"
 
 
-def test_english_help_matches_structure():
+def test_german_help_matches_structure():
     from tretlager.core import helpdoc
-    de = helpdoc.parse((ROOT / "tretlager" / "data" / "hilfe.md").read_text())
-    en = helpdoc.parse((ROOT / "tretlager" / "data" / "hilfe.en.md").read_text())
+    de = helpdoc.parse((ROOT / "tretlager" / "data" / "help.de.md").read_text())
+    en = helpdoc.parse((ROOT / "tretlager" / "data" / "help.md").read_text())
     assert [len(s["items"]) for s in de] == [len(s["items"]) for s in en]
     assert [s["icon"] for s in de] == [s["icon"] for s in en]
     assert [s["wide"] for s in de] == [s["wide"] for s in en]

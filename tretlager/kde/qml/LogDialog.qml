@@ -6,7 +6,7 @@ import org.kde.kirigami as Kirigami
 Kirigami.Dialog {
     id: dialog
     property string text
-    title: i18n("Protokoll")
+    title: i18n("Log")
     preferredWidth: Kirigami.Units.gridUnit * 40
     preferredHeight: Kirigami.Units.gridUnit * 28
     standardButtons: Kirigami.Dialog.Close

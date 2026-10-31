@@ -135,7 +135,7 @@ class Backend(QObject):
     def runPrepare(self) -> None:
         if self._prep["running"]:
             return
-        self._prep = {"running": True, "percent": 0.0, "step": _("Berechtigung anfragen …"), "log": "",
+        self._prep = {"running": True, "percent": 0.0, "step": _("Requesting permission…"), "log": "",
                       "result": "", "error": ""}
         self.prepareChanged.emit()
 
@@ -155,13 +155,13 @@ class Backend(QObject):
         elif kind == "log":
             p["log"] = (p["log"] + ev.get("text", "") + "\n")[-20000:]
         elif kind == "done":
-            p.update(result="done", percent=100.0, step=_("Fertig: {wine}").format(wine=ev.get("wine", "")).strip())
+            p.update(result="done", percent=100.0, step=_("Done: {wine}").format(wine=ev.get("wine", "")).strip())
         elif kind == "error":
-            p.update(result="error", error=_(ev.get("text") or "Unbekannter Fehler"))
+            p.update(result="error", error=_(ev.get("text") or "Unknown error"))
         elif kind == "exit":
             p["running"] = False
             if ev.get("code") and not p["result"]:
-                p.update(result="error", error=p["error"] or _("Helfer beendet mit Code {code}").format(code=ev["code"]))
+                p.update(result="error", error=p["error"] or _("Helper exited with code {code}").format(code=ev["code"]))
         self._prep = p
         self.prepareChanged.emit()
 
@@ -514,11 +514,11 @@ class Backend(QObject):
         if active and self._ac_at_start is not None and ac is not None and ac != self._ac_at_start \
                 and not self._launch["powerChanged"]:
             ev["powerChanged"] = True
-            self._on_launch_event({"logline": _("Stromversorgung gewechselt: Netz") if ac else _("Stromversorgung gewechselt: Akku")})
+            self._on_launch_event({"logline": _("Power source changed: AC") if ac else _("Power source changed: battery")})
             threading.Thread(target=power.notify, daemon=True, args=(
-                _("Stromversorgung gewechselt"),
-                _("Der Wechsel zwischen Netz und Akku kann den NVIDIA-Treiber stören. Hängt Zwift, "
-                  "Zwift mit Alt+F4 beenden und mit angeschlossenem Netzteil neu starten."))).start()
+                _("Power source changed"),
+                _("Switching between AC and battery can upset the NVIDIA driver. If Zwift "
+                  "hangs, close it with Alt+F4 and restart it with the power adapter connected."))).start()
         if ev:
             self._on_launch_event(ev)
 
@@ -546,13 +546,13 @@ class Backend(QObject):
         for path in (Path("/usr/share/common-licenses/GPL-3"), Path(__file__).resolve().parents[2] / "LICENSE"):
             if path.is_file():
                 return path.read_text()
-        return _("GNU General Public License, Version 3 oder später: https://www.gnu.org/licenses/gpl-3.0.html")
+        return _("GNU General Public License, version 3 or later: https://www.gnu.org/licenses/gpl-3.0.html")
 
     @Property(list, constant=True)
     def helpSections(self) -> list:
         """Hilfe als Abschnitte mit Einträgen und Spalte (siehe core/helpdoc.py)."""
-        localized = DATA_DIR / f"hilfe.{LANGUAGE}.md"
-        source = localized if LANGUAGE != "de" and localized.exists() else DATA_DIR / "hilfe.md"
+        localized = DATA_DIR / f"help.{LANGUAGE}.md"
+        source = localized if LANGUAGE != "en" and localized.exists() else DATA_DIR / "help.md"
         return helpdoc.layout(helpdoc.parse(source.read_text()))
 
     @Slot()
@@ -560,7 +560,7 @@ class Backend(QObject):
         """Bridge schon beim Öffnen starten, damit Trainer und Gurt beim Aufsteigen verbunden sind."""
         def work():
             if not self._launch.get("zwiftRunning") and bridgectl.restart_if_outdated(__version__):
-                self._launchEvent.emit({"logline": _("Sensor-Bridge nach Update neu gestartet")})
+                self._launchEvent.emit({"logline": _("Sensor bridge restarted after an update")})
             if bridgectl.unit_installed() and not bridgectl.is_running():
                 bridgectl.set_running(True)
             self.refreshSensors()
@@ -609,12 +609,12 @@ class Backend(QObject):
             try:
                 tok = login.Keyring().load()
                 ls = login.status(tok)
-                info["login"] = {"valid": _("gültig"), "refreshable": _("wird beim Start erneuert"),
-                                 "expired": _("abgelaufen – bitte neu anmelden"),
-                                 "none": _("nicht angemeldet")}[ls["state"]]
+                info["login"] = {"valid": _("valid"), "refreshable": _("renewed at start"),
+                                 "expired": _("expired – please sign in again"),
+                                 "none": _("not signed in")}[ls["state"]]
                 if ls["state"] in ("valid", "refreshable"):
                     days = ls["refresh_left"] // 86400
-                    info["login"] += ngettext(", Erneuerung noch {n} Tag", ", Erneuerung noch {n} Tage", days).format(n=days)
+                    info["login"] += ngettext(", renewal for {n} more day", ", renewal for {n} more days", days).format(n=days)
             except login.LoginError as e:
                 info["login"] = str(e)
             self._launchEvent.emit(info)
@@ -633,7 +633,7 @@ class Backend(QObject):
             return
         self._ac_at_start = power.on_ac()
         started_at = time.time()
-        self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": _("Start vorbereiten"),
+        self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": _("Preparing the start"),
                                "powerChanged": False, "gpuErrors": ""})
         launcher = launch.Launcher(progress=lambda t, p=-1: self._launchEvent.emit({"text": t, "percent": float(p)}),
                                    log=lambda t: self._launchEvent.emit({"logline": t}))
@@ -651,10 +651,10 @@ class Backend(QObject):
                 return
             except Exception as e:  # nur den Typ melden: Ausnahmen können Befehlszeilen enthalten
                 applog.warning("Start fehlgeschlagen: %s", type(e).__name__)
-                self._launchEvent.emit({"busy": False, "error": _("Unerwarteter Fehler ({name})").format(name=type(e).__name__), "text": ""})
+                self._launchEvent.emit({"busy": False, "error": _("Unexpected error ({name})").format(name=type(e).__name__), "text": ""})
                 self._after_exit_quietly(launcher)
                 return
-            self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift läuft"), "percent": -1})
+            self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift is running"), "percent": -1})
             applog.info("Zwift läuft (%s)", systemcheck.wine_version())
             ride_start = time.monotonic()
             # Ein Fehler beim Nachsehen darf die Überwachung nicht beenden: Sonst bliebe die
@@ -672,10 +672,10 @@ class Backend(QObject):
                 kept = wine.record_ride(time.monotonic() - ride_start)
                 if kept:
                     applog.info("Wine %s als bewährte Version aufbewahrt", kept)
-                    self._launchEvent.emit({"logline": _("{version} als bewährte Wine-Version aufbewahrt").format(version=kept)})
+                    self._launchEvent.emit({"logline": _("{version} kept as the proven Wine version").format(version=kept)})
             except OSError as e:
                 applog.warning("Wine aufbewahren: %s", e)
-            self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift beendet")})
+            self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift closed")})
             self._report_gpu_errors(started_at)
             self.refreshOverview()
         threading.Thread(target=work, daemon=True).start()
@@ -693,7 +693,7 @@ class Backend(QObject):
         codes = power.nvidia_xids(since)
         if codes:
             text = power.describe_xids(codes)
-            self._launchEvent.emit({"gpuErrors": text, "logline": _("NVIDIA-Treiber meldete {errors}").format(errors=text)})
+            self._launchEvent.emit({"gpuErrors": text, "logline": _("NVIDIA driver reported {errors}").format(errors=text)})
 
     # --- Nur eine Instanz ---
 

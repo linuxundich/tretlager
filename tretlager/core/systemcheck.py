@@ -58,12 +58,12 @@ def check_system(root: Path = Path("/"), machine: str | None = None) -> Check:
     try:
         osr = read_os_release(root)
     except OSError:
-        return Check("system", _("System"), FAIL, _("Betriebssystem nicht erkannt"))
+        return Check("system", _("System"), FAIL, _("Operating system not recognised"))
     name = osr.get("PRETTY_NAME", "Linux")
     codename = osr.get("VERSION_CODENAME", "")
-    details = [f"{name}, {codename or _('ohne Codename')}, {machine}"]
+    details = [f"{name}, {codename or _("no codename")}, {machine}"]
     if machine != "x86_64":
-        return Check("system", _("System"), FAIL, _("{machine} wird nicht unterstützt (Zwift braucht x86-64)").format(machine=machine), details)
+        return Check("system", _("System"), FAIL, _("{machine} is not supported (Zwift needs x86-64)").format(machine=machine), details)
     # Tretlager läuft als Flatpak auf allen modernen Distributionen; das System wird nur angezeigt.
     return Check("system", _("System"), OK, name, details)
 
@@ -146,9 +146,9 @@ def secure_boot_enabled(root: Path = Path("/")) -> bool | None:
 def check_graphics(root: Path = Path("/")) -> list[Check]:
     gpus = list_gpus(root)
     if not gpus:
-        return [Check("graphics", _("Grafik"), FAIL, _("Keine Grafikkarte gefunden"))]
-    details = [_("{vendor} {device} (Treiber {driver})").format(vendor=g.vendor, device=g.device, driver=g.driver or _("keiner"))
-               + (_(" – Anzeige") if g.boot_vga else "")
+        return [Check("graphics", _("Graphics"), FAIL, _("No graphics card found"))]
+    details = [_("{vendor} {device} (driver {driver})").format(vendor=g.vendor, device=g.device, driver=g.driver or _("none"))
+               + (_(" – display") if g.boot_vga else "")
                for g in gpus]
     nvidia = [g for g in gpus if g.vendor == "NVIDIA"]
     others = [g for g in gpus if g.vendor != "NVIDIA"]
@@ -156,35 +156,37 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
     if nvidia:
         version = nvidia_driver_version(root)
         if nvidia[0].driver == "nvidia" and version and nvidia_gl_extension_missing(version, root):
-            checks.append(Check("graphics", _("Grafik"), FAIL,
-                                _("NVIDIA-Treiber {version} geladen, aber dem Flatpak fehlt die passende Erweiterung. "
-                                  "Im Terminal „flatpak update“ ausführen und Tretlager neu starten.").format(version=version),
+            checks.append(Check("graphics", _("Graphics"), FAIL,
+                                _("NVIDIA driver {version} is loaded, but the Flatpak lacks "
+                                  "the matching extension. Run “flatpak update” in a terminal "
+                                  "and restart Tretlager.").format(version=version),
                                 details + [f"org.freedesktop.Platform.GL.nvidia-{version.replace('.', '-')}"]))
         elif nvidia[0].driver == "nvidia" and version:
-            checks.append(Check("graphics", _("Grafik"), OK, _("NVIDIA-Treiber {version} geladen").format(version=version), details))
+            checks.append(Check("graphics", _("Graphics"), OK, _("NVIDIA driver {version} loaded").format(version=version), details))
         else:
             sb = secure_boot_enabled(root)
-            hint = (" " + _("Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung).")
+            hint = (" " + _("Secure Boot is on; the kernel module must be signed (see the TUXEDO guide).")
                     if sb else "")
-            checks.append(Check("graphics", _("Grafik"), FAIL,
-                                _("NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen.") + hint,
+            checks.append(Check("graphics", _("Graphics"), FAIL,
+                                _("NVIDIA card found, but the proprietary driver is not loaded.") + hint,
                                 details, action="nvidia-help"))
         if others:
             display_vendor = next((g.vendor for g in gpus if g.boot_vga), others[0].vendor)
             if nvidia_usable(root):
-                checks.append(Check("hybrid", _("Hybrid-Grafik"), OK,
-                                    _("Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"),
-                                    [_("Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)").format(vendor=display_vendor)]))
+                checks.append(Check("hybrid", _("Hybrid graphics"), OK,
+                                    _("Laptop with two graphics chips – Zwift runs on the NVIDIA card"),
+                                    [_("Display via {vendor}, Zwift via PRIME offload (GLX)").format(vendor=display_vendor)]))
             else:
-                checks.append(Check("hybrid", _("Hybrid-Grafik"), WARN,
-                                    _("Notebook mit zwei Grafikchips – Zwift läuft auf {vendor}, bis die NVIDIA-Karte nutzbar ist").format(
+                checks.append(Check("hybrid", _("Hybrid graphics"), WARN,
+                                    _("Laptop with two graphics chips – Zwift runs on {vendor} until the NVIDIA card is usable").format(
                                         vendor=display_vendor)))
     else:
         g = gpus[0]
-        checks.append(Check("graphics", _("Grafik"), WARN,
-                            _("{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA").format(vendor=g.vendor),
-                            details + [_("Notebook mit abgeschalteter NVIDIA-Karte (etwa envycontrol „integrated“)? "
-                                         "Dann sieht Tretlager sie nicht; siehe Hilfe, „Zwift auf der NVIDIA-Karte“.")]))
+        checks.append(Check("graphics", _("Graphics"), WARN,
+                            _("{vendor} graphics (Mesa): Zwift runs, but at a lower frame rate than with NVIDIA").format(vendor=g.vendor),
+                            details + [_("Laptop with the NVIDIA card switched off (e.g. "
+                                         "envycontrol “integrated”)? Then Tretlager cannot see "
+                                         "it; see Help, “Zwift on the NVIDIA card”.")]))
     return checks
 
 
@@ -215,15 +217,15 @@ def check_bluetooth(root: Path = Path("/"), run=subprocess.run) -> Check:
         adapter = None
     if adapter is None:
         return Check("bluetooth", _("Bluetooth"), WARN,
-                     _("Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter verbinden"))
+                     _("No Bluetooth adapter found – sensors can only be connected with an adapter"))
     details = [f"{adapter['Name']} ({adapter['Address']})"]
     chip = btcompat.adapter_chip(root=root / "sys/class/bluetooth")
     if chip:
         details.append(_("Chip: {name}").format(name=chip.name))
     if rfkill_blocked(root) or not adapter["Powered"]:
-        return Check("bluetooth", _("Bluetooth"), WARN, _("Bluetooth ist ausgeschaltet"), details,
+        return Check("bluetooth", _("Bluetooth"), WARN, _("Bluetooth is turned off"), details,
                      action="bluetooth-on")
-    return Check("bluetooth", _("Bluetooth"), OK, _("Bluetooth bereit für Trainer und Pulsgurt"), details)
+    return Check("bluetooth", _("Bluetooth"), OK, _("Bluetooth ready for trainer and heart rate strap"), details)
 
 
 def check_disk(path: Path | None = None) -> Check:
@@ -235,12 +237,12 @@ def check_disk(path: Path | None = None) -> Check:
             path = path.parent
     free = shutil.disk_usage(path).free
     gb = free / 10**9
-    details = [_("{gb} GB frei in {path}").format(gb=f"{gb:.0f}", path=path), _("Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)")]
+    details = [_("{gb} GB free in {path}").format(gb=f"{gb:.0f}", path=path), _("Required: about 11 GB (Wine 1.8 GB, Zwift with environment 8.6 GB)")]
     if free >= paths.RECOMMENDED_BYTES:
-        return Check("disk", _("Speicherplatz"), OK, _("{gb} GB frei").format(gb=f"{gb:.0f}"), details)
+        return Check("disk", _("Disk space"), OK, _("{gb} GB free").format(gb=f"{gb:.0f}"), details)
     if free >= paths.REQUIRED_BYTES:
-        return Check("disk", _("Speicherplatz"), WARN, _("Nur {gb} GB frei – reicht knapp").format(gb=f"{gb:.0f}"), details)
-    return Check("disk", _("Speicherplatz"), FAIL, _("Nur {gb} GB frei, nötig sind etwa 11 GB").format(gb=f"{gb:.0f}"), details)
+        return Check("disk", _("Disk space"), WARN, _("Only {gb} GB free – just enough").format(gb=f"{gb:.0f}"), details)
+    return Check("disk", _("Disk space"), FAIL, _("Only {gb} GB free, about 11 GB are needed").format(gb=f"{gb:.0f}"), details)
 
 
 # Zwift (Installer, Spiel) und GitHub (winetricks); WineHQ nur noch für das alte Debian-Paket.
@@ -256,10 +258,10 @@ def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
                 pass
         except OSError:
             bad.append(host)
-    details = [f"{h}: {_('nicht erreichbar') if h in bad else _('erreichbar')}" for h, _port in hosts]
+    details = [f"{h}: {_("unreachable") if h in bad else _("reachable")}" for h, _port in hosts]
     if bad:
-        return Check("network", _("Internet"), FAIL, _("Download-Quellen nicht erreichbar"), details)
-    return Check("network", _("Internet"), OK, _("Zwift und GitHub erreichbar"), details)
+        return Check("network", _("Internet"), FAIL, _("Download sources unreachable"), details)
+    return Check("network", _("Internet"), OK, _("Zwift and GitHub reachable"), details)
 
 
 def wine_version(run=subprocess.run) -> str:
@@ -277,14 +279,14 @@ def check_wine(root: Path = Path("/"), run=subprocess.run) -> Check:
     version = wine_version(run)
     if (root / ".flatpak-info").exists():
         if version:
-            return Check("wine", "Wine", OK, _("{version}, im Flatpak enthalten").format(version=version))
-        return Check("wine", "Wine", FAIL, _("Wine fehlt im Flatpak – Tretlager neu installieren"))
+            return Check("wine", "Wine", OK, _("{version}, included in the Flatpak").format(version=version))
+        return Check("wine", "Wine", FAIL, _("Wine is missing from the Flatpak – reinstall Tretlager"))
     source = any((root / "etc/apt/sources.list.d").glob("winehq-*.sources"))
-    details = [_("WineHQ-Paketquelle: {state}").format(state=_("eingerichtet") if source else _("fehlt")),
-               _("Wine: {version}").format(version=version or _("nicht installiert"))]
+    details = [_("WineHQ package source: {state}").format(state=_("set up") if source else _("missing")),
+               _("Wine: {version}").format(version=version or _("not installed"))]
     if version:
-        return Check("wine", "Wine", OK, _("{version} installiert").format(version=version), details)
-    return Check("wine", "Wine", WARN, _("Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)"), details)
+        return Check("wine", "Wine", OK, _("{version} installed").format(version=version), details)
+    return Check("wine", "Wine", WARN, _("Will be set up in the next step (WineHQ, about 290 MB)"), details)
 
 
 def check_existing(zwift_dir: Path | None = None) -> Check:
@@ -292,19 +294,19 @@ def check_existing(zwift_dir: Path | None = None) -> Check:
     if (zwift_dir / "ZwiftLauncher.exe").exists():
         game = (zwift_dir / "ZwiftApp.exe").exists()
         return Check("existing", "Zwift", OK,
-                     _("Zwift ist schon eingerichtet") if game else _("Launcher vorhanden, Spiel fehlt noch"),
+                     _("Zwift is already set up") if game else _("Launcher present, game still missing"),
                      [str(zwift_dir)])
-    return Check("existing", "Zwift", OK, _("Noch nicht eingerichtet – das übernimmt Tretlager"), [])
+    return Check("existing", "Zwift", OK, _("Not set up yet – Tretlager takes care of it"), [])
 
 
 def check_avahi(run=subprocess.run) -> Check:
     """Avahi kündigt die Sensoren für Zwift an (mDNS); fehlt es, findet Zwift keine Geräte."""
     if dbusutil.name_has_owner("system", "org.freedesktop.Avahi", run) or \
             dbusutil.activatable("system", "org.freedesktop.Avahi", run):
-        return Check("avahi", _("Geräte-Ankündigung"), OK, _("Avahi läuft, Zwift kann die Sensoren finden"))
-    return Check("avahi", _("Geräte-Ankündigung"), WARN,
-                 _("Avahi läuft nicht – Zwift findet die Sensoren dann nicht. Abhilfe: Paket avahi "
-                   "installieren und den Dienst avahi-daemon starten."))
+        return Check("avahi", _("Device announcement"), OK, _("Avahi is running, Zwift can find the sensors"))
+    return Check("avahi", _("Device announcement"), WARN,
+                 _("Avahi is not running – Zwift will not find the sensors. Remedy: install "
+                   "the avahi package and start the avahi-daemon service."))
 
 
 def run_all() -> list[Check]:

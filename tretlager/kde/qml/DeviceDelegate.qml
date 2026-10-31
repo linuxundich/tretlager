@@ -19,14 +19,14 @@ FormCard.AbstractFormDelegate {
     hoverEnabled: true
     focusPolicy: Qt.NoFocus
 
-    readonly property var roleText: ({ "trainer": i18n("Smart-Trainer"), "power": i18n("Leistungsmesser"),
-        "cadence": i18n("Trittfrequenzsensor"), "heartrate": i18n("Pulsgurt"), "other": i18n("Sensor") })
+    readonly property var roleText: ({ "trainer": i18n("Smart trainer"), "power": i18n("Power meter"),
+        "cadence": i18n("Cadence sensor"), "heartrate": i18n("Heart rate strap"), "other": i18n("Sensor") })
     // Messwerte je Rolle: [Schlüssel, Einheit]
     readonly property var valueRows: ({
-        "trainer": [["power", i18n("Watt")], ["cadence", i18n("U/min")]],
-        "power": [["power", i18n("Watt")], ["cadence", i18n("U/min")]],
-        "cadence": [["cadence", i18n("U/min")]],
-        "heartrate": [["heart_rate", i18n("Schläge/min")]],
+        "trainer": [["power", i18n("watts")], ["cadence", i18n("rpm")]],
+        "power": [["power", i18n("watts")], ["cadence", i18n("rpm")]],
+        "cadence": [["cadence", i18n("rpm")]],
+        "heartrate": [["heart_rate", i18n("bpm")]],
         "other": [] })
     readonly property string iconDir: Qt.resolvedUrl("../../data/icons/")
     readonly property var values: device.values || {}
@@ -39,20 +39,20 @@ FormCard.AbstractFormDelegate {
     }
     function stateLine(d) {
         switch (d.state) {
-        case "verbunden": return d.zwift_clients > 0 ? i18n("Mit Zwift verbunden") : i18n("Verbunden, wartet auf Zwift")
-        case "verbinde": return i18n("Sucht das Gerät …")
-        case "getrennt": return i18n("Getrennt, neuer Versuch folgt")
-        case "fehler": return d.error || i18n("Nicht erreichbar")
-        case "aus": return i18n("Pausiert")
+        case "verbunden": return d.zwift_clients > 0 ? i18n("Connected to Zwift") : i18n("Connected, waiting for Zwift")
+        case "verbinde": return i18n("Searching for the device…")
+        case "getrennt": return i18n("Disconnected, trying again")
+        case "fehler": return d.error || i18n("Unreachable")
+        case "aus": return i18n("Paused")
         }
         return d.state
     }
     function stateHelp(d) {
         switch (d.state) {
-        case "verbunden": return i18n("Die Bridge empfängt Daten und bietet das Gerät Zwift an.")
-        case "verbinde": return i18n("Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein Gurt nicht.")
-        case "fehler": return (d.error ? d.error + ". " : "") + i18n("Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät verbunden. Wird es gerade nicht genutzt: pausieren.")
-        case "aus": return i18n("Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. Fortsetzen, sobald es wieder gebraucht wird.")
+        case "verbunden": return i18n("The bridge receives data and offers the device to Zwift.")
+        case "verbinde": return i18n("Pedal briefly or put on the strap; a strap does not transmit without skin contact.")
+        case "fehler": return (d.error ? d.error + ". " : "") + i18n("The device is asleep, too far away or connected to another device. If it is not in use right now: pause it.")
+        case "aus": return i18n("Paused: the bridge does not search for the device or offer it to Zwift. Resume as soon as it is needed again.")
         }
         return ""
     }
@@ -196,10 +196,10 @@ FormCard.AbstractFormDelegate {
                 visible: row.detailed
                 Layout.alignment: Qt.AlignVCenter
                 icon.name: row.paused ? "media-playback-start" : "media-playback-pause"
-                text: row.paused ? i18n("Fortsetzen") : i18n("Pausieren")
+                text: row.paused ? i18n("Resume") : i18n("Pause")
                 display: Controls.AbstractButton.IconOnly
-                Controls.ToolTip.text: row.paused ? i18n("Fortsetzen: wieder suchen und Zwift anbieten")
-                                                  : i18n("Pausieren: nicht mehr suchen, bis zum Fortsetzen")
+                Controls.ToolTip.text: row.paused ? i18n("Resume: search again and offer to Zwift")
+                                                  : i18n("Pause: stop searching until resumed")
                 Controls.ToolTip.visible: hovered
                 Controls.ToolTip.delay: Kirigami.Units.toolTipDelay
                 onClicked: row.pauseRequested(!row.paused)
@@ -208,7 +208,7 @@ FormCard.AbstractFormDelegate {
                 visible: row.detailed
                 Layout.alignment: Qt.AlignVCenter
                 icon.name: "edit-delete-remove"
-                text: i18n("Gerät entfernen")
+                text: i18n("Remove device")
                 display: Controls.AbstractButton.IconOnly
                 Controls.ToolTip.text: text
                 Controls.ToolTip.visible: hovered

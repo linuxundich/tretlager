@@ -9,7 +9,7 @@ import org.kde.kirigami as Kirigami
 // keine Fehlerseite, und nichts muss kopiert werden. Tretlager liest die Seite nicht aus.
 Kirigami.Page {
     id: page
-    title: i18n("Bei Zwift anmelden")
+    title: i18n("Sign in to Zwift")
     padding: 0
 
     readonly property string redirectPrefix: "https://launcher.zwift.com/launcher"
@@ -55,7 +55,7 @@ Kirigami.Page {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     color: Kirigami.Theme.disabledTextColor
-                    text: i18n("Anmeldeseite von Zwift in einem privaten Fenster: Es speichert nichts und vergisst die Eingaben beim Schließen. Tretlager übernimmt danach nur die Sitzung.")
+                    text: i18n("Zwift's sign-in page in a private window: it stores nothing and forgets what you entered when closed. Tretlager only takes over the session afterwards.")
                 }
             }
         }
@@ -67,7 +67,7 @@ Kirigami.Page {
             type: Kirigami.MessageType.Error
             text: page.li.error
             actions: [Kirigami.Action {
-                text: i18n("Erneut versuchen")
+                text: i18n("Try again")
                 icon.name: "view-refresh"
                 onTriggered: { page.handedOver = false; web.url = backend.startEmbeddedLogin() }
             }]
@@ -105,6 +105,6 @@ Kirigami.Page {
         width: parent.width - Kirigami.Units.gridUnit * 4
         visible: page.handedOver && page.li.error === ""
         icon.name: "user-identity"
-        text: i18n("Anmeldung wird übernommen …")
+        text: i18n("Taking over the sign-in…")
     }
 }

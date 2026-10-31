@@ -6,61 +6,61 @@ import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
     id: page
-    title: i18n("Willkommen")
+    title: i18n("Welcome")
     backdrop: true
 
     PageHero {
-        title: i18n("Zwift unter Linux")
-        text: i18n("Tretlager richtet Zwift auf diesem Rechner ein und verbindet Trainer und Pulsgurt. Die Einrichtung führt in %1 Schritten durch alles.", applicationWindow().stepIds.length)
+        title: i18n("Zwift on Linux")
+        text: i18n("Tretlager sets up Zwift on this computer and connects your trainer and heart rate strap. The setup guides you through everything in %1 steps.", applicationWindow().stepIds.length)
         VersionLabel {}
     }
 
     leftCards: [
-        FormCard.FormHeader { title: i18n("Voraussetzungen") },
+        FormCard.FormHeader { title: i18n("Requirements") },
         FormCard.FormCard {
-            FormCard.FormTextDelegate { text: i18n("Zwift-Konto mit Abo"); icon.name: "user-identity" }
+            FormCard.FormTextDelegate { text: i18n("Zwift account with subscription"); icon.name: "user-identity" }
             FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate { text: i18n("Etwa 11 GB freier Speicher"); icon.name: "drive-harddisk" }
+            FormCard.FormTextDelegate { text: i18n("About 11 GB of free disk space"); icon.name: "drive-harddisk" }
             FormCard.FormDelegateSeparator {}
-            FormCard.FormTextDelegate { text: i18n("Internetzugang für etwa 5 GB Download"); icon.name: "network-wired" }
+            FormCard.FormTextDelegate { text: i18n("Internet access for a download of about 5 GB"); icon.name: "network-wired" }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Smart-Trainer und Pulsgurt mit Bluetooth")
-                description: i18n("Erst bei Schritt %1 nötig", applicationWindow().stepIds.indexOf("sensors") + 1)
+                text: i18n("Smart trainer and heart rate strap with Bluetooth")
+                description: i18n("Only needed at step %1", applicationWindow().stepIds.indexOf("sensors") + 1)
                 icon.name: "network-bluetooth"
             }
         }
     ]
 
     rightCards: [
-        FormCard.FormHeader { title: i18n("Wichtig") },
+        FormCard.FormHeader { title: i18n("Important") },
         FormCard.FormCard {
             FormCard.FormTextDelegate {
-                text: i18n("Kein offizielles Zwift-Programm")
-                description: i18n("Zwift unterstützt Linux nicht. Tretlager nutzt Wine und lädt Zwift von der offiziellen Quelle, ohne Zwift zu verändern. Die Anmeldung über den Browser widerspricht den Zwift-Nutzungsbedingungen. Benutzung auf eigene Gefahr.")
+                text: i18n("Not an official Zwift program")
+                description: i18n("Zwift does not support Linux. Tretlager uses Wine and downloads Zwift from the official source without modifying it. Signing in outside the launcher contradicts Zwift's terms of service. Use at your own risk.")
                 icon.name: "dialog-warning"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Auf eigene Gefahr")
-                description: i18n("Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die sich manipulieren ließen. Einschränkungen bis hin zur Sperre des Kontos lassen sich nicht ausschließen – samt der mühsam erstrampelten XP und Drops.")
+                text: i18n("At your own risk")
+                description: i18n("Zwift may not be happy that a software bridge sends data to Zwift that could be manipulated. Restrictions up to a suspended account cannot be ruled out – including the XP and drops earned with so much sweat.")
                 icon.name: "emblem-warning"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Nicht für Rennen")
-                description: i18n("Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")
+                text: i18n("Not for races")
+                description: i18n("Tretlager does not guarantee that the sensor bridge passes power, cadence and heart rate to Zwift correctly. Do not use Tretlager for races or competitions with results.")
                 icon.name: "flag"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: i18n("Über Tretlager und Lizenzen")
+                text: i18n("About Tretlager and licenses")
                 icon.name: "help-about"
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormButtonDelegate {
-                text: i18n("Hilfe lesen")
+                text: i18n("Read the help")
                 icon.name: "help-contents"
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("HelpPage.qml"))
             }
@@ -68,7 +68,7 @@ ColumnsPage {
     ]
 
     footer: WizardFooter {
-        nextText: i18n("Einrichtung beginnen")
+        nextText: i18n("Start setup")
         onNext: {
             backend.runChecks()
             applicationWindow().pageStack.push(Qt.resolvedUrl("CheckPage.qml"))

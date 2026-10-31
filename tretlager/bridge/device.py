@@ -81,23 +81,23 @@ def describe_error(e: BaseException) -> tuple[str, bool]:
     """
     raw = str(e)
     if isinstance(e, BleakDeviceNotFoundError) or "was not found" in raw:
-        return N_("Nicht in Reichweite oder schläft"), True
+        return N_("Out of range or asleep"), True
     if "failed to discover services" in raw:
         # Gerät ist beim Verbinden wieder eingeschlafen (KICKR nach Pause): bald erneut.
-        return N_("Gerät schläft – kurz treten bzw. Gurt anlegen"), True
+        return N_("Device is asleep – pedal briefly or put on the strap"), True
     if isinstance(e, (asyncio.TimeoutError, TimeoutError)):
-        return N_("Zeitüberschreitung beim Verbinden, neuer Versuch folgt"), False
+        return N_("Connection timed out, trying again"), False
     if "NotReady" in raw or "not powered" in raw.lower() or ("adapter" in raw.lower() and "not found" in raw):
-        return N_("Bluetooth ist aus oder der Adapter fehlt"), False
+        return N_("Bluetooth is off or the adapter is missing"), False
     if "InProgress" in raw or "in progress" in raw:
-        return N_("Bluetooth ist gerade beschäftigt, neuer Versuch folgt"), False
+        return N_("Bluetooth is busy, retrying"), False
     if "le-connection-abort" in raw or "ConnectionAttemptFailed" in raw or "Software caused connection abort" in raw:
-        return N_("Verbindungsaufbau abgebrochen, neuer Versuch folgt"), False
+        return N_("Connection attempt aborted, retrying"), False
     if "NotPermitted" in raw or "NotAuthorized" in raw or "AccessDenied" in raw:
-        return N_("Bluetooth verweigert den Zugriff auf das Gerät"), False
+        return N_("Bluetooth denies access to the device"), False
     if isinstance(e, RuntimeError) and raw:
         return raw, False  # eigene, schon verständliche Texte (N_)
-    return N_("Verbindung fehlgeschlagen, neuer Versuch folgt"), False
+    return N_("Connection failed, retrying"), False
 
 
 def dircon_name(cfg: DeviceConfig) -> str:
@@ -259,7 +259,7 @@ class BridgedDevice:
             await client.connect()
         services = self._collect_services(client)
         if not services:
-            raise RuntimeError(N_("Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, Herzfrequenz)"))
+            raise RuntimeError(N_("Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"))
         self._cancel_grace()
         if self._server.running and [s.uuid for s in services] != self._announced:
             await self._withdraw()  # anderes Dienstangebot als vor dem Abbruch: neu ankündigen
@@ -281,7 +281,7 @@ class BridgedDevice:
         self._was_connected = True
         self._set_state("verbunden")
         await self._disconnected.wait()
-        raise RuntimeError(N_("Verbindung zum Gerät verloren"))
+        raise RuntimeError(N_("Connection to the device lost"))
 
     def _start_grace(self) -> None:
         if self._server.running and (self._grace is None or self._grace.done()):
@@ -343,7 +343,7 @@ class BridgedDevice:
 
     def _require_client(self) -> BleakClient:
         if not self._client or not self._client.is_connected:
-            raise RuntimeError(N_("Gerät nicht verbunden"))
+            raise RuntimeError(N_("Device not connected"))
         return self._client
 
     def _notified(self, char_uuid: str, data: bytearray) -> None:

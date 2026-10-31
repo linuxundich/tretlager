@@ -11,21 +11,21 @@ Kirigami.Dialog {
     // Beim ersten Start muss bestätigt werden; aus „Über Tretlager“ geöffnet genügt Schließen.
     property bool mustConfirm: !backend.disclaimerAccepted
 
-    title: i18n("Bevor es losgeht")
+    title: i18n("Before you start")
     preferredWidth: Kirigami.Units.gridUnit * 32
     modal: true
     showCloseButton: !mustConfirm
     closePolicy: mustConfirm ? Controls.Popup.NoAutoClose : Controls.Popup.CloseOnEscape | Controls.Popup.CloseOnPressOutside
 
     readonly property var points: [
-        [i18n("Keine offizielle Zwift-App"),
-         i18n("Tretlager ist ein privates Projekt. Zwift unterstützt Linux nicht und hat mit Tretlager nichts zu tun; Probleme an Tretlager melden, nicht an Zwift.")],
-        [i18n("Auf eigene Gefahr"),
-         i18n("Zwift ist womöglich nicht glücklich darüber, dass eine Software-Bridge Daten an Zwift übermittelt, die sich manipulieren ließen. Einschränkungen bis hin zur Sperre des Kontos lassen sich nicht ausschließen – samt der mühsam erstrampelten XP und Drops.")],
-        [i18n("Nicht für Rennen"),
-         i18n("Tretlager garantiert nicht, dass die Sensor-Bridge Leistung, Trittfrequenz und Puls korrekt an Zwift weitergibt. An Rennen und Wettbewerben mit Wertung daher nicht mit Tretlager teilnehmen.")],
-        [i18n("Anmeldung außerhalb des Launchers"),
-         i18n("Die offizielle Anmeldung funktioniert unter Linux nicht. Das eigene Anmeldefenster widerspricht den Zwift-Nutzungsbedingungen.")]
+        [i18n("Not an official Zwift app"),
+         i18n("Tretlager is a private project. Zwift does not support Linux and has nothing to do with Tretlager; report problems to Tretlager, not to Zwift.")],
+        [i18n("At your own risk"),
+         i18n("Zwift may not be happy that a software bridge sends data to Zwift that could be manipulated. Restrictions up to a suspended account cannot be ruled out – including the XP and drops earned with so much sweat.")],
+        [i18n("Not for races"),
+         i18n("Tretlager does not guarantee that the sensor bridge passes power, cadence and heart rate to Zwift correctly. Do not use Tretlager for races or competitions with results.")],
+        [i18n("Sign-in outside the launcher"),
+         i18n("The official sign-in does not work on Linux. Tretlager's own sign-in window contradicts Zwift's terms of service.")]
     ]
 
     ColumnLayout {
@@ -45,7 +45,7 @@ Kirigami.Dialog {
                 sourceSize.width: Kirigami.Units.iconSizes.huge
                 sourceSize.height: Kirigami.Units.iconSizes.huge
                 Layout.alignment: Qt.AlignTop
-                Accessible.name: i18n("Warnzeichen")
+                Accessible.name: i18n("Warning sign")
             }
 
             ColumnLayout {
@@ -80,13 +80,13 @@ Kirigami.Dialog {
     customFooterActions: [
         Kirigami.Action {
             visible: dialog.mustConfirm
-            text: i18n("Beenden")
+            text: i18n("Quit")
             icon.name: "application-exit"
             onTriggered: Qt.quit()
         },
         Kirigami.Action {
             visible: dialog.mustConfirm
-            text: i18n("Verstanden, auf eigene Gefahr")
+            text: i18n("Understood, at my own risk")
             icon.name: "dialog-ok-apply"
             onTriggered: {
                 backend.acceptDisclaimer()

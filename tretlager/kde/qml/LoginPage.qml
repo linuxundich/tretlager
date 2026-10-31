@@ -7,7 +7,7 @@ import org.kde.kirigamiaddons.formcard as FormCard
 // Schritt 4 des Assistenten; aus der Übersicht auch zum erneuten Anmelden (ohne Schrittanzeige).
 ColumnsPage {
     id: page
-    title: i18n("Anmeldung")
+    title: i18n("Sign-in")
 
     readonly property var li: backend.loginInfo
     readonly property bool signedIn: li.state === "valid" || li.state === "refreshable"
@@ -20,16 +20,16 @@ ColumnsPage {
     header: WizardHeader {
         visible: page.wizard
         stepId: "login"
-        text: i18n("Das Passwort wird nur auf der Anmeldeseite von Zwift eingegeben.")
+        text: i18n("The password is only entered on Zwift's sign-in page.")
     }
 
     PageMessage {
         visible: page.signedIn
         type: Kirigami.MessageType.Positive
-        text: i18np("Angemeldet. Tretlager erneuert die Sitzung noch einen Tag lang selbst, danach ist eine neue Anmeldung nötig.",
-                     "Angemeldet. Tretlager erneuert die Sitzung noch %1 Tage lang selbst, danach ist eine neue Anmeldung nötig.",
+        text: i18np("Signed in. Tretlager renews the session by itself for one more day; after that, signing in again is required.",
+                     "Signed in. Tretlager renews the session by itself for %1 more days; after that, signing in again is required.",
                      page.days(page.li.refresh_left))
-        actions: [Kirigami.Action { text: i18n("Abmelden"); icon.name: "system-log-out"; onTriggered: backend.logout() }]
+        actions: [Kirigami.Action { text: i18n("Sign out"); icon.name: "system-log-out"; onTriggered: backend.logout() }]
     }
     PageMessage {
         visible: page.li.error !== ""
@@ -39,25 +39,25 @@ ColumnsPage {
 
     leftCards: [
         // --- Ersatzweg: mit Zustimmung ---
-        FormCard.FormHeader { visible: !page.signedIn; title: i18n("Anmeldung über Tretlager") },
+        FormCard.FormHeader { visible: !page.signedIn; title: i18n("Sign in through Tretlager") },
         FormCard.FormCard {
             visible: !page.signedIn
             FormCard.FormTextDelegate {
-                text: i18n("So funktioniert es")
+                text: i18n("How it works")
                 description: backend.embeddedLogin
-                    ? i18n("Die Anmeldeseite von Zwift öffnet sich in einem privaten Fenster von Tretlager, wie im offiziellen Launcher. Danach übernimmt Tretlager die Sitzung und legt sie im Schlüsselbund ab. Das Passwort liest und speichert Tretlager nicht.")
-                    : i18n("Die Anmeldung erfolgt auf der Zwift-Seite im Browser. Tretlager übernimmt danach die Sitzung und legt sie im Schlüsselbund ab.")
+                    ? i18n("Zwift's sign-in page opens in a private Tretlager window, as in the official launcher. Tretlager then takes over the session and stores it in the keyring. Tretlager neither reads nor stores the password.")
+                    : i18n("You sign in on Zwift's page in the browser. Tretlager then takes over the session and stores it in the keyring.")
                 icon.name: "user-identity"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {
-                text: i18n("Nicht von Zwift erlaubt")
-                description: i18n("Zwift erlaubt keine fremden Programme an seiner Anmeldung (Nutzungsbedingungen, Abschnitt 5). Die Nutzung dieses Wegs erfolgt auf eigenes Risiko.")
+                text: i18n("Not permitted by Zwift")
+                description: i18n("Zwift does not allow third-party programs to use its sign-in (terms of service, section 5). Using this route is at your own risk.")
                 icon.name: "dialog-warning"
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormCheckDelegate {
-                text: i18n("Risiko verstanden, diesen Weg verwenden")
+                text: i18n("I understand the risk, use this route")
                 checked: page.li.consent
                 enabled: !page.li.consent
                 onToggled: if (checked) backend.giveConsent()
@@ -65,7 +65,7 @@ ColumnsPage {
             FormCard.FormDelegateSeparator { visible: backend.embeddedLogin }
             FormCard.FormButtonDelegate {
                 visible: backend.embeddedLogin
-                text: i18n("Bei Zwift anmelden …")
+                text: i18n("Sign in to Zwift…")
                 icon.name: "go-next"
                 enabled: page.li.consent && !page.li.busy
                 onClicked: applicationWindow().pageStack.push(Qt.resolvedUrl("LoginWebPage.qml"))
@@ -77,16 +77,16 @@ ColumnsPage {
         // --- Ausweichweg: eigener Browser (Passwortmanager, Anmeldung mit Google oder Apple) ---
         FormCard.FormHeader {
             visible: !page.signedIn
-            title: backend.embeddedLogin ? i18n("Alternative: eigener Browser") : i18n("Im Browser anmelden")
+            title: backend.embeddedLogin ? i18n("Alternative: your own browser") : i18n("Sign in in the browser")
             trailing: Kirigami.ContextualHelpButton {
                 visible: backend.embeddedLogin
-                toolTipText: i18n("Sinnvoll, wenn das Passwort im Passwortmanager des Browsers liegt oder die Anmeldung über Google oder Apple läuft; diese Anbieter sperren eingebettete Fenster oft. Nach der Anmeldung zeigt der Browser eine Fehlerseite, deren Adresse Tretlager braucht.")
+                toolTipText: i18n("Useful if the password is stored in the browser's password manager or you sign in with Google or Apple; these providers often block embedded windows. After signing in, the browser shows an error page whose address Tretlager needs.")
             }
         },
         FormCard.FormCard {
             visible: !page.signedIn
             FormCard.FormButtonDelegate {
-                text: page.li.waiting ? i18n("Anmeldeseite erneut öffnen") : i18n("Im eigenen Browser anmelden")
+                text: page.li.waiting ? i18n("Open the sign-in page again") : i18n("Sign in in your own browser")
                 icon.name: "internet-web-browser"
                 enabled: page.li.consent && !page.li.busy
                 onClicked: backend.startBrowserLogin()
@@ -94,22 +94,22 @@ ColumnsPage {
             FormCard.FormDelegateSeparator { visible: page.li.waiting }
             FormCard.FormTextDelegate {
                 visible: page.li.waiting
-                text: i18n("Nach der Anmeldung")
-                description: i18n("Der Browser zeigt „Bad Request“, das ist bei diesem Weg normal. Die Adresse aus der Adresszeile kopieren (Strg+L, dann Strg+C); Tretlager übernimmt sie von selbst aus der Zwischenablage.")
+                text: i18n("After signing in")
+                description: i18n("The browser shows “Bad Request”; that is normal for this route. Copy the address from the address bar (Ctrl+L, then Ctrl+C); Tretlager picks it up from the clipboard by itself.")
                 icon.name: "edit-paste"
             }
             FormCard.FormDelegateSeparator { visible: page.li.waiting }
             FormCard.FormTextFieldDelegate {
                 id: redirect
                 visible: page.li.waiting
-                label: i18n("Adresse")
+                label: i18n("Address")
                 placeholderText: "https://launcher.zwift.com/launcher?…&code=…"
                 onAccepted: backend.submitRedirect(text)
             }
             FormCard.FormDelegateSeparator { visible: page.li.waiting }
             FormCard.FormButtonDelegate {
                 visible: page.li.waiting
-                text: page.li.busy ? i18n("Wird übernommen …") : i18n("Adresse übernehmen")
+                text: page.li.busy ? i18n("Taking over…") : i18n("Use address")
                 icon.name: "dialog-ok"
                 enabled: redirect.text.length > 0 && !page.li.busy
                 onClicked: backend.submitRedirect(redirect.text)
@@ -117,19 +117,19 @@ ColumnsPage {
         },
 
         // --- Offiziell: derzeit nicht möglich ---
-        FormCard.FormHeader { visible: !page.signedIn; title: i18n("Offizielle Anmeldung") },
+        FormCard.FormHeader { visible: !page.signedIn; title: i18n("Official sign-in") },
         FormCard.FormCard {
             visible: !page.signedIn
             FormCard.FormTextDelegate {
-                text: i18n("Derzeit nicht möglich")
-                description: i18n("Der Zwift Launcher nutzt seit Version 1.2 eine Windows-Funktion, die Wine noch fehlt.")
+                text: i18n("Currently not possible")
+                description: i18n("Since version 1.2, the Zwift launcher uses a Windows feature that Wine does not provide yet.")
                 icon.name: "data-error"
             }
         }
     ]
 
     footer: WizardFooter {
-        nextText: page.wizard ? i18n("Weiter") : i18n("Zur Übersicht")
+        nextText: page.wizard ? i18n("Next") : i18n("Go to overview")
         nextIcon: page.wizard ? "go-next" : "go-home"
         nextEnabled: page.signedIn
         onNext: page.wizard ? applicationWindow().pageStack.push(Qt.resolvedUrl("SensorsPage.qml"))

@@ -107,26 +107,26 @@ def main():
     if os.geteuid() != 0:
         fail("Muss als root laufen (über pkexec)")
 
-    emit("step", text=N_("WineHQ-Schlüssel prüfen"))
+    emit("step", text=N_("Checking the WineHQ key"))
     if fingerprint(KEY_SRC) != WINEHQ_FPR:
-        fail(N_("WineHQ-Schlüssel stimmt nicht mit dem erwarteten Fingerabdruck überein"))
+        fail(N_("The WineHQ key does not match the expected fingerprint"))
     with open(KEY_SRC, "rb") as f:
         key = f.read()
     os.makedirs(os.path.dirname(KEY_DST), mode=0o755, exist_ok=True)
     write_file(KEY_DST, key)
 
-    emit("step", text=N_("Paketquelle einrichten"))
+    emit("step", text=N_("Setting up the package source"))
     write_file(SOURCES_DST, (f"Types: deb\nURIs: {WINEHQ_URI}\nSuites: {WINEHQ_SUITE}\nComponents: main\n"
                              f"Architectures: amd64\nSigned-By: {KEY_DST}\n").encode())
-    emit("progress", percent=5, text=N_("Paketquelle eingerichtet"))
+    emit("progress", percent=5, text=N_("Package source set up"))
 
-    apt(["update"], N_("Paketlisten aktualisieren"), 5, 15)
+    apt(["update"], N_("Updating package lists"), 5, 15)
     apt(["install", "-y", "--install-recommends", "--no-remove", *PACKAGES],
-        N_("Wine und Werkzeuge installieren"), 20, 80)
+        N_("Installing Wine and tools"), 20, 80)
 
     r = subprocess.run(["wine", "--version"], capture_output=True, text=True,
                        env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent"})
-    emit("done", text=N_("System vorbereitet"), wine=r.stdout.strip())
+    emit("done", text=N_("System prepared"), wine=r.stdout.strip())
 
 
 if __name__ == "__main__":

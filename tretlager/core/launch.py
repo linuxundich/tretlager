@@ -105,7 +105,7 @@ def maximize_window_kde(log: Callable[[str], None]) -> bool:
                                    script, name], capture_output=True, text=True, timeout=10)
         sid = r.stdout.strip().strip("(),")
         if not sid.lstrip("-").isdigit() or int(sid) < 0:
-            log(_("KWin-Skript ließ sich nicht laden"))
+            log(_("Could not load the KWin script"))
             return False
         subprocess.run(call + ["--object-path", f"/Scripting/Script{sid}", "--method", "org.kde.kwin.Script.run"],
                        capture_output=True, timeout=10)
@@ -131,9 +131,9 @@ class Launcher:
         return self.ctx.wine_env
 
     def run(self) -> None:
-        self.progress(_("Sensor-Bridge prüfen"))
+        self.progress(_("Checking the sensor bridge"))
         self.ensure_bridge()
-        self.progress(_("Anmeldung prüfen"))
+        self.progress(_("Checking the sign-in"))
         token = login.valid_token()
         if token is None:
             raise NeedLogin()
@@ -141,20 +141,20 @@ class Launcher:
         self.update_if_needed()
         dpi = display.ensure_dpi(paths.PREFIX, self.ctx.run)
         if dpi:
-            self.log(_("Wine-DPI an den Bildschirm angepasst: {dpi}").format(dpi=dpi))
-        self.progress(_("Zwift starten"))
+            self.log(_("Wine DPI adjusted to the screen: {dpi}").format(dpi=dpi))
+        self.progress(_("Start Zwift"))
         self.start(token)
-        self.progress(_("Fenster anpassen"))
+        self.progress(_("Adjusting the window"))
         self.wait_and_maximize()
-        self.progress(_("Zwift läuft"))
+        self.progress(_("Zwift is running"))
 
     def ensure_bridge(self) -> None:
         if not bridgectl.unit_installed():
-            self.log(_("Sensor-Bridge nicht installiert, Start ohne Sensoren"))
+            self.log(_("Sensor bridge not installed, starting without sensors"))
             return
         if not bridgectl.is_running():
             bridgectl.set_running(True)
-            self.log(_("Sensor-Bridge gestartet"))
+            self.log(_("Sensor bridge started"))
 
     def reconcile(self) -> None:
         """Einrichtung mit diesem Tretlager abgleichen (docs/updates.md).
@@ -166,38 +166,38 @@ class Launcher:
         """
         shutil.rmtree(paths.DATA / "snapshots", ignore_errors=True)  # Schnappschüsse bis 0.8.x
         if wine.check_after_update():
-            self.log(_("Neues Wine mit Tretlager: wieder mit der mitgelieferten Version"))
+            self.log(_("New Wine with Tretlager: back to the bundled version"))
         titles = {s.id: s.title for s in setup.STEPS}
         errors: list[str] = []
 
         def on_step(step_id: str, status: str, text: str) -> None:
             if status == "running":
-                self.progress(_("Einrichtung ergänzen: {step}").format(step=titles.get(step_id, step_id)))
-                self.log(_("Einrichtung ergänzen: {step}").format(step=titles.get(step_id, step_id)))
+                self.progress(_("Completing setup: {step}").format(step=titles.get(step_id, step_id)))
+                self.log(_("Completing setup: {step}").format(step=titles.get(step_id, step_id)))
             elif status == "error":
                 errors.append(text)
 
-        self.progress(_("Einrichtung prüfen"))
+        self.progress(_("Check setup"))
         if not setup.run_setup(self.ctx, on_step):
-            raise LaunchError(errors[0] if errors else _("Die Einrichtung ließ sich nicht abgleichen."))
+            raise LaunchError(errors[0] if errors else _("The setup could not be checked."))
 
     def update_if_needed(self) -> None:
         local = setup.game_version()
         try:
             remote = remote_version()
         except OSError as e:
-            self.log(_("Update-Prüfung nicht möglich: {error}").format(error=e))
+            self.log(_("Could not check for updates: {error}").format(error=e))
             return
         state.update("game", local=local, remote=remote, checked=int(time.time()))
         if not remote or remote == local:
             return
         # Zwift aktualisiert sich über den eigenen Launcher; Tretlager startet ihn nur unsichtbar und
         # wartet, bis die neue Version auf der Platte steht.
-        title = _("Zwift wird aktualisiert ({old} → {new})").format(old=local, new=remote)
+        title = _("Updating Zwift ({old} → {new})").format(old=local, new=remote)
         self.progress(title)
         tracker = UpdateProgress()
         if tracker.total:
-            self.log(_("Zwift-Update: {gb} GB zu laden").format(gb=f"{tracker.total / 10**9:.1f}"))
+            self.log(_("Zwift update: {gb} GB to download").format(gb=f"{tracker.total / 10**9:.1f}"))
         self.ctx.wineserver_kill()
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -209,17 +209,17 @@ class Launcher:
                 pct = tracker.percent()
                 if pct >= 0:
                     done = tracker.loaded()
-                    self.progress(_("{title}: {done} von {total} GB").format(
+                    self.progress(_("{title}: {done} of {total} GB").format(
                         title=title, done=f"{done / 10**9:.1f}", total=f"{tracker.total / 10**9:.1f}"), pct)
                 else:
                     minutes = int((time.monotonic() - started) // 60)
-                    self.progress(ngettext("{title}, seit {n} Minute", "{title}, seit {n} Minuten", minutes)
+                    self.progress(ngettext("{title}, for {n} minute", "{title}, for {n} minutes", minutes)
                                   .format(title=title, n=minutes) if minutes else title)
                 if setup.game_version() == remote:
-                    self.log(_("Zwift aktualisiert auf {version}").format(version=remote))
+                    self.log(_("Zwift updated to {version}").format(version=remote))
                     time.sleep(10)
                     return
-            raise LaunchError(_("Das Zwift-Update wurde nicht fertig. Beim nächsten Start setzt Tretlager es fort."))
+            raise LaunchError(_("The Zwift update did not finish. Tretlager continues it on the next start."))
         finally:
             self.ctx.wineserver_kill()
 
@@ -235,7 +235,7 @@ class Launcher:
             self.ctx.run(["wine", setup.CSC, "/nologo", "/target:exe", "/platform:x64", "/out:RunFromProcess.exe",
                           "RunFromProcess.cs"], cwd=work)
             if not exe.exists():
-                raise LaunchError(_("Hilfsprogramm zum Starten ließ sich nicht übersetzen."))
+                raise LaunchError(_("Could not compile the start helper."))
         return exe
 
     def ensure_display_settings(self) -> None:
@@ -258,7 +258,7 @@ class Launcher:
             if pid:
                 break
         if not pid:
-            raise LaunchError(_("Der Zwift-Launcher startet nicht."))
+            raise LaunchError(_("The Zwift launcher does not start."))
         time.sleep(5)
         gfx = state.load().get("graphics", {})
         env = dict(self.env, **setup.graphics_env(gfx))
@@ -275,10 +275,10 @@ class Launcher:
                                   cwd=paths.ZWIFT_DIR, env=env, stdout=subprocess.DEVNULL,
                                   stderr=subprocess.DEVNULL, timeout=60, check=False)
             if proc.returncode != 0:
-                raise LaunchError(_("Zwift ließ sich nicht starten (RunFromProcess, Code {code}).").format(code=proc.returncode))
+                raise LaunchError(_("Could not start Zwift (RunFromProcess, code {code}).").format(code=proc.returncode))
             time.sleep(15)
         except subprocess.TimeoutExpired:
-            raise LaunchError(_("Zwift ließ sich nicht starten (Zeitüberschreitung).")) from None
+            raise LaunchError(_("Could not start Zwift (timed out).")) from None
         finally:
             tok_file.unlink(missing_ok=True)
         for name in ("ZwiftLauncher.exe", "ZwiftWindowsCrashHandler.exe"):
@@ -300,6 +300,6 @@ class Launcher:
         try:
             if bridgectl.is_running() and not bridgectl.autostart():
                 bridgectl.set_running(False)
-                self.log(_("Sensor-Bridge gestoppt"))
+                self.log(_("Sensor bridge stopped"))
         except bridgectl.BridgeError as e:
             self.log(str(e))

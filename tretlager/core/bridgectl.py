@@ -44,7 +44,7 @@ def _gdbus(args: list[str], timeout: int, run) -> str:
     try:
         r = run(cmd, capture_output=True, text=True, timeout=timeout + 5)
     except FileNotFoundError:
-        raise BridgeError(_("gdbus fehlt (Paket libglib2.0-bin bzw. glib2)")) from None
+        raise BridgeError(_("gdbus is missing (package libglib2.0-bin or glib2)")) from None
     if r.returncode != 0:
         applog.warning("gdbus %s: %s", args[-1] if args else "", r.stderr.strip())
         raise BridgeError(describe_dbus_error(r.stderr))
@@ -54,14 +54,14 @@ def _gdbus(args: list[str], timeout: int, run) -> str:
 def describe_dbus_error(stderr: str) -> str:
     """D-Bus-Fehler von gdbus als Satz für Nutzer; die Rohmeldung steht im Protokoll (applog)."""
     if "org.bluez.Error.NotReady" in stderr or "not powered" in stderr.lower():
-        return _("Bluetooth ist ausgeschaltet. Bluetooth einschalten und erneut versuchen.")
+        return _("Bluetooth is switched off. Switch on Bluetooth and try again.")
     if "org.bluez.Error.InProgress" in stderr:
-        return _("Bluetooth ist gerade beschäftigt. In ein paar Sekunden erneut versuchen.")
+        return _("Bluetooth is busy. Try again in a few seconds.")
     if "org.bluez" in stderr and ("NoSuchAdapter" in stderr or "UnknownObject" in stderr):
-        return _("Kein Bluetooth-Adapter gefunden. Adapter einstecken bzw. einschalten.")
+        return _("No Bluetooth adapter found. Plug in or switch on the adapter.")
     if any(k in stderr for k in ("ServiceUnknown", "NameHasNoOwner", "NoReply", "Timeout", "TimedOut")):
-        return _("Die Sensor-Bridge antwortet nicht. Sie startet beim nächsten Versuch neu.")
-    return _("Die Sensor-Bridge meldet einen Fehler. Details stehen im Protokoll.")
+        return _("The sensor bridge is not responding. It restarts on the next attempt.")
+    return _("The sensor bridge reported an error. Details are in the log.")
 
 
 def _call(method: str, *args, timeout: int = 10, run=subprocess.run):
@@ -73,7 +73,7 @@ def _call(method: str, *args, timeout: int = 10, run=subprocess.run):
     try:  # GVariant-Text eines Strings ist ein Python-Literal: ('…',)
         result = ast.literal_eval(out) if out else ()
     except (ValueError, SyntaxError):
-        raise BridgeError(_("Unerwartete Antwort der Bridge")) from None
+        raise BridgeError(_("Unexpected response from the bridge")) from None
     return result[0] if result else None
 
 
@@ -170,7 +170,7 @@ def set_autostart(on: bool, run=subprocess.run) -> None:
     bzw. entfernt ihn). Außerhalb des Flatpaks nur gemerkt."""
     if IN_FLATPAK:
         options = ("{'reason': <%s>, 'autostart': <%s>, 'commandline': <['tretlager-bridge']>, "
-                   "'dbus-activatable': <false>}") % (_gvariant(_("Sensoren beim Anmelden bereithalten")),
+                   "'dbus-activatable': <false>}") % (_gvariant(_("Keep sensors ready at login")),
                                                        "true" if on else "false")
         _gdbus(["--dest", "org.freedesktop.portal.Desktop", "--object-path", "/org/freedesktop/portal/desktop",
                 "--method", "org.freedesktop.portal.Background.RequestBackground", "''", options], 30, run)

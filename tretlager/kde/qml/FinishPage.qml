@@ -5,41 +5,41 @@ import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
 ColumnsPage {
-    title: i18n("Fertig")
+    title: i18n("Done")
 
     Component.onCompleted: backend.markSetupComplete()
 
-    header: WizardHeader { stepId: "finish"; text: i18n("Noch ein Handgriff in Zwift.") }
+    header: WizardHeader { stepId: "finish"; text: i18n("One more step in Zwift.") }
 
     PageHero {
         iconName: "data-success"
-        title: i18n("Zwift ist bereit")
-        text: i18n("Ab jetzt startet Zwift mit einem Klick, in der Übersicht oder im Startmenü unter Zwift (Tretlager).")
+        title: i18n("Zwift is ready")
+        text: i18n("From now on Zwift starts with one click, from the overview or from the application menu under Zwift (Tretlager).")
     }
 
-    FormCard.FormHeader { title: i18n("Einmalig in Zwift: Gekoppelte Geräte") }
+    FormCard.FormHeader { title: i18n("Once in Zwift: Paired Devices") }
     FormCard.FormCard {
         FormCard.FormTextDelegate {
-            text: i18n("Leistung, Trittfrequenz und Widerstand")
-            description: i18n("„Wahoo KICKR …“ auswählen")
+            text: i18n("Power, cadence and resistance")
+            description: i18n("Select “Wahoo KICKR …”")
             icon.source: Qt.resolvedUrl("../../data/icons/tretlager-trainer-symbolic.svg")
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {
-            text: i18n("Herzfrequenz")
-            description: i18n("„Wahoo HRM …“ auswählen")
+            text: i18n("Heart rate")
+            description: i18n("Select “Wahoo HRM …”")
             icon.source: Qt.resolvedUrl("../../data/icons/tretlager-heartrate-symbolic.svg")
         }
         FormCard.FormDelegateSeparator {}
         FormCard.FormTextDelegate {
-            text: i18n("Hinweise zu Bluetooth und ANT+")
-            description: i18n("Zwift meldet beides als nicht verfügbar. Das ist normal, die Geräte kommen über die Sensor-Bridge.")
+            text: i18n("Notices about Bluetooth and ANT+")
+            description: i18n("Zwift reports both as unavailable. That is normal; the devices come through the sensor bridge.")
             icon.name: "dialog-information"
         }
     }
 
     footer: WizardFooter {
-        nextText: i18n("Zur Übersicht")
+        nextText: i18n("Go to overview")
         nextIcon: "go-home"
         onNext: applicationWindow().show("overview")
     }
