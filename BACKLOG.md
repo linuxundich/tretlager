@@ -126,6 +126,7 @@ Umsetzung in Meilensteinen (Kern Python `tretlager/core`, Oberfläche PySide6 + 
 - [x] F3 Umstieg auf tinytin: Debian-Paket entfernt, alte Paketdaten (36 GB) gelöscht (30.10.)
 - [ ] F4 Flatpak-Quelle auf bender mit GPG-Schlüssel
 - [ ] F5 Abnahme: frisches TUXEDO OS, Fedora KDE + GNOME, Arch, lange Fahrt; Debian-Quelle auf bender abschalten
+- [ ] **Startabbruch auf nanhlanu (Arch, GNOME 51, 31.10.):** Bundle (master ce6b144, auf tinytin gebaut) installiert in 19 s, startet aber nicht: `QtCore.abi3.so: undefined symbol _ZN14QObjectPrivateC2E16QtPrivate_6_11_2, version Qt_6_PRIVATE_API`. nanhlanu hat `org.kde.Platform//6.11` vom 31.10. (Commit fb23e178), tinytin einen älteren (76fa01ac). PySide aus `io.qt.PySide.BaseApp` hängt an der privaten Qt-API der Patch-Version → jedes Laufzeit-Update kann Tretlager brechen. Lösung suchen: gegen aktuelle Laufzeit + BaseApp neu bauen, Laufzeit-Commit pinnen oder PySide selbst gegen die Laufzeit bauen; Startfehler sichtbar machen (kein Fenster, kein Log)
 
 ## Hinweise in der App
 
