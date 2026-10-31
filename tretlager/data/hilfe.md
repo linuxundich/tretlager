@@ -76,6 +76,10 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
 - **2. Zwift**: Download und Installation, etwa zehn Minuten. Abbrechen geht jederzeit, beim
   nächsten Start geht es an derselben Stelle weiter.
 - **3.–5. Anmeldung, Sensoren, Fertig**: Siehe die Abschnitte oben.
+- **Zwift auf der NVIDIA-Karte**: Auf Notebooks mit zwei Grafikchips legt Tretlager
+  Zwift selbst auf die NVIDIA (PRIME-Offload). Ist sie abgeschaltet (envycontrol „integrated“),
+  vorher `sudo envycontrol -s hybrid`, neu starten und `flatpak update` ausführen (lädt den
+  passenden NVIDIA-Teil fürs Flatpak). Tretlager richtet die Grafik beim nächsten Start neu ein.
 
 ## Wenn etwas nicht klappt
 <!-- icon: help-hint; wide -->

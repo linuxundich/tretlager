@@ -7,7 +7,7 @@ from tretlager.core import systemcheck as sc
 
 def make_root(tmp_path: Path, os_release: str, gpus: list[tuple], nvidia_version: str = "",
               secure_boot: int | None = None, rfkill_soft: str | None = None) -> Path:
-    (tmp_path / "etc").mkdir()
+    (tmp_path / "etc").mkdir(parents=True)
     (tmp_path / "etc/os-release").write_text(os_release)
     drm = tmp_path / "sys/class/drm"
     drivers = tmp_path / "sys/bus/pci/drivers"
@@ -139,3 +139,28 @@ def test_overall():
     assert sc.overall([mk(sc.OK), mk(sc.WARN)]) == sc.WARN
     assert sc.overall([mk(sc.OK), mk(sc.FAIL), mk(sc.WARN)]) == sc.FAIL
     assert sc.overall([mk(sc.OK)]) == sc.OK
+
+
+def test_nvidia_in_flatpak_without_gl_extension(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, TINYTIN_GPUS, nvidia_version="580.196.07")
+    (root / ".flatpak-info").write_text("[Application]\n")
+    checks = sc.check_graphics(root)
+    assert checks[0].status == sc.FAIL and "flatpak update" in checks[0].summary
+    assert not sc.nvidia_usable(root)
+    (root / "usr/lib/x86_64-linux-gnu/GL/nvidia-580-196-07").mkdir(parents=True)
+    assert sc.check_graphics(root)[0].status == sc.OK
+    assert sc.nvidia_usable(root)
+
+
+def test_gpu_signature_changes_when_nvidia_appears(tmp_path):
+    intel = make_root(tmp_path / "a", TUXEDO_FORKY, [("0x8086", "0x591b", "i915", True)])
+    hybrid = make_root(tmp_path / "b", TUXEDO_FORKY, [("0x8086", "0x591b", "i915", True),
+                                                       ("0x10de", "0x1c8d", "nvidia", False)], nvidia_version="580.196.07")
+    assert sc.gpu_signature(intel) == ["Intel:0x591b:i915"]
+    assert sc.gpu_signature(hybrid)[-1] == "nvidia-usable"
+
+
+def test_intel_only_mentions_switched_off_nvidia(tmp_path):
+    root = make_root(tmp_path, TUXEDO_FORKY, [("0x8086", "0x591b", "i915", True)])
+    (c,) = sc.check_graphics(root)
+    assert any("envycontrol" in d for d in c.details)

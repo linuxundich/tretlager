@@ -108,6 +108,33 @@ def nvidia_driver_version(root: Path = Path("/")) -> str:
         return ""
 
 
+def nvidia_gl_extension_missing(version: str, root: Path = Path("/")) -> bool:
+    """Im Flatpak: fehlt die GL-Erweiterung zum NVIDIA-Treiber (org.freedesktop.Platform.GL.nvidia-…)?
+
+    Flatpak installiert sie nur, wenn der Treiber beim `flatpak update` geladen ist. Wer erst nach
+    der Installation auf die NVIDIA-Karte umschaltet (envycontrol, nvidia-prime), hat sie nicht; dann
+    gibt es in der Sandbox kein OpenGL auf der NVIDIA-Karte.
+    """
+    if not (root / ".flatpak-info").exists() or not version:
+        return False
+    return not (root / "usr/lib/x86_64-linux-gnu/GL" / ("nvidia-" + version.replace(".", "-"))).is_dir()
+
+
+def nvidia_usable(root: Path = Path("/")) -> bool:
+    """Kann Zwift auf der NVIDIA-Karte rendern: Treiber geladen und (im Flatpak) GL-Erweiterung da."""
+    gpus = list_gpus(root)
+    if not any(g.vendor == "NVIDIA" and g.driver == "nvidia" for g in gpus):
+        return False
+    version = nvidia_driver_version(root)
+    return bool(version) and not nvidia_gl_extension_missing(version, root)
+
+
+def gpu_signature(root: Path = Path("/")) -> list[str]:
+    """Grafikchips samt Treiber und Nutzbarkeit der NVIDIA; ändert sich das, läuft der Grafiktest neu."""
+    return sorted(f"{g.vendor}:{g.device}:{g.driver}" for g in list_gpus(root)) + (
+        ["nvidia-usable"] if nvidia_usable(root) else [])
+
+
 def secure_boot_enabled(root: Path = Path("/")) -> bool | None:
     var = root / "sys/firmware/efi/efivars" / SECURE_BOOT_VAR
     try:
@@ -128,7 +155,12 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
     checks = []
     if nvidia:
         version = nvidia_driver_version(root)
-        if nvidia[0].driver == "nvidia" and version:
+        if nvidia[0].driver == "nvidia" and version and nvidia_gl_extension_missing(version, root):
+            checks.append(Check("graphics", _("Grafik"), FAIL,
+                                _("NVIDIA-Treiber {version} geladen, aber dem Flatpak fehlt die passende Erweiterung. "
+                                  "Im Terminal „flatpak update“ ausführen und Tretlager neu starten.").format(version=version),
+                                details + [f"org.freedesktop.Platform.GL.nvidia-{version.replace('.', '-')}"]))
+        elif nvidia[0].driver == "nvidia" and version:
             checks.append(Check("graphics", _("Grafik"), OK, _("NVIDIA-Treiber {version} geladen").format(version=version), details))
         else:
             sb = secure_boot_enabled(root)
@@ -146,7 +178,8 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
         g = gpus[0]
         checks.append(Check("graphics", _("Grafik"), WARN,
                             _("{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA").format(vendor=g.vendor),
-                            details))
+                            details + [_("Notebook mit abgeschalteter NVIDIA-Karte (etwa envycontrol „integrated“)? "
+                                         "Dann sieht Tretlager sie nicht; siehe Hilfe, „Zwift auf der NVIDIA-Karte“.")]))
     return checks
 
 

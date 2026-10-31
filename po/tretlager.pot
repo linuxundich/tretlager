@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 15:18+0100\n"
+"POT-Creation-Date: 2026-10-31 15:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -459,27 +459,27 @@ msgstr ""
 msgid "Grafik einrichten"
 msgstr ""
 
-#: tretlager/core/setup.py:368
+#: tretlager/core/setup.py:371
 msgid "Grafiktest übersetzen"
 msgstr ""
 
-#: tretlager/core/setup.py:374
+#: tretlager/core/setup.py:377
 msgid "Grafiktest ausführen"
 msgstr ""
 
-#: tretlager/core/setup.py:382
+#: tretlager/core/setup.py:385
 msgid "Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."
 msgstr ""
 
-#: tretlager/core/setup.py:384
+#: tretlager/core/setup.py:387
 msgid "Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"
 msgstr ""
 
-#: tretlager/core/setup.py:400
+#: tretlager/core/setup.py:403
 msgid "schon erledigt"
 msgstr ""
 
-#: tretlager/core/setup.py:410
+#: tretlager/core/setup.py:413
 #, python-brace-format
 msgid "Unerwarteter Fehler: {error}"
 msgstr ""
@@ -502,195 +502,210 @@ msgstr ""
 msgid "{machine} wird nicht unterstützt (Zwift braucht x86-64)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:122 tretlager/core/systemcheck.py:132
-#: tretlager/core/systemcheck.py:137 tretlager/core/systemcheck.py:147
+#: tretlager/core/systemcheck.py:149 tretlager/core/systemcheck.py:159
+#: tretlager/core/systemcheck.py:164 tretlager/core/systemcheck.py:169
+#: tretlager/core/systemcheck.py:179
 msgid "Grafik"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:122
+#: tretlager/core/systemcheck.py:149
 msgid "Keine Grafikkarte gefunden"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:123
+#: tretlager/core/systemcheck.py:150
 #, python-brace-format
 msgid "{vendor} {device} (Treiber {driver})"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:123
+#: tretlager/core/systemcheck.py:150
 msgid "keiner"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:124
+#: tretlager/core/systemcheck.py:151
 msgid " – Anzeige"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:132
+#: tretlager/core/systemcheck.py:160
+#, python-brace-format
+msgid ""
+"NVIDIA-Treiber {version} geladen, aber dem Flatpak fehlt die passende "
+"Erweiterung. Im Terminal „flatpak update“ ausführen und Tretlager neu "
+"starten."
+msgstr ""
+
+#: tretlager/core/systemcheck.py:164
 #, python-brace-format
 msgid "NVIDIA-Treiber {version} geladen"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:135
+#: tretlager/core/systemcheck.py:167
 msgid ""
 "Secure Boot ist an; das Kernelmodul muss signiert sein (TUXEDO-Anleitung)."
 msgstr ""
 
-#: tretlager/core/systemcheck.py:138
+#: tretlager/core/systemcheck.py:170
 msgid "NVIDIA-Karte gefunden, aber der proprietäre Treiber ist nicht geladen."
 msgstr ""
 
-#: tretlager/core/systemcheck.py:141
+#: tretlager/core/systemcheck.py:173
 msgid "Hybrid-Grafik"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:142
+#: tretlager/core/systemcheck.py:174
 msgid "Notebook mit zwei Grafikchips – Zwift wird auf die NVIDIA-Karte gelegt"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:143
+#: tretlager/core/systemcheck.py:175
 #, python-brace-format
 msgid "Anzeige über {vendor}, Zwift per PRIME-Offload (GLX)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:148
+#: tretlager/core/systemcheck.py:180
 #, python-brace-format
 msgid ""
 "{vendor}-Grafik (Mesa): Zwift läuft, aber mit weniger Bildrate als mit NVIDIA"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:179 tretlager/core/systemcheck.py:186
-#: tretlager/core/systemcheck.py:188
+#: tretlager/core/systemcheck.py:181
+msgid ""
+"Notebook mit abgeschalteter NVIDIA-Karte (etwa envycontrol „integrated“)? "
+"Dann sieht Tretlager sie nicht; siehe Hilfe, „Zwift auf der NVIDIA-Karte“."
+msgstr ""
+
+#: tretlager/core/systemcheck.py:212 tretlager/core/systemcheck.py:219
+#: tretlager/core/systemcheck.py:221
 msgid "Bluetooth"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:180
+#: tretlager/core/systemcheck.py:213
 msgid ""
 "Kein Bluetooth-Adapter gefunden – Sensoren lassen sich erst mit Adapter "
 "verbinden"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:184
+#: tretlager/core/systemcheck.py:217
 #, python-brace-format
 msgid "Chip: {name}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:186
+#: tretlager/core/systemcheck.py:219
 msgid "Bluetooth ist ausgeschaltet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:188
+#: tretlager/core/systemcheck.py:221
 msgid "Bluetooth bereit für Trainer und Pulsgurt"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:200
+#: tretlager/core/systemcheck.py:233
 #, python-brace-format
 msgid "{gb} GB frei in {path}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:200
+#: tretlager/core/systemcheck.py:233
 msgid "Bedarf: etwa 11 GB (Wine 1,8 GB, Zwift mit Umgebung 8,6 GB)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:202 tretlager/core/systemcheck.py:204
-#: tretlager/core/systemcheck.py:205
+#: tretlager/core/systemcheck.py:235 tretlager/core/systemcheck.py:237
+#: tretlager/core/systemcheck.py:238
 msgid "Speicherplatz"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:202
+#: tretlager/core/systemcheck.py:235
 #, python-brace-format
 msgid "{gb} GB frei"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:204
+#: tretlager/core/systemcheck.py:237
 #, python-brace-format
 msgid "Nur {gb} GB frei – reicht knapp"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:205
+#: tretlager/core/systemcheck.py:238
 #, python-brace-format
 msgid "Nur {gb} GB frei, nötig sind etwa 11 GB"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:221
+#: tretlager/core/systemcheck.py:254
 msgid "nicht erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:221
+#: tretlager/core/systemcheck.py:254
 msgid "erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:223 tretlager/core/systemcheck.py:224
+#: tretlager/core/systemcheck.py:256 tretlager/core/systemcheck.py:257
 msgid "Internet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:223
+#: tretlager/core/systemcheck.py:256
 msgid "Download-Quellen nicht erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:224
+#: tretlager/core/systemcheck.py:257
 msgid "Zwift und GitHub erreichbar"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:242
+#: tretlager/core/systemcheck.py:275
 #, python-brace-format
 msgid "{version}, im Flatpak enthalten"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:243
+#: tretlager/core/systemcheck.py:276
 msgid "Wine fehlt im Flatpak – Tretlager neu installieren"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:245
+#: tretlager/core/systemcheck.py:278
 #, python-brace-format
 msgid "WineHQ-Paketquelle: {state}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:245
+#: tretlager/core/systemcheck.py:278
 msgid "eingerichtet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:245
+#: tretlager/core/systemcheck.py:278
 msgid "fehlt"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:246
+#: tretlager/core/systemcheck.py:279
 #, python-brace-format
 msgid "Wine: {version}"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:246
+#: tretlager/core/systemcheck.py:279
 msgid "nicht installiert"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:248
+#: tretlager/core/systemcheck.py:281
 #, python-brace-format
 msgid "{version} installiert"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:249
+#: tretlager/core/systemcheck.py:282
 msgid "Wird im nächsten Schritt eingerichtet (WineHQ, etwa 290 MB)"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:257
+#: tretlager/core/systemcheck.py:290
 msgid "Zwift ist schon eingerichtet"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:257
+#: tretlager/core/systemcheck.py:290
 msgid "Launcher vorhanden, Spiel fehlt noch"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:259
+#: tretlager/core/systemcheck.py:292
 msgid "Noch nicht eingerichtet – das übernimmt Tretlager"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:266 tretlager/core/systemcheck.py:267
+#: tretlager/core/systemcheck.py:299 tretlager/core/systemcheck.py:300
 msgid "Geräte-Ankündigung"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:266
+#: tretlager/core/systemcheck.py:299
 msgid "Avahi läuft, Zwift kann die Sensoren finden"
 msgstr ""
 
-#: tretlager/core/systemcheck.py:268
+#: tretlager/core/systemcheck.py:301
 msgid ""
 "Avahi läuft nicht – Zwift findet die Sensoren dann nicht. Abhilfe: Paket "
 "avahi installieren und den Dienst avahi-daemon starten."

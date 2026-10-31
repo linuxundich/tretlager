@@ -352,11 +352,14 @@ class Graphics(Step):
 
     def done(self, ctx: Context) -> bool:
         info = state.load().get("graphics", {})
-        return bool(info.get("gl_renderer")) and info.get("wine") == systemcheck.wine_version()
+        # Neu, wenn sich Wine oder die Grafik ändert (etwa NVIDIA per envycontrol zugeschaltet)
+        return (bool(info.get("gl_renderer")) and info.get("wine") == systemcheck.wine_version()
+                and info.get("gpus") == systemcheck.gpu_signature())
 
     def run(self, ctx: Context) -> None:
         gpus = systemcheck.list_gpus()
-        nvidia = any(g.vendor == "NVIDIA" for g in gpus)
+        # NVIDIA nur, wenn Zwift sie auch nutzen kann (Treiber + GL-Erweiterung im Flatpak)
+        nvidia = systemcheck.nvidia_usable()
         hybrid = nvidia and any(g.vendor != "NVIDIA" for g in gpus)
         reg = r"HKCU\Software\Wine\X11 Driver"
         # T3: Mit NVIDIA unter XWayland liefert nur GLX einen Kontext auf der NVIDIA-Karte.
@@ -382,7 +385,7 @@ class Graphics(Step):
             raise SetupError(_("Wine bekommt keinen OpenGL-Kontext; Zwift würde nicht starten."))
         if nvidia and "NVIDIA" not in result.get("gl_vendor", ""):
             ctx.log(_("Warnung: NVIDIA vorhanden, aber OpenGL läuft nicht darauf"))
-        state.update("graphics", **info, **result, wine=systemcheck.wine_version())
+        state.update("graphics", **info, **result, wine=systemcheck.wine_version(), gpus=systemcheck.gpu_signature())
 
 
 STEPS: list[Step] = [Installer(), Prefix(), Components(), Launcher(), Game(), Graphics()]

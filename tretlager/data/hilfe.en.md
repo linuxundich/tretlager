@@ -74,6 +74,10 @@ using it is at your own risk.**
 - **2. Zwift**: Download and installation, about ten minutes. You can cancel at any time; the
   next start continues where it left off.
 - **3.–5. Sign-in, sensors, done**: See the sections above.
+- **Zwift on the NVIDIA card**: On laptops with two graphics chips Tretlager puts
+  Zwift on the NVIDIA card itself (PRIME offload). If the card is switched off (envycontrol
+  "integrated"), first run `sudo envycontrol -s hybrid`, reboot and run `flatpak update` (fetches the
+  matching NVIDIA part for the Flatpak). Tretlager sets up graphics again on the next start.
 
 ## Troubleshooting
 <!-- icon: help-hint; wide -->

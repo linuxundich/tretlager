@@ -32,6 +32,11 @@ Alle wichtigen Änderungen an Tretlager. Format nach [Keep a Changelog](https://
   `org.freedesktop.appearance`, auch beim Umschalten im laufenden Betrieb) und übernimmt die
   Schrift von GNOME (`tretlager/kde/desktopstyle.py`).
 
+- Grafikschritt merkt sich die Grafikchips samt Treiber und läuft neu, sobald sich das ändert (etwa
+  NVIDIA per envycontrol zugeschaltet); PRIME-Offload nur, wenn Treiber und Flatpak-GL-Erweiterung
+  vorhanden sind. Die Systemprüfung meldet eine fehlende Erweiterung (`flatpak update`) und weist bei
+  reiner Intel-Grafik auf abgeschaltete NVIDIA-Karten hin; Hilfe „Zwift auf der NVIDIA-Karte“.
+
 ### Behoben
 - Absturz beim Öffnen der Anmeldung im Flatpak (SIGABRT): Qt fand den `QtWebEngineProcess` aus dem
   BaseApp nicht. `QTWEBENGINEPROCESS_PATH` und `QTWEBENGINE_DICTIONARIES_PATH` stehen jetzt im
