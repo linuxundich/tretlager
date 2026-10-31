@@ -1,5 +1,5 @@
-// Prüft, ob Wine einen WGL-Kontext liefert, und gibt Hersteller, Renderer und Version aus.
-// Gleicher Weg wie GLFW in ZwiftApp: Fenster, ChoosePixelFormat, wglCreateContext, glGetString.
+// Checks whether Wine provides a WGL context and prints vendor, renderer and version.
+// Same path as GLFW in ZwiftApp: window, ChoosePixelFormat, wglCreateContext, glGetString.
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -36,9 +36,9 @@ class GLTest
         };
         int fmt = ChoosePixelFormat(hdc, ref pfd);
         Console.WriteLine("ChoosePixelFormat: " + fmt);
-        if (fmt == 0 || !SetPixelFormat(hdc, fmt, ref pfd)) { Console.WriteLine("FAIL: kein Pixelformat"); return 1; }
+        if (fmt == 0 || !SetPixelFormat(hdc, fmt, ref pfd)) { Console.WriteLine("FAIL: no pixel format"); return 1; }
         IntPtr ctx = wglCreateContext(hdc);
-        if (ctx == IntPtr.Zero || !wglMakeCurrent(hdc, ctx)) { Console.WriteLine("FAIL: kein Kontext"); return 1; }
+        if (ctx == IntPtr.Zero || !wglMakeCurrent(hdc, ctx)) { Console.WriteLine("FAIL: no context"); return 1; }
         Console.WriteLine("GL_VENDOR:   " + S(0x1F00));
         Console.WriteLine("GL_RENDERER: " + S(0x1F01));
         Console.WriteLine("GL_VERSION:  " + S(0x1F02));

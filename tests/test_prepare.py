@@ -38,7 +38,7 @@ def test_plan_properties():
     plan = prepare.Plan(True, [prepare.Package("x", "1", "o", 10), prepare.Package("y", "2", "o", 5)])
     assert plan.download_bytes == 15 and not plan.nothing_to_do
     assert prepare.Plan(False).nothing_to_do
-    assert not prepare.Plan(False, error="kaputt").nothing_to_do
+    assert not prepare.Plan(False, error="broken").nothing_to_do
 
 
 def test_sources_text_amd64_only():
@@ -66,7 +66,7 @@ def test_helper_refuses_other_commands():
 
 def test_run_helper_relays_events():
     events = []
-    script = ("import json;print(json.dumps({'event':'step','text':'A'}));print('kein json');"
+    script = ("import json;print(json.dumps({'event':'step','text':'A'}));print('not json');"
               "print(json.dumps({'event':'done','text':'ok'}))")
     rc = prepare.run_helper(events.append, cmd=[sys.executable, "-c", script])
     assert rc == 0

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Minimaler msgfmt: .po → .mo, nur Standardbibliothek (auf tinytin fehlt gettext).
+"""Minimal msgfmt: .po -> .mo, standard library only (tinytin lacks gettext).
 
-Unterstützt msgctxt, msgid_plural/msgstr[n] und mehrzeilige Zeichenketten; leere und als
-„fuzzy“ markierte Übersetzungen werden ausgelassen (dann gilt der deutsche Text).
-    build-aux/msgfmt.py po/en.po tretlager/data/locale/en/LC_MESSAGES/tretlager.mo
+Supports msgctxt, msgid_plural/msgstr[n] and multi-line strings; empty translations and those
+marked "fuzzy" are skipped (the English source text applies then).
+    build-aux/msgfmt.py po/de.po tretlager/data/locale/de/LC_MESSAGES/tretlager.mo
 """
 
 import ast
@@ -38,7 +38,7 @@ def parse(path: Path) -> dict[str, str]:
             fuzzy = True
             continue
         if not line or line.startswith("#"):
-            # Leerzeile beendet einen Eintrag erst, wenn seine Übersetzung schon gelesen ist
+            # A blank line ends an entry only once its translation has been read
             if not line and "msgid" in cur and any(k.startswith("msgstr") for k in cur):
                 flush()
             continue

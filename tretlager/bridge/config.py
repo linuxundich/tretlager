@@ -1,4 +1,4 @@
-"""Gespeicherte Geräte der Bridge: ~/.config/tretlager/bridge.json."""
+"""Devices saved by the bridge: ~/.config/tretlager/bridge.json."""
 
 from __future__ import annotations
 
@@ -20,20 +20,20 @@ def config_path() -> Path:
 
 @dataclass
 class DeviceConfig:
-    address: str  # BLE-Adresse, z. B. CE:E7:78:71:FE:2E
-    name: str  # Name des BLE-Geräts
+    address: str  # BLE address, e.g. CE:E7:78:71:FE:2E
+    name: str  # name of the BLE device
     role: str  # trainer, power, cadence, heartrate, other
-    port: int  # DIRCON-Port dieses Geräts
+    port: int  # DIRCON port of this device
     enabled: bool = True
 
 
 @dataclass
 class BridgeConfig:
     devices: list[DeviceConfig] = field(default_factory=list)
-    # True: nur für Zwift auf diesem Rechner (Ankündigung auf 127.0.0.1, robust bei Netzwechsel).
-    # False: auch für Zwift auf anderen Geräten im Netz (Apple TV, iPad, zweiter Rechner).
+    # True: only for Zwift on this computer (announced on 127.0.0.1, survives network changes).
+    # False: also for Zwift on other devices in the network (Apple TV, iPad, second computer).
     local_only: bool = True
-    # Adresse des Bluetooth-Adapters (z. B. eines USB-Sticks); leer = Standardadapter von BlueZ.
+    # Address of the Bluetooth adapter (e.g. a USB dongle); empty = BlueZ default adapter.
     adapter: str = ""
 
     @classmethod
@@ -48,14 +48,14 @@ class BridgeConfig:
         except FileNotFoundError:
             return cls()
         except (OSError, ValueError, TypeError, AttributeError) as e:
-            # Kaputte Datei (abgebrochenes Schreiben, Handarbeit): Ohne diesen Weg startete die Bridge
-            # gar nicht mehr. Datei beiseitelegen, damit nichts verloren geht, und leer beginnen.
-            backup = path.with_suffix(".defekt")
+            # Broken file (interrupted write, manual edit): without this path the bridge would not
+            # start at all. Move the file aside so nothing is lost, and start empty.
+            backup = path.with_suffix(".broken")
             try:
                 path.replace(backup)
             except OSError:
                 pass
-            log.error("%s unlesbar (%s), gesichert als %s", path, e, backup.name)
+            log.error("%s unreadable (%s), saved as %s", path, e, backup.name)
             return cls()
 
     def save(self, path: Path | None = None) -> None:

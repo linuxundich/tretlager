@@ -1,7 +1,7 @@
 #!/bin/bash
-# Texte aus QML und Python sammeln (po/tretlager.pot), Kataloge abgleichen und übersetzen.
-#   po/update.sh          .pot neu erzeugen, po/*.po per msgmerge abgleichen (braucht gettext)
-#   po/update.sh --build  nur .po → data/locale/*.mo (reines Python, geht auch ohne gettext)
+# Extract strings from QML and Python (po/tretlager.pot), merge the catalogs and compile them.
+#   po/update.sh          regenerate the .pot, merge po/*.po with msgmerge (needs gettext)
+#   po/update.sh --build  only .po -> data/locale/*.mo (pure Python, works without gettext)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [ "${1:-}" != "--build" ]; then

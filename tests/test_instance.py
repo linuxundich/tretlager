@@ -17,7 +17,7 @@ def test_second_call_reaches_first_instance():
         assert instance.forward("start", name=name) is True
         assert done.wait(2) and got == ["start"]
         done.clear()
-        assert instance.forward("rm -rf", name=name) is True  # unbekannte Befehle werden ignoriert
+        assert instance.forward("rm -rf", name=name) is True  # unknown commands are ignored
         assert not done.wait(0.3)
     finally:
         srv.close()

@@ -1,12 +1,12 @@
-"""Bridge-Dienst: Geräte verwalten und über D-Bus (Session-Bus) steuerbar machen.
+"""Bridge service: manage devices and make them controllable over D-Bus (session bus).
 
-Schnittstelle de.linuxundich.Tretlager.Bridge unter /de/linuxundich/Tretlager/Bridge.
-Zustände gehen als JSON-Zeichenkette hinaus; so bleibt die Schnittstelle schlank und die
-Oberfläche (GLib/Gio) braucht keine eigenen D-Bus-Typen.
+Interface de.linuxundich.Tretlager.Bridge at /de/linuxundich/Tretlager/Bridge.
+State goes out as a JSON string; this keeps the interface lean and the user interface
+(GLib/Gio) needs no D-Bus types of its own.
 """
 
-# Kein `from __future__ import annotations`: dbus-fast liest die Signaturen ("s", "u", …) aus
-# den Annotationen.
+# No `from __future__ import annotations`: dbus-fast reads the signatures ("s", "u", …) from
+# the annotations.
 import asyncio
 import json
 import logging
@@ -25,7 +25,7 @@ from .mdns import Announcer
 
 log = logging.getLogger(__name__)
 
-TICK = 1.0  # Sekunden zwischen Live-Aktualisierungen
+TICK = 1.0  # seconds between live updates
 
 
 class Bridge(ServiceInterface):
@@ -37,22 +37,22 @@ class Bridge(ServiceInterface):
         self.scanning = False
         self._dirty = True
         self.stop_event = asyncio.Event()
-        self.adapters: dict[str, str] = {}  # hciN → Adresse laut BlueZ
-        self.hci = ""  # aufgelöster Adapter, leer = Standard
+        self.adapters: dict[str, str] = {}  # hciN -> address according to BlueZ
+        self.hci = ""  # resolved adapter, empty = default
         self.adapter_missing = False
         self._adapter_check = 0
 
     async def resolve_adapter(self) -> bool:
-        """Gewählten Adapter auflösen; True, wenn sich der genutzte Adapter geändert hat."""
+        """Resolve the selected adapter; True if the adapter in use has changed."""
         self.adapters = await adapters.bluez_adapters()
         hci, missing = adapters.resolve(self.config.adapter, self.adapters)
         changed = hci != self.hci
         newly_missing = missing and not self.adapter_missing
         self.hci, self.adapter_missing = hci, missing
         if newly_missing:
-            log.warning("Adapter %s fehlt, nutze Standardadapter", self.config.adapter)
+            log.warning("adapter %s missing, using default adapter", self.config.adapter)
         if changed:
-            log.info("Adapter: %s", hci or "Standard")
+            log.info("adapter: %s", hci or "default")
         return changed
 
     async def restart_devices(self) -> None:
@@ -61,11 +61,11 @@ class Bridge(ServiceInterface):
         self.start_devices()
         self._mark_dirty()
 
-    # --- Lebenszyklus ---
+    # --- Lifecycle ---
 
     def start_devices(self) -> None:
-        # Trainer zuerst: Die Verbindungen entstehen nacheinander, ein schlafender Gurt soll den
-        # Trainer nicht aufhalten.
+        # Trainer first: connections are made one after another, and a sleeping strap should not
+        # hold up the trainer.
         for cfg in sorted(self.config.devices, key=lambda c: c.role != "trainer"):
             if cfg.enabled:
                 self._start(cfg.address)
@@ -91,13 +91,13 @@ class Bridge(ServiceInterface):
     async def tick(self) -> None:
         while True:
             await asyncio.sleep(TICK)
-            # Ist ein Adapter gewählt, alle zehn Sekunden nachsehen, ob er noch da und eingeschaltet ist
-            # (USB-Stick abgezogen oder ausgeschaltet) bzw. wieder da ist.
+            # If an adapter is selected, check every ten seconds whether it is still present and
+            # powered (USB dongle unplugged or switched off), or has come back.
             self._adapter_check += 1
             if self.config.adapter and self._adapter_check % 10 == 0:
                 if await self.resolve_adapter():
                     await self.restart_devices()
-            live = any(d.state == "verbunden" for d in self.devices.values())
+            live = any(d.state == "connected" for d in self.devices.values())
             if self._dirty or live:
                 self._dirty = False
                 self.Changed(self._status_json())
@@ -113,7 +113,7 @@ class Bridge(ServiceInterface):
                 devices.append(dev.status())
             else:
                 devices.append({"address": cfg.address, "name": cfg.name, "role": cfg.role,
-                                "enabled": cfg.enabled, "port": cfg.port, "state": "aus",
+                                "enabled": cfg.enabled, "port": cfg.port, "state": "paused",
                                 "error": "", "services": [], "zwift_clients": 0, "values": {}})
         return json.dumps({"running": True, "version": __version__, "scanning": self.scanning,
                            "local_only": self.config.local_only,
@@ -128,7 +128,7 @@ class Bridge(ServiceInterface):
 
     @method()
     async def Scan(self, seconds: "u") -> "s":
-        """BLE-Geräte in Reichweite suchen, die einen überbrückbaren Dienst ankündigen."""
+        """Scan for BLE devices in range that advertise a service the bridge can relay."""
         self.scanning = True
         self._mark_dirty()
         try:
@@ -149,7 +149,7 @@ class Bridge(ServiceInterface):
         return json.dumps(out)
 
     async def _discover(self, seconds: float) -> dict:
-        # Gleiche Sperre wie beim Verbinden: BlueZ scannt und verbindet nicht parallel.
+        # Same lock as for connecting: BlueZ does not scan and connect in parallel.
         for attempt in range(3):
             try:
                 async with connect_lock:
@@ -194,7 +194,7 @@ class Bridge(ServiceInterface):
 
     @method()
     async def SetLocalOnly(self, local_only: "b") -> "b":
-        """Nur für Zwift auf diesem Rechner (True) oder auch im Netz (False); Geräte neu ankündigen."""
+        """Only for Zwift on this computer (True) or also in the network (False); re-announce devices."""
         if self.config.local_only == local_only:
             return True
         self.config.local_only = local_only
@@ -204,7 +204,7 @@ class Bridge(ServiceInterface):
 
     @method()
     async def SetAdapter(self, address: "s") -> "b":
-        """Bluetooth-Adapter per Adresse wählen (leer = Standard); Geräte darüber neu verbinden."""
+        """Select the Bluetooth adapter by address (empty = default); reconnect devices through it."""
         address = address.upper()
         if address == self.config.adapter:
             return True
@@ -216,8 +216,8 @@ class Bridge(ServiceInterface):
 
     @method()
     def Quit(self) -> "b":
-        """Bridge beenden (ersetzt `systemctl stop`; Geräte werden sauber getrennt)."""
-        log.info("Beenden über D-Bus angefordert")
+        """Quit the bridge (replaces `systemctl stop`; devices are disconnected cleanly)."""
+        log.info("quit requested over D-Bus")
         self.stop_event.set()
         return True
 
@@ -231,7 +231,7 @@ async def run() -> None:
     bus = await MessageBus().connect()
     bus.export(BRIDGE_OBJECT_PATH, bridge)
     await bus.request_name(BRIDGE_BUS_NAME)
-    log.info("Bridge bereit, %d Gerät(e) konfiguriert", len(bridge.config.devices))
+    log.info("bridge ready, %d device(s) configured", len(bridge.config.devices))
     await bridge.resolve_adapter()
     bridge.start_devices()
 
@@ -244,4 +244,4 @@ async def run() -> None:
     ticker.cancel()
     await bridge.shutdown()
     bus.disconnect()
-    log.info("Bridge beendet")
+    log.info("bridge stopped")

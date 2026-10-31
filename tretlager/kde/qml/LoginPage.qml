@@ -4,7 +4,7 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Schritt 4 des Assistenten; aus der Übersicht auch zum erneuten Anmelden (ohne Schrittanzeige).
+// Step 4 of the wizard; also used from the overview to sign in again (without step indicator).
 ColumnsPage {
     id: page
     title: i18n("Sign-in")
@@ -38,7 +38,7 @@ ColumnsPage {
     }
 
     leftCards: [
-        // --- Ersatzweg: mit Zustimmung ---
+        // --- Alternative route: with consent ---
         FormCard.FormHeader { visible: !page.signedIn; title: i18n("Sign in through Tretlager") },
         FormCard.FormCard {
             visible: !page.signedIn
@@ -74,7 +74,7 @@ ColumnsPage {
     ]
 
     rightCards: [
-        // --- Ausweichweg: eigener Browser (Passwortmanager, Anmeldung mit Google oder Apple) ---
+        // --- Fallback route: own browser (password manager, sign-in with Google or Apple) ---
         FormCard.FormHeader {
             visible: !page.signedIn
             title: backend.embeddedLogin ? i18n("Alternative: your own browser") : i18n("Sign in in the browser")
@@ -116,7 +116,7 @@ ColumnsPage {
             }
         },
 
-        // --- Offiziell: derzeit nicht möglich ---
+        // --- Official: currently not possible ---
         FormCard.FormHeader { visible: !page.signedIn; title: i18n("Official sign-in") },
         FormCard.FormCard {
             visible: !page.signedIn

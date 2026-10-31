@@ -19,7 +19,7 @@ ColumnsPage {
         }
     ]
 
-    // Direkt geöffnet (Seitenleiste → Einrichtung prüfen) ohne laufende Prüfung: gleich prüfen.
+    // Opened directly (sidebar -> Check setup) with no check running: start checking right away.
     Component.onCompleted: if (!backend.busy && backend.checks.length === 0) backend.runChecks()
 
     header: WizardHeader { stepId: "check"; text: i18n("Read-only, nothing on the system changes.") }

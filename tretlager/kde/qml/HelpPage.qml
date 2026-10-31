@@ -4,10 +4,10 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Hilfe im selben Gerüst wie die übrigen Seiten: je Abschnitt eine Karte mit Einträgen aus
-// Stichwort und Satz statt Fließtext. Welche Spalte ein Abschnitt bekommt, rechnet das Backend
-// aus (core/helpdoc.py); „Wenn etwas nicht klappt“ steht unten über die volle Breite, die
-// Einträge dort in zwei Spalten.
+// Help in the same scaffold as the other pages: one card per section with entries made of
+// keyword and sentence instead of running text. The backend works out which column a section
+// goes into (core/helpdoc.py); "If something goes wrong" sits at the bottom across the full width,
+// with its entries in two columns.
 ColumnsPage {
     id: page
     title: i18n("Help")
@@ -15,7 +15,7 @@ ColumnsPage {
     readonly property var sections: backend.helpSections
     function inColumn(c) { return sections.filter(function (s) { return s.column === c }) }
 
-    // Ein Eintrag: Symbol (optional), Stichwort, Satz
+    // One entry: icon (optional), keyword, sentence
     component Entry: FormCard.AbstractFormDelegate {
         id: entry
         required property var item
@@ -62,7 +62,7 @@ ColumnsPage {
         FormCard.FormCard {
             maximumWidth: Infinity
 
-            // Einleitung
+            // Introduction
             Repeater {
                 model: section.modelData.intro
                 delegate: FormCard.AbstractFormDelegate {
@@ -78,7 +78,7 @@ ColumnsPage {
             }
             FormCard.FormDelegateSeparator { visible: section.modelData.intro.length > 0 }
 
-            // Einträge: untereinander mit Trennlinien, breite Abschnitte in zwei Spalten
+            // Entries: stacked with separators, wide sections in two columns
             GridLayout {
                 Layout.fillWidth: true
                 columns: section.twoColumns ? 2 : 1

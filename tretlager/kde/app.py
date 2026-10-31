@@ -1,4 +1,4 @@
-"""Tretlager für Plasma: Einrichtungsassistent und Hauptfenster (PySide6 + Kirigami)."""
+"""Tretlager for Plasma: setup assistant and main window (PySide6 + Kirigami)."""
 
 from __future__ import annotations
 
@@ -18,28 +18,28 @@ from .i18n import LocalizedContext
 from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
 
-# Eingebettete Anmeldung (wie im offiziellen Launcher): braucht QtWebEngine. Fehlt das Modul,
-# bleibt nur der Weg über den eigenen Browser.
+# Embedded sign-in (as in the official launcher): needs QtWebEngine. Without the module,
+# only the route through the user's own browser remains.
 try:
     from PySide6.QtWebEngineQuick import QtWebEngineQuick
-except ImportError:  # python3-pyside6.qtwebenginequick nicht installiert
+except ImportError:  # python3-pyside6.qtwebenginequick not installed
     QtWebEngineQuick = None
 
 QML_DIR = Path(__file__).parent / "qml"
-# Fassung der Warnhinweise (WarningDialog.qml); erhöhen, wenn sich ihr Inhalt ändert
+# Revision of the warnings (WarningDialog.qml); increase it when their content changes
 DISCLAIMER_VERSION = 1
-POLL_VISIBLE_MS = 1500  # Live-Werte der Sensoren bei sichtbarem Fenster
+POLL_VISIBLE_MS = 1500  # live sensor values while the window is visible
 POLL_HIDDEN_MS = 15000
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 ICON_FILE = DATA_DIR / "icons" / "de.linuxundich.Tretlager.svg"
 
 
 class Backend(QObject):
-    """Brücke zwischen QML und Kern. Lange Arbeiten laufen in Threads, Ergebnisse kommen per Signal."""
+    """Bridge between QML and core. Long tasks run in threads, results arrive via signals."""
 
     checksChanged = Signal()
     busyChanged = Signal()
-    remoteCommand = Signal(str)  # von einem zweiten Aufruf: "show" oder "start"
+    remoteCommand = Signal(str)  # from a second invocation: "show" or "start"
     _checksDone = Signal(list)
 
     def __init__(self, auto_start: bool = False) -> None:
@@ -47,7 +47,7 @@ class Backend(QObject):
         self._auto_start = auto_start
         self._checks: list[dict] = []
         self._busy = False
-        self._checksDone.connect(self._set_checks)  # Thread → Hauptthread (queued)
+        self._checksDone.connect(self._set_checks)  # thread → main thread (queued)
         self._init_prepare()
         self._init_setup()
         self._init_login()
@@ -83,7 +83,7 @@ class Backend(QObject):
         self.checksChanged.emit()
         self.busyChanged.emit()
 
-    # --- Schritt „System vorbereiten“ ---
+    # --- Step "Prepare system" ---
 
     planChanged = Signal()
     prepareChanged = Signal()
@@ -118,10 +118,10 @@ class Backend(QObject):
 
         def work():
             try:
-                # Testschalter: so tun, als fehle die WineHQ-Quelle (Ablauf auf fertigen Systemen prüfen).
+                # Test switch: pretend the WineHQ source is missing (to test the flow on set-up systems).
                 force = os.environ.get("TRETLAGER_TEST_FORCE_SOURCE") == "1"
                 result = prepare.plan(force_temp_source=force).to_dict()
-            except Exception as e:  # Planung darf die Oberfläche nie mitreißen
+            except Exception as e:  # planning must never take down the UI
                 result = {"error": str(e), "packages": [], "removals": [], "nothing_to_do": False}
             self._planDone.emit(result)
         threading.Thread(target=work, daemon=True).start()
@@ -166,7 +166,7 @@ class Backend(QObject):
         self.prepareChanged.emit()
 
 
-    # --- Schritt „Zwift einrichten“ ---
+    # --- Step "Set up Zwift" ---
 
     setupChanged = Signal()
     _setupEvent = Signal(dict)
@@ -232,7 +232,7 @@ class Backend(QObject):
         self.setupChanged.emit()
 
 
-    # --- Schritt „Anmeldung“ ---
+    # --- Step "Sign-in" ---
 
     loginChanged = Signal()
     _loginEvent = Signal(dict)
@@ -244,7 +244,7 @@ class Backend(QObject):
         self._loginEvent.connect(self._on_login_event)
         app = QGuiApplication.instance()
         app.clipboard().dataChanged.connect(self.checkClipboard)
-        # Beim Zurückwechseln ins Fenster prüfen; unter Wayland ist die Zwischenablage erst mit Fokus lesbar.
+        # Check when switching back to the window; under Wayland the clipboard is only readable with focus.
         app.focusWindowChanged.connect(lambda _window: self.checkClipboard())
 
     @Property("QVariantMap", notify=loginChanged)
@@ -264,7 +264,7 @@ class Backend(QObject):
 
         def work():
             try:
-                token = login.valid_token()  # erneuert bei Bedarf
+                token = login.valid_token()  # renews if needed
                 st = login.status(token)
                 self._loginEvent.emit(dict(st, busy=False))
             except login.LoginError as e:
@@ -278,32 +278,32 @@ class Backend(QObject):
 
     @staticmethod
     def _ui_language() -> str:
-        """Sprache der Zwift-Anmeldeseite: dieselbe wie die Oberfläche von Tretlager."""
+        """Language of the Zwift sign-in page: the same as Tretlager's UI."""
         return LANGUAGE
 
     def on_quit(self) -> None:
-        """Beim Beenden aufräumen: Läuft Zwift nicht mehr, die Bridge stoppen (außer im Autostart).
-        Sonst bliebe sie laufen, wenn das Fenster vor dem Aufräumen nach der Fahrt zuging."""
+        """Clean up on quit: if Zwift is no longer running, stop the bridge (unless on autostart).
+        Otherwise it would keep running if the window closed before the post-ride cleanup."""
         zwift = self._launch.get("zwiftRunning", False)
-        applog.info("Fenster geschlossen, Zwift läuft: %s", zwift)
+        applog.info("Window closed, Zwift running: %s", zwift)
         if zwift:
             return
         try:
             if bridgectl.is_running() and not bridgectl.autostart():
                 bridgectl.set_running(False)
-                applog.info("Sensor-Bridge beim Beenden gestoppt")
+                applog.info("Sensor bridge stopped on quit")
         except bridgectl.BridgeError as e:
-            applog.warning("Bridge beim Beenden: %s", e)
+            applog.warning("Bridge on quit: %s", e)
 
     @Slot()
     def quitNow(self) -> None:
-        """Nach Rückfrage auch während einer Fahrt beenden."""
-        applog.info("Beenden während der Fahrt bestätigt")
+        """Quit even during a ride, after confirmation."""
+        applog.info("Quitting during the ride confirmed")
         QGuiApplication.quit()
 
     @Property(bool, constant=True)
     def flatpak(self) -> bool:
-        """Im Flatpak bringt Tretlager Wine selbst mit; der Schritt *Vorbereiten* entfällt."""
+        """In the Flatpak Tretlager ships its own Wine; the *Prepare* step is skipped."""
         return bridgectl.IN_FLATPAK
 
     @Property(bool, constant=True)
@@ -312,7 +312,7 @@ class Backend(QObject):
 
     @Slot(result=str)
     def startEmbeddedLogin(self) -> str:
-        """Anmeldeseite für das eingebettete Fenster; der Rücksprung kommt über submitRedirect."""
+        """Sign-in page for the embedded window; the redirect comes back via submitRedirect."""
         self._login_state_value = login.new_state()
         self._login_update(waiting=False, error="")
         return login.auth_url(self._login_state_value, self._ui_language())
@@ -351,7 +351,7 @@ class Backend(QObject):
 
     @Slot()
     def logout(self) -> None:
-        """Bei Zwift abmelden (Sitzung serverseitig beenden) und das Token aus dem Schlüsselbund löschen."""
+        """Sign out of Zwift (end the session on the server) and delete the token from the keyring."""
         def work():
             err = ""
             try:
@@ -369,7 +369,7 @@ class Backend(QObject):
         threading.Thread(target=work, daemon=True).start()
 
 
-    # --- Sensoren (Bridge) ---
+    # --- Sensors (bridge) ---
 
     sensorsChanged = Signal()
     _sensorsEvent = Signal(dict)
@@ -405,8 +405,8 @@ class Backend(QObject):
 
     @Slot(bool)
     def setWindowHidden(self, hidden: bool) -> None:
-        """Minimiert (etwa während der Fahrt) sieht niemand die Live-Werte: seltener nachfragen.
-        Jede Abfrage startet zwei gdbus-Prozesse; alle 1,5 s kostete das im Leerlauf gut 1 % CPU."""
+        """When minimized (e.g. during a ride) nobody sees the live values: poll less often.
+        Each poll starts two gdbus processes; every 1.5 s that cost a good 1 % CPU when idle."""
         self._poll.setInterval(POLL_HIDDEN_MS if hidden else POLL_VISIBLE_MS)
 
     @Slot(bool)
@@ -427,7 +427,7 @@ class Backend(QObject):
             try:
                 st = bridgectl.status()
                 ev = {}
-                # Adapterliste seltener auffrischen (je Adapter ein busctl-Aufruf).
+                # Refresh the adapter list less often (one busctl call per adapter).
                 if time.monotonic() - self._adapters_at > 10:
                     self._adapters_at = time.monotonic()
                     ev["adapters"] = btcompat.list_adapters()
@@ -450,12 +450,12 @@ class Backend(QObject):
 
     @Slot(bool)
     def setBridgeNetwork(self, on: bool) -> None:
-        """Bridge auch für Zwift auf anderen Geräten im Netz anbieten (statt nur 127.0.0.1)."""
+        """Also offer the bridge to Zwift on other devices on the network (instead of only 127.0.0.1)."""
         self._bg(lambda: (bridgectl.set_local_only(not on), self.refreshSensors()))
 
     @Slot(str)
     def setBridgeAdapter(self, address: str) -> None:
-        """Adapter wählen; die Bridge verbindet die Geräte darüber neu."""
+        """Choose the adapter; the bridge reconnects the devices through it."""
         self._adapters_at = 0.0
         self._bg(lambda: (bridgectl.set_adapter(address), self.refreshSensors()))
 
@@ -480,14 +480,14 @@ class Backend(QObject):
 
     @Slot(str, bool)
     def setDeviceEnabled(self, address: str, enabled: bool) -> None:
-        """Sensor pausieren (False) oder fortsetzen: Pausiert sucht die Bridge nicht nach ihm."""
+        """Pause (False) or resume a sensor: while paused, the bridge does not look for it."""
         self._bg(lambda: (bridgectl.set_device_enabled(address, enabled), self.refreshSensors()))
 
     @Slot(str)
     def removeDevice(self, address: str) -> None:
         self._bg(lambda: (bridgectl.remove_device(address), self.refreshSensors()))
 
-    # --- Hauptfenster: Zwift starten ---
+    # --- Main window: start Zwift ---
 
     launchChanged = Signal()
     _launchEvent = Signal(dict)
@@ -499,7 +499,7 @@ class Backend(QObject):
                         "onBattery": power.on_ac() is False, "powerChanged": False, "gpuErrors": ""}
         self._launchEvent.connect(self._on_launch_event)
         self._ac_at_start: bool | None = None
-        # Stromquelle beobachten: Hinweis im Akkubetrieb, Wechsel während Start und Fahrt merken.
+        # Watch the power source: notice on battery, note changes during start and ride.
         self._power_timer = QTimer(self)
         self._power_timer.setInterval(2000)
         self._power_timer.timeout.connect(self._check_power)
@@ -528,7 +528,7 @@ class Backend(QObject):
 
     @Property(bool, constant=True)
     def autoStart(self) -> bool:
-        """Mit `tretlager --start` aufgerufen: Zwift gleich starten, danach Tretlager beenden."""
+        """Called as `tretlager --start`: start Zwift right away, then quit Tretlager."""
         return self._auto_start and self.setupComplete and self.disclaimerAccepted
 
     @Property(str, constant=True)
@@ -537,12 +537,12 @@ class Backend(QObject):
 
     @Property(str, constant=True)
     def build(self) -> str:
-        """Kurzkennung des installierten Flatpak-Baus (wie `flatpak info`), sonst leer."""
+        """Short ID of the installed Flatpak build (as in `flatpak info`), else empty."""
         return build_id()
 
     @Property(str, constant=True)
     def licenseText(self) -> str:
-        """Volltext der GPL für die Infoseite: Debian-Systemkopie, sonst LICENSE aus dem Quellbaum."""
+        """Full GPL text for the About page: Debian system copy, else LICENSE from the source tree."""
         for path in (Path("/usr/share/common-licenses/GPL-3"), Path(__file__).resolve().parents[2] / "LICENSE"):
             if path.is_file():
                 return path.read_text()
@@ -550,14 +550,14 @@ class Backend(QObject):
 
     @Property(list, constant=True)
     def helpSections(self) -> list:
-        """Hilfe als Abschnitte mit Einträgen und Spalte (siehe core/helpdoc.py)."""
+        """Help (help.md, or help.<lang>.md) as sections with entries and column (see core/helpdoc.py)."""
         localized = DATA_DIR / f"help.{LANGUAGE}.md"
         source = localized if LANGUAGE != "en" and localized.exists() else DATA_DIR / "help.md"
         return helpdoc.layout(helpdoc.parse(source.read_text()))
 
     @Slot()
     def prewarmBridge(self) -> None:
-        """Bridge schon beim Öffnen starten, damit Trainer und Gurt beim Aufsteigen verbunden sind."""
+        """Start the bridge on opening already, so trainer and strap are connected when you get on."""
         def work():
             if not self._launch.get("zwiftRunning") and bridgectl.restart_if_outdated(__version__):
                 self._launchEvent.emit({"logline": _("Sensor bridge restarted after an update")})
@@ -578,13 +578,13 @@ class Backend(QObject):
 
     @Property(bool, notify=disclaimerChanged)
     def disclaimerAccepted(self) -> bool:
-        """Warnhinweise beim ersten Start bestätigt? Neu fragen, wenn sich ihr Text ändert."""
+        """Warnings confirmed on first start? Ask again when their text changes."""
         return state.load().get("disclaimer", {}).get("accepted") == DISCLAIMER_VERSION
 
     @Slot()
     def acceptDisclaimer(self) -> None:
         state.update("disclaimer", accepted=DISCLAIMER_VERSION)
-        applog.info("Warnhinweise bestätigt (Fassung %s)", DISCLAIMER_VERSION)
+        applog.info("Warnings confirmed (revision %s)", DISCLAIMER_VERSION)
         self.disclaimerChanged.emit()
 
     def _on_launch_event(self, ev: dict) -> None:
@@ -601,7 +601,7 @@ class Backend(QObject):
                     "renderer": st.get("graphics", {}).get("gl_renderer", ""),
                     "wine": {"bundled": wine.bundled_version(), "kept": wine.kept_version(),
                              "useKept": wine.use_kept(), "active": systemcheck.wine_version()}}
-            try:  # Update-Prüfung im Hintergrund, damit das Hauptfenster es vor dem Start zeigt
+            try:  # update check in the background, so the main window shows it before the start
                 info["remote"] = launch.remote_version()
                 state.update("game", remote=info["remote"], checked=int(time.time()))
             except OSError:
@@ -622,9 +622,9 @@ class Backend(QObject):
 
     @Slot(bool)
     def setUseKeptWine(self, on: bool) -> None:
-        """Zwift mit der aufbewahrten, vorigen Wine-Version starten (Rückweg nach einem Update)."""
+        """Start Zwift with the kept, previous Wine version (way back after an update)."""
         wine.set_use_kept(on)
-        applog.info("Vorige Wine-Version %s", "an" if on else "aus")
+        applog.info("Previous Wine version %s", "on" if on else "off")
         self.refreshOverview()
 
     @Slot()
@@ -649,32 +649,32 @@ class Backend(QObject):
                 self._after_exit_quietly(launcher)
                 self._report_gpu_errors(started_at)
                 return
-            except Exception as e:  # nur den Typ melden: Ausnahmen können Befehlszeilen enthalten
-                applog.warning("Start fehlgeschlagen: %s", type(e).__name__)
+            except Exception as e:  # report the type only: exceptions may contain command lines
+                applog.warning("Start failed: %s", type(e).__name__)
                 self._launchEvent.emit({"busy": False, "error": _("Unexpected error ({name})").format(name=type(e).__name__), "text": ""})
                 self._after_exit_quietly(launcher)
                 return
             self._launchEvent.emit({"busy": False, "zwiftRunning": True, "text": _("Zwift is running"), "percent": -1})
-            applog.info("Zwift läuft (%s)", systemcheck.wine_version())
+            applog.info("Zwift running (%s)", systemcheck.wine_version())
             ride_start = time.monotonic()
-            # Ein Fehler beim Nachsehen darf die Überwachung nicht beenden: Sonst bliebe die
-            # Oberfläche für immer bei „Zwift läuft“, und niemand räumte auf.
+            # An error while checking must not end the monitoring: otherwise the UI would stay
+            # at "Zwift is running" forever, and nobody would clean up.
             misses = 0
-            while misses < 2:  # zweimal nicht gesehen = beendet (kurze Lücke beim Neustart im Spiel)
+            while misses < 2:  # not seen twice = ended (short gap on an in-game restart)
                 time.sleep(5)
                 try:
                     misses = 0 if launcher.running() else misses + 1
                 except OSError:
                     pass
-            applog.info("Zwift beendet, räume auf")
+            applog.info("Zwift ended, cleaning up")
             self._after_exit_quietly(launcher)
-            try:  # Hat sich das mitgelieferte Wine bewährt, wird es zur aufbewahrten Version
+            try:  # if the bundled Wine has proven itself, it becomes the kept version
                 kept = wine.record_ride(time.monotonic() - ride_start)
                 if kept:
-                    applog.info("Wine %s als bewährte Version aufbewahrt", kept)
+                    applog.info("Wine %s kept as the proven version", kept)
                     self._launchEvent.emit({"logline": _("{version} kept as the proven Wine version").format(version=kept)})
             except OSError as e:
-                applog.warning("Wine aufbewahren: %s", e)
+                applog.warning("Keeping Wine: %s", e)
             self._launchEvent.emit({"zwiftRunning": False, "text": _("Zwift closed")})
             self._report_gpu_errors(started_at)
             self.refreshOverview()
@@ -685,22 +685,22 @@ class Backend(QObject):
     def _after_exit_quietly(launcher) -> None:
         try:
             launcher.after_exit()
-        except Exception as e:  # Aufräumen ist Kür; Fehler nur ins Protokoll
-            applog.warning("Aufräumen nach Zwift: %s", type(e).__name__)
+        except Exception as e:  # cleanup is optional; errors go to the log only
+            applog.warning("Cleanup after Zwift: %s", type(e).__name__)
 
     def _report_gpu_errors(self, since: float) -> None:
-        """Nach der Fahrt: Hat der NVIDIA-Treiber Fehler gemeldet? (läuft im Arbeits-Thread)"""
+        """After the ride: did the NVIDIA driver report errors? (runs in the worker thread)"""
         codes = power.nvidia_xids(since)
         if codes:
             text = power.describe_xids(codes)
             self._launchEvent.emit({"gpuErrors": text, "logline": _("NVIDIA driver reported {errors}").format(errors=text)})
 
-    # --- Nur eine Instanz ---
+    # --- Single instance ---
 
     def listen_for_instances(self) -> None:
-        """Weitere Aufrufe nicht als zweites Fenster starten, sondern an dieses weitergeben."""
+        """Do not open further invocations as a second window; hand them over to this one."""
         def on_command(cmd: str) -> None:
-            applog.info("Zweiter Aufruf: %s", cmd)
+            applog.info("Second invocation: %s", cmd)
             self.remoteCommand.emit(cmd)
         self._instance_socket = instance.listen(on_command)
 
@@ -711,35 +711,35 @@ def main() -> int:
         return 0
     restyle = desktopstyle.wanted(in_flatpak=bridgectl.IN_FLATPAK)
     if restyle:
-        # Außerhalb von Plasma meldet das Portal das Symbolthema des Desktops (GNOME: Adwaita), das in
-        # der KDE-Laufzeit fehlt: Status-, Schritt- und Knopfsymbole blieben leer, Steuerelemente im
-        # Fusion-Stil. Das Plasma-Plattformthema bringt Breeze (Stil, Symbole, Farben) vollständig mit.
-        # Fest setzen, nicht nur vorgeben: Flatpak reicht ein QT_QPA_PLATFORMTHEME des Hosts durch
-        # (etwa qt5ct aus ~/.bash_profile), das in der Sandbox fehlt.
+        # Outside Plasma the portal reports the desktop's icon theme (GNOME: Adwaita), which the KDE
+        # runtime lacks: status, step and button icons would stay empty, controls in Fusion style.
+        # The Plasma platform theme brings Breeze (style, icons, colors) in full.
+        # Force it, not just default it: Flatpak passes a host QT_QPA_PLATFORMTHEME through
+        # (e.g. qt5ct from ~/.bash_profile), which is missing in the sandbox.
         os.environ["QT_QPA_PLATFORMTHEME"] = "kde"
     if QtWebEngineQuick is not None:
         if bridgectl.IN_FLATPAK:
-            # WebEngine kommt aus dem BaseApp (/app), Qt sucht den Hilfsprozess aber nur in den Pfaden
-            # der Laufzeit (/usr) und bricht ohne ihn beim ersten WebEngineView ab (SIGABRT)
+            # WebEngine comes from the BaseApp (/app), but Qt only looks for the helper process in the
+            # runtime's paths (/usr) and aborts without it at the first WebEngineView (SIGABRT)
             os.environ.setdefault("QTWEBENGINEPROCESS_PATH", "/app/bin/QtWebEngineProcess")
             os.environ.setdefault("QTWEBENGINE_DICTIONARIES_PATH", "/app/qtwebengine_dictionaries")
-        QtWebEngineQuick.initialize()  # muss vor der QGuiApplication laufen
+        QtWebEngineQuick.initialize()  # must run before the QGuiApplication
     app = QGuiApplication(sys.argv)
     app.setApplicationName("Tretlager")
     app.setOrganizationDomain("linuxundich.de")
     app.setDesktopFileName(APP_ID)
     app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
     if restyle:
-        desktopstyle.DesktopStyle(app).start()  # Hell/Dunkel und Schrift vom Desktop
+        desktopstyle.DesktopStyle(app).start()  # light/dark and font from the desktop
     engine = QQmlApplicationEngine()
-    localized = LocalizedContext()  # i18n-Funktionen für Kirigami Addons
+    localized = LocalizedContext()  # i18n functions for Kirigami Addons
     engine.rootContext().setContextObject(localized)
     backend = Backend(auto_start=start)
     backend.listen_for_instances()
     engine.rootContext().setContextProperty("backend", backend)
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
-    # Skalierung für Wine (LogPixels), falls KWins XWayland-Einstellung nicht lesbar ist (Flatpak):
-    # die des Fensters ist unter Wayland gebrochen (z. B. 1,6), die des Bildschirms aufgerundet.
+    # Scaling for Wine (LogPixels) in case KWin's XWayland setting is unreadable (Flatpak):
+    # the window's is fractional under Wayland (e.g. 1.6), the screen's is rounded up.
     for window in engine.rootObjects():
         display.set_scale(window.devicePixelRatio())
         window.screenChanged.connect(lambda _s, w=window: display.set_scale(w.devicePixelRatio()))
@@ -748,5 +748,5 @@ def main() -> int:
     applog.info("Start %s%s%s", __version__, f" (Flatpak, Build {build_id()})" if bridgectl.IN_FLATPAK else "", " --start" if start else "")
     app.aboutToQuit.connect(backend.on_quit)
     code = app.exec()
-    applog.info("Beendet (Code %s)", code)
+    applog.info("Exited (code %s)", code)
     return code

@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Kopfzeile der Assistentenseiten: „Schritt n von m“ und ein kurzer Satz, was jetzt passiert.
-// Die Nummer ergibt sich aus der Schrittkennung (im Flatpak entfällt „Vorbereiten“).
+// Header of the wizard pages: "Step n of m" and a short sentence on what happens now.
+// The number is derived from the step id (the Flatpak has no "Prepare" step).
 Controls.Control {
     id: header
     property string stepId

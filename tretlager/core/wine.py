@@ -1,11 +1,11 @@
-"""Welches Wine Zwift startet: das mitgelieferte oder die vorige, bewährte Version (docs/updates.md).
+"""Which Wine starts Zwift: the bundled one or the previous, proven version (docs/updates.md).
 
-Tretlager behält genau eine Kopie von Wine im Datenordner: die zuletzt bewährte Version. Bringt ein
-Tretlager-Update ein neues Wine, bleibt die Kopie der alten Version stehen; macht das neue Wine
-Probleme, lässt sich Zwift mit der Kopie starten. Hat das neue Wine zwei Fahrten geschafft, ersetzt
-es die Kopie. Eine Kopie kostet gut 500 MB und ist in einer Sekunde angelegt.
+Tretlager keeps exactly one copy of Wine in the data directory: the last proven version. If a
+Tretlager update brings a new Wine, the copy of the old version stays; if the new Wine causes
+problems, Zwift can be started with the copy. Once the new Wine has managed two rides, it replaces
+the copy. A copy takes a good 500 MB and is created in a second.
 
-Nur im Flatpak: Außerhalb bringt Tretlager kein eigenes Wine mit.
+Flatpak only: outside it, Tretlager does not bring its own Wine.
 """
 
 from __future__ import annotations
@@ -19,9 +19,10 @@ from pathlib import Path
 from . import paths, state
 
 BUNDLED = Path("/app/wine")
-KEPT = paths.DATA / "wine-bewaehrt"
+KEPT = paths.DATA / "wine-kept"
+_OLD_KEPT = paths.DATA / "wine-bewaehrt"  # name up to 0.9.x
 VERSION_FILE = "tretlager-wine-version"
-GOOD_RIDES = 2  # so viele Fahrten, bis ein neues Wine als bewährt gilt
+GOOD_RIDES = 2  # number of rides until a new Wine counts as proven
 GOOD_RIDE_SECONDS = 5 * 60
 
 
@@ -33,11 +34,23 @@ def _version(bin_dir: Path) -> str:
         return ""
 
 
+def _adopt_old_copy() -> None:
+    """Keep the proven Wine copy of installations from before the directory was renamed."""
+    try:
+        if _OLD_KEPT.is_dir() and not KEPT.exists():
+            _OLD_KEPT.rename(KEPT)
+    except OSError:
+        pass
+
+
+_adopt_old_copy()
+
+
 def available() -> bool:
     return (BUNDLED / "bin" / "wine").exists()
 
 
-@lru_cache(maxsize=1)  # /app ändert sich nicht, solange Tretlager läuft
+@lru_cache(maxsize=1)  # /app does not change while Tretlager is running
 def bundled_version() -> str:
     return _version(BUNDLED / "bin") if available() else ""
 
@@ -54,21 +67,21 @@ def _info() -> dict:
 
 
 def use_kept() -> bool:
-    """Startet Zwift gerade mit der vorigen Version? Nur, wenn sie da ist und sich unterscheidet."""
+    """Is Zwift currently started with the previous version? Only if it exists and differs."""
     info = _info()
     kept = kept_version()
     return bool(info.get("use_kept")) and bool(kept) and kept != bundled_version()
 
 
 def bin_dir() -> Path | None:
-    """Ordner des Wine, mit dem Tretlager arbeitet; None = `wine` aus PATH (außerhalb des Flatpaks)."""
+    """Directory of the Wine Tretlager works with; None = `wine` from PATH (outside the Flatpak)."""
     if use_kept():
         return KEPT / "bin"
     return BUNDLED / "bin" if available() else None
 
 
 def env_path(base: str | None = None) -> str:
-    """PATH mit dem gewählten Wine vorn."""
+    """PATH with the selected Wine first."""
     base = base if base is not None else os.environ.get("PATH", "/usr/bin")
     b = bin_dir()
     return f"{b}:{base}" if b else base
@@ -79,8 +92,8 @@ def set_use_kept(on: bool) -> None:
 
 
 def check_after_update() -> bool:
-    """Nach einem Tretlager-Update mit wieder neuem Wine die Wahl „vorige Version“ zurücksetzen:
-    Das neue Wine kann das Problem behoben haben. True, wenn zurückgesetzt wurde."""
+    """After a Tretlager update with yet another new Wine, reset the "previous version" choice:
+    the new Wine may have fixed the problem. True if it was reset."""
     info = _info()
     if info.get("use_kept") and info.get("for_bundled") != bundled_version():
         state.update("wine", use_kept=False)
@@ -89,7 +102,7 @@ def check_after_update() -> bool:
 
 
 def _copy_bundled() -> None:
-    tmp = KEPT.with_name(KEPT.name + ".neu")
+    tmp = KEPT.with_name(KEPT.name + ".new")
     shutil.rmtree(tmp, ignore_errors=True)
     shutil.copytree(BUNDLED, tmp, symlinks=True)
     (tmp / VERSION_FILE).write_text(bundled_version() + "\n")
@@ -98,8 +111,8 @@ def _copy_bundled() -> None:
 
 
 def record_ride(seconds: float) -> str:
-    """Nach einer Fahrt: Bewährt sich das mitgelieferte Wine, wird es zur aufbewahrten Kopie.
-    Liefert eine Zeile fürs Protokoll oder ""."""
+    """After a ride: once the bundled Wine has proven itself, it becomes the kept copy.
+    Returns a line for the log or ""."""
     if not available() or use_kept() or seconds < GOOD_RIDE_SECONDS:
         return ""
     bundled = bundled_version()
@@ -108,8 +121,8 @@ def record_ride(seconds: float) -> str:
     info = _info()
     rides = (info.get("rides", 0) if info.get("rides_for") == bundled else 0) + 1
     state.update("wine", rides=rides, rides_for=bundled)
-    # Erste Kopie überhaupt sofort (sonst gäbe es beim ersten Update nichts zum Zurückgehen),
-    # eine vorhandene ältere erst, wenn sich die neue Version bewährt hat.
+    # The very first copy right away (otherwise there would be nothing to go back to at the first
+    # update); an existing older one only once the new version has proven itself.
     if kept_version() and rides < GOOD_RIDES:
         return ""
     _copy_bundled()

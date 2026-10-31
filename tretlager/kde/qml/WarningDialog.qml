@@ -3,12 +3,12 @@ import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Warnhinweise beim ersten Start (und erneut, wenn sich ihr Text ändert: DISCLAIMER_VERSION in
-// app.py). Ohne Bestätigung geht es nicht weiter; „Beenden“ schließt Tretlager. Später erreichbar
-// unter „Über Tretlager“.
+// Warnings on first start (and again when their text changes: DISCLAIMER_VERSION in
+// app.py). Nothing continues without confirmation; "Quit" closes Tretlager. Later available
+// under "About Tretlager".
 Kirigami.Dialog {
     id: dialog
-    // Beim ersten Start muss bestätigt werden; aus „Über Tretlager“ geöffnet genügt Schließen.
+    // On first start confirmation is required; when opened from "About Tretlager", closing is enough.
     property bool mustConfirm: !backend.disclaimerAccepted
 
     title: i18n("Before you start")
@@ -30,7 +30,7 @@ Kirigami.Dialog {
 
     ColumnLayout {
         spacing: Kirigami.Units.largeSpacing
-        // Lesebreite: Lange Texte würden den Dialog sonst auf Fensterbreite ziehen
+        // Reading width: long texts would otherwise stretch the dialog to the window width
         Layout.preferredWidth: Kirigami.Units.gridUnit * 30
         Layout.maximumWidth: Kirigami.Units.gridUnit * 30
 
@@ -39,7 +39,7 @@ Kirigami.Dialog {
             Layout.margins: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.gridUnit
 
-            // Stilisiertes Steigungsschild als Warnzeichen
+            // Stylised gradient sign as the warning symbol
             Image {
                 source: Qt.resolvedUrl("../../data/icons/tretlager-warning.svg")
                 sourceSize.width: Kirigami.Units.iconSizes.huge

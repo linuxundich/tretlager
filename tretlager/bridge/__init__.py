@@ -1,1 +1,1 @@
-"""Bridge: BLE-Sensoren über BlueZ halten und Zwift per Wahoo Direct Connect (DIRCON) anbieten."""
+"""Bridge: hold BLE sensors via BlueZ and offer them to Zwift over Wahoo Direct Connect (DIRCON)."""

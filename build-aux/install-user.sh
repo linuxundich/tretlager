@@ -1,7 +1,7 @@
 #!/bin/bash
-# Installiert Tretlager für den aktuellen Benutzer nach ~/.local (Testinstallation, kein root).
-#   build-aux/install-user.sh            installieren bzw. aktualisieren
-#   build-aux/install-user.sh --remove   wieder entfernen
+# Installs Tretlager for the current user into ~/.local (test installation, no root).
+#   build-aux/install-user.sh            install or update
+#   build-aux/install-user.sh --remove   uninstall
 set -euo pipefail
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 LIBDIR="$HOME/.local/lib/tretlager"
@@ -13,7 +13,7 @@ if [ "${1:-}" = "--remove" ]; then
   systemctl --user disable --now tretlager-bridge.service 2>/dev/null || true
   rm -rf "$LIBDIR" "$DOCDIR" "$UNITDIR/tretlager-bridge.service" "$APPDIR"/de.linuxundich.Tretlager*.desktop
   systemctl --user daemon-reload
-  echo "Tretlager entfernt (Einstellungen in ~/.config/tretlager bleiben)."
+  echo "Tretlager removed (settings in ~/.config/tretlager are kept)."
   exit 0
 fi
 
@@ -30,4 +30,4 @@ systemctl --user daemon-reload
 if systemctl --user is-active -q tretlager-bridge.service; then
   systemctl --user restart tretlager-bridge.service
 fi
-echo "Tretlager installiert nach $LIBDIR"
+echo "Tretlager installed to $LIBDIR"

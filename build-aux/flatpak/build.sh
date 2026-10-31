@@ -1,7 +1,7 @@
 #!/bin/bash
-# Tretlager-Flatpak bauen und für den Benutzer installieren (auf tinytin: 20 Kerne).
-#   build-aux/flatpak/build.sh            bauen + installieren
-#   build-aux/flatpak/build.sh --bundle   zusätzlich tretlager.flatpak (Einzeldatei, dauert)
+# Build the Tretlager Flatpak and install it for the current user (on tinytin: 20 cores).
+#   build-aux/flatpak/build.sh            build + install
+#   build-aux/flatpak/build.sh --bundle   also create tretlager.flatpak (single file, takes a while)
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 cd "$here"

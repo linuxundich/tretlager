@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Python-Pakete der Bridge für das Flatpak festschreiben: lädt passende Wheels (CPython 3.13,
-manylinux x86_64 – die Python-Version der KDE-Laufzeit 6.11) und schreibt python-deps.json mit
-festen URLs und Prüfsummen. Der Bau läuft damit ohne Netz.
+"""Pin the bridge's Python packages for the Flatpak: downloads matching wheels (CPython 3.13,
+manylinux x86_64 - the Python version of the KDE runtime 6.11) and writes python-deps.json with
+fixed URLs and checksums, so the build runs without network access.
     build-aux/flatpak/gen-python-deps.py
 """
 
@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory() as tmp:
         with urllib.request.urlopen(f"https://pypi.org/pypi/{name}/{version}/json", timeout=30) as r:
             urls = [u for u in json.load(r)["urls"] if u["filename"] == wheel.name]
         if not urls or urls[0]["digests"]["sha256"] != sha:
-            sys.exit(f"{wheel.name}: nicht auf PyPI gefunden oder Prüfsumme weicht ab")
+            sys.exit(f"{wheel.name}: not found on PyPI or checksum differs")
         sources.append({"type": "file", "url": urls[0]["url"], "sha256": sha})
         names.append(name)
         print(wheel.name)
@@ -41,4 +41,4 @@ module = {
     "sources": sources,
 }
 (HERE / "python-deps.json").write_text(json.dumps(module, indent=2) + "\n")
-print(f"→ {HERE / 'python-deps.json'} ({len(sources)} Wheels)")
+print(f"-> {HERE / 'python-deps.json'} ({len(sources)} wheels)")

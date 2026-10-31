@@ -3,14 +3,14 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
-// Gemeinsames Seitengerüst aller Seiten (Vorbild: Übersicht). Oben volle Breite (Meldungen,
-// Kopf, einzelne Listen), darunter zwei Spalten, auf schmalen Fenstern untereinander, und am
-// Ende wieder volle Breite. Alle Seiten nutzen dieselbe Breite, damit beim Wechseln zwischen
-// den Seiten nichts springt: das Fenster bis gridUnit * 62, darüber mittig.
+// Shared page scaffold for all pages (modelled on the overview). Full width at the top (messages,
+// header, single lists), two columns below, stacked on narrow windows, and full width again
+// at the end. All pages use the same width so nothing jumps when switching between
+// pages: the window width up to gridUnit * 62, centred beyond that.
 //
-// FormCards und FormHeader direkt in topItems/leftCards/rightCards/bottomCards füllen ihre Spalte; Kirigami Addons
-// begrenzt sie sonst auf eine schmale Lesebreite. Von Repeatern erzeugte Karten setzen
-// `maximumWidth: Infinity` selbst.
+// FormCards and FormHeaders placed directly in topItems/leftCards/rightCards/bottomCards fill their column; Kirigami Addons
+// would otherwise limit them to a narrow reading width. Cards created by Repeaters set
+// `maximumWidth: Infinity` themselves.
 Kirigami.ScrollablePage {
     id: page
 
@@ -19,8 +19,8 @@ Kirigami.ScrollablePage {
     property alias rightCards: rightColumn.data
     property alias bottomCards: bottomColumn.data
 
-    // Dezente Silhouette einer Radgruppe hinter dem Seitenkopf (build-aux/make-backdrop.py), in
-    // der Textfarbe des Farbschemas und mit wenig Deckkraft; nur Übersicht und Willkommen.
+    // Subtle silhouette of a group of cyclists behind the page header (build-aux/make-backdrop.py), in
+    // the colour scheme's text colour at low opacity; only on the overview and welcome pages.
     property bool backdrop: false
     readonly property real columnsWidth: Kirigami.Units.gridUnit * 62
     readonly property bool wide: width > Kirigami.Units.gridUnit * 42

@@ -85,7 +85,7 @@ ColumnsPage {
             }
         },
 
-        // --- Fortschritt ---
+        // --- Progress ---
         FormCard.FormHeader { visible: page.prep.running || page.prep.result !== ""; title: i18n("Progress") },
         FormCard.FormCard {
             visible: page.prep.running || page.prep.result !== ""

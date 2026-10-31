@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Erzeugt tretlager/data/icons/de.linuxundich.Tretlager.svg.
+"""Generates tretlager/data/icons/de.linuxundich.Tretlager.svg.
 
-Motiv: moderne Rennrad-Kurbel von der Antriebsseite, silberne Kettenblätter mit dunkler Kante (auf dunklem
-Panel kaum sichtbar war die frühere, ganz dunkle Fassung), (Vorbild Straßen-Kurbeln mit asymmetrischer
-Vierarm-Spinne, zwei Kettenblättern und Klickpedalen). Reine Seitenansicht: Die Pedale stehen waagrecht und sitzen
-mittig auf dem Auge ihres Kurbelarms; das hintere liegt hinter Arm und Kettenblatt.
+Motif: modern road bike crankset seen from the drive side, silver chainrings with a dark edge (the earlier,
+all-dark version was barely visible on a dark panel), modelled on road cranksets with an asymmetric four-arm
+spider, two chainrings and clipless pedals. Pure side view: the pedals are horizontal and sit centred on the
+eye of their crank arm; the rear one lies behind the arm and the chainring.
 """
 import math
 from pathlib import Path
 
 CX, CY = 24.0, 23.0
-ANGLE = math.radians(15)  # vorderer Kurbelarm zeigt fast waagrecht nach vorn
+ANGLE = math.radians(15)  # front crank arm points forward, almost horizontally
 CRANK = 16.5
 
 
@@ -38,7 +38,7 @@ def circle_path(r):
 
 
 def arm(a, length, w0, w1):
-    """Kurbelarm als verjüngtes Viereck mit runden Enden."""
+    """Crank arm as a tapered quadrilateral with round ends."""
     nx, ny = -math.sin(a), math.cos(a)
     tx, ty = pt(length, a)
     p = [(CX + nx * w0 / 2, CY + ny * w0 / 2), (tx + nx * w1 / 2, ty + ny * w1 / 2),
@@ -47,7 +47,7 @@ def arm(a, length, w0, w1):
 
 
 def pedal(x, y, s, body, plate, edge):
-    """Klickpedal von der Seite: flacher Keil, Nase vorn (rechts), Stahlplatte oben."""
+    """Clipless pedal from the side: flat wedge, nose at the front (right), steel plate on top."""
     def P(dx, dy):
         return x + dx * s, y + dy * s
     shape = f(P(-5.4, -1.3), P(4.6, -0.9), P(5.6, -0.2), P(5.0, 0.7), P(0.0, 1.9), P(-5.0, 1.7))
@@ -67,20 +67,20 @@ def build():
            '<stop offset="0" stop-color="#e3e6e9"/><stop offset="1" stop-color="#a7aeb5"/></linearGradient>',
            '  </defs>']
 
-    # hinteres Pedal und hinterer Arm (Nicht-Antriebsseite), alles hinter den Kettenblättern
+    # rear pedal and rear arm (non-drive side), all behind the chainrings
     rear_a = ANGLE + math.pi
     rp, rtip = arm(rear_a, CRANK, 4.4, 2.8)
-    out.append('  <!-- hinteres Pedal, mittig am Armende -->')
+    out.append('  <!-- rear pedal, centred on the arm end -->')
     out.append('  ' + pedal(rtip[0], rtip[1] - 0.2, 0.9, "#1b1e20", "#4d545b", "#000000"))
-    out.append('  <!-- hinterer Kurbelarm -->')
+    out.append('  <!-- rear crank arm -->')
     out.append(f'  <polygon points="{f(*rp)}" fill="#232629" stroke="#232629" stroke-width="1.2" '
                'stroke-linejoin="round"/>')
 
-    # Kettenblätter
-    out.append('  <!-- großes Kettenblatt mit Schatten, kleines Blatt innen -->')
+    # Chainrings
+    out.append('  <!-- large chainring with shadow, small ring inside -->')
     ring = gear(16.0, 15.0, 46) + " " + circle_path(10.7)
     out.append(f'  <path transform="translate(0.5 1)" d="{ring}" fill="#000" opacity="0.15" fill-rule="evenodd"/>')
-    # Silberne Blätter mit dunkler Kante: auf dunklem wie hellem Panel gut zu erkennen
+    # Silver rings with a dark edge: clearly visible on dark and light panels alike
     out.append(f'  <path d="{ring}" fill="url(#ring)" stroke="#31363b" stroke-width="0.7" '
                'stroke-linejoin="round" fill-rule="evenodd"/>')
     out.append(f'  <path d="{circle_path(15.0)}" fill="none" stroke="#7f8c8d" stroke-width="0.8" opacity="0.6"/>')
@@ -88,8 +88,8 @@ def build():
                'fill-rule="evenodd"/>')
     out.append(f'  <path d="{circle_path(10.6)}" fill="none" stroke="#7f8c8d" stroke-width="0.5" opacity="0.5"/>')
 
-    # Spinne: vier breite Arme; einer liegt unter dem Kurbelarm
-    out.append('  <!-- asymmetrische Vierarm-Spinne -->')
+    # Spider: four wide arms; one lies under the crank arm
+    out.append('  <!-- asymmetric four-arm spider -->')
     for k, off in enumerate((math.radians(80), math.radians(170), math.radians(260))):
         a = ANGLE + off
         p, tip = arm(a, 12.2, 4.6, 3.0)
@@ -98,9 +98,9 @@ def build():
         bx, by = pt(11.0, a)
         out.append(f'  <circle cx="{bx:.2f}" cy="{by:.2f}" r="0.9" fill="#bdc3c7"/>')
 
-    # vorderer Kurbelarm mit blauem Streifen
+    # front crank arm with a blue stripe
     fp, ftip = arm(ANGLE, CRANK, 6.4, 3.6)
-    out.append('  <!-- vorderer Kurbelarm (Antriebsseite) -->')
+    out.append('  <!-- front crank arm (drive side) -->')
     out.append(f'  <polygon transform="translate(0.5 1)" points="{f(*fp)}" fill="#000" opacity="0.15" '
                'stroke="#000" stroke-width="1.4" stroke-linejoin="round"/>')
     out.append(f'  <polygon points="{f(*fp)}" fill="url(#crank)" stroke="#2a2e32" stroke-width="1.4" '
@@ -111,13 +111,13 @@ def build():
                f'x2="{s1[0] - nx * 0.6:.2f}" y2="{s1[1] - ny * 0.6:.2f}" '
                'stroke="#1d99f3" stroke-width="1.3" stroke-linecap="round"/>')
 
-    # vorderes Pedal: mittig auf dem Kurbelauge, Achsende als silberner Punkt
-    out.append('  <!-- vorderes Pedal, mittig am Armende -->')
+    # front pedal: centred on the crank eye, axle end as a silver dot
+    out.append('  <!-- front pedal, centred on the arm end -->')
     out.append('  ' + pedal(ftip[0], ftip[1] - 0.2, 1.0, "#232629", "#bdc3c7", "#000000"))
     out.append(f'  <circle cx="{ftip[0]:.2f}" cy="{ftip[1]:.2f}" r="1.0" fill="#bdc3c7"/>')
 
-    # Achse / Kurbelschraube
-    out.append('  <!-- Achse -->')
+    # Axle / crank bolt
+    out.append('  <!-- axle -->')
     out.append(f'  <circle cx="{CX}" cy="{CY}" r="3.4" fill="#232629"/>')
     out.append(f'  <circle cx="{CX}" cy="{CY}" r="2.1" fill="none" stroke="#bdc3c7" stroke-width="0.8"/>')
     out.append('</svg>')

@@ -4,8 +4,8 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Übersicht für den Alltag: oben rahmenlos der Start, darunter zwei Spalten mit FormCards
-// (Sensoren | Zwift). Auf schmalen Fenstern stehen die Spalten untereinander.
+// Overview for everyday use: frameless start area at the top, two columns of FormCards below
+// (Sensors | Zwift). On narrow windows the columns are stacked.
 ColumnsPage {
     id: page
     title: i18n("Overview")
@@ -20,9 +20,9 @@ ColumnsPage {
         : la.wine.kept ? i18n("%1, proven and kept", la.wine.active)
         : i18n("%1, bundled with Tretlager", la.wine.active)
     readonly property bool anyUnstable: se.devices.some(function (d) { return d.unstable && !d.compat })
-    // Startbereitschaft auf einen Blick: Welche eingeschalteten Sensoren sind verbunden?
+    // Readiness at a glance: which enabled sensors are connected?
     readonly property var activeDevices: se.devices.filter(function (d) { return d.enabled })
-    readonly property var waitingDevices: activeDevices.filter(function (d) { return d.state !== "verbunden" })
+    readonly property var waitingDevices: activeDevices.filter(function (d) { return d.state !== "connected" })
     readonly property bool sensorsReady: se.running && waitingDevices.length === 0
     readonly property string readinessText: {
         if (!se.running)
@@ -46,7 +46,7 @@ ColumnsPage {
 
     LogDialog { id: logDialog; text: page.la.log; title: i18n("Log of the last start") }
 
-    // --- Meldungen ---
+    // --- Messages ---
     PageMessage {
         visible: page.la.needLogin
         type: Kirigami.MessageType.Warning
@@ -100,7 +100,7 @@ ColumnsPage {
         actions: [Kirigami.Action { text: i18n("Sensors"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
     }
 
-    // --- Start (rahmenlos) ---
+    // --- Start (frameless) ---
     PageHero {
         title: page.la.zwiftRunning ? i18n("Enjoy the ride!") : page.la.busy ? i18n("Zwift is starting…")
              : page.sensorsReady ? i18n("Ready to ride") : i18n("Almost ready")
@@ -110,14 +110,14 @@ ColumnsPage {
         RowLayout {
             Layout.topMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
-            // Die eine Hauptaktion: größer als alle anderen Knöpfe und als einziger hervorgehoben.
+            // The one main action: larger than all other buttons and the only one highlighted.
             Controls.Button {
                 id: startButton
                 text: page.la.zwiftRunning ? i18n("Zwift is running") : i18n("Start Zwift")
                 icon.name: "media-playback-start"
                 icon.width: Kirigami.Units.iconSizes.smallMedium
                 icon.height: Kirigami.Units.iconSizes.smallMedium
-                // Der Plasma-Stil misst Knöpfe selbst und übergeht Polsterwerte; Größe direkt setzen.
+                // The Plasma style sizes buttons itself and ignores padding; set the size directly.
                 implicitHeight: Kirigami.Units.gridUnit * 2.4
                 implicitWidth: Math.max(implicitContentWidth + Kirigami.Units.gridUnit * 2, Kirigami.Units.gridUnit * 11)
                 highlighted: true
@@ -135,7 +135,7 @@ ColumnsPage {
                 toolTipText: i18n("Before starting, Tretlager checks the sensor bridge and renews the Zwift session. After a Tretlager update it adapts the Zwift environment, and it installs a new Zwift version through the Zwift launcher. Zwift runs on the most powerful graphics card and at the screen's resolution.")
             }
         }
-        // Fortschritt langer Schritte (Zwift-Update, Nachinstallieren), sonst unsichtbar
+        // Progress of long steps (Zwift update, reinstalling), invisible otherwise
         Controls.ProgressBar {
             visible: page.la.busy && page.la.percent >= 0
             Layout.fillWidth: true
@@ -144,7 +144,7 @@ ColumnsPage {
             to: 100
             value: page.la.percent
         }
-        // Haftungshinweis direkt an der Hauptaktion: Die Werte der Bridge sind nicht abgesichert.
+        // Disclaimer right next to the main action: the bridge values are not guaranteed.
         Controls.Label {
             Layout.fillWidth: true
             Layout.topMargin: Kirigami.Units.smallSpacing
@@ -155,7 +155,7 @@ ColumnsPage {
         }
     }
 
-    // --- Sensoren ---
+    // --- Sensors ---
     leftCards: [
         FormCard.FormHeader {
             title: i18n("Sensors")

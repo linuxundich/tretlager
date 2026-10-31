@@ -4,7 +4,7 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Schritt 5 des Assistenten und zugleich die Sensorverwaltung aus der Seitenleiste.
+// Step 5 of the wizard and also the sensor management page from the sidebar.
 ColumnsPage {
     id: page
     title: i18n("Sensors")
@@ -27,7 +27,7 @@ ColumnsPage {
         text: i18n("Pedal briefly and put on the heart rate strap.")
     }
 
-    // --- Meldungen ---
+    // --- Messages ---
     PageMessage {
         visible: page.se.error !== ""
         type: Kirigami.MessageType.Error
@@ -45,7 +45,7 @@ ColumnsPage {
                    page.unstable.map(function (d) { return d.name }).join(", "))
     }
 
-    // --- Suche oben, darunter die gekoppelten Sensoren ---
+    // --- Search at the top, paired sensors below ---
     leftCards: [
         FormCard.FormHeader {
             title: i18n("Sensors nearby")
@@ -145,7 +145,7 @@ ColumnsPage {
                 text: i18n("Bluetooth adapter")
                 description: i18n("The bridge connects all sensors through this adapter.")
                 enabled: page.se.running
-                // Gleiche Chips (zwei gleiche Sticks) anhand der Adresse unterscheiden
+                // Tell identical chips (two identical sticks) apart by their address
                 model: page.se.adapters.map(function (a) {
                     const twins = page.se.adapters.filter(function (b) { return b.chip === a.chip }).length > 1
                     return twins ? a.chip + " (" + a.address + ")" : a.chip
@@ -182,7 +182,7 @@ ColumnsPage {
         }
     ]
 
-    // --- Hilfe: über die volle Breite, die Fälle in zwei Spalten (gerade Anzahl) ---
+    // --- Help: across the full width, cases in two columns (even count) ---
     bottomCards: [
         FormCard.FormHeader { title: i18n("Troubleshooting") },
         FormCard.FormCard {

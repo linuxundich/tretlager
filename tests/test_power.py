@@ -40,7 +40,7 @@ def test_nvidia_xids_parses_journal():
 
 def test_nvidia_xids_without_journal():
     def run(cmd, **kw):
-        raise OSError("kein journalctl")
+        raise OSError("no journalctl")
     assert power.nvidia_xids(0, run=run) == []
 
 

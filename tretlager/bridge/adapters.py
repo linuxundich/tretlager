@@ -1,10 +1,10 @@
-"""Bluetooth-Adapter der Bridge auswählen.
+"""Select the bridge's Bluetooth adapter.
 
-Gespeichert wird die Adresse des Adapters, nicht der Name hciN: Die Nummer hängt von der
-Reihenfolge ab, in der die Adapter erscheinen, und ändert sich etwa beim Umstecken eines
-USB-Sticks. Beim Start und bei jeder Änderung wird die Adresse auf den aktuellen hciN-Namen
-aufgelöst. Ohne Auswahl oder wenn der gewählte Adapter fehlt, nutzt die Bridge den
-Standardadapter von BlueZ. Ausgeschaltete Adapter gelten als fehlend.
+The adapter's address is stored, not its hciN name: the number depends on the order in which
+the adapters appear and changes, for example, when a USB dongle is replugged. On start and on
+every change the address is resolved to the current hciN name. Without a selection, or if the
+selected adapter is missing, the bridge uses the BlueZ default adapter. Powered-off adapters
+count as missing.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from dbus_fast.aio import MessageBus
 
 
 async def bluez_adapters() -> dict[str, str]:
-    """Eingeschaltete Adapter laut BlueZ als {"hci0": "AA:BB:…"}; leer, wenn BlueZ nicht antwortet."""
+    """Powered adapters according to BlueZ as {"hci0": "AA:BB:…"}; empty if BlueZ does not answer."""
     try:
         bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
     except Exception:
@@ -28,7 +28,7 @@ async def bluez_adapters() -> dict[str, str]:
         out = {}
         for path, ifaces in reply.body[0].items():
             adapter = ifaces.get("org.bluez.Adapter1")
-            # Ausgeschaltete Adapter zählen wie fehlende: Über sie kommt keine Verbindung zustande.
+            # Powered-off adapters count as missing: no connection can be made through them.
             if adapter and "Address" in adapter and adapter.get("Powered") and adapter["Powered"].value:
                 out[path.rsplit("/", 1)[-1]] = adapter["Address"].value.upper()
         return dict(sorted(out.items()))
@@ -37,7 +37,7 @@ async def bluez_adapters() -> dict[str, str]:
 
 
 def resolve(wanted: str, adapters: dict[str, str]) -> tuple[str, bool]:
-    """hciN für die gewünschte Adresse; ("", True), wenn sie gewählt ist, aber fehlt."""
+    """hciN for the wanted address; ("", True) if it is selected but missing."""
     if not wanted:
         return "", False
     for hci, address in adapters.items():

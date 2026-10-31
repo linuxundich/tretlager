@@ -1,19 +1,19 @@
-"""Anmeldung bei Zwift über den Browser (Entscheidung E2, nur mit ausdrücklicher Zustimmung).
+"""Signing in to Zwift via the browser (decision E2, only with explicit consent).
 
-Die offizielle Anmeldung im Launcher 1.2 funktioniert unter Wine nicht (WebView2CompositionControl
-braucht Windows.UI.Composition, siehe FEASIBILITY.md T2). Ersatz:
-  1. Die Anmeldeseite von secure.zwift.com erscheint in einem eingebetteten, privaten
-     Browserfenster (QtWebEngine), wie im offiziellen Launcher. Tretlager liest die Seite nicht aus.
-     Ausweichweg: der eigene Browser (Passwortmanager, Anmeldung mit Google oder Apple).
-  2. Zwift springt auf launcher.zwift.com/launcher?…&code=… zurück; andere Rücksprungadressen
-     (localhost usw.) lehnt Zwift ab (geprüft 2026-10-30). Das eingebettete Fenster fängt diese
-     Adresse ab, bevor die Seite („Bad Request“) lädt. Im eigenen Browser kopiert der Nutzer sie.
-  3. Tretlager tauscht den Code gegen ein Token und erneuert es später selbst.
-Das nutzt die nicht dokumentierte Launcher-Anmeldung (client_id Game_Launcher) und widerspricht
-§5 der Zwift-Nutzungsbedingungen; deshalb nur nach Zustimmung und mit Hinweis.
+The official sign-in in launcher 1.2 does not work under Wine (WebView2CompositionControl needs
+Windows.UI.Composition, see FEASIBILITY.md T2). Replacement:
+  1. The sign-in page of secure.zwift.com appears in an embedded, private browser window
+     (QtWebEngine), as in the official launcher. Tretlager does not read the page.
+     Fallback: the user's own browser (password manager, sign-in with Google or Apple).
+  2. Zwift redirects back to launcher.zwift.com/launcher?…&code=…; Zwift rejects other redirect
+     addresses (localhost etc.) (checked 2026-10-30). The embedded window intercepts this address
+     before the page ("Bad Request") loads. In their own browser the user copies it.
+  3. Tretlager exchanges the code for a token and later refreshes it itself.
+This uses the undocumented launcher sign-in (client_id Game_Launcher) and contradicts §5 of the
+Zwift terms of service; hence only after consent and with a notice.
 
-Das Token liegt nur im Schlüsselbund (Secret Service, unter Plasma ksecretd), nie in Dateien oder
-Protokollen. Gültigkeit laut Zwift: Zugriff 6 h, Erneuerung 8 Tage.
+The token is only kept in the keyring (Secret Service, ksecretd under Plasma), never in files or
+logs. Validity according to Zwift: access 6 h, refresh 8 days.
 """
 
 from __future__ import annotations
@@ -31,16 +31,16 @@ from ..i18n import _
 REALM = "https://secure.zwift.com/auth/realms/zwift/protocol/openid-connect"
 CLIENT_ID = "Game_Launcher"
 REDIRECT = "https://launcher.zwift.com/launcher"
-MARGIN = 5 * 60  # so viel Restlaufzeit muss ein Zugriffstoken für einen Start haben
+MARGIN = 5 * 60  # remaining lifetime an access token needs for a launch
 KEYRING_ATTRS = {"application": "tretlager", "kind": "zwift-token"}
 
 
 class LoginError(Exception):
-    """Fehler mit einem Satz für den Nutzer."""
+    """Error with a sentence for the user."""
 
 
 class LoginUnavailable(LoginError):
-    """Zwift-Anmeldung nicht erreichbar (offline, Serverfehler): kein Grund, sich neu anzumelden."""
+    """Zwift sign-in unreachable (offline, server error): no reason to sign in again."""
 
 
 def new_state() -> str:
@@ -48,7 +48,7 @@ def new_state() -> str:
 
 
 def auth_url(state_value: str, language: str = "") -> str:
-    """Adresse der Anmeldeseite; `language` (z. B. „de“) wählt die Sprache der Zwift-Seite."""
+    """Address of the sign-in page; `language` (e.g. "de") selects the language of the Zwift page."""
     params = {"response_type": "code", "client_id": CLIENT_ID, "redirect_uri": REDIRECT,
               "scope": "openid", "login": "true", "state": state_value}
     if language:
@@ -57,7 +57,7 @@ def auth_url(state_value: str, language: str = "") -> str:
     return f"{REALM}/auth?{q}"
 
 
-# Fehlercodes aus OAuth/OpenID Connect als Satz für den Nutzer
+# OAuth/OpenID Connect error codes as a sentence for the user
 ERROR_TEXT = {
     "access_denied": _("The sign-in was cancelled."),
     "login_required": _("Zwift requires signing in with email and password. Please sign in again."),
@@ -72,7 +72,7 @@ def _error_text(code: str) -> str:
 
 
 def parse_redirect(url: str, expected_state: str | None = None) -> str:
-    """Code aus der Rücksprungadresse holen; prüft Ziel und (falls bekannt) state."""
+    """Extract the code from the redirect address; checks the target and (if known) the state."""
     url = url.strip()
     parsed = urllib.parse.urlparse(url)
     if parsed.netloc != "launcher.zwift.com" or not parsed.path.startswith("/launcher"):
@@ -92,7 +92,7 @@ def _post(form: dict, opener=urllib.request.urlopen) -> dict:
     data = urllib.parse.urlencode(form).encode()
     req = urllib.request.Request(f"{REALM}/token", data=data, headers={"User-Agent": "Tretlager"})
     try:
-        with opener(req, timeout=30) as r:  # noqa: S310 (feste https-URL)
+        with opener(req, timeout=30) as r:  # noqa: S310 (fixed https URL)
             token = json.loads(r.read())
     except urllib.error.HTTPError as e:
         if e.code in (400, 401):
@@ -117,11 +117,11 @@ def refresh(token: dict, opener=urllib.request.urlopen) -> dict:
 
 
 def logout_remote(token: dict, opener=urllib.request.urlopen) -> None:
-    """Sitzung bei Zwift beenden (Keycloak-Logout); das Erneuerungs-Token wird damit ungültig."""
+    """End the session at Zwift (Keycloak logout); this invalidates the refresh token."""
     data = urllib.parse.urlencode({"client_id": CLIENT_ID, "refresh_token": token["refresh_token"]}).encode()
     req = urllib.request.Request(f"{REALM}/logout", data=data, headers={"User-Agent": "Tretlager"})
     try:
-        with opener(req, timeout=30):  # noqa: S310 (feste https-URL)
+        with opener(req, timeout=30):  # noqa: S310 (fixed https URL)
             pass
     except urllib.error.HTTPError as e:
         raise LoginError(_("Signing out of Zwift failed (HTTP {code}).").format(code=e.code)) from None
@@ -130,7 +130,7 @@ def logout_remote(token: dict, opener=urllib.request.urlopen) -> None:
 
 
 def lifetimes(token: dict, now: float | None = None) -> tuple[int, int]:
-    """Restlaufzeit (Sekunden) von Zugriffs- und Erneuerungstoken."""
+    """Remaining lifetime (seconds) of access and refresh token."""
     now = now if now is not None else time.time()
     got = token.get("obtained_at", 0)
     return (int(got + token.get("expires_in", 0) - now), int(got + token.get("refresh_expires_in", 0) - now))
@@ -149,10 +149,10 @@ def status(token: dict | None, now: float | None = None) -> dict:
     return {"state": st, "access_left": max(access, 0), "refresh_left": max(refresh_left, 0)}
 
 
-# --- Schlüsselbund ---
+# --- Keyring ---
 
 class Keyring:
-    """Token im Secret Service; ohne Bibliothek oder Dienst eine klare Fehlermeldung."""
+    """Token in the Secret Service; a clear error message without library or service."""
 
     def _collection(self):
         try:
@@ -167,7 +167,7 @@ class Keyring:
                 if coll.is_locked():
                     raise LoginError(_("The keyring is locked. Unlock the keyring to start Zwift."))
         except secretstorage.exceptions.SecretStorageException:
-            # Kein Secret Service (manche Desktops starten keinen) oder Entsperren abgelehnt
+            # No Secret Service (some desktops do not start one) or unlocking was refused
             raise LoginError(_("No keyring available. Tretlager keeps the Zwift session in the "
                                "desktop keyring (KWallet or GNOME Keyring), which must be "
                                "running and unlocked.")) from None
@@ -184,7 +184,7 @@ class Keyring:
 
     def save(self, token: dict) -> None:
         coll = self._collection()
-        coll.create_item("Tretlager: Zwift-Sitzung", KEYRING_ATTRS, json.dumps(token).encode(), replace=True)
+        coll.create_item("Tretlager: Zwift session", KEYRING_ATTRS, json.dumps(token).encode(), replace=True)
 
     def delete(self) -> None:
         coll = self._collection()
@@ -201,7 +201,7 @@ def give_consent() -> None:
 
 
 def valid_token(keyring: Keyring | None = None, opener=urllib.request.urlopen) -> dict | None:
-    """Ein für den Start brauchbares Token, notfalls erneuert; None = Anmeldung im Browser nötig."""
+    """A token usable for a launch, refreshed if necessary; None = sign-in in the browser required."""
     keyring = keyring or Keyring()
     token = keyring.load()
     st = status(token)["state"]
@@ -211,7 +211,7 @@ def valid_token(keyring: Keyring | None = None, opener=urllib.request.urlopen) -
         try:
             token = refresh(token, opener)
         except LoginUnavailable:
-            raise  # offline o. Ä.: melden statt zur Neuanmeldung schicken
+            raise  # offline or similar: report instead of asking to sign in again
         except LoginError:
             return None
         keyring.save(token)

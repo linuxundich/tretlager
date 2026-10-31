@@ -117,8 +117,9 @@ example for testing from the source tree.
 
 ### Languages
 
-The source language is German, with English in addition (`po/en.po`, help in
-`tretlager/data/hilfe.en.md`). Without a German system language Tretlager shows English;
+The source language is English, with German in addition (`po/de.po`, help in
+`tretlager/data/help.de.md`; English help in `help.md`). Without a catalogue for the system
+language Tretlager shows English;
 `TRETLAGER_LANG=en` or `de` forces a language. QML strings are in `i18n()`, Python strings
 in `_()` (bridge strings in `N_()`, translated only in the interface).
 

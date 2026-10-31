@@ -1,5 +1,5 @@
 [Unit]
-Description=Tretlager-Bridge: BLE-Sensoren als Wahoo Direct Connect für Zwift
+Description=Tretlager bridge: BLE sensors as Wahoo Direct Connect for Zwift
 Documentation=file://@DOCDIR@/BLUETOOTH.md
 After=bluetooth.target
 

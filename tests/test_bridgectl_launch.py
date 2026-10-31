@@ -16,7 +16,7 @@ def fake_run(stdout="", returncode=0, seen=None):
 
 
 def gdbus_run(responses, seen=None):
-    """Antwortet je nach Methode: NameHasOwner, GetStatus usw."""
+    """Answers depending on the method: NameHasOwner, GetStatus etc."""
     def run(cmd, **_kw):
         if seen is not None:
             seen.append(cmd)
@@ -29,7 +29,7 @@ def gdbus_run(responses, seen=None):
 def test_status_parses_gdbus_string():
     payload = {"running": True, "devices": [{"name": "KICKR „Fe2E“ \'x\'", "on": True}]}
     text = json.dumps(payload, ensure_ascii=False)
-    gv = "(" + repr(text) + ",)"  # GVariant-Text eines Strings entspricht einem Python-Literal
+    gv = "(" + repr(text) + ",)"  # the GVariant text of a string matches a Python literal
     run = gdbus_run({"NameHasOwner": ("(true,)", 0), "GetStatus": (gv, 0)})
     assert bridgectl.status(run=run) == payload
 
@@ -55,7 +55,7 @@ def test_scan_uses_long_timeout_and_uint():
 def test_set_running_activates_over_dbus():
     seen = []
     run = gdbus_run({"NameHasOwner": ("(false,)", 0), "StartServiceByName": ("(uint32 1,)", 0)}, seen)
-    bridgectl.set_running(True, run=run, popen=lambda *a, **k: pytest.fail("kein Prozess erwartet"))
+    bridgectl.set_running(True, run=run, popen=lambda *a, **k: pytest.fail("no process expected"))
     assert any("org.freedesktop.DBus.StartServiceByName" in c for c in seen)
 
 
@@ -98,10 +98,10 @@ def test_remote_version():
 
 
 def test_wine_tasks_parsing(monkeypatch):
-    out = ("Abbildname                     PID Sitzungsname     Sitz.-Nr. Speichernutzung\n"
+    out = ("Image Name                     PID Session Name        Session#    Mem Usage\n"
            "========================= ======== ================ =========== ============\n"
-           "ZwiftLauncher.exe              344 Console                    1    440.116 K\n"
-           "ZwiftApp.exe                   700 Console                    1  3.000.000 K\n")
+           "ZwiftLauncher.exe              344 Console                    1    440,116 K\n"
+           "ZwiftApp.exe                   700 Console                    1  3,000,000 K\n")
     monkeypatch.setattr(launch.subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, out, ""))
     assert launch.wine_tasks({}) == {"ZwiftLauncher.exe": 344, "ZwiftApp.exe": 700}
 
@@ -124,7 +124,7 @@ def test_start_never_puts_token_on_command_line():
     code = inspect.getsource(launch.Launcher.start)
     assert "--token=@" in code and "json.dumps(token)" in code
     call = code[code.index('"--token=@"'):]
-    assert "stdout=subprocess.DEVNULL" in call[:400]  # Zwift erbt sonst die Pipe
+    assert "stdout=subprocess.DEVNULL" in call[:400]  # otherwise Zwift inherits the pipe
 
 
 def test_logout_remote_posts_refresh_token():

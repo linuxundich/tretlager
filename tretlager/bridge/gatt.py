@@ -1,7 +1,7 @@
-"""Bekannte GATT-Dienste und Decoder für die Live-Anzeige.
+"""Known GATT services and decoders for the live display.
 
-Die Bridge reicht Rohdaten unverändert an Zwift weiter. Die Decoder hier dienen nur der Anzeige in
-der Oberfläche und der Diagnose; sie verändern nichts am Datenstrom.
+The bridge passes raw data to Zwift unchanged. The decoders here only serve the display in the
+user interface and diagnostics; they do not alter the data stream.
 """
 
 from __future__ import annotations
@@ -20,20 +20,20 @@ CP_MEASUREMENT = full_uuid(0x2A63)
 CSC_MEASUREMENT = full_uuid(0x2A5B)
 HR_MEASUREMENT = full_uuid(0x2A37)
 
-# Dienste, die Zwift über DIRCON nutzt. Herstellereigene Dienste (z. B. Wahoo EE01…) bleiben
-# draußen, damit Zwift den Standardweg FTMS nimmt.
+# Services Zwift uses over DIRCON. Vendor-specific services (e.g. Wahoo EE01…) stay out so that
+# Zwift takes the standard FTMS path.
 BRIDGED_SERVICES = [FTMS, CYCLING_POWER, CSC, HEART_RATE]
 
 SERVICE_NAMES = {
     FTMS: "Fitness Machine (FTMS)",
     CYCLING_POWER: "Cycling Power",
-    CSC: "Geschwindigkeit/Trittfrequenz",
-    HEART_RATE: "Herzfrequenz",
+    CSC: "Cycling Speed and Cadence",
+    HEART_RATE: "Heart Rate",
 }
 
 
 def role_for(services: list[str]) -> str:
-    """Geräteklasse aus den angebotenen Diensten: trainer, power, cadence, heartrate, other."""
+    """Device class from the offered services: trainer, power, cadence, heartrate, other."""
     s = set(services)
     if FTMS in s:
         return "trainer"
@@ -55,32 +55,32 @@ def decode_heart_rate(data: bytes) -> dict:
 
 
 def decode_indoor_bike_data(data: bytes) -> dict:
-    """FTMS Indoor Bike Data (0x2AD2), nur die Felder für die Anzeige."""
+    """FTMS Indoor Bike Data (0x2AD2), only the fields needed for the display."""
     if len(data) < 2:
         return {}
     flags = struct.unpack_from("<H", data, 0)[0]
     pos = 2
     out: dict = {}
-    if not flags & 0x0001:  # Bit 0 „More Data“ = 0 → Momentangeschwindigkeit vorhanden
+    if not flags & 0x0001:  # bit 0 "More Data" = 0 -> instantaneous speed present
         out["speed_kmh"] = struct.unpack_from("<H", data, pos)[0] / 100
         pos += 2
-    if flags & 0x0002:  # Durchschnittsgeschwindigkeit
+    if flags & 0x0002:  # average speed
         pos += 2
     if flags & 0x0004:
         out["cadence"] = struct.unpack_from("<H", data, pos)[0] / 2
         pos += 2
-    if flags & 0x0008:  # Durchschnittstrittfrequenz
+    if flags & 0x0008:  # average cadence
         pos += 2
-    if flags & 0x0010:  # Gesamtstrecke (uint24)
+    if flags & 0x0010:  # total distance (uint24)
         pos += 3
-    if flags & 0x0020:  # Widerstandsstufe
+    if flags & 0x0020:  # resistance level
         pos += 2
     if flags & 0x0040:
         out["power"] = struct.unpack_from("<h", data, pos)[0]
         pos += 2
-    if flags & 0x0080:  # Durchschnittsleistung
+    if flags & 0x0080:  # average power
         pos += 2
-    if flags & 0x0100:  # Energie: gesamt, pro Stunde, pro Minute
+    if flags & 0x0100:  # energy: total, per hour, per minute
         pos += 5
     if flags & 0x0200:
         out["heart_rate"] = data[pos]
@@ -88,7 +88,7 @@ def decode_indoor_bike_data(data: bytes) -> dict:
 
 
 def decode_cycling_power(data: bytes) -> dict:
-    """Cycling Power Measurement (0x2A63): nur die Momentanleistung."""
+    """Cycling Power Measurement (0x2A63): only the instantaneous power."""
     if len(data) < 4:
         return {}
     return {"power": struct.unpack_from("<h", data, 2)[0]}

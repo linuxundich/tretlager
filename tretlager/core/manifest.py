@@ -1,8 +1,8 @@
-"""Zwift-Manifest vom CDN: was zu einer Zwift-Version gehört und wie viel davon noch fehlt.
+"""Zwift manifest from the CDN: what belongs to a Zwift version and how much of it is still missing.
 
-`Zwift_ver_cur.xml` nennt die aktuelle Version und ihr Manifest (`Zwift_<Version>_<Hash>_manifest.xml`,
-gleicher Ordner, ≈ 5 MB). Das Manifest führt jede Datei mit Pfad (Backslash) und Größe. Daraus
-berechnen Erstinstallation (`setup.Game`) und Update (`launch.Launcher`) ihren Fortschritt.
+`Zwift_ver_cur.xml` names the current version and its manifest (`Zwift_<Version>_<Hash>_manifest.xml`,
+same directory, ≈ 5 MB). The manifest lists every file with path (backslashes) and size. From it,
+the first installation (`setup.Game`) and the update (`launch.Launcher`) compute their progress.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ MANIFEST_BASE = "https://cdn.zwift.com/gameassets/Zwift_Updates_Root/"
 
 def _fetch(url: str, opener=urllib.request.urlopen, timeout: int = 20) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "Tretlager"})
-    with opener(req, timeout=timeout) as r:  # noqa: S310 (feste https-URL beim Zwift-CDN)
+    with opener(req, timeout=timeout) as r:  # noqa: S310 (fixed https URL on the Zwift CDN)
         return r.read().decode(errors="ignore")
 
 
@@ -34,14 +34,14 @@ def remote_version(opener=urllib.request.urlopen) -> str:
 
 
 def manifest_files(manifest: str) -> list[tuple[str, int]]:
-    """Dateien laut Zwift-Manifest: (Pfad relativ zum Zwift-Ordner, Größe in Byte)."""
+    """Files per the Zwift manifest: (path relative to the Zwift directory, size in bytes)."""
     return [(path.replace("\\", "/"), int(length)) for path, length in
             re.findall(r"<path>([^<]+)</path>\s*<length>(\d+)</length>", manifest)]
 
 
 def missing_files(files: list[tuple[str, int]], zwift_dir: Path) -> list[tuple[Path, int]]:
-    """Was dem Zwift-Ordner zur neuen Version fehlt: Dateien, die fehlen oder anders groß sind.
-    Gleich große, aber geänderte Dateien bleiben unerkannt; für die Anzeige genügt das."""
+    """What the Zwift directory lacks for the new version: files that are missing or differ in size.
+    Changed files of the same size go undetected; that is good enough for the display."""
     out = []
     for rel, length in files:
         path = zwift_dir / rel
@@ -55,7 +55,7 @@ def missing_files(files: list[tuple[str, int]], zwift_dir: Path) -> list[tuple[P
 
 
 def loaded_bytes(missing: list[tuple[Path, int]]) -> int:
-    """Wie viel der fehlenden Dateien inzwischen in voller Größe da ist."""
+    """How much of the missing files is now present at full size."""
     done = 0
     for path, length in missing:
         try:
@@ -67,8 +67,9 @@ def loaded_bytes(missing: list[tuple[Path, int]]) -> int:
 
 
 def staging_dirs(prefix: Path | None = None) -> list[Path]:
-    """Zwischenordner des Zwift-Launchers: Er lädt alles nach Temp\\Zwift\\Downloads und verschiebt es
-    erst am Ende in den Zwift-Ordner (gemessen auf tinytin, 30.10.: 5,1 GB in ~9 min, dann ~15 s)."""
+    """Staging directories of the Zwift launcher: it downloads everything to Temp\\Zwift\\Downloads and
+    only moves it into the Zwift directory at the end (measured on tinytin, 2026-10-30: 5.1 GB in
+    ~9 min, then ~15 s)."""
     return sorted((prefix or paths.PREFIX).glob("drive_c/users/*/AppData/Local/Temp/Zwift/Downloads"))
 
 
@@ -85,9 +86,9 @@ def dir_bytes(dirs: list[Path]) -> int:
 
 
 class UpdateProgress:
-    """Fortschritt beim Laden von Zwift (Erstinstallation und Update) aus dem Manifest der aktuellen
-    Version (cdn.zwift.com): was im Zwischenordner des Launchers liegt plus was schon fertig im
-    Zwift-Ordner angekommen ist."""
+    """Progress of downloading Zwift (first installation and update) from the manifest of the current
+    version (cdn.zwift.com): what is in the launcher's staging directory plus what has already
+    arrived complete in the Zwift directory."""
 
     def __init__(self, opener=urllib.request.urlopen, zwift_dir: Path | None = None,
                  prefix: Path | None = None):
@@ -102,8 +103,8 @@ class UpdateProgress:
                 self.missing = missing_files(manifest_files(manifest), zwift_dir or paths.ZWIFT_DIR)
                 self.total = sum(length for _p, length in self.missing)
         except (OSError, ValueError):
-            pass  # ohne Manifest bleibt es bei der Zeitanzeige
-        # Reste eines abgebrochenen Ladens zählen nicht mit
+            pass  # without a manifest, only elapsed time is shown
+        # leftovers of an interrupted download do not count
         self.staged_before = dir_bytes(staging_dirs(self.prefix)) if self.total else 0
 
     def loaded(self) -> int:
@@ -111,7 +112,7 @@ class UpdateProgress:
         return min(staged + loaded_bytes(self.missing), self.total)
 
     def percent(self) -> float:
-        """0–100, oder -1, wenn unbekannt."""
+        """0–100, or -1 if unknown."""
         if not self.total:
             return -1
         return min(99.0, 100 * self.loaded() / self.total)

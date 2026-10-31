@@ -1,9 +1,9 @@
-"""„Zwift starten“: Bridge, Anmeldung, Update, Start, Fenster, Aufräumen.
+"""Start Zwift: bridge, sign-in, update, launch, window, cleanup.
 
-Abläufe aus den Tests auf tinytin (FEASIBILITY.md, T2b/T3, poc/token-login/start.sh):
-- Zwift startet nur als Kind des Launchers; sonst ruft ZwiftApp.exe den Launcher erneut auf.
-- NVIDIA auf Hybrid-Notebooks nur über GLX + PRIME-Offload (Grafikschritt legt das fest).
-- Zwift maximiert sich nicht von selbst passend zur Plasma-Leiste → KWin-Skript.
+Procedures from the tests on tinytin (FEASIBILITY.md, T2b/T3, poc/token-login/start.sh):
+- Zwift only starts as a child of the launcher; otherwise ZwiftApp.exe calls the launcher again.
+- NVIDIA on hybrid laptops only via GLX + PRIME offload (decided by the graphics step).
+- Zwift does not maximise itself to fit the Plasma panel → KWin script.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Callable
 
 from . import bridgectl, display, login, paths, setup, state, wine
-from .manifest import UpdateProgress, remote_version  # noqa: F401 (auch für Aufrufer von launch)
+from .manifest import UpdateProgress, remote_version  # noqa: F401 (also for callers of launch)
 from ..i18n import _, ngettext
 
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
@@ -27,15 +27,15 @@ UPDATE_TIMEOUT = 15 * 60
 
 
 class NeedLogin(Exception):
-    """Kein gültiges Token mehr: Anmeldung im Browser nötig."""
+    """No valid token left: sign-in in the browser required."""
 
 
 class LaunchError(Exception):
-    """Fehler mit einem Satz für den Nutzer."""
+    """Error with a sentence for the user."""
 
 
 def wine_tasks(env: dict) -> dict[str, int]:
-    """Laufende Windows-Prozesse im Prefix: Name → PID."""
+    """Running Windows processes in the prefix: name → PID."""
     r = subprocess.run(["wine", "tasklist"], capture_output=True, text=True, env=env, timeout=30)
     out = {}
     for line in r.stdout.splitlines():
@@ -46,13 +46,13 @@ def wine_tasks(env: dict) -> dict[str, int]:
 
 
 def process_running(name: str, proc: Path = Path("/proc")) -> bool:
-    """Läuft ein Windows-Programm dieses Namens? Billiger und robuster als `wine tasklist`, das
-    alle paar Sekunden ein Wine-Programm starten müsste und bei hängendem wineserver blockiert.
+    """Is a Windows program with this name running? Cheaper and more robust than `wine tasklist`,
+    which would have to start a Wine program every few seconds and blocks if wineserver hangs.
 
-    Maßgeblich ist argv[0]: Wine setzt dort den Windows-Pfad (`C:\\…\\ZwiftApp.exe`). Der
-    Prozessname (comm) taugt nicht – Zwift benennt seinen Hauptthread „main“, und comm ist auf
-    15 Zeichen gekürzt (gemessen auf tinytin, 30.10.). Gelesen wird nur bis zum ersten Nullbyte:
-    Die weiteren Argumente enthalten das Zwift-Token.
+    argv[0] is what counts: Wine puts the Windows path there (`C:\\…\\ZwiftApp.exe`). The process
+    name (comm) is useless – Zwift names its main thread "main", and comm is truncated to
+    15 characters (measured on tinytin, 2026-10-30). Only read up to the first null byte: the
+    remaining arguments contain the Zwift token.
     """
     want = name.lower()
     for entry in proc.iterdir():
@@ -62,7 +62,7 @@ def process_running(name: str, proc: Path = Path("/proc")) -> bool:
             with open(entry / "cmdline", "rb") as f:
                 argv0 = f.read(4096).split(b"\0", 1)[0].decode(errors="replace")
         except OSError:
-            continue  # Prozess inzwischen beendet
+            continue  # process has exited in the meantime
         if re.split(r"[\\/]", argv0)[-1].lower() == want:
             return True
     return False
@@ -78,8 +78,8 @@ for (const w of workspace.windowList()) {
 
 
 def _host_visible_tmpdir() -> str | None:
-    """Ordner für Dateien, die KWin lesen muss. Im Flatpak ist /tmp privat; $XDG_RUNTIME_DIR/app/<ID>
-    sieht der Rechner unter demselben Pfad. Sonst das normale Temp-Verzeichnis (None)."""
+    """Directory for files KWin has to read. In the Flatpak /tmp is private; the host sees
+    $XDG_RUNTIME_DIR/app/<ID> under the same path. Otherwise the normal temp directory (None)."""
     app_id = os.environ.get("FLATPAK_ID")
     runtime = os.environ.get("XDG_RUNTIME_DIR")
     if app_id and runtime:
@@ -90,7 +90,7 @@ def _host_visible_tmpdir() -> str | None:
 
 
 def maximize_window_kde(log: Callable[[str], None]) -> bool:
-    """Zwift-Fenster unter KWin maximieren (über der Plasma-Leiste). False außerhalb von KDE."""
+    """Maximise the Zwift window under KWin (above the Plasma panel). False outside KDE."""
     if "KDE" not in os.environ.get("XDG_CURRENT_DESKTOP", "") or not shutil.which("gdbus"):
         return False
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, dir=_host_visible_tmpdir()) as f:
@@ -117,17 +117,17 @@ def maximize_window_kde(log: Callable[[str], None]) -> bool:
 
 
 class Launcher:
-    """Führt einen Start durch; progress(text) für die Statuszeile, log(text) fürs Protokoll."""
+    """Performs a launch; progress(text) for the status line, log(text) for the log."""
 
     def __init__(self, progress: Callable[..., None], log: Callable[[str], None]):
-        """progress(text, percent=-1): Statuszeile, percent 0–100 oder -1 ohne Fortschrittsbalken."""
+        """progress(text, percent=-1): status line, percent 0–100 or -1 without a progress bar."""
         self.progress = progress
         self.log = log
         self.ctx = setup.Context(log=log, progress=lambda _step, pct, text: progress(text, pct) if text else None)
 
     @property
     def env(self) -> dict:
-        # Jedes Mal neu: Die Wahl des Wine (core/wine.py) kann sich im Abgleich ändern.
+        # Fresh every time: the choice of Wine (core/wine.py) can change during reconciliation.
         return self.ctx.wine_env
 
     def run(self) -> None:
@@ -157,14 +157,14 @@ class Launcher:
             self.log(_("Sensor bridge started"))
 
     def reconcile(self) -> None:
-        """Einrichtung mit diesem Tretlager abgleichen (docs/updates.md).
+        """Reconcile the setup with this Tretlager (docs/updates.md).
 
-        Jeder Schritt prüft am echten System, ob er erledigt ist; im Normalfall dauert das unter
-        einer Sekunde. Nach einem Tretlager-Update mit neuem Wine passt das die Zwift-Umgebung an
-        (`wineboot -u`) und wiederholt den Grafiktest; verlangt eine neue Tretlager-Version
-        weitere Windows-Komponenten, kommen sie hier dazu; fehlt etwas, wird es repariert.
+        Each step checks on the real system whether it is done; normally this takes under a
+        second. After a Tretlager update with a new Wine this adapts the Zwift environment
+        (`wineboot -u`) and repeats the graphics test; if a new Tretlager version requires more
+        Windows components, they are added here; if something is missing, it is repaired.
         """
-        shutil.rmtree(paths.DATA / "snapshots", ignore_errors=True)  # Schnappschüsse bis 0.8.x
+        shutil.rmtree(paths.DATA / "snapshots", ignore_errors=True)  # snapshots up to 0.8.x
         if wine.check_after_update():
             self.log(_("New Wine with Tretlager: back to the bundled version"))
         titles = {s.id: s.title for s in setup.STEPS}
@@ -191,8 +191,8 @@ class Launcher:
         state.update("game", local=local, remote=remote, checked=int(time.time()))
         if not remote or remote == local:
             return
-        # Zwift aktualisiert sich über den eigenen Launcher; Tretlager startet ihn nur unsichtbar und
-        # wartet, bis die neue Version auf der Platte steht.
+        # Zwift updates itself through its own launcher; Tretlager only starts it invisibly and
+        # waits until the new version is on disk.
         title = _("Updating Zwift ({old} → {new})").format(old=local, new=remote)
         self.progress(title)
         tracker = UpdateProgress()
@@ -227,7 +227,7 @@ class Launcher:
         work = paths.CACHE / "rfp"
         exe = work / "RunFromProcess.exe"
         src = work / "RunFromProcess.cs"
-        # Neu übersetzen, wenn die mitgelieferte Quelle sich geändert hat.
+        # Recompile if the bundled source has changed.
         if not exe.exists() or not src.exists() or src.read_bytes() != RFP_SRC.read_bytes():
             work.mkdir(parents=True, exist_ok=True)
             exe.unlink(missing_ok=True)
@@ -239,7 +239,7 @@ class Launcher:
         return exe
 
     def ensure_display_settings(self) -> None:
-        """Auflösungswechsel bei jedem Start sperren, auch für Prefixe aus älteren Tretlager-Versionen."""
+        """Block resolution changes on every launch, also for prefixes from older Tretlager versions."""
         reg = r"HKCU\Software\Wine\X11 Driver"
         for value in setup.WINE_DISPLAY_KEYS:
             subprocess.run(["wine", "reg", "add", reg, "/v", value, "/t", "REG_SZ", "/d", "N", "/f"],
@@ -262,15 +262,15 @@ class Launcher:
         time.sleep(5)
         gfx = state.load().get("graphics", {})
         env = dict(self.env, **setup.graphics_env(gfx))
-        # Das Token nie in eine Linux-Befehlszeile oder ein Protokoll: Es geht über eine Datei, die nur
-        # der Benutzer lesen kann (tmpfs), RunFromProcess setzt es selbst ein; danach wird sie gelöscht.
+        # Never put the token on a Linux command line or in a log: it goes via a file only the user can
+        # read (tmpfs), RunFromProcess inserts it itself; the file is deleted afterwards.
         tok_file = Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "tretlager-start.json"
         fd = os.open(tok_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
         with os.fdopen(fd, "w") as f:
             f.write(json.dumps(token))
         try:
             win_path = "Z:" + str(tok_file).replace("/", "\\")
-            # Ohne Pipe: Zwift erbt sonst die Ausgabe und hält sie offen (Zeitüberschreitung).
+            # No pipe: otherwise Zwift inherits the output and keeps it open (timeout).
             proc = subprocess.run(["wine", str(rfp), str(pid), "ZwiftApp.exe", "--token=@" + win_path],
                                   cwd=paths.ZWIFT_DIR, env=env, stdout=subprocess.DEVNULL,
                                   stderr=subprocess.DEVNULL, timeout=60, check=False)
@@ -285,7 +285,7 @@ class Launcher:
             subprocess.run(["wine", "taskkill", "/f", "/im", name], env=self.env, capture_output=True, timeout=30)
 
     def wait_and_maximize(self) -> None:
-        # Das Skript weiß nicht, ob das Fenster schon da ist; mehrfaches Maximieren schadet nicht.
+        # The script does not know whether the window exists yet; maximising more than once does no harm.
         for _attempt in range(3):
             if not maximize_window_kde(self.log):
                 return
@@ -295,7 +295,7 @@ class Launcher:
         return process_running("ZwiftApp.exe")
 
     def after_exit(self) -> None:
-        """Nach dem Beenden: Reste beenden, Bridge stoppen, wenn sie nicht im Autostart ist."""
+        """After exit: kill leftovers, stop the bridge unless it is set to autostart."""
         self.ctx.wineserver_kill()
         try:
             if bridgectl.is_running() and not bridgectl.autostart():

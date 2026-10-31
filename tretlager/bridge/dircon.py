@@ -1,13 +1,13 @@
-"""Wahoo Direct Connect (DIRCON): GATT über TCP.
+"""Wahoo Direct Connect (DIRCON): GATT over TCP.
 
-Wahoo veröffentlicht keine Spezifikation. Das Format folgt dem Verhalten echter Geräte, wie es
-qdomyos-zwift (src/devices/dircon/, GPL-3.0) nachbildet:
+Wahoo publishes no specification. The format follows the behaviour of real devices as
+reproduced by qdomyos-zwift (src/devices/dircon/, GPL-3.0):
 
-    Kopf (6 Byte): Version (1) | Nachricht | Sequenz | Antwortcode | Länge (uint16, Big Endian)
-    Nutzdaten:     UUIDs immer als 16 Byte (128 Bit), gefolgt von nachrichtenabhängigen Daten
+    Header (6 bytes): version (1) | message | sequence | response code | length (uint16, big endian)
+    Payload:          UUIDs always as 16 bytes (128 bit), followed by message-specific data
 
-Dieses Modul kennt nur das Format und die Antwortlogik; woher die GATT-Werte kommen, entscheidet
-der Aufrufer über die Schnittstelle `GattBackend`.
+This module only knows the format and the response logic; where the GATT values come from is up
+to the caller via the `GattBackend` interface.
 """
 
 from __future__ import annotations
@@ -50,12 +50,12 @@ PROP_INDICATE = 0x08
 BLUETOOTH_BASE = "0000{:04x}-0000-1000-8000-00805f9b34fb"
 
 ADDRESS_CHECK_INTERVAL = 3.0
-MAX_SEND_BUFFER = 64 * 1024  # Bytes; Messwert-Pakete sind 20–30 Bytes groß
+MAX_SEND_BUFFER = 64 * 1024  # bytes; measurement packets are 20–30 bytes
 SIOCGIFADDR = 0x8915
 
 
 def local_ipv4_addresses() -> set[str]:
-    """IPv4-Adressen aller Schnittstellen (ohne externe Werkzeuge, per ioctl)."""
+    """IPv4 addresses of all interfaces (via ioctl, without external tools)."""
     out = set()
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         for _index, name in socket.if_nameindex():
@@ -63,12 +63,12 @@ def local_ipv4_addresses() -> set[str]:
                 req = struct.pack("256s", name.encode()[:15])
                 out.add(socket.inet_ntoa(fcntl.ioctl(s.fileno(), SIOCGIFADDR, req)[20:24]))
             except OSError:
-                pass  # Schnittstelle ohne IPv4-Adresse
+                pass  # interface without an IPv4 address
     return out
 
 
 def full_uuid(value: str | int) -> str:
-    """Kurze (0x2AD2, "2ad2") oder lange UUID in die kleingeschriebene 128-Bit-Form bringen."""
+    """Turn a short (0x2AD2, "2ad2") or long UUID into the lowercase 128-bit form."""
     if isinstance(value, int):
         return BLUETOOTH_BASE.format(value)
     v = value.strip().lower()
@@ -99,7 +99,7 @@ class Packet:
 
 
 def parse_packets(buf: bytearray) -> list[Packet]:
-    """Vollständige Pakete aus `buf` lösen; unvollständige Reste bleiben im Puffer."""
+    """Extract complete packets from `buf`; incomplete remainders stay in the buffer."""
     out = []
     while len(buf) >= HEADER.size:
         version, message, sequence, response, length = HEADER.unpack_from(buf)
@@ -108,7 +108,7 @@ def parse_packets(buf: bytearray) -> list[Packet]:
         payload = bytes(buf[HEADER.size:HEADER.size + length])
         del buf[:HEADER.size + length]
         if version != VERSION:
-            log.warning("DIRCON-Version %d unbekannt, Paket verworfen", version)
+            log.warning("unknown DIRCON version %d, packet dropped", version)
             continue
         out.append(Packet(message, sequence, response, payload))
     return out
@@ -127,21 +127,21 @@ class Service:
 
 
 class GattBackend(Protocol):
-    """Was der DIRCON-Server von der Gegenseite (dem echten BLE-Gerät) braucht."""
+    """What the DIRCON server needs from the other side (the real BLE device)."""
 
     def services(self) -> list[Service]: ...
 
     async def read(self, char_uuid: str) -> bytes: ...
 
     async def write(self, char_uuid: str, data: bytes) -> bytes | None:
-        """Schreiben; bei Control Points die Antwort des Geräts (Indication) zurückgeben."""
+        """Write; for control points return the device's answer (indication)."""
         ...
 
     async def set_notify(self, char_uuid: str, enabled: bool) -> None: ...
 
 
 class Session:
-    """Eine TCP-Verbindung eines DIRCON-Clients (Zwift)."""
+    """One TCP connection of a DIRCON client (Zwift)."""
 
     def __init__(self, backend: GattBackend, writer: asyncio.StreamWriter | None):
         self.backend = backend
@@ -156,9 +156,9 @@ class Session:
         return None
 
     async def handle(self, pkt: Packet) -> Packet | None:
-        """Antwort auf eine Anfrage berechnen (None = keine Antwort senden)."""
+        """Compute the reply to a request (None = send no reply)."""
         if pkt.response != RESP_SUCCESS:
-            return None  # Antworten oder Fehler der Gegenseite ignorieren wir
+            return None  # we ignore replies or errors from the other side
         m = pkt.message
         reply = Packet(m, pkt.sequence)
 
@@ -195,8 +195,8 @@ class Session:
                 return reply
             try:
                 reply.payload = uuid_bytes(target) + await self.backend.read(target)
-            except Exception as e:  # BLE-Fehler werden zu DIRCON-Fehlern
-                log.warning("Lesen %s fehlgeschlagen: %s", target, e)
+            except Exception as e:  # BLE errors become DIRCON errors
+                log.warning("reading %s failed: %s", target, e)
                 reply.response = RESP_UNEXPECTED_ERROR
             return reply
 
@@ -206,12 +206,12 @@ class Session:
                 return reply
             try:
                 answer = await self.backend.write(target, data)
-                # Bei Control Points erwartet Zwift die Antwort des Geräts (z. B. FTMS 0x80,
-                # Befehl, Ergebnis) direkt in der Schreib-Antwort, wie bei qdomyos-zwift; sonst
-                # wiederholt Zwift den Befehl und setzt den Trainer zurück. Ohne Antwort: Echo.
+                # For control points Zwift expects the device's answer (e.g. FTMS 0x80, command,
+                # result) directly in the write response, as in qdomyos-zwift; otherwise Zwift
+                # repeats the command and resets the trainer. Without an answer: echo.
                 reply.payload = uuid_bytes(target) + (answer if answer is not None else data)
             except Exception as e:
-                log.warning("Schreiben %s fehlgeschlagen: %s", target, e)
+                log.warning("writing %s failed: %s", target, e)
                 reply.response = RESP_WRITE_FAILED
             return reply
 
@@ -227,7 +227,7 @@ class Session:
             try:
                 await self.backend.set_notify(target, enable)
             except Exception as e:
-                log.warning("Benachrichtigung %s fehlgeschlagen: %s", target, e)
+                log.warning("notification %s failed: %s", target, e)
                 reply.response = RESP_UNEXPECTED_ERROR
                 return reply
             reply.payload = uuid_bytes(target)
@@ -238,12 +238,12 @@ class Session:
         return reply
 
     def notify(self, char_uuid: str, value: bytes, strict: bool = False) -> None:
-        # Wie qdomyos-zwift (Standard): Benachrichtigungen gehen an jeden Client, auch ohne
-        # Abo. Zwift verlässt sich darauf, z. B. für die Antworten des Control Points.
+        # Like qdomyos-zwift (default): notifications go to every client, even without a
+        # subscription. Zwift relies on this, e.g. for the control point's answers.
         if self.writer is None or (strict and char_uuid not in self.subscribed):
             return
-        # Liest der Client nicht mehr (Zwift hängt), Messwerte verwerfen statt den Puffer
-        # unbegrenzt wachsen zu lassen; veraltete Werte nützen ohnehin niemandem.
+        # If the client stops reading (Zwift hangs), drop measurements instead of letting the
+        # buffer grow without limit; stale values are of no use to anyone anyway.
         transport = getattr(self.writer, "transport", None)
         if transport is not None and transport.get_write_buffer_size() > MAX_SEND_BUFFER:
             return
@@ -251,7 +251,7 @@ class Session:
 
 
 class Server:
-    """TCP-Server für ein Gerät; mehrere Clients gleichzeitig sind erlaubt."""
+    """TCP server for one device; several clients at once are allowed."""
 
     def __init__(self, backend: GattBackend, host: str = "0.0.0.0", port: int = 36866):
         self.backend = backend
@@ -264,13 +264,13 @@ class Server:
     async def start(self) -> None:
         self._server = await asyncio.start_server(self._client, self.host, self.port)
         self._watchdog = asyncio.create_task(self._watch_addresses())
-        log.info("DIRCON lauscht auf %s:%d", self.host, self.port)
+        log.info("DIRCON listening on %s:%d", self.host, self.port)
 
     async def _watch_addresses(self) -> None:
-        """Verbindungen schließen, deren lokale Adresse verschwunden ist (Kabel ab, WLAN-Wechsel).
+        """Close connections whose local address has disappeared (cable unplugged, Wi-Fi change).
 
-        TCP merkt das sonst erst nach Minuten; Zwift wartet so lange auf Daten, die nie kommen,
-        statt sich über die neue Adresse wieder zu verbinden.
+        TCP otherwise notices only after minutes; until then Zwift waits for data that never
+        arrives instead of reconnecting via the new address.
         """
         while True:
             await asyncio.sleep(ADDRESS_CHECK_INTERVAL)
@@ -278,7 +278,7 @@ class Server:
             for s in list(self.sessions):
                 local = s.writer.get_extra_info("sockname") if s.writer else None
                 if local and local[0] not in current and not local[0].startswith("127."):
-                    log.info("DIRCON: lokale Adresse %s ist weg, Verbindung wird geschlossen", local[0])
+                    log.info("DIRCON: local address %s is gone, closing connection", local[0])
                     s.writer.transport.abort()
 
     async def stop(self) -> None:
@@ -302,7 +302,7 @@ class Server:
         return self._server is not None
 
     def subscribed(self) -> set[str]:
-        """Merkmale, die mindestens ein Client abonniert hat."""
+        """Characteristics at least one client has subscribed to."""
         return set().union(*(s.subscribed for s in self.sessions)) if self.sessions else set()
 
     @property
@@ -313,7 +313,7 @@ class Server:
         peer = writer.get_extra_info("peername")
         session = Session(self.backend, writer)
         self.sessions.add(session)
-        log.info("DIRCON-Client verbunden: %s", peer)
+        log.info("DIRCON client connected: %s", peer)
         buf = bytearray()
         try:
             while data := await reader.read(4096):
@@ -334,4 +334,4 @@ class Server:
                     except Exception:
                         pass
             writer.close()
-            log.info("DIRCON-Client getrennt: %s", peer)
+            log.info("DIRCON client disconnected: %s", peer)

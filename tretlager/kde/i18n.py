@@ -1,9 +1,9 @@
-"""Ersatz für KLocalizedContext: i18n-Funktionen für QML, die Kirigami Addons aufruft.
+"""Replacement for KLocalizedContext: i18n functions for QML that Kirigami Addons calls.
 
-In C++-Programmen setzt KI18n diese Funktionen als Kontextobjekt der QML-Engine. PySide hat dafür
-keine Bindung; ohne sie bleiben z. B. auf der Infoseite die Beschriftungen leer. Die Übersetzungen
-liest gettext aus den Katalogen der jeweiligen Domain (etwa kirigami-addons6); i18n() ohne Domain
-nutzt Tretlagers eigenen Katalog.
+In C++ programs KI18n sets these functions as the QML engine's context object. PySide has no
+binding for it; without it, labels stay empty, e.g. on the About page. gettext reads the
+translations from the catalogs of the respective domain (e.g. kirigami-addons6); i18n() without
+a domain uses Tretlager's own catalog.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ def _catalog(domain: str) -> gettext.NullTranslations:
 
 
 def _fill(text: str, args) -> str:
-    """KDE-Platzhalter %1 … %9 ersetzen (von hinten, damit %1 nicht in %10 greift)."""
+    """Replace the KDE placeholders %1 … %9 (from the back, so that %1 does not hit %10)."""
     for i in range(len(args), 0, -1):
         text = text.replace(f"%{i}", str(args[i - 1]))
     return text
@@ -33,9 +33,9 @@ def _args(*values):
 
 
 class LocalizedContext(QObject):
-    """Kontextobjekt der QML-Engine. Bis zu drei Platzhalter je Aufruf genügen für Kirigami Addons."""
+    """Context object of the QML engine. Up to three placeholders per call suffice for Kirigami Addons."""
 
-    # --- mit Domain ---
+    # --- with domain ---
     @Slot(str, str, result=str)
     @Slot(str, str, "QVariant", result=str)
     @Slot(str, str, "QVariant", "QVariant", result=str)
@@ -62,7 +62,7 @@ class LocalizedContext(QObject):
         count = int(n) if n is not None else 0
         return _fill(_catalog(domain).npgettext(context, singular, plural, count), _args(n, a1))
 
-    # --- ohne Domain: Texte von Tretlager selbst (Domain „tretlager“, siehe tretlager/i18n.py) ---
+    # --- without domain: Tretlager's own texts (domain "tretlager", see tretlager/i18n.py) ---
     @Slot(str, result=str)
     @Slot(str, "QVariant", result=str)
     @Slot(str, "QVariant", "QVariant", result=str)

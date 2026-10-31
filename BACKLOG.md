@@ -113,7 +113,8 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
 ## Languages
 
 - [x] English UI (0.7.0, gettext, `po/en.po`)
-- [ ] New strings: `po/update.sh` (on the Arch machine with gettext), add the translation to `po/en.po`;
+- [x] English as the source language, German as `po/de.po` (2026-10-31)
+- [ ] New strings: `po/update.sh` (on the Arch machine with gettext), add the translation to `po/de.po`;
   `tests/test_i18n.py` reports gaps
 
 ## Flatpak (plan: docs/flatpak.md)

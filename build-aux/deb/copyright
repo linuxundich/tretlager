@@ -1,9 +1,9 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Tretlager
 Upstream-Contact: Christoph Langner <https://linuxundich.de/>
-Disclaimer: Tretlager ist kein Produkt von Zwift Inc. und wird von Zwift nicht unterstützt.
- Zwift selbst ist proprietäre Software; Tretlager lädt den Zwift-Client von den Servern von
- Zwift herunter und liefert ihn nicht mit.
+Disclaimer: Tretlager is not a product of Zwift Inc. and is not supported by Zwift.
+ Zwift itself is proprietary software; Tretlager downloads the Zwift client from Zwift's
+ servers and does not ship it.
 
 Files: *
 Copyright: 2026 Christoph Langner

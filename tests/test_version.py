@@ -15,4 +15,4 @@ def test_build_id(tmp_path):
     info = tmp_path / "flatpak-info"
     info.write_text("[Application]\nname=de.linuxundich.Tretlager\n\n[Instance]\napp-commit=9ea5ca9b93b1b4f1\n")
     assert build_id(str(info)) == "9ea5ca9"
-    assert build_id(str(tmp_path / "fehlt")) == ""
+    assert build_id(str(tmp_path / "missing")) == ""

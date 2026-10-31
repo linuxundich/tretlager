@@ -50,7 +50,7 @@ graphics test, then Zwift after 47 s; normal start without changes: Zwift after 
 ## Rolling back when an update breaks something
 
 - **Wine (in Tretlager):** Tretlager keeps exactly one Wine version, the last proven one
-  (`~/.var/app/de.linuxundich.Tretlager/data/tretlager/wine-bewaehrt`, a good 500 MB,
+  (`~/.var/app/de.linuxundich.Tretlager/data/tretlager/wine-kept`, a good 500 MB,
   `core/wine.py`).
   - After the first ride (≥ 5 min), the bundled Wine is copied.
   - If a Tretlager update brings a new Wine, the copy of the old version stays. In the overview,

@@ -1,8 +1,8 @@
-"""Schritt „System vorbereiten“: WineHQ-Quelle und Pakete.
+"""Step "Prepare the system": WineHQ source and packages.
 
-Planung ohne root: APT rechnet die Installation in einem Temp-Verzeichnis durch (WineHQ-Liste dort
-geladen, Systemlisten nur verlinkt). So sieht der Nutzer die genaue Paketliste vor der einzigen
-Passwortabfrage. Ausführen tut der feste Helfer `setup-system` über pkexec.
+Planning without root: APT works through the installation in a temp directory (WineHQ list
+downloaded there, system lists only linked). This way the user sees the exact package list before
+the single password prompt. The fixed helper `setup-system` does the work via pkexec.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from ..i18n import _
 WINEHQ_FPR = "D43F640145369C51D786DDEA76F1A20FF987672F"
 WINEHQ_URI = "https://dl.winehq.org/wine-builds/debian"
 WINEHQ_SUITE = "forky"
-# Was Tretlager braucht; cabextract für winetricks, osslsigncode für die Signaturprüfung.
+# What Tretlager needs; cabextract for winetricks, osslsigncode for the signature check.
 PACKAGES = ["winehq-devel", "cabextract", "osslsigncode"]
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -45,7 +45,7 @@ class Package:
     name: str
     version: str
     origin: str
-    size: int = 0  # Download in Byte
+    size: int = 0  # download in bytes
 
 
 @dataclass
@@ -53,7 +53,7 @@ class Plan:
     add_source: bool
     packages: list[Package] = field(default_factory=list)
     error: str = ""
-    removals: list[str] = field(default_factory=list)  # müsste APT etwas entfernen, steht es hier
+    removals: list[str] = field(default_factory=list)  # anything APT would have to remove is listed here
 
     @property
     def nothing_to_do(self) -> bool:
@@ -78,7 +78,7 @@ def parse_removals(output: str) -> list[str]:
 
 
 def parse_simulation(output: str) -> list[Package]:
-    """`apt-get -s install` auswerten: „Inst wine-devel (11.20~forky-1 winehq:testing [amd64])“."""
+    """Parse `apt-get -s install`: "Inst wine-devel (11.20~forky-1 winehq:testing [amd64])"."""
     out = []
     for line in output.splitlines():
         m = INST_RE.match(line)
@@ -124,12 +124,12 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
             r = _run(["apt-get", "-q", *_apt_opts(tmp, tmp / "wine-only"), "update"])
             if r.returncode != 0:
                 return Plan(add_source, error=_("Could not load the WineHQ package list: {error}").format(error=r.stderr.strip()[-300:] or r.stdout[-300:]))
-        # Systemquellen und -listen dazu, nur verlinkt.
+        # Add system sources and lists, only linked.
         for src in SYSTEM_SOURCES.glob("*"):
             if src.suffix not in (".sources", ".list") or (tmp / "all" / src.name).exists():
                 continue
             if add_source and WINEHQ_URI in src.read_text(errors="ignore"):
-                continue  # sonst zwei Signed-By für dieselbe Quelle
+                continue  # otherwise two Signed-By for the same source
             (tmp / "all" / src.name).symlink_to(src)
         for lst in SYSTEM_LISTS.iterdir():
             if lst.is_file() and lst.name != "lock" and not (tmp / "lists" / lst.name).exists():
@@ -148,7 +148,7 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
 
 
 def run_helper(on_event: Callable[[dict], None], cmd: list[str] | None = None) -> int:
-    """Helfer per pkexec starten und seine JSON-Zeilen weiterreichen. Rückgabe: Exit-Code."""
+    """Start the helper via pkexec and pass on its JSON lines. Returns the exit code."""
     cmd = cmd or ["pkexec", HELPER, "install"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
     assert proc.stdout
@@ -161,6 +161,6 @@ def run_helper(on_event: Callable[[dict], None], cmd: list[str] | None = None) -
         except json.JSONDecodeError:
             on_event({"event": "log", "text": line})
     rc = proc.wait()
-    if rc in (126, 127):  # pkexec: abgelehnt bzw. nicht autorisiert
+    if rc in (126, 127):  # pkexec: refused or not authorised
         on_event({"event": "error", "text": _("Cancelled or permission not granted")})
     return rc

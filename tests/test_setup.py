@@ -37,7 +37,7 @@ def test_game_version_utf16_reference(tmp_path):
     (tmp_path / "Zwift_ver_cur_filename.txt").write_bytes("Zwift_ver_cur.167761.xml".encode("utf-16-le"))
     (tmp_path / "Zwift_ver_cur.167761.xml").write_text('<Zwift version="1.0.167761" sversion="1.124.0 (167761)"/>')
     assert setup.game_version(tmp_path) == "1.124.0 (167761)"
-    assert setup.game_version(tmp_path / "fehlt") == ""
+    assert setup.game_version(tmp_path / "missing") == ""
 
 
 def test_verb_weights_cover_all_verbs():
@@ -52,11 +52,11 @@ def test_run_setup_skips_done_and_stops_on_error():
     class Fails(setup.Step):
         id = "b"
         def done(self, ctx): return False
-        def run(self, ctx): raise setup.SetupError("kaputt")
+        def run(self, ctx): raise setup.SetupError("broken")
 
     class Never(setup.Step):
         id = "c"
-        def done(self, ctx): raise AssertionError("darf nicht laufen")
+        def done(self, ctx): raise AssertionError("must not run")
 
     calls = []
     old = setup.STEPS
@@ -66,4 +66,4 @@ def test_run_setup_skips_done_and_stops_on_error():
     finally:
         setup.STEPS = old
     assert not ok
-    assert calls == [("a", "skipped", "schon erledigt"), ("b", "running", ""), ("b", "error", "kaputt")]
+    assert calls == [("a", "skipped", "already done"), ("b", "running", ""), ("b", "error", "broken")]

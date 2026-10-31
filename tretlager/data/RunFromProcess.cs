@@ -1,7 +1,7 @@
-// Startet ein Programm als Kindprozess eines anderen Prozesses (PROC_THREAD_ATTRIBUTE_PARENT_PROCESS).
-// Aufruf: RunFromProcess.exe <Eltern-PID> <Programm> [Argumente ...]
-// Gleiche Aufgabe wie runfromprocess-rs (netbrain/zwift); hier in C#, damit csc.exe aus dem
-// .NET-4.8-Prefix reicht.
+// Starts a program as a child process of another process (PROC_THREAD_ATTRIBUTE_PARENT_PROCESS).
+// Usage: RunFromProcess.exe <parent PID> <program> [arguments ...]
+// Same job as runfromprocess-rs (netbrain/zwift); written in C# here so that csc.exe from the
+// .NET 4.8 prefix is enough.
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -46,8 +46,8 @@ class RunFromProcess
         return "\"" + a.Replace("\\\"", "\\\\\"").Replace("\"", "\\\"") + "\"";
     }
 
-    // "--token=@C:\\pfad\\datei" wird durch den Dateiinhalt ersetzt. So taucht das Token nicht in der
-    // Befehlszeile des aufrufenden Linux-Prozesses auf (Prozessliste, Fehlermeldungen).
+    // "--token=@C:\\path\\file" is replaced by the file's content. This keeps the token out of the
+    // command line of the calling Linux process (process list, error messages).
     static string ExpandFileArg(string a)
     {
         int at = a.IndexOf("=@", StringComparison.Ordinal);
@@ -58,7 +58,7 @@ class RunFromProcess
 
     static int Main(string[] args)
     {
-        if (args.Length < 2) { Console.Error.WriteLine("Aufruf: RunFromProcess.exe <PID> <Programm> [Argumente]"); return 2; }
+        if (args.Length < 2) { Console.Error.WriteLine("Usage: RunFromProcess.exe <PID> <program> [arguments]"); return 2; }
         int pid = int.Parse(args[0]);
         var cmd = new StringBuilder(Quote(args[1]));
         for (int i = 2; i < args.Length; i++) cmd.Append(' ').Append(Quote(ExpandFileArg(args[i])));
@@ -83,11 +83,11 @@ class RunFromProcess
             if (!CreateProcess(null, cmd, IntPtr.Zero, IntPtr.Zero, false, EXTENDED_STARTUPINFO_PRESENT | CREATE_UNICODE_ENVIRONMENT,
                     IntPtr.Zero, Environment.CurrentDirectory, ref si, out pi))
                 throw new Win32Exception();
-            Console.WriteLine("gestartet, PID " + pi.dwProcessId + " unter Eltern-PID " + pid);
+            Console.WriteLine("started, PID " + pi.dwProcessId + " under parent PID " + pid);
             CloseHandle(pi.hThread); CloseHandle(pi.hProcess);
             return 0;
         }
-        catch (Win32Exception e) { Console.Error.WriteLine("Fehler: " + e.Message); return 1; }
+        catch (Win32Exception e) { Console.Error.WriteLine("Error: " + e.Message); return 1; }
         finally
         {
             DeleteProcThreadAttributeList(list);

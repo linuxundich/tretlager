@@ -1,1 +1,1 @@
-"""UI-freier Kern: Systemprüfung, Einrichtung, Start. Von der Kirigami-Oberfläche genutzt."""
+"""UI-free core: system check, setup, launch. Used by the Kirigami interface."""

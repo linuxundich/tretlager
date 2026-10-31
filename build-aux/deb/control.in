@@ -12,13 +12,13 @@ Depends: python3 (>= 3.12), python3-bleak, python3-dbus-fast, python3-secretstor
  python3-pyside6.qtwebenginequick, qml6-module-qtwebengine,
  qml6-module-qtquick-controls, avahi-daemon, bluez, pkexec, gpg, osslsigncode, cabextract, systemd
 Recommends: qml6-module-org-kde-desktop
-Description: Zwift unter Linux einrichten, starten und mit Sensoren verbinden
- Tretlager richtet den offiziellen Windows-Client von Zwift unter Wine ein (WineHQ),
- prüft den Installer per Signatur, wählt den Grafikweg (NVIDIA per PRIME-Offload)
- und startet Zwift mit einem Klick.
+Description: Set up Zwift on Linux, launch it and connect your sensors
+ Tretlager sets up the official Windows client of Zwift under Wine (WineHQ),
+ verifies the installer's signature, picks the graphics path (NVIDIA via PRIME
+ offload) and launches Zwift with one click.
  .
- Die Sensor-Bridge verbindet Smart-Trainer und Pulsgurt über BlueZ und bietet sie
- Zwift als Wahoo-Direct-Connect-Geräte an, ganz ohne Zwift Companion.
+ The sensor bridge connects smart trainers and heart rate straps via BlueZ and
+ offers them to Zwift as Wahoo Direct Connect devices, without Zwift Companion.
  .
- Zwift unterstützt Linux offiziell nicht. Die optionale Anmeldung über den Browser
- widerspricht den Zwift-Nutzungsbedingungen und erfolgt auf eigenes Risiko.
+ Zwift does not officially support Linux. The optional sign-in via the browser
+ violates the Zwift terms of service and is at your own risk.

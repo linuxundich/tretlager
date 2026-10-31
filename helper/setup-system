@@ -1,13 +1,13 @@
 #!/usr/bin/python3 -I
-"""Tretlager: Systemvorbereitung als root (über pkexec, Polkit-Aktion de.linuxundich.tretlager.setup).
+"""Tretlager: system preparation as root (via pkexec, polkit action de.linuxundich.tretlager.setup).
 
-Bewusst ohne freie Parameter: Das einzige Kommando ist `install`. Es
-  1. prüft den mitgelieferten WineHQ-Schlüssel gegen den festen Fingerabdruck,
-  2. legt Schlüssel und Paketquelle (nur amd64) an,
-  3. aktualisiert die Paketlisten und installiert die feste Paketliste,
-     ohne etwas zu entfernen (--no-remove) und ohne Systemupgrade.
-Ausgabe: eine JSON-Zeile pro Ereignis (step, progress, log, done, error).
-Konstanten müssen zu tretlager/core/prepare.py passen (Test test_helper_constants).
+Deliberately without free parameters: the only command is `install`. It
+  1. checks the bundled WineHQ key against the fixed fingerprint,
+  2. installs the key and the package source (amd64 only),
+  3. updates the package lists and installs the fixed package list,
+     without removing anything (--no-remove) and without a system upgrade.
+Output: one JSON line per event (step, progress, log, done, error).
+Constants must match tretlager/core/prepare.py (test test_helper_constants).
 """
 
 import json
@@ -27,8 +27,8 @@ SOURCES_DST = "/etc/apt/sources.list.d/winehq-forky.sources"
 
 
 def N_(text):
-    """Nur Markierung für die Übersetzung; Tretlager übersetzt die Texte beim Anzeigen (root hat
-    nicht die Sprache des Benutzers)."""
+    """Marker for translation only; Tretlager translates the texts when displaying them (root
+    does not have the user's language)."""
     return text
 
 
@@ -42,8 +42,8 @@ def fail(text):
 
 
 def fingerprint(path):
-    # Eigenes leeres GnuPG-Verzeichnis: nichts unter /root anlegen; ein nicht existierendes
-    # Verzeichnis lässt gpg dagegen abbrechen.
+    # Own empty GnuPG directory: create nothing under /root; a non-existent directory, on the
+    # other hand, makes gpg abort.
     with tempfile.TemporaryDirectory(prefix="tretlager-gpg-") as home:
         r = subprocess.run(["gpg", "--batch", "--show-keys", "--with-colons", path],
                            capture_output=True, text=True, env={"PATH": "/usr/bin:/bin", "GNUPGHOME": home})
@@ -63,7 +63,7 @@ def write_file(path, data, mode=0o644):
 
 
 def apt(args, step_text, base, span):
-    """apt-get mit Status-Fd: pmstatus/dlstatus werden zu progress-Ereignissen (base … base+span %)."""
+    """apt-get with a status fd: pmstatus/dlstatus become progress events (base … base+span %)."""
     emit("step", text=step_text)
     r, w = os.pipe()
     env = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "DEBIAN_FRONTEND": "noninteractive",
@@ -98,14 +98,14 @@ def apt(args, step_text, base, span):
                     emit("progress", percent=round(base + span * pct / 100, 1), text=parts[3])
     rc = proc.wait()
     if rc != 0:
-        fail(f"apt-get {' '.join(args[:2])} ist fehlgeschlagen (Code {rc}), Details im Protokoll")
+        fail(f"apt-get {' '.join(args[:2])} failed (code {rc}), details in the log")
 
 
 def main():
     if len(sys.argv) != 2 or sys.argv[1] != "install":
-        fail("Aufruf: setup-system install")
+        fail("Usage: setup-system install")
     if os.geteuid() != 0:
-        fail("Muss als root laufen (über pkexec)")
+        fail("Must run as root (via pkexec)")
 
     emit("step", text=N_("Checking the WineHQ key"))
     if fingerprint(KEY_SRC) != WINEHQ_FPR:

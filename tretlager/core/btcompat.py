@@ -1,14 +1,14 @@
-"""Bekannte Problemkombinationen aus Bluetooth-Chip und Sensor.
+"""Known problem combinations of Bluetooth chip and sensor.
 
-Manche Sensoren vertragen sich mit bestimmten Bluetooth-Chips nicht, ohne dass Reichweite oder
-Batterie schuld sind. Befund auf tinytin (2026-10-29): Der Garmin HRM-Pro Plus wird am
-eingebauten Intel AX201 (Firmware 202-5.26) gefunden, die GATT-Dienstsuche nach dem Verbinden
-hängt aber jedes Mal; am Intel AX200 (smokki) und am USB-Stick
-TP-Link UB500 (Realtek RTL8761BU, tinytin, 30.10.) läuft derselbe Gurt. Vermutet wird ein Problem mit
-LE 2M. Tretlager erkennt den Chip an der USB-Kennung und warnt beim Hinzufügen und in der
-Übersicht, statt den Gurt endlos „Verbindet …“ zeigen zu lassen.
+Some sensors do not get along with certain Bluetooth chips, without range or battery being the
+cause. Finding on tinytin (2026-10-29): the Garmin HRM-Pro Plus is found on the built-in Intel
+AX201 (firmware 202-5.26), but GATT service discovery after connecting hangs every time; on the
+Intel AX200 (smokki) and on the USB dongle TP-Link UB500 (Realtek RTL8761BU, tinytin, 2026-10-30)
+the same strap works. Suspected cause: a problem with LE 2M. Tretlager recognises the chip by its
+USB ID and warns when adding the device and in the overview, instead of letting the strap show
+"Connecting …" forever.
 
-Neue Fälle als Eintrag in KNOWN_ISSUES ergänzen – nur mit echtem Befund.
+Add new cases as an entry in KNOWN_ISSUES – only with a real finding.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from . import dbusutil
 
 BLUETOOTH = Path("/sys/class/bluetooth")
 
-# USB-Kennungen (Hersteller:Produkt) gängiger eingebauter Chips, nur für lesbare Namen.
+# USB IDs (vendor:product) of common built-in chips, only for readable names.
 CHIP_NAMES = {
     "8087:0025": "Intel Wireless-AC 9260/9560",
     "8087:0026": "Intel Wi-Fi 6 AX201",
@@ -32,7 +32,7 @@ CHIP_NAMES = {
     "8087:0033": "Intel Wi-Fi 6E AX211",
     "8087:0036": "Intel Wi-Fi 7 BE200",
     "8087:0aaa": "Intel Wireless-AC 9560",
-    # Realtek RTL8761B(U): Chip der meisten günstigen Bluetooth-5-Sticks
+    # Realtek RTL8761B(U): chip of most cheap Bluetooth 5 dongles
     "0bda:8771": "Realtek RTL8761B",
     "2357:0604": "TP-Link UB500 (Realtek RTL8761BU)",
     "2550:8761": "Realtek RTL8761BU",
@@ -41,23 +41,23 @@ CHIP_NAMES = {
 
 @dataclass(frozen=True)
 class Chip:
-    usb_id: str  # z. B. 8087:0026, leer bei Chips ohne USB-Anbindung
+    usb_id: str  # e.g. 8087:0026, empty for chips without a USB connection
     name: str
 
 
 @dataclass(frozen=True)
 class Issue:
-    chips: frozenset[str]  # USB-Kennungen
-    device: re.Pattern  # passt auf den BLE-Namen des Sensors
+    chips: frozenset[str]  # USB IDs
+    device: re.Pattern  # matches the sensor's BLE name
     device_name: str
-    text: str  # Warnung am eingerichteten Gerät
-    short: str  # eine Zeile in den Suchergebnissen
+    text: str  # warning on the configured device
+    short: str  # one line in the scan results
 
 
 KNOWN_ISSUES = [
     Issue(
         chips=frozenset({"8087:0026"}),
-        device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # „HRM-Pro:…“, „HRMPro+:…“
+        device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # "HRM-Pro:…", "HRMPro+:…"
         device_name="Garmin HRM-Pro",
         text=_("The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
                "({chip}). It is found, but the connection never completes; range and battery "
@@ -70,12 +70,12 @@ KNOWN_ISSUES = [
 
 
 def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:
-    """Chip des Bluetooth-Adapters, den die Bridge nutzt; None ohne Adapter."""
+    """Chip of the Bluetooth adapter the bridge uses; None without an adapter."""
     dev = root / adapter / "device"
     if not dev.exists():
         return None
     usb_id = ""
-    # btusb hängt am USB-Interface, idVendor/idProduct stehen eine Ebene höher am USB-Gerät.
+    # btusb is bound to the USB interface; idVendor/idProduct sit one level up on the USB device.
     for d in (dev, dev / ".."):
         try:
             usb_id = f"{(d / 'idVendor').read_text().strip()}:{(d / 'idProduct').read_text().strip()}".lower()
@@ -86,14 +86,14 @@ def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:
 
 
 def list_adapters(root: Path = BLUETOOTH, run=subprocess.run) -> list[dict]:
-    """Alle Bluetooth-Adapter: hciN, Adresse (von BlueZ) und Chip; zur Auswahl in der Oberfläche."""
+    """All Bluetooth adapters: hciN, address (from BlueZ) and chip; for selection in the interface."""
     out = []
     for hci in sorted(p.name for p in root.glob("hci*")):
         chip = adapter_chip(hci, root)
         props = dbusutil.get_all("system", "org.bluez", f"/org/bluez/{hci}", "org.bluez.Adapter1", run) or {}
         address = str(props.get("Address", "")).upper()
         if address:
-            out.append({"hci": hci, "address": address, "chip": chip.name if chip else "unbekannter Chip",
+            out.append({"hci": hci, "address": address, "chip": chip.name if chip else _("unknown chip"),
                         "usb_id": chip.usb_id if chip else ""})
     return out
 
@@ -108,7 +108,7 @@ def find_issue(chip: Chip | None, device_name: str) -> Issue | None:
 
 
 def issue_for(chip: Chip | None, device_name: str, short: bool = False) -> str:
-    """Warntext für eine bekannte Problemkombination, sonst leer."""
+    """Warning text for a known problem combination, otherwise empty."""
     issue = find_issue(chip, device_name)
     if issue is None:
         return ""
@@ -116,8 +116,8 @@ def issue_for(chip: Chip | None, device_name: str, short: bool = False) -> str:
 
 
 def annotate(devices: list[dict], chip: Chip | None) -> list[dict]:
-    """Gerätelisten der Bridge (eingerichtet oder gefunden) um `compat` und `compat_short` ergänzen."""
+    """Add `compat` and `compat_short` to the bridge's device lists (configured or found)."""
     return [dict(d, compat=issue_for(chip, d.get("name", "")),
                  compat_short=issue_for(chip, d.get("name", ""), short=True),
-                 # Fehlertexte der Bridge kommen deutsch (N_) und werden hier übersetzt
+                 # The bridge sends error texts untranslated (N_ msgids); they are translated here
                  **({"error": _(d["error"])} if d.get("error") else {})) for d in devices]

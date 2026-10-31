@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Protokoll in einem eigenen Dialog: auswählbar, Festbreitenschrift, scrollt bei langen Läufen.
+// Log in its own dialog: selectable, monospace font, scrolls for long runs.
 Kirigami.Dialog {
     id: dialog
     property string text

@@ -1,9 +1,10 @@
 import os
 
-# Tests prüfen die deutschen Quelltexte, unabhängig von der Sprache des Rechners.
-os.environ["TRETLAGER_LANG"] = "de"
+# Tests run with the English UI language, independent of the machine's locale;
+# several tests compare UI texts.
+os.environ["TRETLAGER_LANG"] = "en"
 
-# Protokoll und Zustand der Tests nicht in die echten Ordner des Benutzers schreiben.
+# Do not write the tests' log and state into the user's real directories.
 import tempfile  # noqa: E402
 
 _tmp = tempfile.mkdtemp(prefix="tretlager-tests-")

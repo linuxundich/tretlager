@@ -46,7 +46,7 @@ def test_full_uuid_forms():
 
 
 def test_uuid_bytes_layout_matches_dircon():
-    # Kurze UUID steht in Byte 2 und 3, Rest ist die Bluetooth-Basis-UUID.
+    # The short UUID is in bytes 2 and 3, the rest is the Bluetooth base UUID.
     raw = uuid_bytes(FTMS)
     assert len(raw) == 16 and raw[2:4] == b"\x18\x26" and raw[4:] == bytes.fromhex("0000100080000080" "5f9b34fb")
 
@@ -91,7 +91,7 @@ def test_read_and_unsupported_read():
 def test_write_control_point_echoes_data():
     backend = FakeBackend()
     s = Session(backend, None)
-    cmd = bytes([0x05, 0xC8, 0x00])  # FTMS: Zielleistung 200 W
+    cmd = bytes([0x05, 0xC8, 0x00])  # FTMS: target power 200 W
     r = run(s.handle(Packet(dircon.MSG_WRITE_CHARACTERISTIC, 9, 0, uuid_bytes(CP) + cmd)))
     assert r.response == 0 and r.payload == uuid_bytes(CP) + cmd
     assert backend.written == [(CP, cmd)]
@@ -99,7 +99,7 @@ def test_write_control_point_echoes_data():
 
 def test_write_control_point_returns_device_answer():
     backend = FakeBackend()
-    backend.answer = bytes([0x80, 0x05, 0x01])  # FTMS-Antwort: Zielleistung, Erfolg
+    backend.answer = bytes([0x80, 0x05, 0x01])  # FTMS response: target power, success
     r = run(Session(backend, None).handle(Packet(dircon.MSG_WRITE_CHARACTERISTIC, 9, 0,
                                                  uuid_bytes(CP) + bytes([0x05, 0xC8, 0x00]))))
     assert r.payload == uuid_bytes(CP) + bytes([0x80, 0x05, 0x01])
@@ -129,7 +129,7 @@ def test_enable_notifications_and_filtering():
     w = Writer()
     s = Session(backend, w)
     s.notify(BIKE_DATA, b"\x44\x00", strict=True)
-    assert w.data == b""  # streng und nicht abonniert → nichts senden
+    assert w.data == b""  # strict and not subscribed -> send nothing
     r = run(s.handle(Packet(dircon.MSG_ENABLE_NOTIFICATIONS, 10, 0, uuid_bytes(BIKE_DATA) + b"\x01")))
     assert r.response == 0 and r.payload == uuid_bytes(BIKE_DATA)
     assert backend.notify == [(BIKE_DATA, True)]

@@ -1,7 +1,7 @@
-"""Zustandsdatei der Einrichtung: ~/.local/state/tretlager/state.json.
+"""State file of the setup: ~/.local/state/tretlager/state.json.
 
-Ob ein Schritt fertig ist, prüft jeder Schritt am echten System. Hier stehen nur Zusatzinfos:
-Prüfergebnis des Installers, Grafikweg, Versionen, Zeitstempel.
+Each step checks on the real system whether it is done. Only extra information is kept here:
+installer check result, graphics path, versions, timestamps.
 """
 
 from __future__ import annotations

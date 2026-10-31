@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Rahmenloser Seitenkopf wie in der Übersicht: großes Symbol links, Überschrift und Satz rechts,
-// darunter optional Knöpfe (Kinder dieses Elements).
+// Frameless page header as on the overview: large icon on the left, heading and sentence on the right,
+// optionally followed by buttons (children of this element).
 RowLayout {
     id: hero
     property string iconName: "de.linuxundich.Tretlager"

@@ -30,6 +30,13 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
   notification and in the log instead of silently exiting without a window.
 
 ### Changed
+- English is now the source language of the interface; the German interface comes from
+  `po/de.po` (formerly English from `po/en.po`). Help files: `help.md` (English) and
+  `help.de.md`. Comments, docstrings, log messages and scripts are English throughout.
+- Internal names in English: sensor states over D-Bus (`connected`, `connecting`,
+  `disconnected`, `error`, `paused`), the kept Wine copy `wine-kept` (an existing
+  `wine-bewaehrt` is taken over on the first start) and a damaged bridge configuration is moved
+  aside as `bridge.broken`.
 - Sensor bridge: connects the trainer first and gives up on a sensor after 20 s instead of
   40 s (only the Garmin HRM-Pro keeps 40 s for its slow service discovery). On nanhlanu a sleeping
   TICKR held up the KICKR for 40 s.

@@ -22,7 +22,7 @@ def test_wine_dpi_fallbacks(tmp_path):
     display.set_scale(0)
     assert display.wine_dpi({"XDG_CONFIG_HOME": str(tmp_path), "HOME": str(tmp_path / "home")}) == 96
     (tmp_path / "kwinrc").write_text("[Xwayland]\nScale=1.6\n")
-    display.set_scale(2)  # Bildschirm aufgerundet; kwinrc hat Vorrang
+    display.set_scale(2)  # screen rounded up; kwinrc takes precedence
     try:
         assert display.wine_dpi({"XDG_CONFIG_HOME": str(tmp_path), "HOME": str(tmp_path / "home")}) == 154
     finally:
@@ -45,4 +45,4 @@ def test_ensure_dpi_only_when_different(tmp_path):
 
 def test_ensure_dpi_without_prefix(tmp_path):
     calls = []
-    assert display.ensure_dpi(tmp_path / "fehlt", calls.append, 154) is None and not calls
+    assert display.ensure_dpi(tmp_path / "missing", calls.append, 154) is None and not calls

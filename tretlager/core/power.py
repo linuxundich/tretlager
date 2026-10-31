@@ -1,12 +1,12 @@
-"""Stromversorgung und NVIDIA-Fehler rund um eine Fahrt.
+"""Power supply and NVIDIA errors around a ride.
 
-Befund auf tinytin (2026-10-30): Zwift im Netzbetrieb gestartet, während des Starts das Netzteil
-gezogen bzw. gesteckt – kurz danach meldete der NVIDIA-Treiber für Zwifts Prozess Dutzende
-„Xid 69“ (Fehler der Grafik-Engine), Zwift hing. Die Grafik wechselt dabei nicht auf den
-Intel-Chip (PRIME-Offload bleibt), das TCC-Profil war für Netz und Akku gleich; vermutlich stellt
-nvidia-powerd (Dynamic Boost) beim Wechsel der Stromquelle das Leistungsbudget um, während Zwift
-seine Grafik aufbaut. Tretlager warnt deshalb vor dem Start im Akkubetrieb, bemerkt einen Wechsel
-während Start und Fahrt und meldet danach NVIDIA-Fehler aus dem Kernel-Journal.
+Finding on tinytin (2026-10-30): Zwift started on AC power, power adapter unplugged or plugged in
+during the start – shortly afterwards the NVIDIA driver reported dozens of "Xid 69" (graphics
+engine error) for Zwift's process, and Zwift hung. The graphics do not switch to the Intel chip
+(PRIME offload stays), and the TCC profile was the same for AC and battery; presumably
+nvidia-powerd (Dynamic Boost) changes the power budget when the power source changes while Zwift
+is setting up its graphics. Tretlager therefore warns before starting on battery, notices a change
+during start and ride, and afterwards reports NVIDIA errors from the kernel journal.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ XID_RE = re.compile(r"NVRM: Xid \([^)]*\): (\d+)")
 
 
 def on_ac(root: Path = POWER_SUPPLY) -> bool | None:
-    """True am Netz, False auf Akku, None ohne Netzteil-Eintrag (z. B. Desktop-PC)."""
+    """True on AC, False on battery, None without a mains entry (e.g. desktop PC)."""
     mains = []
     for dev in root.glob("*"):
         try:
@@ -35,10 +35,10 @@ def on_ac(root: Path = POWER_SUPPLY) -> bool | None:
 
 
 def nvidia_xids(since: float, run=subprocess.run) -> list[int]:
-    """Xid-Codes des NVIDIA-Treibers seit `since` (Unix-Zeit) aus dem Kernel-Journal.
+    """Xid codes of the NVIDIA driver since `since` (Unix time) from the kernel journal.
 
-    Braucht Lesezugriff aufs Journal (Gruppe systemd-journal oder adm, unter Debian/TUXEDO OS für
-    den ersten Benutzer üblich); ohne Zugriff kommt eine leere Liste.
+    Needs read access to the journal (group systemd-journal or adm, usual for the first user on
+    Debian/TUXEDO OS); without access the list is empty.
     """
     try:
         res = run(["journalctl", "-k", "--no-pager", "-o", "cat", "--since", f"@{int(since)}", "-g", "NVRM: Xid"],
@@ -49,7 +49,7 @@ def nvidia_xids(since: float, run=subprocess.run) -> list[int]:
 
 
 def describe_xids(codes: list[int]) -> str:
-    """Kurzfassung für die Oberfläche, z. B. „Xid 69 (58×)“."""
+    """Short summary for the interface, e.g. "Xid 69 (58×)"."""
     counts: dict[int, int] = {}
     for c in codes:
         counts[c] = counts.get(c, 0) + 1
@@ -57,7 +57,7 @@ def describe_xids(codes: list[int]) -> str:
 
 
 def notify(summary: str, body: str, run=subprocess.run) -> None:
-    """Desktop-Benachrichtigung (org.freedesktop.Notifications) über gdbus; Fehler bleiben still."""
+    """Desktop notification (org.freedesktop.Notifications) via gdbus; errors are silent."""
     if not shutil.which("gdbus"):
         return
     try:

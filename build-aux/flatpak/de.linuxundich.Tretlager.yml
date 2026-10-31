@@ -1,9 +1,9 @@
-# Tretlager als Flatpak (docs/flatpak.md). Bauen auf tinytin: build-aux/flatpak/build.sh
+# Tretlager as a Flatpak (docs/flatpak.md). Build on tinytin: build-aux/flatpak/build.sh
 id: de.linuxundich.Tretlager
 runtime: org.kde.Platform
 runtime-version: '6.11'
 sdk: org.kde.Sdk
-# PySide6 6.11 mit QtWebEngine (Anmeldefenster); Kirigami und Kirigami Addons bringt die KDE-Laufzeit.
+# PySide6 6.11 with QtWebEngine (sign-in window); Kirigami and Kirigami Addons come with the KDE runtime.
 base: io.qt.PySide.BaseApp
 base-version: '6.11'
 command: tretlager
@@ -15,27 +15,27 @@ finish-args:
   - --share=network
   - --share=ipc
   - --socket=wayland
-  # Wine und Zwift über XWayland (fallback-x11 gäbe X11 nicht frei, Wine nähme seinen Wayland-Treiber)
+  # Wine and Zwift via XWayland (fallback-x11 would not expose X11, Wine would pick its Wayland driver)
   - --socket=x11
   - --socket=pulseaudio
   - --device=dri
-  # WoW64: ohne multiarch lässt die Sandbox keinen 32-Bit-Code zu, syswow64 bliebe leer
+  # WoW64: without multiarch the sandbox allows no 32-bit code, syswow64 would stay empty
   - --allow=multiarch
-  # Sensor-Bridge: Bluetooth LE über BlueZ, Ankündigung für Zwift über Avahi
+  # Sensor bridge: Bluetooth LE via BlueZ, announcement to Zwift via Avahi
   - --system-talk-name=org.bluez
   - --system-talk-name=org.freedesktop.Avahi
-  # Zwift-Sitzung im Schlüsselbund, Hinweise, Zwift-Fenster maximieren (Plasma)
+  # Zwift session in the keyring, notifications, maximizing the Zwift window (Plasma)
   - --talk-name=org.freedesktop.secrets
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.kde.KWin
-  # XWayland-Skalierung für die DPI der Wine-Fenster (nur lesen)
+  # XWayland scaling for the DPI of the Wine windows (read-only)
   - --filesystem=xdg-config/kwinrc:ro
   - --env=PATH=/app/wine/bin:/app/bin:/usr/bin
-  # Anmeldefenster: WebEngine aus dem BaseApp, Qt sucht den Hilfsprozess sonst nur unter /usr (Absturz)
+  # Sign-in window: WebEngine from the BaseApp, otherwise Qt looks for the helper process only under /usr (crash)
   - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
   - --env=QTWEBENGINE_DICTIONARIES_PATH=/app/qtwebengine_dictionaries
 modules:
-  # Kirigami Addons (1.13.1, mit FormCard) und der Plasma-Stil sind schon in org.kde.Platform 6.11.
+  # Kirigami Addons (1.13.1, with FormCard) and the Plasma style are already in org.kde.Platform 6.11.
 
   - name: cabextract
     sources:
@@ -43,7 +43,7 @@ modules:
         url: https://www.cabextract.org.uk/cabextract-1.11.tar.gz
         sha256: b5546db1155e4c718ff3d4b278573604f30dd64c3c5bfd4657cd089b823a3ac6
 
-  # Signaturprüfung des Zwift-Installers
+  # Signature check of the Zwift installer
   - name: osslsigncode
     buildsystem: cmake-ninja
     config-opts: [-DCMAKE_BUILD_TYPE=Release]
@@ -52,12 +52,12 @@ modules:
         url: https://github.com/mtrojnar/osslsigncode/archive/refs/tags/2.14.tar.gz
         sha256: 0f033fd6069387d2e489fbd2187e62f624764eb8c2758ee94e3e793e5150b5c5
 
-  # bleak, dbus-fast, SecretStorage als feste Wheels (build-aux/flatpak/gen-python-deps.py)
+  # bleak, dbus-fast, SecretStorage as pinned wheels (build-aux/flatpak/gen-python-deps.py)
   - python-deps.json
 
-  # Wine aus den Quellen als WoW64 (64-Bit-Unix-Teil, 32-Bit-Windows-Code per mingw), wie das
-  # WoW64-Flatpak von Flathub. Fertige Kron4ek-WoW64-Builds stürzten in jeder Flatpak-Laufzeit
-  # beim Start ab (virtual_init, Code 139); die KDE-Laufzeit hat keine 32-Bit-Erweiterungen.
+  # Wine from source as WoW64 (64-bit Unix part, 32-bit Windows code via mingw), like the
+  # WoW64 Flatpak on Flathub. Prebuilt Kron4ek WoW64 builds crashed at startup in every Flatpak
+  # runtime (virtual_init, code 139); the KDE runtime has no 32-bit extensions.
   - name: wine
     config-opts:
       - --prefix=/app/wine
@@ -87,7 +87,7 @@ modules:
       - printf '#!/bin/sh\nexec python3 -m tretlager.kde "$@"\n' > /app/bin/tretlager
       - printf '#!/bin/sh\nexec python3 -m tretlager.bridge "$@"\n' > /app/bin/tretlager-bridge
       - chmod 755 /app/bin/tretlager /app/bin/tretlager-bridge
-      # Sensor-Bridge per D-Bus-Aktivierung: eigene Instanz, unabhängig vom Fenster
+      # Sensor bridge via D-Bus activation: separate instance, independent of the window
       - install -Dm644 build-aux/flatpak/de.linuxundich.Tretlager.Bridge.service -t /app/share/dbus-1/services/
       - install -Dm644 tretlager/data/icons/de.linuxundich.Tretlager.svg /app/share/icons/hicolor/scalable/apps/de.linuxundich.Tretlager.svg
       - |

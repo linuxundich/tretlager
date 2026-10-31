@@ -5,24 +5,24 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
     id: root
     title: i18n("Tretlager")
-    // Seitenleiste plus Übersicht mit zwei Spalten; auf kleinen Bildschirmen höchstens 90 % der Fläche.
+    // Sidebar plus two-column overview; on small screens at most 90 % of the area.
     width: Math.min(Kirigami.Units.gridUnit * 64, Screen.desktopAvailableWidth * 0.9)
     height: Math.min(Kirigami.Units.gridUnit * 46, Screen.desktopAvailableHeight * 0.9)
     minimumWidth: Kirigami.Units.gridUnit * 22
     minimumHeight: Kirigami.Units.gridUnit * 20
-    // Immer nur eine Seite zeigen: Der Assistent ist linear (Zurück über die Kopfzeile), und
-    // aus der Übersicht geöffnete Seiten wie die Anmeldung brauchen die volle Breite.
+    // Always show only one page: the wizard is linear (Back via the header), and
+    // pages opened from the overview, such as sign-in, need the full width.
     pageStack.columnView.columnResizeMode: Kirigami.ColumnView.SingleColumn
 
-    // Schritte des Assistenten; die Kopfzeile jeder Seite zeigt „Schritt n von 6“.
-    // Im Flatpak entfällt „Vorbereiten“ (Wine ist im Paket), die Schritte zählen dann 1–5.
+    // Wizard steps; the header of each page shows "Step n of 6".
+    // The Flatpak has no "Prepare" step (Wine is bundled), so the steps count 1-5.
     readonly property var stepIds: backend.flatpak ? ["check", "zwift", "login", "sensors", "finish"]
                                                    : ["check", "prepare", "zwift", "login", "sensors", "finish"]
     readonly property var steps: stepIds
 
-    // Assistent: linearer Ablauf mit Schrittanzeige. Bei der ersten Einrichtung ohne Seitenleiste
-    // (nichts außer dem Assistenten ergibt dann Sinn); über „Einrichtung prüfen“ nach der
-    // Einrichtung bleibt die Seitenleiste nutzbar, und der Assistent beginnt gleich bei Schritt 1.
+    // Wizard: linear flow with step indicator. On first setup without a sidebar
+    // (nothing but the wizard makes sense then); when opened via "Check setup" after
+    // setup, the sidebar stays usable and the wizard starts right at step 1.
     property string current: ""
     readonly property bool inWizard: current === "setup"
     readonly property bool navigation: !inWizard || backend.setupComplete
@@ -86,14 +86,14 @@ Kirigami.ApplicationWindow {
         ]
     }
 
-    // Während der Fahrt und minimiert seltener nach den Sensoren fragen. Unter Wayland meldet Qt
-    // das Minimieren nicht immer, deshalb zählt die laufende Fahrt mit.
+    // Poll the sensors less often during a ride and while minimised. On Wayland Qt does not
+    // always report minimising, so a running ride counts as well.
     readonly property bool quiet: visibility === Window.Minimized || visibility === Window.Hidden
                                   || backend.launchInfo.zwiftRunning
     onQuietChanged: backend.setWindowHidden(quiet)
 
-    // Schließen während einer Fahrt nur nach Rückfrage: Im Flatpak läuft Zwift in derselben Instanz
-    // und endet mit dem Fenster; außerdem räumt Tretlager sonst nach der Fahrt nicht auf.
+    // Closing during a ride only after confirmation: in the Flatpak Zwift runs in the same instance
+    // and ends with the window; also, Tretlager would otherwise not clean up after the ride.
     onClosing: function (close) {
         if (backend.launchInfo.zwiftRunning && !quitDialog.confirmed) {
             close.accepted = false
@@ -117,11 +117,11 @@ Kirigami.ApplicationWindow {
         ]
     }
 
-    // Während der Fahrt aus dem Weg gehen, danach zurückkommen bzw. beim Direktstart beenden.
+    // Get out of the way during the ride, come back afterwards, or quit after a direct start.
     property bool zwiftWasRunning: false
     Connections {
         target: backend
-        // Zweiter Aufruf (Startmenü): dieses Fenster nach vorn, bei „start“ gleich Zwift starten.
+        // Second invocation (start menu): raise this window; with "start", launch Zwift right away.
         function onRemoteCommand(cmd) {
             root.showNormal()
             root.raise()
@@ -145,14 +145,14 @@ Kirigami.ApplicationWindow {
         }
     }
 
-    // Seiten erst nach dem Aufbau auf den Stapel legen (Kirigami-Falle aus Stafette).
-    // Nach abgeschlossener Einrichtung gleich die Übersicht, sonst der Assistent.
+    // Push pages onto the stack only after construction (Kirigami pitfall learned in Stafette).
+    // Show the overview right away once setup is complete, otherwise the wizard.
     Component.onCompleted: {
         show(backend.setupComplete ? "overview" : "setup")
         if (!backend.disclaimerAccepted) warningDialog.open()
     }
 
-    // Warnhinweise: beim ersten Start zum Bestätigen, später aus „Über Tretlager“ zum Nachlesen
+    // Warnings: to be confirmed on first start, later available for reference from "About Tretlager"
     WarningDialog { id: warningDialog }
     function showWarnings() { warningDialog.open() }
 }

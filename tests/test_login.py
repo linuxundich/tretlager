@@ -20,15 +20,15 @@ def test_auth_url_contains_parameters():
 def test_parse_redirect_ok_and_state():
     assert login.parse_redirect(BACK, "abc") == "CODE123"
     assert login.parse_redirect("  " + BACK + "\n") == "CODE123"
-    with pytest.raises(login.LoginError, match="älteren"):
+    with pytest.raises(login.LoginError, match="earlier sign-in"):
         login.parse_redirect(BACK, "other")
 
 
 @pytest.mark.parametrize("url,msg", [
-    ("https://example.com/launcher?code=x", "nicht die Adresse"),
-    ("https://launcher.zwift.com/launcher?state=abc", "fehlt"),
-    ("https://launcher.zwift.com/launcher?error=access_denied", "abgebrochen"),
-    ("https://launcher.zwift.com/launcher?error=login_required", "erneut anmelden"),
+    ("https://example.com/launcher?code=x", "not the address"),
+    ("https://launcher.zwift.com/launcher?state=abc", "missing the sign-in code"),
+    ("https://launcher.zwift.com/launcher?error=access_denied", "cancelled"),
+    ("https://launcher.zwift.com/launcher?error=login_required", "sign in again"),
     ("https://launcher.zwift.com/launcher?error=something_new", "something_new"),
 ])
 def test_parse_redirect_errors(url, msg):
@@ -70,7 +70,7 @@ def test_exchange_code_posts_form_and_stamps_time():
 def test_exchange_rejected_code():
     def opener(req, timeout=0):
         raise urllib.error.HTTPError(req.full_url, 400, "bad", {}, io.BytesIO(b""))
-    with pytest.raises(login.LoginError, match="abgelehnt"):
+    with pytest.raises(login.LoginError, match="rejected"):
         login.exchange_code("x", opener)
 
 
@@ -92,9 +92,9 @@ def test_valid_token_refreshes_when_needed():
            "refresh_token": "r"}
     kr = FakeKeyring(old)
     seen = []
-    new = login.valid_token(kr, opener_returning({"access_token": "neu", "expires_in": 21600,
+    new = login.valid_token(kr, opener_returning({"access_token": "new", "expires_in": 21600,
                                                   "refresh_expires_in": 691200, "refresh_token": "r2"}, seen))
-    assert new["access_token"] == "neu" and kr.saved is new
+    assert new["access_token"] == "new" and kr.saved is new
     assert seen[0]["grant_type"] == ["refresh_token"] and seen[0]["refresh_token"] == ["r"]
 
 

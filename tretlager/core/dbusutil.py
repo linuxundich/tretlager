@@ -1,5 +1,5 @@
-"""Kleine D-Bus-Abfragen über `gdbus` (System- und Sitzungsbus), ohne `busctl` und ohne
-zusätzliche Python-Pakete – im Flatpak gibt es nur gdbus."""
+"""Small D-Bus queries via `gdbus` (system and session bus), without `busctl` and without
+extra Python packages – the Flatpak only has gdbus."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def _gdbus(bus: str, args: list[str], run=subprocess.run, timeout: int = 5) -> s
 
 
 def _value(text: str):
-    """GVariant-Wert aus gdbus-Ausgabe: 'str' / "str", true/false, Zahlen (mit Typpräfix)."""
+    """GVariant value from gdbus output: 'str' / "str", true/false, numbers (with type prefix)."""
     text = text.strip()
     if text in ("true", "false"):
         return text == "true"
@@ -31,7 +31,7 @@ def _value(text: str):
 
 
 def get_all(bus: str, dest: str, path: str, interface: str, run=subprocess.run) -> dict | None:
-    """Alle Eigenschaften eines Objekts als {Name: Wert} (einfache Werte); None bei Fehler."""
+    """All properties of an object as {name: value} (simple values); None on error."""
     out = _gdbus(bus, ["--dest", dest, "--object-path", path, "--method",
                        "org.freedesktop.DBus.Properties.GetAll", interface], run)
     if out is None:

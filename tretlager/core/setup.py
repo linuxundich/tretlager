@@ -1,8 +1,8 @@
-"""Schritt „Zwift einrichten“: Installer, Wine-Umgebung, Komponenten, Launcher, Spiel, Grafik.
+"""Step "Set up Zwift": installer, Wine environment, components, launcher, game, graphics.
 
-Jeder Schritt prüft mit `done()` am echten System, ob er schon erledigt ist; so lässt sich die
-Einrichtung jederzeit abbrechen und fortsetzen. Abläufe und Zeiten stammen aus den Tests auf
-tinytin (FEASIBILITY.md, T1–T3).
+Each step checks with `done()` on the real system whether it is already done; this way the setup
+can be cancelled and resumed at any time. Procedures and timings come from the tests on tinytin
+(FEASIBILITY.md, T1–T3).
 """
 
 from __future__ import annotations
@@ -23,33 +23,33 @@ from . import display, manifest, paths, state, systemcheck, wine
 from ..i18n import _
 
 INSTALLER_URL = "https://cdn.zwift.com/app/ZwiftSetup.exe"
-# Erwarteter Signierer (EV-Zertifikat); das Blatt-Zertifikat läuft 2027 ab, daher Subject statt Fingerabdruck.
+# Expected signer (EV certificate); the leaf certificate expires in 2027, hence subject instead of fingerprint.
 SIGNER_REQUIRED = ["CN=Zwift\\, Inc.", "serialNumber=5463328"]
 CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt"
 
-WINETRICKS_COMMIT = "f3890f670867b5ffbc3938726db45c0f7d16c8ba"  # bringt das Verb webview2 mit
+WINETRICKS_COMMIT = "f3890f670867b5ffbc3938726db45c0f7d16c8ba"  # provides the webview2 verb
 WINETRICKS_URL = f"https://raw.githubusercontent.com/Winetricks/winetricks/{WINETRICKS_COMMIT}/src/winetricks"
 WINETRICKS_SHA256 = "672a1ff4442e8691a3ffc0e6860137e201a1d1227e9b3044245f1731e9e9837e"
 VERBS = ["corefonts", "dotnet48", "d3dcompiler_47", "webview2"]
 VERB_WEIGHT = {"corefonts": 15, "dotnet48": 60, "d3dcompiler_47": 5, "webview2": 20}
 
-GAME_SIZE_BYTES = 4_900_000_000  # Zwift 1.124 auf tinytin
+GAME_SIZE_BYTES = 4_900_000_000  # Zwift 1.124 on tinytin
 GAME_TIMEOUT = 45 * 60
-WINEBOOT_TIMEOUT = 5 * 60  # Anlegen ≈ 30 s, Anpassen an neues Wine kürzer
-# Zwift im Vollbild stellte trotz UseXRandR=N die Panel-Auflösung um (tinytin, M5); XVidMode
-# ist der zweite Weg, über den Wine Modi wechselt.
+WINEBOOT_TIMEOUT = 5 * 60  # creating ≈ 30 s, adapting to a new Wine is quicker
+# Zwift in fullscreen changed the panel resolution despite UseXRandR=N (tinytin, M5); XVidMode
+# is the second way Wine switches modes.
 WINE_DISPLAY_KEYS = ["UseXRandR", "UseXVidMode"]
 GLTEST_SRC = Path(__file__).resolve().parent.parent / "data" / "gltest" / "GLTest.cs"
 CSC = r"C:\windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
 
 class SetupError(Exception):
-    """Fehler mit einem Satz für den Nutzer."""
+    """Error with a sentence for the user."""
 
 
 @dataclass
 class Context:
-    """Was die Schritte zum Arbeiten brauchen; die Oberfläche hängt sich über die Rückrufe an."""
+    """What the steps need to work; the interface hooks in via the callbacks."""
 
     progress: Callable[[str, float, str], None] = lambda step, pct, text: None
     log: Callable[[str], None] = lambda text: None
@@ -57,17 +57,17 @@ class Context:
 
     @property
     def wine_env(self) -> dict:
-        # PATH: mitgeliefertes Wine oder die aufbewahrte vorige Version (core/wine.py)
+        # PATH: bundled Wine or the kept previous version (core/wine.py)
         return dict(os.environ, WINEPREFIX=str(paths.PREFIX), WINEDEBUG="-all", PATH=wine.env_path())
 
     def run(self, cmd: list[str], env: dict | None = None, cwd: Path | None = None, timeout: int = 3600) -> int:
-        """Befehl ausführen, Ausgabe zeilenweise ins Protokoll."""
+        """Run a command, output goes to the log line by line."""
         self.log("$ " + " ".join(cmd))
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                                 env=env or self.wine_env, cwd=cwd, errors="replace")
         assert proc.stdout
-        # Abbruch und Zeitlimit überwacht ein eigener Thread: Hängt ein Programm stumm (z. B.
-        # winetricks in einem Dialog), käme die Schleife unten nie zur nächsten Zeile.
+        # A separate thread watches for cancellation and the time limit: if a program hangs silently
+        # (e.g. winetricks in a dialog), the loop below would never get to the next line.
         done = threading.Event()
 
         def watchdog() -> None:
@@ -105,7 +105,7 @@ def download(url: str, dest: Path, ctx: Context, step: str, text: str) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     part = dest.with_suffix(dest.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": "Tretlager"})
-    with urllib.request.urlopen(req, timeout=60) as r, open(part, "wb") as f:  # noqa: S310 (feste https-URL)
+    with urllib.request.urlopen(req, timeout=60) as r, open(part, "wb") as f:  # noqa: S310 (fixed https URL)
         total = int(r.headers.get("Content-Length") or 0)
         done = 0
         while chunk := r.read(1 << 16):
@@ -118,7 +118,7 @@ def download(url: str, dest: Path, ctx: Context, step: str, text: str) -> None:
     part.replace(dest)
 
 
-# --- Schritte ---
+# --- Steps ---
 
 class Step:
     id = ""
@@ -132,7 +132,7 @@ class Step:
 
 
 def parse_signer(output: str) -> str:
-    """Erstes „Signer #0“-Subject aus `osslsigncode verify`."""
+    """First "Signer #0" subject from `osslsigncode verify`."""
     m = re.search(r"Signer #0:\s*\n\s*Subject: (.+)", output)
     return m.group(1).strip() if m else ""
 
@@ -143,7 +143,7 @@ class Installer(Step):
     path = paths.CACHE / "ZwiftSetup.exe"
 
     def done(self, ctx: Context) -> bool:
-        # Den Installer braucht nur der Schritt „Launcher“; ist der da, nicht erneut laden.
+        # Only the "launcher" step needs the installer; if the launcher exists, do not download it again.
         if (paths.ZWIFT_DIR / "ZwiftLauncher.exe").exists():
             return True
         info = state.load().get("installer", {})
@@ -175,9 +175,9 @@ class Prefix(Step):
 
     @staticmethod
     def wine_of_prefix() -> str:
-        """Wine-Version, mit der die Umgebung zuletzt angelegt bzw. angepasst wurde."""
+        """Wine version the environment was last created or adapted with."""
         st = state.load()
-        # Umgebungen bis 0.8.x haben keinen eigenen Eintrag; der Grafiktest lief mit derselben Wine.
+        # Environments up to 0.8.x have no entry of their own; the graphics test ran with the same Wine.
         return st.get("prefix", {}).get("wine") or st.get("graphics", {}).get("wine", "")
 
     def done(self, ctx: Context) -> bool:
@@ -185,20 +185,20 @@ class Prefix(Step):
 
     def run(self, ctx: Context) -> None:
         paths.PREFIX.parent.mkdir(parents=True, exist_ok=True)
-        # Neues Wine (Tretlager-Update): Umgebung an die neue Version anpassen, wie es Wine sonst
-        # beim nächsten Programmstart unaufgefordert und mitten im Zwift-Start täte.
+        # New Wine (Tretlager update): adapt the environment to the new version, which Wine would
+        # otherwise do unprompted on the next program start, in the middle of starting Zwift.
         ctx.progress(self.id, 0, _("Wine is adapting the environment to the new version") if self.exists()
                      else _("Wine is setting up the environment"))
-        # Nur für wineboot: Mono und Gecko nicht nachladen. Ohne die Variable öffnet wineboot einen
-        # Installationsdialog und wartet (auf tinytin hing `wineboot -u` daran über 10 min). .NET und
-        # WebView2 kommen über winetricks; dauerhaft gesetzt würde die Variable .NET abschalten.
+        # Only for wineboot: do not fetch Mono and Gecko. Without the variable wineboot opens an
+        # install dialog and waits (on tinytin `wineboot -u` hung there for over 10 min). .NET and
+        # WebView2 come via winetricks; set permanently, the variable would disable .NET.
         env = dict(ctx.wine_env, WINEDLLOVERRIDES="mscoree,mshtml=")
         if ctx.run(["wine", "wineboot", "-u"], env=env, timeout=WINEBOOT_TIMEOUT) != 0:
             raise SetupError(_("Wine could not adapt the environment.") if self.exists()
                              else _("Wine could not create the environment."))
         ctx.wineserver_wait()
         state.update("prefix", wine=systemcheck.wine_version())
-        # Ab jetzt in Bildschirmgröße: Installer und .NET-Einrichtung sonst winzig auf HiDPI
+        # From now on at screen scale: otherwise installer and .NET setup are tiny on HiDPI
         display.ensure_dpi(paths.PREFIX, ctx.run)
 
 
@@ -216,8 +216,8 @@ class Winetricks:
 
     @staticmethod
     def installed(ctx: Context) -> set[str]:
-        """Eingerichtete Verben. winetricks führt sie in winetricks.log im Präfix; das direkt zu lesen
-        ist dasselbe wie `winetricks list-installed`, nur ohne 2 s Startzeit (Abgleich vor jedem Start)."""
+        """Installed verbs. winetricks records them in winetricks.log in the prefix; reading it directly
+        equals `winetricks list-installed`, just without 2 s startup time (reconciled before every launch)."""
         try:
             return set((paths.PREFIX / "winetricks.log").read_text(errors="ignore").split())
         except OSError:
@@ -256,7 +256,7 @@ class Launcher(Step):
         ctx.progress(self.id, 0, _("Installer is running unattended"))
         ctx.run(["wine", str(Installer.path), "/SP-", "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/NOCANCEL"])
         time.sleep(5)
-        # Launcher 1.2 stürzt sonst beim ersten Start ab (netbrain/zwift#420).
+        # Otherwise launcher 1.2 crashes on its first start (netbrain/zwift#420).
         ctx.wineserver_kill()
         if not self.done(ctx):
             raise SetupError(_("The Zwift launcher was not installed."))
@@ -274,7 +274,7 @@ def dir_size(path: Path) -> int:
 
 
 def game_version(zwift_dir: Path | None = None) -> str:
-    """Version aus der Versionsdatei; der Launcher benennt sie um und vermerkt den Namen (UTF-16)."""
+    """Version from the version file; the launcher renames it and records the name (UTF-16)."""
     zwift_dir = zwift_dir or paths.ZWIFT_DIR
     ref = zwift_dir / "Zwift_ver_cur_filename.txt"
     try:
@@ -294,8 +294,8 @@ class Game(Step):
         return (paths.ZWIFT_DIR / "ZwiftApp.exe").exists() and bool(game_version())
 
     def run(self, ctx: Context) -> None:
-        # Fortschritt aus dem Zwift-Manifest (wie beim Update); ohne Manifest geschätzt über die
-        # Größe des Zwift-Ordners.
+        # Progress from the Zwift manifest (as for updates); without a manifest it is estimated from
+        # the size of the Zwift directory.
         tracker = manifest.UpdateProgress()
         if tracker.total:
             ctx.log(_("Zwift: {gb} GB to download").format(gb=f"{tracker.total / 10**9:.1f}"))
@@ -331,7 +331,7 @@ class Game(Step):
 
 
 def graphics_env(info: dict) -> dict:
-    """Umgebungsvariablen für den Start, abgeleitet aus dem Grafiktest."""
+    """Environment variables for the launch, derived from the graphics test."""
     if info.get("offload"):
         return {"__NV_PRIME_RENDER_OFFLOAD": "1", "__GLX_VENDOR_LIBRARY_NAME": "nvidia"}
     return {}
@@ -352,20 +352,20 @@ class Graphics(Step):
 
     def done(self, ctx: Context) -> bool:
         info = state.load().get("graphics", {})
-        # Neu, wenn sich Wine oder die Grafik ändert (etwa NVIDIA per envycontrol zugeschaltet)
+        # Redo if Wine or the graphics change (e.g. NVIDIA switched on via envycontrol)
         return (bool(info.get("gl_renderer")) and info.get("wine") == systemcheck.wine_version()
                 and info.get("gpus") == systemcheck.gpu_signature())
 
     def run(self, ctx: Context) -> None:
         gpus = systemcheck.list_gpus()
-        # NVIDIA nur, wenn Zwift sie auch nutzen kann (Treiber + GL-Erweiterung im Flatpak)
+        # NVIDIA only if Zwift can actually use it (driver + GL extension in the Flatpak)
         nvidia = systemcheck.nvidia_usable()
         hybrid = nvidia and any(g.vendor != "NVIDIA" for g in gpus)
         reg = r"HKCU\Software\Wine\X11 Driver"
-        # T3: Mit NVIDIA unter XWayland liefert nur GLX einen Kontext auf der NVIDIA-Karte.
+        # T3: with NVIDIA under XWayland only GLX provides a context on the NVIDIA card.
         if nvidia:
             ctx.run(["wine", "reg", "add", reg, "/v", "UseEGL", "/t", "REG_SZ", "/d", "N", "/f"])
-        # Zwift soll die Auflösung des Desktops nicht umstellen (weder per XRandR noch per XVidMode).
+        # Zwift must not change the desktop resolution (neither via XRandR nor via XVidMode).
         for value in WINE_DISPLAY_KEYS:
             ctx.run(["wine", "reg", "add", reg, "/v", value, "/t", "REG_SZ", "/d", "N", "/f"])
         ctx.progress(self.id, 40, _("Compiling the graphics test"))
@@ -392,8 +392,8 @@ STEPS: list[Step] = [Installer(), Prefix(), Components(), Launcher(), Game(), Gr
 
 
 def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
-    """Alle Schritte der Reihe nach; on_step(id, status, text) mit status running/done/skipped/error."""
-    # Weitergeführte Einrichtung: DPI der vorhandenen Umgebung an den Bildschirm anpassen
+    """All steps in order; on_step(id, status, text) with status running/done/skipped/error."""
+    # Resumed setup: adapt the DPI of the existing environment to the screen
     display.ensure_dpi(paths.PREFIX, ctx.run)
     for step in STEPS:
         if ctx.cancel.is_set():
@@ -408,7 +408,7 @@ def run_setup(ctx: Context, on_step: Callable[[str, str, str], None]) -> bool:
         except SetupError as e:
             on_step(step.id, "error", str(e))
             return False
-        except Exception as e:  # unerwartet: trotzdem verständlich melden, Details ins Protokoll
+        except Exception as e:  # unexpected: still report it understandably, details go to the log
             ctx.log(f"{type(e).__name__}: {e}")
             on_step(step.id, "error", _("Unexpected error: {error}").format(error=e))
             return False

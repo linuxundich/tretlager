@@ -1,1 +1,1 @@
-"""Kirigami-Oberfläche (PySide6 + QML) für Plasma."""
+"""Kirigami user interface (PySide6 + QML) for Plasma."""

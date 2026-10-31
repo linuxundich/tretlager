@@ -4,8 +4,8 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Infoseite im selben Gerüst wie die übrigen Seiten: oben Name, Version und Haftungshinweis,
-// darunter links, was der Hinweis auf Zwift bedeutet, rechts die Lizenzen.
+// About page in the same scaffold as the other pages: name, version and disclaimer at the top,
+// below that what the Zwift notice means on the left, the licences on the right.
 ColumnsPage {
     id: page
     title: i18n("About Tretlager")
@@ -41,7 +41,7 @@ ColumnsPage {
         }
     }
 
-    // Name, Lizenz, wofür, Link
+    // Name, licence, purpose, link
     readonly property var freeParts: [
         [i18n("Qt and PySide6"), "LGPL-3.0", i18n("User interface"), "https://www.qt.io/licensing/open-source-lgpl-obligations"],
         [i18n("KDE Kirigami and Kirigami Addons"), "LGPL-2.0-or-later", i18n("Plasma-style user interface"), "https://develop.kde.org/frameworks/kirigami/"],

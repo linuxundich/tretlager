@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-# Benutzer-Dienste neu einlesen lassen (laufende systemd --user-Instanzen).
+# Make running systemd --user instances reload the user services.
 if [ "$1" = "configure" ] && command -v systemctl >/dev/null 2>&1; then
     systemctl --global daemon-reload >/dev/null 2>&1 || true
 fi

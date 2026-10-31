@@ -1,12 +1,12 @@
-"""Sensor-Bridge aus dem Kern steuern – über D-Bus mit `gdbus` (gibt es im Flatpak und auf jedem
-System mit GLib; `busctl` und `systemctl` fehlen in der Sandbox).
+"""Control the sensor bridge from the core – over D-Bus with `gdbus` (available in the Flatpak and on
+every system with GLib; `busctl` and `systemctl` are missing in the sandbox).
 
-Synchron und ohne zusätzliche Python-Pakete, damit die Oberfläche es aus Threads nutzen kann.
+Synchronous and without extra Python packages, so the interface can use it from threads.
 
-Lebenszyklus: Im Flatpak startet der Sitzungsbus die Bridge per D-Bus-Aktivierung als eigene
-Instanz (Dienstdatei `de.linuxundich.Tretlager.Bridge.service`), unabhängig vom Fenster; beendet
-wird sie über die Methode `Quit`. *Beim Anmelden starten* läuft über das Background-Portal. Aus
-dem Quellbaum (ohne Dienstdatei) startet Tretlager die Bridge als losgelösten Prozess.
+Lifecycle: in the Flatpak the session bus starts the bridge via D-Bus activation as a separate
+instance (service file `de.linuxundich.Tretlager.Bridge.service`), independent of the window; it is
+stopped via the `Quit` method. *Start at login* goes through the Background portal. From the source
+tree (no service file) Tretlager starts the bridge as a detached process.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ class BridgeError(Exception):
 
 
 def _gvariant(value) -> str:
-    """Python-Wert als GVariant-Text für gdbus."""
+    """Python value as GVariant text for gdbus."""
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, int):
@@ -52,7 +52,7 @@ def _gdbus(args: list[str], timeout: int, run) -> str:
 
 
 def describe_dbus_error(stderr: str) -> str:
-    """D-Bus-Fehler von gdbus als Satz für Nutzer; die Rohmeldung steht im Protokoll (applog)."""
+    """gdbus D-Bus error as a sentence for the user; the raw message goes to the log (applog)."""
     if "org.bluez.Error.NotReady" in stderr or "not powered" in stderr.lower():
         return _("Bluetooth is switched off. Switch on Bluetooth and try again.")
     if "org.bluez.Error.InProgress" in stderr:
@@ -65,12 +65,12 @@ def describe_dbus_error(stderr: str) -> str:
 
 
 def _call(method: str, *args, timeout: int = 10, run=subprocess.run):
-    """Methode der Bridge aufrufen; liefert das erste Rückgabeelement (bei uns ein String/Bool)."""
+    """Call a bridge method; returns the first return element (a string/bool in our case)."""
     out = _gdbus(["--dest", BRIDGE_BUS_NAME, "--object-path", BRIDGE_OBJECT_PATH,
                   "--method", f"{BRIDGE_BUS_NAME}.{method}", *[_gvariant(a) for a in args]], timeout, run)
     if out in ("(true,)", "(false,)"):
         return out == "(true,)"
-    try:  # GVariant-Text eines Strings ist ein Python-Literal: ('…',)
+    try:  # GVariant text of a string is a Python literal: ('…',)
         result = ast.literal_eval(out) if out else ()
     except (ValueError, SyntaxError):
         raise BridgeError(_("Unexpected response from the bridge")) from None
@@ -78,7 +78,7 @@ def _call(method: str, *args, timeout: int = 10, run=subprocess.run):
 
 
 def status(run=subprocess.run) -> dict | None:
-    """Zustand der Bridge; None, wenn sie nicht läuft (startet sie nicht)."""
+    """Bridge status; None if it is not running (does not start it)."""
     if not is_running(run):
         return None
     try:
@@ -88,7 +88,7 @@ def status(run=subprocess.run) -> dict | None:
 
 
 def scan(seconds: int = 10, run=subprocess.run) -> list[dict]:
-    # Ein laufender Verbindungsaufbau kann die BlueZ-Sperre bis zu 40 s halten.
+    # A connection attempt in progress can hold the BlueZ lock for up to 40 s.
     return json.loads(_call("Scan", seconds, timeout=seconds + 60, run=run))
 
 
@@ -109,12 +109,12 @@ def set_local_only(local_only: bool, run=subprocess.run) -> None:
 
 
 def set_adapter(address: str, run=subprocess.run) -> None:
-    """Bluetooth-Adapter per Adresse wählen; leer = Standardadapter von BlueZ."""
+    """Select the Bluetooth adapter by address; empty = BlueZ default adapter."""
     _call("SetAdapter", address, timeout=60, run=run)
 
 
 def unit_installed(run=subprocess.run) -> bool:
-    """Die Bridge gehört zu Tretlager und ist immer vorhanden (früher: systemd-Dienst des Pakets)."""
+    """The bridge is part of Tretlager and always present (formerly: the package's systemd service)."""
     return True
 
 
@@ -133,27 +133,27 @@ def set_running(on: bool, run=subprocess.run, popen=subprocess.Popen) -> None:
         return
     if is_running(run):
         return
-    try:  # D-Bus-Aktivierung (Flatpak bzw. installierte Dienstdatei)
+    try:  # D-Bus activation (Flatpak or installed service file)
         _gdbus([*DBUS, "org.freedesktop.DBus.StartServiceByName", _gvariant(BRIDGE_BUS_NAME), "uint32 0"], 30, run)
         return
     except BridgeError:
         if IN_FLATPAK:
             raise
-    # Aus dem Quellbaum: losgelöster Prozess, überlebt das Fenster
+    # From the source tree: detached process, outlives the window
     env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[2]))
     popen([sys.executable, "-m", "tretlager.bridge"], env=env, start_new_session=True,
           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def restart_if_outdated(version: str, run=subprocess.run, sleep=None) -> bool:
-    """Läuft noch eine Bridge aus einer älteren Version (nach einem Update), neu starten.
-    True, wenn neu gestartet wurde. Nur aufrufen, solange Zwift nicht läuft."""
+    """Restart the bridge if one from an older version is still running (after an update).
+    True if it was restarted. Only call while Zwift is not running."""
     import time
     st = status(run)
     if st is None or st.get("version") == version:
         return False
     set_running(False, run)
-    for _attempt in range(50):  # Quit trennt die Geräte sauber, das dauert ein paar Sekunden
+    for _attempt in range(50):  # Quit disconnects the devices cleanly; that takes a few seconds
         if not is_running(run):
             break
         (sleep or time.sleep)(0.2)
@@ -166,8 +166,8 @@ def autostart(run=subprocess.run) -> bool:
 
 
 def set_autostart(on: bool, run=subprocess.run) -> None:
-    """Bridge beim Anmelden starten – über das Background-Portal (legt den Autostart-Eintrag an
-    bzw. entfernt ihn). Außerhalb des Flatpaks nur gemerkt."""
+    """Start the bridge at login – via the Background portal (creates or removes the autostart
+    entry). Outside the Flatpak it is only remembered."""
     if IN_FLATPAK:
         options = ("{'reason': <%s>, 'autostart': <%s>, 'commandline': <['tretlager-bridge']>, "
                    "'dbus-activatable': <false>}") % (_gvariant(_("Keep sensors ready at login")),

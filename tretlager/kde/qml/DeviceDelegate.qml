@@ -4,14 +4,14 @@ import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
-// Ein Sensor als Zeile einer FormCard. Die Zeile hat feste Maße: Alle Texte sind einzeilig (lange
-// Fehlermeldungen werden gekürzt, vollständig im Tooltip), und die Messwerte stehen in einer
-// Spalte fester Breite mit zwei reservierten Zeilen. So springt nichts, wenn Werte kommen und
-// gehen oder der Zustand wechselt. Der Entfernen-Knopf bleibt laut HIG immer sichtbar.
+// One sensor as a row of a FormCard. The row has fixed dimensions: all texts are single-line (long
+// error messages are elided, shown in full in the tooltip), and the readings sit in a
+// fixed-width column with two reserved lines. That way nothing jumps when values come and
+// go or the state changes. Per the HIG, the remove button always stays visible.
 FormCard.AbstractFormDelegate {
     id: row
     required property var device
-    property bool detailed: false   // Sensorseite: Rolle, Zwift-Name, Pausieren, Entfernen, Chip-Warnung
+    property bool detailed: false   // Sensors page: role, Zwift name, pause, remove, chip warning
     readonly property bool paused: device.enabled === false
     signal removeRequested()
     signal pauseRequested(bool pause)
@@ -21,7 +21,7 @@ FormCard.AbstractFormDelegate {
 
     readonly property var roleText: ({ "trainer": i18n("Smart trainer"), "power": i18n("Power meter"),
         "cadence": i18n("Cadence sensor"), "heartrate": i18n("Heart rate strap"), "other": i18n("Sensor") })
-    // Messwerte je Rolle: [Schlüssel, Einheit]
+    // Readings per role: [key, unit]
     readonly property var valueRows: ({
         "trainer": [["power", i18n("watts")], ["cadence", i18n("rpm")]],
         "power": [["power", i18n("watts")], ["cadence", i18n("rpm")]],
@@ -32,27 +32,27 @@ FormCard.AbstractFormDelegate {
     readonly property var values: device.values || {}
 
     function stateColor(st) {
-        return st === "verbunden" ? Kirigami.Theme.positiveTextColor
-             : st === "verbinde" ? Kirigami.Theme.neutralTextColor
-             : st === "fehler" ? Kirigami.Theme.negativeTextColor
+        return st === "connected" ? Kirigami.Theme.positiveTextColor
+             : st === "connecting" ? Kirigami.Theme.neutralTextColor
+             : st === "error" ? Kirigami.Theme.negativeTextColor
              : Kirigami.Theme.disabledTextColor
     }
     function stateLine(d) {
         switch (d.state) {
-        case "verbunden": return d.zwift_clients > 0 ? i18n("Connected to Zwift") : i18n("Connected, waiting for Zwift")
-        case "verbinde": return i18n("Searching for the device…")
-        case "getrennt": return i18n("Disconnected, trying again")
-        case "fehler": return d.error || i18n("Unreachable")
-        case "aus": return i18n("Paused")
+        case "connected": return d.zwift_clients > 0 ? i18n("Connected to Zwift") : i18n("Connected, waiting for Zwift")
+        case "connecting": return i18n("Searching for the device…")
+        case "disconnected": return i18n("Disconnected, trying again")
+        case "error": return d.error || i18n("Unreachable")
+        case "paused": return i18n("Paused")
         }
         return d.state
     }
     function stateHelp(d) {
         switch (d.state) {
-        case "verbunden": return i18n("The bridge receives data and offers the device to Zwift.")
-        case "verbinde": return i18n("Pedal briefly or put on the strap; a strap does not transmit without skin contact.")
-        case "fehler": return (d.error ? d.error + ". " : "") + i18n("The device is asleep, too far away or connected to another device. If it is not in use right now: pause it.")
-        case "aus": return i18n("Paused: the bridge does not search for the device or offer it to Zwift. Resume as soon as it is needed again.")
+        case "connected": return i18n("The bridge receives data and offers the device to Zwift.")
+        case "connecting": return i18n("Pedal briefly or put on the strap; a strap does not transmit without skin contact.")
+        case "error": return (d.error ? d.error + ". " : "") + i18n("The device is asleep, too far away or connected to another device. If it is not in use right now: pause it.")
+        case "paused": return i18n("Paused: the bridge does not search for the device or offer it to Zwift. Resume as soon as it is needed again.")
         }
         return ""
     }
@@ -83,7 +83,7 @@ FormCard.AbstractFormDelegate {
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            // Name, Zustand, Zwift-Name: je eine Zeile
+            // Name, state, Zwift name: one line each
             ColumnLayout {
                 opacity: row.paused ? 0.55 : 1
                 Layout.fillWidth: true
@@ -116,7 +116,7 @@ FormCard.AbstractFormDelegate {
                 Controls.Label {
                     visible: row.detailed
                     Layout.fillWidth: true
-                    // Die Rolle zeigt schon das Symbol; der Zwift-Name ist der Name zum Koppeln in Zwift.
+                    // The icon already shows the role; the Zwift name is the name to pair with in Zwift.
                     text: row.device.dircon_name ? i18n("In Zwift: %1", row.device.dircon_name)
                                                  : (row.roleText[row.device.role] || i18n("Sensor"))
                     color: Kirigami.Theme.disabledTextColor
@@ -126,8 +126,8 @@ FormCard.AbstractFormDelegate {
                 }
             }
 
-            // Übersicht: Messwerte als Kennzahlen (große Ziffer, Einheit klein darunter), feste
-            // Breite je Wert, damit beim Treten nichts springt.
+            // Overview: readings as key figures (large digits, small unit below), fixed
+            // width per value so nothing jumps while pedalling.
             Repeater {
                 model: row.detailed ? [] : (row.valueRows[row.device.role] || [])
                 delegate: ColumnLayout {
@@ -154,7 +154,7 @@ FormCard.AbstractFormDelegate {
                 }
             }
 
-            // Sensorseite: Messwerte kompakt, feste Breite, zwei Zeilen reserviert
+            // Sensors page: compact readings, fixed width, two lines reserved
             ColumnLayout {
                 visible: row.detailed
                 opacity: row.paused ? 0.55 : 1
@@ -224,7 +224,7 @@ FormCard.AbstractFormDelegate {
             }
         }
 
-        // Bekanntes Problem mit dem Bluetooth-Chip: hängt nur vom Gerät ab, nicht von Live-Werten
+        // Known issue with the Bluetooth chip: depends only on the device, not on live values
         Kirigami.InlineMessage {
             visible: row.detailed && !!row.device.compat
             Layout.fillWidth: true

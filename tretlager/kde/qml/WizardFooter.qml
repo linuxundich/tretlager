@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import QtQuick.Controls as Controls
 import org.kde.kirigami as Kirigami
 
-// Fußleiste der Assistentenseiten: links Abbrechen bzw. Überspringen (nach der Einrichtung
-// sonst „Assistent schließen“), rechts der nächste Schritt.
+// Footer of the wizard pages: Cancel or Skip on the left (after setup
+// "Close wizard" instead), the next step on the right.
 Controls.ToolBar {
     id: footer
     property string skipText: ""
@@ -25,7 +25,7 @@ Controls.ToolBar {
             flat: true
             onClicked: footer.skip()
         }
-        // Nach abgeschlossener Einrichtung lässt sich der Assistent jederzeit verlassen.
+        // Once setup is complete, the wizard can be left at any time.
         Controls.Button {
             visible: footer.skipText === "" && backend.setupComplete
             text: i18n("Close assistant")

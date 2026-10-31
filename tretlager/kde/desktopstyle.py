@@ -1,12 +1,12 @@
-"""Aussehen außerhalb von Plasma im Flatpak: Breeze, aber Hell/Dunkel und Schrift vom Desktop.
+"""Appearance outside Plasma in the Flatpak: Breeze, but light/dark and font from the desktop.
 
-Im Flatpak liest das Plasma-Plattformthema Farben und Schrift über das Settings-Portal
-(`org.kde.kdeglobals.*`). Das liefert nur Plasma; unter GNOME bliebe Tretlager immer Breeze Light mit
-Noto Sans. Die Einstellungen des Desktops kommen ebenfalls übers Portal
-(`org.freedesktop.appearance color-scheme`, `org.gnome.desktop.interface font-name`). Das Farbschema
-setzt Tretlager wie KColorSchemeManager: Eigenschaft `KDE_COLOR_SCHEME_PATH` (Kirigami und der
-Desktop-Stil lesen ihre Farben daraus) plus passende Anwendungspalette (löst das Neuzeichnen aus).
-Ändert sich die Einstellung, folgt Tretlager sofort.
+In the Flatpak the Plasma platform theme reads colors and font through the Settings portal
+(`org.kde.kdeglobals.*`). Only Plasma provides those; under GNOME Tretlager would always stay
+Breeze Light with Noto Sans. The desktop's settings also come through the portal
+(`org.freedesktop.appearance color-scheme`, `org.gnome.desktop.interface font-name`). Tretlager sets
+the color scheme like KColorSchemeManager: the `KDE_COLOR_SCHEME_PATH` property (Kirigami and the
+desktop style read their colors from it) plus a matching application palette (triggers the repaint).
+When the setting changes, Tretlager follows immediately.
 """
 
 from __future__ import annotations
@@ -29,17 +29,17 @@ GNOME_FONT = ("org.gnome.desktop.interface", "font-name")
 
 
 def wanted(env=os.environ, in_flatpak: bool = False) -> bool:
-    """Nur im Flatpak und nicht unter Plasma (dort liefert das Portal die echten KDE-Einstellungen)."""
+    """Only in the Flatpak and not under Plasma (there the portal provides the real KDE settings)."""
     return in_flatpak and "KDE" not in env.get("XDG_CURRENT_DESKTOP", "").upper()
 
 
 def scheme_name(color_scheme) -> str:
-    """Portal-Wert color-scheme (0 egal, 1 dunkel, 2 hell) → Breeze-Farbschema."""
+    """Portal value color-scheme (0 no preference, 1 dark, 2 light) → Breeze color scheme."""
     return "BreezeDark" if color_scheme == 1 else "BreezeLight"
 
 
 def parse_font(value) -> tuple[str, float] | None:
-    """GNOME-Schriftangabe „Adwaita Sans 12“ bzw. „Cantarell Bold 11“ → (Familie, Größe in pt)."""
+    """GNOME font setting "Adwaita Sans 12" or "Cantarell Bold 11" → (family, size in pt)."""
     m = re.fullmatch(r"\s*(.+?)\s+(\d+(?:\.\d+)?)\s*", value or "")
     if not m:
         return None
@@ -48,7 +48,7 @@ def parse_font(value) -> tuple[str, float] | None:
 
 
 def read_colors(path: Path) -> dict[str, dict[str, tuple[int, int, int]]]:
-    """[Colors:*]-Gruppen einer .colors-Datei als {Gruppe: {Schlüssel: (r, g, b)}}."""
+    """[Colors:*] groups of a .colors file as {group: {key: (r, g, b)}}."""
     cp = configparser.ConfigParser(interpolation=None, strict=False)
     cp.optionxform = str
     cp.read(path, encoding="utf-8")
@@ -61,7 +61,7 @@ def read_colors(path: Path) -> dict[str, dict[str, tuple[int, int, int]]]:
 
 
 def palette(colors) -> QPalette:
-    """Anwendungspalette wie KColorScheme::createApplicationPalette (vereinfacht)."""
+    """Application palette like KColorScheme::createApplicationPalette (simplified)."""
     def c(group, key):
         return QColor(*colors[group][key])
     p = QPalette()
@@ -103,7 +103,7 @@ def read_setting(namespace: str, key: str):
 
 
 class DesktopStyle(QObject):
-    """Wendet Farbschema und Schrift an und folgt Änderungen am Desktop."""
+    """Applies color scheme and font and follows changes on the desktop."""
 
     def __init__(self, app: QGuiApplication):
         super().__init__(app)
@@ -123,7 +123,7 @@ class DesktopStyle(QObject):
         self.scheme = name
         self.app.setProperty("KDE_COLOR_SCHEME_PATH", str(path))
         self.app.setPalette(palette(read_colors(path)))
-        applog.info("Farbschema %s (Desktop außerhalb von Plasma)", name)
+        applog.info("Color scheme %s (desktop outside Plasma)", name)
 
     def apply_font(self, value) -> None:
         font = parse_font(value) if isinstance(value, str) else None

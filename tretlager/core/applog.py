@@ -1,7 +1,7 @@
-"""Kurzes Protokoll von Start, Fahrt und Beenden der Oberfläche (für Fehlersuche, kein Token o. Ä.).
+"""Short log of start, ride and exit of the interface (for troubleshooting; no token or similar).
 
-Liegt unter $XDG_STATE_HOME/tretlager/tretlager.log (im Flatpak in der Sandbox) und wird ab
-200 kB rotiert (eine ältere Datei bleibt).
+Lives at $XDG_STATE_HOME/tretlager/tretlager.log (inside the sandbox in the Flatpak) and is rotated
+at 200 kB (one older file is kept).
 """
 
 from __future__ import annotations

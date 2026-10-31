@@ -4,9 +4,9 @@ import QtQuick.Controls as Controls
 import QtWebEngine
 import org.kde.kirigami as Kirigami
 
-// Zwift-Anmeldeseite in einem eingebetteten, privaten Browserfenster – so wie im offiziellen Launcher.
-// Der Rücksprung auf launcher.zwift.com wird abgefangen, bevor die Seite lädt; damit erscheint
-// keine Fehlerseite, und nichts muss kopiert werden. Tretlager liest die Seite nicht aus.
+// Zwift sign-in page in an embedded, private browser view, just like in the official launcher.
+// The redirect back to launcher.zwift.com is intercepted before the page loads, so no error page
+// appears and nothing has to be copied. Tretlager does not read the page contents.
 Kirigami.Page {
     id: page
     title: i18n("Sign in to Zwift")
@@ -26,7 +26,7 @@ Kirigami.Page {
         return true
     }
 
-    // Nach erfolgreichem Tausch zurück; bei einem Fehler bleibt die Seite mit Meldung stehen.
+    // Go back after a successful exchange; on error the page stays open with a message.
     Connections {
         target: backend
         function onLoginChanged() {
@@ -39,7 +39,7 @@ Kirigami.Page {
 
     header: ColumnLayout {
         spacing: 0
-        // Ruhige Infozeile statt Meldungskasten (der würde in der Akzentfarbe wie ein Fehler wirken)
+        // Quiet info line instead of a message box (in the accent colour that would look like an error)
         Controls.Control {
             Layout.fillWidth: true
             padding: Kirigami.Units.largeSpacing
@@ -83,18 +83,18 @@ Kirigami.Page {
         id: web
         anchors.fill: parent
         visible: !page.handedOver || page.li.error !== ""
-        // Profil ohne Speicherort (off the record): keine Cookies oder Verläufe auf der Platte.
-        // WebEngineProfilePrototype (ab Qt 6.9 empfohlen) stürzte mit Qt 6.11 ohne storageName ab;
-        // bis dahin bleibt es beim alten Typ, der nur einen Hinweis ins Protokoll schreibt.
+        // Profile without storage (off the record): no cookies or history on disk.
+        // WebEngineProfilePrototype (recommended since Qt 6.9) crashed with Qt 6.11 without storageName;
+        // until that is fixed we keep the old type, which only writes a notice to the log.
         profile: WebEngineProfile { offTheRecord: true }
         settings.javascriptCanOpenWindows: false
 
         onNavigationRequested: function (request) {
             if (page.intercept(request.url)) request.reject()
         }
-        // Rückfall, falls der Rücksprung als Weiterleitung ohne Navigationsanfrage kommt.
+        // Fallback in case the redirect arrives as a redirect without a navigation request.
         onUrlChanged: if (page.intercept(url)) stop()
-        // Neue Fenster (z. B. Links im Kleingedruckten) im eigenen Browser öffnen.
+        // Open new windows (e.g. links in the fine print) in the user's own browser.
         onNewWindowRequested: function (request) { Qt.openUrlExternally(request.requestedUrl) }
 
         Component.onCompleted: url = backend.startEmbeddedLogin()

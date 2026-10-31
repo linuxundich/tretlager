@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Stilisiertes Warnzeichen „Steigung 12 %“ für die Haftungshinweise (WarningDialog.qml).
-     Nach einem Foto nachgezeichnet; GPL-3.0-or-later wie Tretlager. -->
+<!-- Stylised "12 % gradient" warning sign for the liability notices (WarningDialog.qml).
+     Traced from a photo; GPL-3.0-or-later like Tretlager. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 108" width="120" height="108">
-  <!-- Rahmen: weißer Rand, rotes Dreieck mit runden Ecken -->
+  <!-- frame: white border, red triangle with rounded corners -->
   <path d="M60 6 L114 100 L6 100 Z" fill="#ffffff" stroke="#ffffff" stroke-width="14" stroke-linejoin="round"/>
   <path d="M60 6 L114 100 L6 100 Z" fill="#c9303e" stroke="#c9303e" stroke-width="9" stroke-linejoin="round"/>
-  <!-- Innenfeld -->
+  <!-- inner field -->
   <path d="M60 28 L96 92 L24 92 Z" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
-  <!-- Steigungskeil -->
+  <!-- gradient wedge -->
   <path d="M25.5 91 L36.6 70.5 L94.5 91 Z" fill="#232629" stroke="#232629" stroke-width="1" stroke-linejoin="round"/>
   <!-- 12 % -->
   <text x="63" y="65" fill="#232629" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16"

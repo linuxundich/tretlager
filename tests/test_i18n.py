@@ -14,7 +14,7 @@ def test_language_selection(tmp_path):
     (tmp_path / "de" / "LC_MESSAGES" / "tretlager.mo").write_bytes(b"")
     assert i18n.ui_language({"LANG": "de_DE.UTF-8"}, tmp_path) == "de"
     assert i18n.ui_language({"LANG": "en_GB.UTF-8"}, tmp_path) == "en"
-    assert i18n.ui_language({"LANG": "fr_FR.UTF-8"}, tmp_path) == "en"  # ohne Katalog: Englisch
+    assert i18n.ui_language({"LANG": "fr_FR.UTF-8"}, tmp_path) == "en"  # no catalog: English
     assert i18n.ui_language({"LANGUAGE": "de:en", "LANG": "en_US"}, tmp_path) == "de"
     assert i18n.ui_language({"LANG": "C"}, tmp_path) == "en"
     assert i18n.ui_language({"LANG": "de_DE", "TRETLAGER_LANG": "en"}, tmp_path) == "en"
@@ -36,7 +36,7 @@ def test_german_catalog_complete_and_consistent():
             continue
         src = key.split("\x00")[0]
         for translated in value.split("\x00"):
-            # Plural: die Einzahl darf die Zahl ausschreiben („einen Tag“ → „one more day“)
+            # Plural: the singular may spell out the number ("einen Tag" for "one more day")
             if "\x00" in key:
                 assert _placeholders(translated) <= _placeholders(key.replace("\x00", " ")), key
             else:

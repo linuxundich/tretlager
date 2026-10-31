@@ -1,8 +1,8 @@
-"""Systemprüfung vor der Einrichtung – nur lesend, ohne root.
+"""System check before the setup – read-only, without root.
 
-Jede Prüfung liefert ein `Check` mit Ampel (ok, warn, fail) und einem Satz für den Nutzer.
-Wo möglich werden strukturierte Quellen gelesen (sysfs, os-release, busctl --json), nicht die
-menschenlesbare Ausgabe von Werkzeugen.
+Each check returns a `Check` with a traffic light (ok, warn, fail) and a sentence for the user.
+Where possible, structured sources are read (sysfs, os-release, busctl --json), not the
+human-readable output of tools.
 """
 
 from __future__ import annotations
@@ -33,16 +33,16 @@ class Check:
     status: str  # ok, warn, fail
     summary: str
     details: list[str] = field(default_factory=list)
-    action: str = ""  # Kennung einer Abhilfe, die die Oberfläche als Knopf anbieten kann
+    action: str = ""  # ID of a remedy the interface can offer as a button
 
     def to_dict(self) -> dict:
         return asdict(self)
 
 
-# --- einzelne Prüfungen; `root` erlaubt Tests gegen ein nachgebautes Dateisystem ---
+# --- individual checks; `root` allows tests against a mock file system ---
 
 def read_os_release(root: Path = Path("/")) -> dict:
-    """os-release des Rechners; im Flatpak liegt es unter /run/host (sonst sähe man die Laufzeit)."""
+    """The host's os-release; in the Flatpak it is under /run/host (otherwise we would see the runtime)."""
     out = {}
     host = root / "run/host/os-release"
     source = host if host.exists() else root / "etc/os-release"
@@ -64,7 +64,7 @@ def check_system(root: Path = Path("/"), machine: str | None = None) -> Check:
     details = [f"{name}, {codename or _("no codename")}, {machine}"]
     if machine != "x86_64":
         return Check("system", _("System"), FAIL, _("{machine} is not supported (Zwift needs x86-64)").format(machine=machine), details)
-    # Tretlager läuft als Flatpak auf allen modernen Distributionen; das System wird nur angezeigt.
+    # Tretlager runs as a Flatpak on all modern distributions; the system is only displayed.
     return Check("system", _("System"), OK, name, details)
 
 
@@ -80,7 +80,7 @@ def list_gpus(root: Path = Path("/")) -> list[Gpu]:
     gpus = []
     for card in sorted((root / "sys/class/drm").glob("card[0-9]*")):
         if "-" in card.name:
-            continue  # Anschlüsse wie card1-eDP-1
+            continue  # connectors such as card1-eDP-1
         dev = card / "device"
         try:
             vendor = (dev / "vendor").read_text().strip()
@@ -101,7 +101,7 @@ def nvidia_driver_version(root: Path = Path("/")) -> str:
         return (root / "sys/module/nvidia/version").read_text().strip()
     except OSError:
         pass
-    try:  # im Flatpak fehlt /sys/module, /proc/driver/nvidia ist sichtbar
+    try:  # /sys/module is missing in the Flatpak, /proc/driver/nvidia is visible
         m = re.search(r"Kernel Module.*?\s(\d+\.\d+(?:\.\d+)?)\s", (root / "proc/driver/nvidia/version").read_text())
         return m.group(1) if m else ""
     except OSError:
@@ -109,11 +109,11 @@ def nvidia_driver_version(root: Path = Path("/")) -> str:
 
 
 def nvidia_gl_extension_missing(version: str, root: Path = Path("/")) -> bool:
-    """Im Flatpak: fehlt die GL-Erweiterung zum NVIDIA-Treiber (org.freedesktop.Platform.GL.nvidia-…)?
+    """In the Flatpak: is the GL extension for the NVIDIA driver (org.freedesktop.Platform.GL.nvidia-…) missing?
 
-    Flatpak installiert sie nur, wenn der Treiber beim `flatpak update` geladen ist. Wer erst nach
-    der Installation auf die NVIDIA-Karte umschaltet (envycontrol, nvidia-prime), hat sie nicht; dann
-    gibt es in der Sandbox kein OpenGL auf der NVIDIA-Karte.
+    Flatpak only installs it if the driver is loaded during `flatpak update`. Anyone who switches to
+    the NVIDIA card only after the installation (envycontrol, nvidia-prime) does not have it; then
+    there is no OpenGL on the NVIDIA card inside the sandbox.
     """
     if not (root / ".flatpak-info").exists() or not version:
         return False
@@ -121,7 +121,7 @@ def nvidia_gl_extension_missing(version: str, root: Path = Path("/")) -> bool:
 
 
 def nvidia_usable(root: Path = Path("/")) -> bool:
-    """Kann Zwift auf der NVIDIA-Karte rendern: Treiber geladen und (im Flatpak) GL-Erweiterung da."""
+    """Can Zwift render on the NVIDIA card: driver loaded and (in the Flatpak) GL extension present."""
     gpus = list_gpus(root)
     if not any(g.vendor == "NVIDIA" and g.driver == "nvidia" for g in gpus):
         return False
@@ -130,7 +130,7 @@ def nvidia_usable(root: Path = Path("/")) -> bool:
 
 
 def gpu_signature(root: Path = Path("/")) -> list[str]:
-    """Grafikchips samt Treiber und Nutzbarkeit der NVIDIA; ändert sich das, läuft der Grafiktest neu."""
+    """Graphics chips with driver and NVIDIA usability; if this changes, the graphics test runs again."""
     return sorted(f"{g.vendor}:{g.device}:{g.driver}" for g in list_gpus(root)) + (
         ["nvidia-usable"] if nvidia_usable(root) else [])
 
@@ -191,7 +191,7 @@ def check_graphics(root: Path = Path("/")) -> list[Check]:
 
 
 def bluez_adapter(run=subprocess.run, adapter: str = "hci0") -> dict | None:
-    """Eigenschaften eines BlueZ-Adapters (über gdbus), None ohne Adapter."""
+    """Properties of a BlueZ adapter (via gdbus), None without an adapter."""
     props = dbusutil.get_all("system", "org.bluez", f"/org/bluez/{adapter}", "org.bluez.Adapter1", run)
     if not props or "Address" not in props:
         return None
@@ -229,8 +229,8 @@ def check_bluetooth(root: Path = Path("/"), run=subprocess.run) -> Check:
 
 
 def check_disk(path: Path | None = None) -> Check:
-    # Dort messen, wo die Zwift-Umgebung landet: im Flatpak ist ~ nur ein kleines tmpfs, die Daten
-    # liegen unter ~/.var/app/<ID>/data (XDG_DATA_HOME).
+    # Measure where the Zwift environment ends up: in the Flatpak ~ is only a small tmpfs, the data
+    # lives under ~/.var/app/<ID>/data (XDG_DATA_HOME).
     if path is None:
         path = paths.DATA
         while not path.exists() and path != path.parent:
@@ -245,12 +245,12 @@ def check_disk(path: Path | None = None) -> Check:
     return Check("disk", _("Disk space"), FAIL, _("Only {gb} GB free, about 11 GB are needed").format(gb=f"{gb:.0f}"), details)
 
 
-# Zwift (Installer, Spiel) und GitHub (winetricks); WineHQ nur noch für das alte Debian-Paket.
+# Zwift (installer, game) and GitHub (winetricks); WineHQ only for the old Debian package.
 NETWORK_HOSTS = [("cdn.zwift.com", 443), ("raw.githubusercontent.com", 443)]
 
 
 def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
-    """Nur ein Verbindungsaufbau zu den Quellen, die die Einrichtung braucht; keine Daten."""
+    """Only a connection attempt to the sources the setup needs; no data."""
     bad = []
     for host, port in hosts:
         try:
@@ -265,7 +265,7 @@ def check_network(hosts=NETWORK_HOSTS, timeout: float = 4.0) -> Check:
 
 
 def wine_version(run=subprocess.run) -> str:
-    """Version des Wine, mit dem Tretlager Zwift startet (mitgeliefert oder vorige, core/wine.py)."""
+    """Version of the Wine Tretlager starts Zwift with (bundled or previous, core/wine.py)."""
     exe = shutil.which("wine", path=wine.env_path())
     if not exe:
         return ""
@@ -300,7 +300,7 @@ def check_existing(zwift_dir: Path | None = None) -> Check:
 
 
 def check_avahi(run=subprocess.run) -> Check:
-    """Avahi kündigt die Sensoren für Zwift an (mDNS); fehlt es, findet Zwift keine Geräte."""
+    """Avahi announces the sensors to Zwift (mDNS); without it, Zwift finds no devices."""
     if dbusutil.name_has_owner("system", "org.freedesktop.Avahi", run) or \
             dbusutil.activatable("system", "org.freedesktop.Avahi", run):
         return Check("avahi", _("Device announcement"), OK, _("Avahi is running, Zwift can find the sensors"))

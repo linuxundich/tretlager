@@ -66,7 +66,7 @@ def test_intel_only_is_warning(tmp_path):
 def test_other_systems(tmp_path):
     root = make_root(tmp_path, 'ID=fedora\nPRETTY_NAME="Fedora Linux 45 (KDE Plasma)"\n', [])
     c = sc.check_system(root, "x86_64")
-    assert c.status == sc.OK and c.summary == "Fedora Linux 45 (KDE Plasma)"  # nur angezeigt, nicht bewertet
+    assert c.status == sc.OK and c.summary == "Fedora Linux 45 (KDE Plasma)"  # only shown, not rated
     assert sc.check_system(root, "aarch64").status == sc.FAIL
 
 
@@ -97,7 +97,7 @@ def test_avahi_check():
 
 
 def fake_busctl(powered=True, missing=False):
-    """gdbus Properties.GetAll eines BlueZ-Adapters (Name historisch)."""
+    """gdbus Properties.GetAll of a BlueZ adapter (historical name)."""
     def run(cmd, **_kw):
         if missing:
             return subprocess.CompletedProcess(cmd, 1, "", "no adapter")
@@ -122,11 +122,11 @@ def test_rfkill_soft_block_counts_as_off(tmp_path):
 
 
 def test_existing_installation(tmp_path):
-    assert "Noch nicht" in sc.check_existing(tmp_path).summary
+    assert "Not set up yet" in sc.check_existing(tmp_path).summary
     (tmp_path / "ZwiftLauncher.exe").touch()
-    assert "Spiel fehlt" in sc.check_existing(tmp_path).summary
+    assert "game still missing" in sc.check_existing(tmp_path).summary
     (tmp_path / "ZwiftApp.exe").touch()
-    assert "schon eingerichtet" in sc.check_existing(tmp_path).summary
+    assert "already set up" in sc.check_existing(tmp_path).summary
 
 
 def test_network_unreachable_host():
@@ -146,7 +146,7 @@ def test_nvidia_in_flatpak_without_gl_extension(tmp_path):
     (root / ".flatpak-info").write_text("[Application]\n")
     checks = sc.check_graphics(root)
     assert checks[0].status == sc.FAIL and "flatpak update" in checks[0].summary
-    assert checks[1].status == sc.WARN  # Hybrid-Zeile verspricht die NVIDIA nicht
+    assert checks[1].status == sc.WARN  # the hybrid line does not promise the NVIDIA GPU
     assert not sc.nvidia_usable(root)
     (root / "usr/lib/x86_64-linux-gnu/GL/nvidia-580-196-07").mkdir(parents=True)
     assert sc.check_graphics(root)[0].status == sc.OK

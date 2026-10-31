@@ -1,4 +1,4 @@
-"""Aktualisieren ohne Schnappschüsse: Einrichtung vor jedem Start abgleichen (docs/updates.md)."""
+"""Updating without snapshots: reconcile the setup before every start (docs/updates.md)."""
 
 import json
 
@@ -19,11 +19,11 @@ def prefix(tmp_path, monkeypatch):
 
 def test_prefix_needs_update_after_new_wine(prefix, monkeypatch):
     monkeypatch.setattr(systemcheck, "wine_version", lambda *_a: "wine-11.20")
-    state.update("graphics", wine="wine-11.20")  # Umgebung aus 0.8.x: nur der Grafiktest kennt die Version
+    state.update("graphics", wine="wine-11.20")  # environment from 0.8.x: only the graphics test knows the version
     assert setup.Prefix().done(setup.Context())
     monkeypatch.setattr(systemcheck, "wine_version", lambda *_a: "wine-11.21")
     assert not setup.Prefix().done(setup.Context())
-    assert not setup.Graphics().done(setup.Context())  # Grafiktest läuft mit neuem Wine erneut
+    assert not setup.Graphics().done(setup.Context())  # graphics test runs again with the new Wine
 
 
 def test_prefix_update_suppresses_install_dialogs(prefix, monkeypatch):
@@ -39,7 +39,7 @@ def test_prefix_update_suppresses_install_dialogs(prefix, monkeypatch):
             pass
     monkeypatch.setattr(setup.display, "ensure_dpi", lambda *_a: None)
     setup.Prefix().run(Ctx())
-    # ohne die Variable wartet wineboot auf einen Mono-/Gecko-Dialog (tinytin, 30.10.)
+    # without the variable wineboot waits for a Mono/Gecko dialog (tinytin, 2026-10-30)
     assert seen == [(["wine", "wineboot", "-u"], "mscoree,mshtml=")]
     assert json.loads((paths.STATE / "state.json").read_text())["prefix"]["wine"] == "wine-11.21"
 
@@ -59,16 +59,16 @@ def test_installer_not_needed_once_launcher_exists(prefix):
 
 def test_reconcile_reports_failed_step(monkeypatch, tmp_path):
     monkeypatch.setattr(paths, "DATA", tmp_path)
-    (tmp_path / "snapshots" / "prefix-alt").mkdir(parents=True)
+    (tmp_path / "snapshots" / "prefix-old").mkdir(parents=True)
 
     def failing(ctx, on_step):
         on_step("prefix", "running", "")
-        on_step("prefix", "error", "Wine konnte die Umgebung nicht anlegen.")
+        on_step("prefix", "error", "Wine could not create the environment.")
         return False
     monkeypatch.setattr(setup, "run_setup", failing)
     texts = []
     launcher = launch.Launcher(progress=texts.append, log=lambda _t: None)
-    with pytest.raises(launch.LaunchError, match="Wine konnte"):
+    with pytest.raises(launch.LaunchError, match="Wine could not"):
         launcher.reconcile()
-    assert any("Wine-Umgebung" in t for t in texts)
-    assert not (tmp_path / "snapshots").exists()  # Altlast aufgeräumt
+    assert any("Wine environment" in t for t in texts)
+    assert not (tmp_path / "snapshots").exists()  # leftover cleaned up
