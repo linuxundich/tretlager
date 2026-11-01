@@ -6,9 +6,14 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ### Added
 - Wine's output of the Zwift launcher and game goes to `zwift-wine.log` next to `tretlager.log`
-  (overwritten on every launch, errors only). Zwift's own crash handler does not work under Wine,
+  (errors only; the previous launch's log is kept as `zwift-wine.old.log`). Zwift's own crash handler does not work under Wine,
   so this is the only trace of a crash. `TRETLAGER_WINE_DEBUG` sets other WINEDEBUG channels,
   e.g. `-all,err+all,+seh` to log exceptions.
+- Zwift opens on the monitor it was on during the last ride: a KWin script reports the window's
+  monitor over D-Bus while Zwift runs (`de.linuxundich.Tretlager`, `SetOutput`), the next launch
+  moves the window there first and maximises it a few seconds later. Moving and maximising at
+  once left Zwift's picture at the size of the other monitor (two monitors with different
+  scaling); this may also have caused crashes when loading the world.
 
 ## [0.10.0] - 2026-10-31
 

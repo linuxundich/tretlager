@@ -114,6 +114,10 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
   loading Watopia after *Ride* (log ends after the road textures, no Xid, no OOM, Zwift's crash
   handler does not work under Wine). Wine output now in `zwift-wine.log`; reproduce with
   `TRETLAGER_WINE_DEBUG=-all,err+all,+seh`, then compare with the window on the internal panel
+  - Finding 2026-11-01: Zwift's picture keeps the internal panel's size (2880×1689) after the
+    window ends up maximised on the external monitor (two resizes within a second); maximising
+    again fixes it, then the ride ran without a crash. Tretlager now moves first, maximises later
+    and remembers the monitor — confirm on tinytin that the picture fits and Zwift stays stable
 
 ## Languages
 

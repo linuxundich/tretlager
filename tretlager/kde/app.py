@@ -13,7 +13,7 @@ from PySide6.QtGui import QDesktopServices, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from .. import APP_ID, __version__, build_id
-from . import desktopstyle
+from . import desktopstyle, zwiftwindow
 from .i18n import LocalizedContext
 from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
@@ -736,6 +736,7 @@ def main() -> int:
     engine.rootContext().setContextObject(localized)
     backend = Backend(auto_start=start)
     backend.listen_for_instances()
+    zwiftwindow.register(app)
     engine.rootContext().setContextProperty("backend", backend)
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     # Scaling for Wine (LogPixels) in case KWin's XWayland setting is unreadable (Flatpak):

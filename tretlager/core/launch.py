@@ -24,7 +24,7 @@ from ..i18n import _, ngettext
 
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
-# Wine's output of the launcher and ZwiftApp, overwritten on every launch. Zwift's own crash handler
+# Wine's output of the launcher and ZwiftApp; the previous launch's log is kept as zwift-wine.old.log. Zwift's own crash handler
 # does not work under Wine, so this is the only trace of a crash. TRETLAGER_WINE_DEBUG sets the
 # WINEDEBUG channels (e.g. "-all,err+all,+seh" for exceptions); the default is errors only.
 WINE_LOG = paths.STATE / "zwift-wine.log"
@@ -78,13 +78,50 @@ def process_running(name: str, proc: Path = Path("/proc")) -> bool:
     return False
 
 
-KWIN_SCRIPT = """
-for (const w of workspace.windowList()) {
-    if ((w.resourceClass || "").toLowerCase() === "zwiftapp.exe") {
+ZWIFT_WINDOW = """(w) => (w.resourceClass || "").toLowerCase() === "zwiftapp.exe" && w.normalWindow"""
+# Tretlager listens here while Zwift runs; the KWin watch script reports the window's monitor.
+WINDOW_BUS_NAME = "de.linuxundich.Tretlager"
+WINDOW_OBJECT_PATH = "/de/linuxundich/Tretlager/ZwiftWindow"
+WINDOW_INTERFACE = "de.linuxundich.Tretlager.ZwiftWindow"
+
+
+def maximize_script(output: str | None) -> str:
+    """KWin script: move the Zwift window to `output` (the monitor of the last ride), else maximise.
+
+    Moving and maximising happen in separate runs (wait_and_maximize runs it several times):
+    two resizes in quick succession leave Zwift's picture at the old size (two monitors with
+    different scales, tinytin 2026-11-01).
+    """
+    return f"""
+const isZwift = {ZWIFT_WINDOW};
+const target = workspace.screens.find((s) => s.name === {json.dumps(output)});
+for (const w of workspace.windowList()) {{
+    if (!isZwift(w)) continue;
+    if (target && w.output !== target) {{
+        workspace.sendClientToScreen(w, target);
+    }} else {{
         w.setMaximize(true, true);
-    }
-}
+    }}
+}}
 """
+
+
+WATCH_SCRIPT = f"""
+const isZwift = {ZWIFT_WINDOW};
+function report(w) {{
+    if (w.output) {{
+        callDBus("{WINDOW_BUS_NAME}", "{WINDOW_OBJECT_PATH}", "{WINDOW_INTERFACE}", "SetOutput", w.output.name);
+    }}
+}}
+function watch(w) {{
+    if (!isZwift(w)) return;
+    w.outputChanged.connect(() => report(w));
+    report(w);
+}}
+workspace.windowList().forEach(watch);
+workspace.windowAdded.connect(watch);
+"""
+WATCH_SCRIPT_NAME = "tretlager-watch"
 
 
 def _host_visible_tmpdir() -> str | None:
@@ -99,31 +136,46 @@ def _host_visible_tmpdir() -> str | None:
     return None
 
 
-def maximize_window_kde(log: Callable[[str], None]) -> bool:
-    """Maximise the Zwift window under KWin (above the Plasma panel). False outside KDE."""
-    if "KDE" not in os.environ.get("XDG_CURRENT_DESKTOP", "") or not shutil.which("gdbus"):
+def kwin_available() -> bool:
+    return "KDE" in os.environ.get("XDG_CURRENT_DESKTOP", "") and bool(shutil.which("gdbus"))
+
+
+def _kwin_call(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["gdbus", "call", "--session", "--dest", "org.kde.KWin", *args],
+                          capture_output=True, text=True, timeout=10)
+
+
+def unload_kwin_script(name: str) -> None:
+    if kwin_available():
+        _kwin_call("--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.unloadScript", name)
+
+
+def run_kwin_script(name: str, source: str, log: Callable[[str], None], keep: bool = False) -> bool:
+    """Run a KWin script; keep=True leaves it loaded (until unload_kwin_script). False outside KDE."""
+    if not kwin_available():
         return False
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, dir=_host_visible_tmpdir()) as f:
-        f.write(KWIN_SCRIPT)
+        f.write(source)
         script = f.name
     try:
-        name = "tretlager-maximize"
-        call = ["gdbus", "call", "--session", "--dest", "org.kde.KWin"]
-        subprocess.run(call + ["--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.unloadScript", name],
-                       capture_output=True, timeout=10)
-        r = subprocess.run(call + ["--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.loadScript",
-                                   script, name], capture_output=True, text=True, timeout=10)
+        unload_kwin_script(name)
+        r = _kwin_call("--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.loadScript", script, name)
         sid = r.stdout.strip().strip("(),")
         if not sid.lstrip("-").isdigit() or int(sid) < 0:
             log(_("Could not load the KWin script"))
             return False
-        subprocess.run(call + ["--object-path", f"/Scripting/Script{sid}", "--method", "org.kde.kwin.Script.run"],
-                       capture_output=True, timeout=10)
-        subprocess.run(call + ["--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.unloadScript", name],
-                       capture_output=True, timeout=10)
+        _kwin_call("--object-path", f"/Scripting/Script{sid}", "--method", "org.kde.kwin.Script.run")
+        if not keep:
+            unload_kwin_script(name)
         return True
     finally:
         os.unlink(script)
+
+
+def maximize_window_kde(log: Callable[[str], None]) -> bool:
+    """Maximise the Zwift window under KWin (above the Plasma panel), on the monitor of the last ride."""
+    output = state.load().get("window", {}).get("output")
+    return run_kwin_script("tretlager-maximize", maximize_script(output), log)
 
 
 class Launcher:
@@ -261,6 +313,8 @@ class Launcher:
         self.ctx.wineserver_kill()
         # A file, not a pipe: Zwift inherits the descriptor and keeps it open until it exits.
         WINE_LOG.parent.mkdir(parents=True, exist_ok=True)
+        if WINE_LOG.exists():  # keep the previous ride's log (a crash is often noticed only afterwards)
+            WINE_LOG.replace(WINE_LOG.with_suffix(".old.log"))
         wine_log = open(WINE_LOG, "wb")
         try:
             self._start(token, rfp, wine_log)
@@ -309,12 +363,15 @@ class Launcher:
             if not maximize_window_kde(self.log):
                 return
             time.sleep(4)
+        # From now on KWin reports which monitor the window is on (remembered for the next start).
+        run_kwin_script(WATCH_SCRIPT_NAME, WATCH_SCRIPT, self.log, keep=True)
 
     def running(self) -> bool:
         return process_running("ZwiftApp.exe")
 
     def after_exit(self) -> None:
         """After exit: kill leftovers, stop the bridge unless it is set to autostart."""
+        unload_kwin_script(WATCH_SCRIPT_NAME)
         self.ctx.wineserver_kill()
         try:
             if bridgectl.is_running() and not bridgectl.autostart():

@@ -107,7 +107,34 @@ def test_wine_tasks_parsing(monkeypatch):
 
 
 def test_kwin_script_targets_zwift_window():
-    assert "zwiftapp.exe" in launch.KWIN_SCRIPT and "setMaximize(true, true)" in launch.KWIN_SCRIPT
+    script = launch.maximize_script(None)
+    assert "zwiftapp.exe" in script and "setMaximize(true, true)" in script
+    assert "s.name === null" in script  # no remembered monitor: maximise where the window is
+
+
+def test_kwin_script_moves_before_maximising():
+    script = launch.maximize_script('HDMI-A-1"')
+    assert 's.name === "HDMI-A-1\\""' in script  # quoted for JavaScript
+    move, maximise = script.index("sendClientToScreen"), script.index("setMaximize")
+    assert move < maximise and "} else {" in script[move:maximise]
+
+
+def test_watch_script_reports_output_to_tretlager():
+    assert f'callDBus("{launch.WINDOW_BUS_NAME}", "{launch.WINDOW_OBJECT_PATH}"' in launch.WATCH_SCRIPT
+    assert "outputChanged" in launch.WATCH_SCRIPT and "windowAdded" in launch.WATCH_SCRIPT
+
+
+def test_remembered_output_goes_into_the_script(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(launch.state, "load", lambda: {"window": {"output": "HDMI-A-1"}})
+    monkeypatch.setattr(launch, "run_kwin_script", lambda name, src, log, keep=False: seen.setdefault("src", src))
+    launch.maximize_window_kde(print)
+    assert '"HDMI-A-1"' in seen["src"]
+
+
+def test_scripts_do_nothing_outside_kde(monkeypatch):
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
+    assert launch.run_kwin_script("x", "", print) is False
 
 
 def test_bundled_runfromprocess_source():
