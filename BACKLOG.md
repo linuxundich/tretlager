@@ -116,8 +116,10 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
   `TRETLAGER_WINE_DEBUG=-all,err+all,+seh`, then compare with the window on the internal panel
   - Finding 2026-11-01: Zwift's picture keeps the internal panel's size (2880×1689) after the
     window ends up maximised on the external monitor (two resizes within a second); maximising
-    again fixes it, then the ride ran without a crash. Tretlager now moves first, maximises later
-    and remembers the monitor — confirm on tinytin that the picture fits and Zwift stays stable
+    again fixes it, then the ride ran without a crash. Cause: Tretlager maximised while Zwift was
+    still loading (resizes arrive only after the world has loaded). Tretlager now waits for
+    `noesisGUI->OnResize end`, moves to the remembered monitor, then maximises — confirm on
+    tinytin that the picture fits and Zwift stays stable
 
 ## Languages
 

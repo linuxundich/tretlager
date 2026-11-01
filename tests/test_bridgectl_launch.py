@@ -202,3 +202,16 @@ def test_wine_log_env_override(monkeypatch):
     from tretlager.core import launch
     monkeypatch.setenv("TRETLAGER_WINE_DEBUG", "-all,err+all,+seh")
     assert launch.wine_log_env({"WINEDEBUG": "-all"})["WINEDEBUG"] == "-all,err+all,+seh"
+
+
+def test_zwift_ui_ready_reads_only_the_current_log(tmp_path):
+    import os
+    logs = tmp_path / "drive_c/users/me/AppData/Local/Zwift/Logs"
+    logs.mkdir(parents=True)
+    log = logs / "Log.txt"
+    log.write_text("[20:12:22] INFO LEVEL: [LoginFlow] noesisGUI->OnResize end, noesisGUI->Update begin\n")
+    os.utime(log, (1000, 1000))
+    assert not launch.zwift_ui_ready(2000, tmp_path)  # left over from the previous ride
+    assert launch.zwift_ui_ready(500, tmp_path)
+    log.write_text("[20:12:17] resize: 2870 x 1749\n")
+    assert not launch.zwift_ui_ready(0, tmp_path)

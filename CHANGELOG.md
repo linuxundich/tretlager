@@ -11,9 +11,14 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
   e.g. `-all,err+all,+seh` to log exceptions.
 - Zwift opens on the monitor it was on during the last ride: a KWin script reports the window's
   monitor over D-Bus while Zwift runs (`de.linuxundich.Tretlager`, `SetOutput`), the next launch
-  moves the window there first and maximises it a few seconds later. Moving and maximising at
-  once left Zwift's picture at the size of the other monitor (two monitors with different
-  scaling); this may also have caused crashes when loading the world.
+  moves the window there first and maximises it a few seconds later.
+
+### Fixed
+- Zwift's picture stuck out over the edge of the screen after the start: Tretlager maximised the
+  window while Zwift was still loading, and Zwift only took the new size much later or not at all.
+  Tretlager now waits until Zwift's log reports the interface as ready (`noesisGUI->OnResize end`,
+  at most 2 minutes). Possibly also the cause of crashes when loading the world (two monitors,
+  tinytin).
 
 ## [0.10.0] - 2026-10-31
 

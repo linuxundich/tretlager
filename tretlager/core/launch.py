@@ -122,6 +122,23 @@ workspace.windowList().forEach(watch);
 workspace.windowAdded.connect(watch);
 """
 WATCH_SCRIPT_NAME = "tretlager-watch"
+# Zwift writes this once its interface is up. Resizes before that only reach Zwift once the world
+# has loaded, and its picture can stay at the window's first size (tinytin 2026-11-01).
+UI_READY = "noesisGUI->OnResize end"
+UI_TIMEOUT = 120
+
+
+def zwift_ui_ready(since: float, prefix: Path | None = None) -> bool:
+    """Has the Zwift log written since `since` (time.time()) reported the interface as ready?"""
+    for log in (prefix or paths.PREFIX).glob("drive_c/users/*/AppData/Local/Zwift/Logs/Log.txt"):
+        try:
+            if log.stat().st_mtime < since:
+                continue  # previous ride's log, Zwift has not rotated it yet
+            if UI_READY in log.read_text(errors="replace"):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def _host_visible_tmpdir() -> str | None:
@@ -205,9 +222,10 @@ class Launcher:
         if dpi:
             self.log(_("Wine DPI adjusted to the screen: {dpi}").format(dpi=dpi))
         self.progress(_("Start Zwift"))
+        started = time.time()
         self.start(token)
         self.progress(_("Adjusting the window"))
-        self.wait_and_maximize()
+        self.wait_and_maximize(started)
         self.progress(_("Zwift is running"))
 
     def ensure_bridge(self) -> None:
@@ -357,8 +375,12 @@ class Launcher:
         for name in ("ZwiftLauncher.exe", "ZwiftWindowsCrashHandler.exe"):
             subprocess.run(["wine", "taskkill", "/f", "/im", name], env=self.env, capture_output=True, timeout=30)
 
-    def wait_and_maximize(self) -> None:
-        # The script does not know whether the window exists yet; maximising more than once does no harm.
+    def wait_and_maximize(self, started: float) -> None:
+        deadline = time.monotonic() + UI_TIMEOUT
+        while time.monotonic() < deadline and not zwift_ui_ready(started):
+            time.sleep(2)
+        # First run moves the window to the remembered monitor, the next one maximises it;
+        # maximising more than once does no harm.
         for _attempt in range(3):
             if not maximize_window_kde(self.log):
                 return
