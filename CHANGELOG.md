@@ -4,6 +4,8 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-01
+
 ### Added
 - Error reports for testers: *About Tretlager* → *Error reports* → *Save error report…* writes one
   ZIP file (save dialog, via the portal in the Flatpak) with `report.txt` (version and build, host

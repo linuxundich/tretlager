@@ -25,6 +25,16 @@
   <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.11.0" date="2026-11-01">
+      <description>
+        <p>Error reports and two monitors.</p>
+        <ul>
+          <li>Error reports: detailed logging and one ZIP file with system information and logs to send to the developer; sign-in data is removed.</li>
+          <li>Zwift opens on the monitor it was last used on and is maximised only once it has loaded; its picture no longer sticks out over the screen edge.</li>
+          <li>Wine's output of Zwift and the sensor bridge's messages are kept in log files.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.10.0" date="2026-10-31">
       <description>
         <p>First public release.</p>
