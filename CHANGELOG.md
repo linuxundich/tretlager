@@ -5,6 +5,18 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 ## [Unreleased]
 
 ### Added
+- Error reports for testers: *About Tretlager* → *Error reports* → *Save error report…* writes one
+  ZIP file (save dialog, via the portal in the Flatpak) with `report.txt` (version and build, host
+  system, desktop, screens and scaling, graphics, Wine and Zwift versions, sensor bridge status,
+  system check, Flatpak info) and the logs of Tretlager, the sensor bridge, Wine and Zwift plus
+  `state.json` and the bridge's device list. Tokens, passwords and e-mail addresses are masked in
+  every file; large logs keep their beginning and their last 5 MB (`core/report.py`).
+- Debug mode (*Detailed logging* under *About Tretlager*, menu action *Start with detailed
+  logging* or `--debug`, stays on until switched off): launch steps in `tretlager.log`, the
+  bridge's own messages at debug level, Wine also logs exceptions (`-all,err+all,warn+seh`).
+- The sensor bridge also writes `bridge.log` next to `tretlager.log` (the journal cannot be read
+  from inside the Flatpak).
+- Help: *Reporting a problem* and *Zwift's picture sticks out over the edge of the screen*.
 - Wine's output of the Zwift launcher and game goes to `zwift-wine.log` next to `tretlager.log`
   (errors only; the previous launch's log is kept as `zwift-wine.old.log`). Zwift's own crash handler does not work under Wine,
   so this is the only trace of a crash. `TRETLAGER_WINE_DEBUG` sets other WINEDEBUG channels,

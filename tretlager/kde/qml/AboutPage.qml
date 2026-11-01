@@ -1,6 +1,8 @@
+import QtCore
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as Controls
+import QtQuick.Dialogs as Dialogs
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.formcard as FormCard
 
@@ -14,6 +16,16 @@ ColumnsPage {
         id: licenseDialog
         title: i18n("GNU General Public License v3")
         text: backend.licenseText
+    }
+
+    Dialogs.FileDialog {
+        id: reportDialog
+        title: i18n("Save error report")
+        fileMode: Dialogs.FileDialog.SaveFile
+        nameFilters: [i18n("ZIP files (*.zip)")]
+        currentFolder: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
+        selectedFile: currentFolder + "/" + backend.reportName
+        onAccepted: backend.saveReport(selectedFile.toString())
     }
 
     PageHero {
@@ -127,6 +139,28 @@ ColumnsPage {
     ]
 
     rightCards: [
+        FormCard.FormHeader { title: i18n("Error reports") },
+        FormCard.FormCard {
+            FormCard.FormSwitchDelegate {
+                text: i18n("Detailed logging")
+                description: i18n("Records more about Tretlager, the sensor bridge and Zwift. Applies from the next start of Zwift; the logs grow larger. Switch it off again once the problem is solved.")
+                icon.name: "debug-run"
+                checked: backend.debugMode
+                onToggled: backend.setDebugMode(checked)
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormButtonDelegate {
+                text: i18n("Save error report…")
+                description: backend.reportInfo.busy ? i18n("Collecting system information and logs…")
+                    : backend.reportInfo.saved ? i18n("Saved as %1. Send this file to the developer.", backend.reportInfo.saved)
+                    : backend.reportInfo.error ? backend.reportInfo.error
+                    : i18n("A ZIP file with system information and the logs of Tretlager, the sensor bridge, Wine and Zwift. Sign-in data, passwords and e-mail addresses are removed.")
+                icon.name: "document-save"
+                enabled: !backend.reportInfo.busy
+                onClicked: reportDialog.open()
+            }
+        },
+
         FormCard.FormHeader { title: i18n("Free software Tretlager builds on") },
         FormCard.FormCard {
             Repeater {

@@ -18,22 +18,23 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from . import bridgectl, display, login, paths, setup, state, wine
+from . import bridgectl, debug, display, login, paths, setup, state, wine
 from .manifest import UpdateProgress, remote_version  # noqa: F401 (also for callers of launch)
 from ..i18n import _, ngettext
 
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
-# Wine's output of the launcher and ZwiftApp; the previous launch's log is kept as zwift-wine.old.log. Zwift's own crash handler
-# does not work under Wine, so this is the only trace of a crash. TRETLAGER_WINE_DEBUG sets the
-# WINEDEBUG channels (e.g. "-all,err+all,+seh" for exceptions); the default is errors only.
+# Wine's output of the launcher and ZwiftApp; the previous launch's log is kept as zwift-wine.old.log.
+# Zwift's own crash handler does not work under Wine, so this is the only trace of a crash. Errors
+# only, in debug mode also exceptions; TRETLAGER_WINE_DEBUG sets the WINEDEBUG channels directly.
 WINE_LOG = paths.STATE / "zwift-wine.log"
 WINE_LOG_DEBUG = "-all,err+all"
 
 
 def wine_log_env(env: dict) -> dict:
-    """env with the WINEDEBUG channels for the Zwift launch."""
-    return dict(env, WINEDEBUG=os.environ.get("TRETLAGER_WINE_DEBUG") or WINE_LOG_DEBUG)
+    """env with the WINEDEBUG channels for the Zwift launch (in debug mode also exceptions)."""
+    channels = os.environ.get("TRETLAGER_WINE_DEBUG") or (debug.WINE_CHANNELS if debug.enabled() else WINE_LOG_DEBUG)
+    return dict(env, WINEDEBUG=channels)
 
 
 class NeedLogin(Exception):

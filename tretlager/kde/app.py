@@ -15,7 +15,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from .. import APP_ID, __version__, build_id
 from . import desktopstyle, zwiftwindow
 from .i18n import LocalizedContext
-from ..core import applog, bridgectl, btcompat, display, helpdoc, instance, launch, login, power, prepare, setup, state, systemcheck, wine
+from ..core import applog, bridgectl, btcompat, debug, display, helpdoc, instance, launch, login, power, prepare, report, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
 
 # Embedded sign-in (as in the official launcher): needs QtWebEngine. Without the module,
@@ -53,6 +53,7 @@ class Backend(QObject):
         self._init_login()
         self._init_sensors()
         self._init_launch()
+        self._init_report()
 
     @Property(list, notify=checksChanged)
     def checks(self) -> list:
@@ -635,8 +636,11 @@ class Backend(QObject):
         started_at = time.time()
         self._on_launch_event({"busy": True, "error": "", "needLogin": False, "text": _("Preparing the start"),
                                "powerChanged": False, "gpuErrors": ""})
+        def log(text: str) -> None:
+            applog.debug("Launch: %s", text)  # debug mode only
+            self._launchEvent.emit({"logline": text})
         launcher = launch.Launcher(progress=lambda t, p=-1: self._launchEvent.emit({"text": t, "percent": float(p)}),
-                                   log=lambda t: self._launchEvent.emit({"logline": t}))
+                                   log=log)
 
         def work():
             try:
@@ -695,6 +699,71 @@ class Backend(QObject):
             text = power.describe_xids(codes)
             self._launchEvent.emit({"gpuErrors": text, "logline": _("NVIDIA driver reported {errors}").format(errors=text)})
 
+    # --- Debug mode and error report ---
+
+    debugChanged = Signal()
+    reportChanged = Signal()
+    _reportEvent = Signal(dict)
+
+    def _init_report(self) -> None:
+        self._report = {"busy": False, "saved": "", "error": ""}
+        self._reportEvent.connect(self._on_report_event)
+
+    def _on_report_event(self, ev: dict) -> None:
+        self._report = dict(self._report, **ev)
+        self.reportChanged.emit()
+
+    @Property(bool, notify=debugChanged)
+    def debugMode(self) -> bool:
+        return debug.enabled()
+
+    @Slot(bool)
+    def setDebugMode(self, on: bool) -> None:
+        debug.set_enabled(on)
+        applog.set_debug(on)
+        applog.info("Debug mode %s", "on" if on else "off")
+        self.debugChanged.emit()
+        # The bridge reads the setting when it starts; restart it unless a ride is running.
+        if not self._launch.get("zwiftRunning"):
+            def work():
+                if bridgectl.is_running():
+                    bridgectl.set_running(False)
+                    bridgectl.set_running(True)
+            self._bg(work)
+
+    @Property("QVariantMap", notify=reportChanged)
+    def reportInfo(self) -> dict:
+        return self._report
+
+    @Property(str, constant=True)
+    def reportName(self) -> str:
+        return report.default_name()
+
+    @Slot(str)
+    def saveReport(self, url: str) -> None:
+        """Collect the error report into the file chosen in the save dialog (a document portal path in the Flatpak)."""
+        if self._report["busy"]:
+            return
+        dest = Path(QUrl(url).toLocalFile() or url)
+        if dest.suffix.lower() != ".zip":
+            dest = dest.with_name(dest.name + ".zip")
+        screens = [{"name": sc.name(), "x": sc.geometry().x(), "y": sc.geometry().y(),
+                    "width": sc.geometry().width(), "height": sc.geometry().height(),
+                    "scale": sc.devicePixelRatio()} for sc in QGuiApplication.screens()]
+        self._on_report_event({"busy": True, "saved": "", "error": ""})
+
+        def work():
+            try:
+                names = report.build(dest, screens)
+            except Exception as e:  # the type only; messages may contain paths, never secrets, but keep it short
+                applog.warning("Error report failed: %s", type(e).__name__)
+                self._reportEvent.emit({"busy": False, "error": _("Could not save the error report ({name}).").format(
+                    name=type(e).__name__)})
+                return
+            applog.info("Error report saved (%d files)", len(names))
+            self._reportEvent.emit({"busy": False, "saved": dest.name})
+        threading.Thread(target=work, daemon=True).start()
+
     # --- Single instance ---
 
     def listen_for_instances(self) -> None:
@@ -707,6 +776,9 @@ class Backend(QObject):
 
 def main() -> int:
     start = "--start" in sys.argv[1:]
+    if "--debug" in sys.argv[1:]:
+        debug.set_enabled(True)  # stays on (also for the bridge) until switched off under About Tretlager
+    applog.set_debug(debug.enabled())
     if instance.forward("start" if start else "show"):
         return 0
     restyle = desktopstyle.wanted(in_flatpak=bridgectl.IN_FLATPAK)
@@ -746,7 +818,8 @@ def main() -> int:
         window.screenChanged.connect(lambda _s, w=window: display.set_scale(w.devicePixelRatio()))
     if not engine.rootObjects():
         return 1
-    applog.info("Start %s%s%s", __version__, f" (Flatpak, Build {build_id()})" if bridgectl.IN_FLATPAK else "", " --start" if start else "")
+    applog.info("Start %s%s%s%s", __version__, f" (Flatpak, Build {build_id()})" if bridgectl.IN_FLATPAK else "",
+                " --start" if start else "", " (debug mode)" if debug.enabled() else "")
     app.aboutToQuit.connect(backend.on_quit)
     code = app.exec()
     applog.info("Exited (code %s)", code)

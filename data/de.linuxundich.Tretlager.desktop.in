@@ -11,9 +11,14 @@ Categories=Game;Sports;
 Keywords=Zwift;Bluetooth;Trainer;Wahoo;Cycling;Bike;
 Keywords[de]=Zwift;Bluetooth;Trainer;Wahoo;Rad;Rennrad;
 StartupNotify=true
-Actions=start;
+Actions=start;debug;
 
 [Desktop Action start]
 Name=Start Zwift
 Name[de]=Zwift starten
 Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde --start
+
+[Desktop Action debug]
+Name=Start with detailed logging
+Name[de]=Mit ausführlichem Protokoll starten
+Exec=env PYTHONPATH=@LIBDIR@ /usr/bin/python3 -m tretlager.kde --debug

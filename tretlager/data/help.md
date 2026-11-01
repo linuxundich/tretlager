@@ -101,3 +101,12 @@ using it is at your own risk.**
   Applications (X11)* → *Apply scaling themselves*.
 - [update-none] **Zwift does not start after an update**: Sidebar → *Check setup*. The backup
   taken before the update is kept.
+- [view-fullscreen] **Zwift's picture sticks out over the edge of the screen**: Double-click
+  Zwift's title bar twice (restore, maximise). Tretlager remembers the monitor Zwift was on and
+  opens it there next time.
+- [debug-run] **Reporting a problem**: *About Tretlager* → *Error reports*: switch on *Detailed
+  logging*, reproduce the problem, then *Save error report…* and send the ZIP file to the
+  developer. It contains system information and the logs of Tretlager, the sensor bridge, Wine and
+  Zwift (Zwift's log also lists the names of nearby riders); sign-in data, passwords and e-mail
+  addresses are removed. Alternatively start with *Start with detailed logging* from the
+  application menu (right-click on Tretlager) or `flatpak run de.linuxundich.Tretlager --debug`.

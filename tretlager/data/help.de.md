@@ -101,3 +101,13 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
   *Legacy-Anwendungen (X11)* → *Skalierung selbst anwenden*.
 - [update-none] **Zwift startet nach einem Update nicht**: Seitenleiste → *Einrichtung prüfen*.
   Die Sicherung vor dem Update bleibt erhalten.
+- [view-fullscreen] **Zwifts Bild ragt über den Bildschirmrand**: Zweimal auf Zwifts Titelleiste
+  doppelklicken (verkleinern, maximieren). Tretlager merkt sich den Monitor, auf dem Zwift lief,
+  und öffnet es beim nächsten Mal dort.
+- [debug-run] **Problem melden**: *Über Tretlager* → *Fehlerberichte*: *Ausführliches Protokoll*
+  einschalten, das Problem nachstellen, dann *Fehlerbericht speichern…* und die ZIP-Datei an den
+  Entwickler schicken. Sie enthält Systeminformationen und die Protokolle von Tretlager,
+  Sensor-Bridge, Wine und Zwift (Zwifts Protokoll nennt auch die Namen von Fahrern in der Nähe);
+  Anmeldedaten, Passwörter und Mailadressen werden entfernt. Alternativ über *Mit ausführlichem
+  Protokoll starten* im Anwendungsmenü (Rechtsklick auf Tretlager) oder
+  `flatpak run de.linuxundich.Tretlager --debug`.
