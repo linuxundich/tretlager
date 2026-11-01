@@ -121,10 +121,11 @@ def test_runfromprocess_expands_file_argument():
 
 def test_start_never_puts_token_on_command_line():
     import inspect
-    code = inspect.getsource(launch.Launcher.start)
+    code = inspect.getsource(launch.Launcher._start)
     assert "--token=@" in code and "json.dumps(token)" in code
-    call = code[code.index('"--token=@"'):]
-    assert "stdout=subprocess.DEVNULL" in call[:400]  # otherwise Zwift inherits the pipe
+    call = code[code.index('"--token=@"'):][:400]
+    # Output goes to the log file, never into a pipe (otherwise Zwift inherits it).
+    assert "stdout=wine_log" in call and "PIPE" not in call and "capture_output" not in call
 
 
 def test_logout_remote_posts_refresh_token():
@@ -161,3 +162,16 @@ def test_kwin_script_dir_visible_from_host(monkeypatch, tmp_path):
     monkeypatch.setenv("FLATPAK_ID", "de.linuxundich.Tretlager")
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
     assert launch._host_visible_tmpdir() == str(tmp_path / "app" / "de.linuxundich.Tretlager")
+
+
+def test_wine_log_env_defaults_to_errors(monkeypatch):
+    from tretlager.core import launch
+    monkeypatch.delenv("TRETLAGER_WINE_DEBUG", raising=False)
+    env = launch.wine_log_env({"WINEDEBUG": "-all", "WINEPREFIX": "/p"})
+    assert env == {"WINEDEBUG": "-all,err+all", "WINEPREFIX": "/p"}
+
+
+def test_wine_log_env_override(monkeypatch):
+    from tretlager.core import launch
+    monkeypatch.setenv("TRETLAGER_WINE_DEBUG", "-all,err+all,+seh")
+    assert launch.wine_log_env({"WINEDEBUG": "-all"})["WINEDEBUG"] == "-all,err+all,+seh"

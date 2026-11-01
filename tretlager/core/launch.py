@@ -24,6 +24,16 @@ from ..i18n import _, ngettext
 
 RFP_SRC = Path(__file__).resolve().parent.parent / "data" / "RunFromProcess.cs"
 UPDATE_TIMEOUT = 15 * 60
+# Wine's output of the launcher and ZwiftApp, overwritten on every launch. Zwift's own crash handler
+# does not work under Wine, so this is the only trace of a crash. TRETLAGER_WINE_DEBUG sets the
+# WINEDEBUG channels (e.g. "-all,err+all,+seh" for exceptions); the default is errors only.
+WINE_LOG = paths.STATE / "zwift-wine.log"
+WINE_LOG_DEBUG = "-all,err+all"
+
+
+def wine_log_env(env: dict) -> dict:
+    """env with the WINEDEBUG channels for the Zwift launch."""
+    return dict(env, WINEDEBUG=os.environ.get("TRETLAGER_WINE_DEBUG") or WINE_LOG_DEBUG)
 
 
 class NeedLogin(Exception):
@@ -249,8 +259,17 @@ class Launcher:
         rfp = self.run_from_process()
         self.ensure_display_settings()
         self.ctx.wineserver_kill()
+        # A file, not a pipe: Zwift inherits the descriptor and keeps it open until it exits.
+        WINE_LOG.parent.mkdir(parents=True, exist_ok=True)
+        wine_log = open(WINE_LOG, "wb")
+        try:
+            self._start(token, rfp, wine_log)
+        finally:
+            wine_log.close()
+
+    def _start(self, token: dict, rfp: Path, wine_log) -> None:
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
-                         env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                         env=wine_log_env(self.env), stdout=wine_log, stderr=subprocess.STDOUT)
         pid = None
         for _attempt in range(30):
             time.sleep(1)
@@ -261,7 +280,7 @@ class Launcher:
             raise LaunchError(_("The Zwift launcher does not start."))
         time.sleep(5)
         gfx = state.load().get("graphics", {})
-        env = dict(self.env, **setup.graphics_env(gfx))
+        env = wine_log_env(dict(self.env, **setup.graphics_env(gfx)))
         # Never put the token on a Linux command line or in a log: it goes via a file only the user can
         # read (tmpfs), RunFromProcess inserts it itself; the file is deleted afterwards.
         tok_file = Path(os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()) / "tretlager-start.json"
@@ -272,8 +291,8 @@ class Launcher:
             win_path = "Z:" + str(tok_file).replace("/", "\\")
             # No pipe: otherwise Zwift inherits the output and keeps it open (timeout).
             proc = subprocess.run(["wine", str(rfp), str(pid), "ZwiftApp.exe", "--token=@" + win_path],
-                                  cwd=paths.ZWIFT_DIR, env=env, stdout=subprocess.DEVNULL,
-                                  stderr=subprocess.DEVNULL, timeout=60, check=False)
+                                  cwd=paths.ZWIFT_DIR, env=env, stdout=wine_log,
+                                  stderr=subprocess.STDOUT, timeout=60, check=False)
             if proc.returncode != 0:
                 raise LaunchError(_("Could not start Zwift (RunFromProcess, code {code}).").format(code=proc.returncode))
             time.sleep(15)

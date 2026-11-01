@@ -109,6 +109,11 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
 - [x] Range: notice in the UI on frequent dropouts (≥ 3 in 10 min) with a remedy (0.3.0)
 - [x] UI: switch “Offer on the network” (`local_only`), D-Bus `SetLocalOnly` (0.3.0)
 - [x] ~~Update the bridge's GTK UI~~ dropped: GTK UI removed in 0.5.1 (my decision 2026-10-30)
+- [ ] Zwift crashes with two monitors (tinytin 2026-11-01): external 1680×1050 at scale 1 left of
+  the internal panel at 1.6, Zwift window maximised on the external one; the game dies 2 s into
+  loading Watopia after *Ride* (log ends after the road textures, no Xid, no OOM, Zwift's crash
+  handler does not work under Wine). Wine output now in `zwift-wine.log`; reproduce with
+  `TRETLAGER_WINE_DEBUG=-all,err+all,+seh`, then compare with the window on the internal panel
 
 ## Languages
 

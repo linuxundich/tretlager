@@ -4,6 +4,12 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Added
+- Wine's output of the Zwift launcher and game goes to `zwift-wine.log` next to `tretlager.log`
+  (overwritten on every launch, errors only). Zwift's own crash handler does not work under Wine,
+  so this is the only trace of a crash. `TRETLAGER_WINE_DEBUG` sets other WINEDEBUG channels,
+  e.g. `-all,err+all,+seh` to log exceptions.
+
 ## [0.10.0] - 2026-10-31
 
 ### Added
