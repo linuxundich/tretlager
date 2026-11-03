@@ -9,7 +9,7 @@ from typing import Callable
 
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakDeviceNotFoundError, BleakError
-from dbus_fast import BusType, Message, MessageType
+from dbus_fast import BusType, Message, MessageType, Variant
 from dbus_fast.aio import MessageBus
 
 from . import dircon, gatt
@@ -42,6 +42,20 @@ GRACE = 45.0
 # reconnect and the scan in the user interface then waited up to a minute (measured 2026-10-30).
 # Advertising sensors send several times per second, 8 s is enough.
 FIND_TIMEOUT = 8.0
+# Stuck controller (tinytin 2026-11-03, Intel AX201, kernel 7.2): after a strap came back in range,
+# every connection attempt ran into the kernel's 20 s LE timeout for half an hour, although the
+# strap was advertising. At each timeout the kernel logged "ACL packet for unknown connection
+# handle": the controller held a link to the strap that the kernel had already given up on, and
+# that link blocks every new attempt. Removing the sensor in Tretlager does not reach it; only a
+# controller reset does. So after this many timeouts in a row of a device that was found, the
+# bridge switches the adapter off and on (all devices reconnect, Zwift keeps them: grace period),
+# at most once per RESET_INTERVAL and only if no other Bluetooth device (headphones) is connected.
+STUCK_TIMEOUTS = 3
+RESET_INTERVAL = 600.0
+_last_reset: dict[str, float] = {}
+resetting: set[str] = set()  # adapters being switched off and on; the service skips its adapter check
+
+
 def connect_timeout(name: str) -> float:
     """Time limit for connecting and service discovery; long only for sensors known to be slow."""
     return SLOW_CONNECT_TIMEOUT if any(n.lower() in (name or "").lower() for n in SLOW_CONNECT_NAMES) else CONNECT_TIMEOUT
@@ -69,6 +83,94 @@ async def bluez_disconnect(address: str, adapter: str = "") -> None:
             log.info("%s: disconnecting orphaned connection", address)
             await bus.call(Message(destination="org.bluez", path=path, interface="org.bluez.Device1",
                                    member="Disconnect"))
+    finally:
+        bus.disconnect()
+
+
+# Audio profiles (A2DP sink, headset, hands-free): a playing headphone takes most of the airtime.
+AUDIO_UUIDS = {"0000110b-0000-1000-8000-00805f9b34fb", "00001108-0000-1000-8000-00805f9b34fb",
+               "0000111e-0000-1000-8000-00805f9b34fb"}
+
+
+def foreign_devices(objects: dict, adapter: str, bridged) -> list[dict]:
+    """Devices connected through the adapter that the bridge does not handle, e.g. headphones.
+
+    Finding on tinytin (2026-11-03): with headphones and the KICKR on the AX201, the TICKR got
+    nothing but connection timeouts for ten minutes, until the headphones were removed. No chip
+    maker states a usable limit (TP-Link: "7 devices" for the UB500, Intel: none); in practice
+    audio is what crowds out the sensors.
+    """
+    path = f"/org/bluez/{adapter or 'hci0'}/"
+    ours = {a.upper() for a in bridged}
+    out = []
+    for obj, ifaces in sorted(objects.items()):
+        dev = ifaces.get("org.bluez.Device1")
+        if not dev or not obj.startswith(path) or not (dev.get("Connected") and dev["Connected"].value):
+            continue
+        address = dev["Address"].value.upper() if "Address" in dev else ""
+        if address in ours:
+            continue
+        icon = dev["Icon"].value if "Icon" in dev else ""
+        uuids = set(dev["UUIDs"].value) if "UUIDs" in dev else set()
+        name = (dev["Alias"].value if "Alias" in dev else "") or address
+        out.append({"name": name, "address": address, "audio": icon.startswith("audio-") or bool(uuids & AUDIO_UUIDS)})
+    return out
+
+
+async def bluez_objects(bus) -> dict:
+    reply = await bus.call(Message(destination="org.bluez", path="/",
+                                   interface="org.freedesktop.DBus.ObjectManager", member="GetManagedObjects"))
+    return {} if reply.message_type == MessageType.ERROR else reply.body[0]
+
+
+async def other_devices(adapter: str, bridged) -> list[dict]:
+    """foreign_devices() from BlueZ; empty if BlueZ does not answer."""
+    try:
+        bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+    except Exception:
+        return []
+    try:
+        return foreign_devices(await bluez_objects(bus), adapter, bridged)
+    finally:
+        bus.disconnect()
+
+
+async def reset_adapter(adapter: str, bridged) -> str:
+    """Switch the adapter off and on again; returns "" when done, otherwise the reason (N_ text)."""
+    hci = adapter or "hci0"
+    if time.monotonic() - _last_reset.get(hci, -RESET_INTERVAL) < RESET_INTERVAL:
+        return N_("Bluetooth is stuck – switch Bluetooth off and on again")
+    path = f"/org/bluez/{hci}"
+    try:
+        bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+    except Exception:
+        return N_("Bluetooth is stuck – switch Bluetooth off and on again")
+
+    async def powered(on: bool) -> bool:
+        reply = await bus.call(Message(destination="org.bluez", path=path,
+                                       interface="org.freedesktop.DBus.Properties", member="Set",
+                                       signature="ssv", body=["org.bluez.Adapter1", "Powered", Variant("b", on)]))
+        return reply.message_type != MessageType.ERROR
+
+    try:
+        others = foreign_devices(await bluez_objects(bus), hci, bridged)
+        if others:
+            log.warning("%s stuck, but %s is connected: not resetting", hci, others[0]["address"])
+            return N_("Another Bluetooth device such as headphones is using the adapter – disconnect it or "
+                      "connect it through another adapter")
+        _last_reset[hci] = time.monotonic()
+        resetting.add(hci)
+        log.warning("%s seems stuck, switching it off and on", hci)
+        try:
+            if not await powered(False):
+                return N_("Bluetooth is stuck – switch Bluetooth off and on again")
+            await asyncio.sleep(1.0)
+        finally:
+            # Also when cancelled: never leave the adapter switched off.
+            await powered(True)
+            await asyncio.sleep(2.0)
+            resetting.discard(hci)
+        return ""
     finally:
         bus.disconnect()
 
@@ -112,8 +214,9 @@ class BridgedDevice:
     """Connects a BLE device and mirrors its standard services over DIRCON."""
 
     def __init__(self, cfg: DeviceConfig, announcer: Announcer, on_change: Callable[[], None],
-                 local_only: bool = True, adapter: str = ""):
+                 local_only: bool = True, adapter: str = "", bridged: Callable[[], list[str]] = lambda: []):
         self.cfg = cfg
+        self.bridged = bridged  # addresses of all bridged devices (they may drop during a reset)
         self.local_only = local_only
         self.adapter = adapter  # hciN, empty = default adapter
         self.announcer = announcer
@@ -217,6 +320,7 @@ class BridgedDevice:
 
     async def _run(self) -> None:
         failures = 0
+        timeouts = 0  # connection timeouts in a row of a device that was found
         while True:
             not_found = False
             try:
@@ -227,8 +331,19 @@ class BridgedDevice:
                 text, not_found = describe_error(e)
                 if not not_found or "failed to discover" in str(e):
                     self._note_trouble()
+                # find_device_by_address returns None instead of timing out: a timeout comes from
+                # connect, the device was advertising.
+                timeouts = timeouts + 1 if isinstance(e, (asyncio.TimeoutError, TimeoutError)) else 0
                 self._set_state("error", text)
                 log.warning("%s: %s (%s: %s)", self.cfg.address, text, type(e).__name__, e)
+                if timeouts >= STUCK_TIMEOUTS:
+                    async with connect_lock:
+                        await self._teardown()
+                        reason = await reset_adapter(self.adapter, self.bridged())
+                    if reason:
+                        self._set_state("error", reason)
+                    else:
+                        timeouts = 0
             # After an established connection retry right away; try a device that keeps failing
             # less often, so it does not hold the BlueZ lock all the time.
             failures = 0 if self._was_connected else failures + 1
@@ -351,7 +466,7 @@ class BridgedDevice:
         pending = self._pending.get(char_uuid)
         if pending and not pending.done():
             pending.set_result(value)
-            log.info("%s: control point %s answers %s", self.cfg.address, char_uuid[4:8], value.hex(" "))
+            log.debug("%s: control point %s answers %s", self.cfg.address, char_uuid[4:8], value.hex(" "))
         self._server.notify(char_uuid, value)
         decoder = gatt.DECODERS.get(char_uuid)
         if decoder:

@@ -153,3 +153,70 @@ def test_grace_expires_and_withdraws(monkeypatch):
         await dev.stop()
 
     asyncio.run(scenario())
+
+
+# --- Stuck controller (2026-11-03): connection timeouts in a row of a device that is found ---
+
+def test_stuck_controller_resets_adapter(monkeypatch):
+    class TimingOutClient(FakeClient):
+        async def connect(self):
+            raise asyncio.TimeoutError()
+
+    async def found(*_a, **_kw):
+        return object()
+
+    async def no_disconnect(*_a, **_kw):
+        pass
+    resets = []
+
+    async def reset(adapter, bridged):
+        resets.append((adapter, list(bridged)))
+        monkeypatch.setattr(device, "BleakClient", FakeClient)  # after the reset the strap connects
+        return ""
+    monkeypatch.setattr(device.BleakScanner, "find_device_by_address", found)
+    monkeypatch.setattr(device, "BleakClient", TimingOutClient)
+    monkeypatch.setattr(device, "bluez_disconnect", no_disconnect)
+    monkeypatch.setattr(device, "reset_adapter", reset)
+    monkeypatch.setattr(device, "RECONNECT_DELAY", 0.01)
+    monkeypatch.setattr(device, "MAX_RECONNECT_DELAY", 0.01)
+
+    async def scenario():
+        dev = device.BridgedDevice(DeviceConfig("AA:BB:CC:DD:EE:FF", "TICKR", "heartrate", 0), FakeAnnouncer(),
+                                   lambda: None, adapter="hci0", bridged=lambda: ["AA:BB:CC:DD:EE:FF"])
+        dev.start()
+        await asyncio.sleep(0.3)
+        assert resets == [("hci0", ["AA:BB:CC:DD:EE:FF"])]
+        assert dev.state == "connected"
+        await dev.stop()
+
+    asyncio.run(scenario())
+
+
+def test_reset_rate_limited(monkeypatch):
+    monkeypatch.setattr(device, "_last_reset", {"hci0": device.time.monotonic()})
+    reason = asyncio.run(device.reset_adapter("", []))
+    assert "stuck" in reason
+
+
+# --- Other devices on the bridge's adapter (headphones crowd out the sensors, 2026-11-03) ---
+
+def test_foreign_devices_on_adapter():
+    from dbus_fast import Variant
+
+    def dev(addr, connected, icon="", uuids=(), alias=""):
+        return {"org.bluez.Device1": {"Address": Variant("s", addr), "Connected": Variant("b", connected),
+                                      "Icon": Variant("s", icon), "UUIDs": Variant("as", list(uuids)),
+                                      "Alias": Variant("s", alias)}}
+    objects = {
+        "/org/bluez/hci0": {"org.bluez.Adapter1": {}},
+        "/org/bluez/hci0/dev_DC_1E": dev("DC:1E:D3:39:2C:8D", True, alias="TICKR 9029"),  # bridged
+        "/org/bluez/hci0/dev_20_74": dev("20:74:CF:A9:29:10", True, "audio-headset", alias="Headphones"),
+        "/org/bluez/hci0/dev_AA_BB": dev("AA:BB:CC:00:00:01", True,
+                                        uuids=["0000110b-0000-1000-8000-00805f9b34fb"]),
+        "/org/bluez/hci0/dev_AA_CC": dev("AA:BB:CC:00:00:02", False, "audio-headset"),  # not connected
+        "/org/bluez/hci1/dev_AA_DD": dev("AA:BB:CC:00:00:03", True, "audio-headset"),  # other adapter
+    }
+    got = device.foreign_devices(objects, "", ["dc:1e:d3:39:2c:8d"])
+    assert got == [{"name": "Headphones", "address": "20:74:CF:A9:29:10", "audio": True},
+                   {"name": "AA:BB:CC:00:00:01", "address": "AA:BB:CC:00:00:01", "audio": True}]
+    assert [d["address"] for d in device.foreign_devices(objects, "hci1", [])] == ["AA:BB:CC:00:00:03"]

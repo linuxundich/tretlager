@@ -55,6 +55,16 @@ Intel graphics and redoes its graphics check when the card comes back.
 
 ANT+ is not supported; Wine cannot reach ANT+ sticks, and the bridge only speaks Bluetooth LE.
 
+### Headphones and the number of connections
+
+No chip maker states a usable connection limit: TP-Link advertises "7 devices" for the UB500,
+Intel gives no figure for the AX201. The real limit is airtime. On tinytin (2026-11-03) the KICKR
+and Bluetooth headphones were connected through the built-in AX201; the TICKR then got nothing
+but connection timeouts for ten minutes and connected only once the headphones were removed.
+KICKR plus TICKR alone connect reliably. The bridge therefore lists other devices connected
+through its adapter, and the interface warns while a sensor is waiting and headphones share the
+adapter.
+
 ### Range
 
 The built-in Bluetooth of a laptop in the next room is not enough for a reliable trainer

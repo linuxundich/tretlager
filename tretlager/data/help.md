@@ -86,9 +86,18 @@ using it is at your own risk.**
   wear only one strap. If that does not help, replace the strap's battery: a weak battery often
   gives erratic or too high readings.
 - [view-refresh] **Sensor stays at “Searching for the device…”**: Pedal briefly or unclip the
-  strap for a moment; the bridge searches every ten seconds.
+  strap for a moment; the bridge searches every ten seconds. Bluetooth headphones on the same
+  adapter crowd out the sensors while they play: disconnect them or connect them through a second
+  adapter; Tretlager points this out.
 - [data-warning] **Sensor is found but never connects**: It does not get along with the
   Bluetooth chip; Tretlager reports known cases on the sensor. Remedy: USB Bluetooth dongle.
+- [network-bluetooth] **Sensor does not come back after a break**: If a sensor is in range but
+  every attempt times out, the Bluetooth chip is stuck. Tretlager then switches Bluetooth off and
+  on once by itself; the trainer reconnects within seconds and Zwift keeps both. If other
+  Bluetooth devices such as headphones are connected, it leaves that to you: switch Bluetooth off
+  and on in the system tray.
+- [system-suspend-inhibited] **Screen dims or locks during the ride**: Switch on *Keep screen on
+  during the ride* in the main window. It only applies while Zwift runs.
 - [network-wireless-disconnected] **Connection drops often**: Move the computer closer to the
   trainer or place a USB Bluetooth dongle on an extension cable next to the trainer.
 - [network-bluetooth] **Zwift does not find the sensors**: Check under *Sensors* that the bridge

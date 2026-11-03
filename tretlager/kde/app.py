@@ -15,7 +15,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from .. import APP_ID, __version__, build_id
 from . import desktopstyle, zwiftwindow
 from .i18n import LocalizedContext
-from ..core import applog, bridgectl, btcompat, debug, display, helpdoc, instance, launch, login, power, prepare, report, setup, state, systemcheck, wine
+from ..core import applog, awake, bridgectl, btcompat, debug, display, helpdoc, instance, launch, login, power, prepare, report, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
 
 # Embedded sign-in (as in the official launcher): needs QtWebEngine. Without the module,
@@ -379,7 +379,8 @@ class Backend(QObject):
         self._sensors = {"installed": True, "running": False, "autostart": False, "network": False,
                          "devices": [], "scanning": False,
                          "found": [], "scanned": False, "error": "",
-                         "adapters": [], "adapter": "", "adapterHci": "", "adapterMissing": False}
+                         "adapters": [], "adapter": "", "adapterHci": "", "adapterMissing": False,
+                         "otherDevices": []}
         self._chip = btcompat.adapter_chip()
         self._sensorsEvent.connect(self._on_sensors_event)
         self._poll = QTimer(self)
@@ -439,6 +440,7 @@ class Backend(QObject):
                     "autostart": bridgectl.autostart(),
                     "adapter": (st or {}).get("adapter", ""), "adapterHci": (st or {}).get("adapter_hci", ""),
                     "adapterMissing": (st or {}).get("adapter_missing", False),
+                    "otherDevices": (st or {}).get("other_devices", []),
                     "devices": btcompat.annotate((st or {}).get("devices", []), chip),
                     "network": not (st or {}).get("local_only", True)}))
             finally:
@@ -499,6 +501,7 @@ class Backend(QObject):
                         "log": "", "version": "", "remote": "", "renderer": "", "login": "",
                         "onBattery": power.on_ac() is False, "powerChanged": False, "gpuErrors": ""}
         self._launchEvent.connect(self._on_launch_event)
+        self._awake = awake.KeepAwake()
         self._ac_at_start: bool | None = None
         # Watch the power source: notice on battery, note changes during start and ride.
         self._power_timer = QTimer(self)
@@ -593,6 +596,26 @@ class Backend(QObject):
             ev = dict(ev, log=(self._launch["log"] + ev.pop("logline") + "\n")[-20000:])
         self._launch = dict(self._launch, **ev)
         self.launchChanged.emit()
+        self._update_awake()
+
+    # --- Keep the screen on during the ride ---
+
+    keepScreenOnChanged = Signal()
+
+    def _update_awake(self) -> None:
+        ride = self._launch["busy"] or self._launch["zwiftRunning"]
+        self._awake.want(ride and awake.enabled(), _("Zwift ride"))
+
+    @Property(bool, notify=keepScreenOnChanged)
+    def keepScreenOn(self) -> bool:
+        return awake.enabled()
+
+    @Slot(bool)
+    def setKeepScreenOn(self, on: bool) -> None:
+        awake.set_enabled(on)
+        applog.info("Keep screen on %s", "on" if on else "off")
+        self.keepScreenOnChanged.emit()
+        self._update_awake()
 
     @Slot()
     def refreshOverview(self) -> None:

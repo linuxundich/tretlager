@@ -12,6 +12,9 @@ ColumnsPage {
     property bool wizard: applicationWindow().inWizard
     readonly property var se: backend.sensors
     readonly property var unstable: se.devices.filter(function (d) { return d.unstable && !d.compat })
+    // Headphones and the like on the same adapter, while a sensor is still waiting
+    readonly property var others: se.running && se.devices.some(function (d) { return d.enabled && d.state !== "connected" })
+                                  ? (se.otherDevices || []) : []
     readonly property var roleText: ({ "trainer": i18n("Smart trainer"), "power": i18n("Power meter"),
         "cadence": i18n("Cadence sensor"), "heartrate": i18n("Heart rate strap"), "other": i18n("Sensor") })
 
@@ -37,6 +40,15 @@ ColumnsPage {
         visible: page.se.running && page.se.adapterMissing
         type: Kirigami.MessageType.Warning
         text: i18n("The selected Bluetooth adapter is unplugged or turned off. Until it is back, the bridge uses the built-in adapter and then switches back by itself.")
+    }
+    PageMessage {
+        visible: page.others.length > 0
+        type: Kirigami.MessageType.Warning
+        text: page.others.some(function (o) { return o.audio })
+            ? i18n("%1 is also connected through the sensors' Bluetooth adapter. While it plays audio, the adapter has hardly any time left for the sensors: they are no longer found or do not connect. Disconnect it, or connect it through another Bluetooth adapter.",
+                   page.others.map(function (o) { return o.name }).join(", "))
+            : i18n("Also connected through the sensors' Bluetooth adapter: %1. If a sensor does not connect, disconnect this device for a test.",
+                   page.others.map(function (o) { return o.name }).join(", "))
     }
     PageMessage {
         visible: page.unstable.length > 0

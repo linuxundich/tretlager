@@ -88,9 +88,18 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
   einen Gurt tragen. Hilft das nicht, die Batterie des Gurts wechseln: Eine schwache Batterie
   liefert oft sprunghafte oder zu hohe Werte.
 - [view-refresh] **Sensor bleibt bei „Sucht das Gerät …“**: Kurz in die Pedale treten oder den
-  Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden.
+  Gurt kurz abklipsen; die Bridge sucht alle zehn Sekunden. Bluetooth-Kopfhörer am selben Adapter
+  verdrängen die Sensoren, solange Ton läuft: trennen oder über einen zweiten Adapter verbinden;
+  Tretlager weist darauf hin.
 - [data-warning] **Sensor wird gefunden, verbindet sich aber nie**: Er verträgt den
   Bluetooth-Chip nicht; bekannte Fälle meldet Tretlager am Sensor. Abhilfe: USB-Bluetooth-Stick.
+- [network-bluetooth] **Sensor kommt nach einer Pause nicht zurück**: Ist ein Sensor in Reichweite,
+  läuft aber jeder Versuch in eine Zeitüberschreitung, hängt der Bluetooth-Chip. Tretlager schaltet
+  Bluetooth dann einmal selbst aus und wieder ein; der Trainer verbindet sich nach wenigen Sekunden
+  neu, und Zwift behält beide. Sind andere Bluetooth-Geräte wie Kopfhörer verbunden, überlässt
+  Tretlager das dir: Bluetooth im Systemabschnitt der Kontrollleiste aus- und einschalten.
+- [system-suspend-inhibited] **Bildschirm wird während der Fahrt dunkel oder sperrt**: Im
+  Hauptfenster *Bildschirm während der Fahrt anlassen* einschalten. Das gilt nur, solange Zwift läuft.
 - [network-wireless-disconnected] **Verbindung bricht oft ab**: Rechner näher an den Trainer
   stellen oder einen USB-Bluetooth-Stick mit Verlängerung neben den Trainer legen.
 - [network-bluetooth] **Zwift findet die Sensoren nicht**: Unter *Sensoren* prüfen, ob die Bridge

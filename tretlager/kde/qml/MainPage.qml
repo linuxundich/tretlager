@@ -24,6 +24,8 @@ ColumnsPage {
     readonly property var activeDevices: se.devices.filter(function (d) { return d.enabled })
     readonly property var waitingDevices: activeDevices.filter(function (d) { return d.state !== "connected" })
     readonly property bool sensorsReady: se.running && waitingDevices.length === 0
+    readonly property var audioOthers: se.running && waitingDevices.length > 0
+                                       ? (se.otherDevices || []).filter(function (o) { return o.audio }) : []
     readonly property string readinessText: {
         if (!se.running)
             return i18n("The sensor bridge is starting …")
@@ -92,6 +94,13 @@ ColumnsPage {
             text: modelData.compat
             actions: [Kirigami.Action { text: i18n("Sensors"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
         }
+    }
+    PageMessage {
+        visible: page.audioOthers.length > 0
+        type: Kirigami.MessageType.Warning
+        text: i18n("%1 shares the Bluetooth adapter with the sensors and crowds them out while it plays audio. Disconnect it, or connect it through another Bluetooth adapter.",
+                   page.audioOthers.map(function (o) { return o.name }).join(", "))
+        actions: [Kirigami.Action { text: i18n("Sensors"); icon.name: "network-bluetooth"; onTriggered: applicationWindow().show("sensors", { wizard: false }) }]
     }
     PageMessage {
         visible: page.anyUnstable
@@ -233,6 +242,14 @@ ColumnsPage {
                 checked: page.la.wine.useKept
                 enabled: !page.la.busy && !page.la.zwiftRunning
                 onToggled: backend.setUseKeptWine(checked)
+            }
+            FormCard.FormDelegateSeparator {}
+            FormCard.FormSwitchDelegate {
+                text: i18n("Keep screen on during the ride")
+                description: i18n("The screen does not dim, switch off or lock while Zwift runs, even during a break.")
+                icon.name: "system-suspend-inhibited"
+                checked: backend.keepScreenOn
+                onToggled: backend.setKeepScreenOn(checked)
             }
             FormCard.FormDelegateSeparator {}
             FormCard.FormTextDelegate {

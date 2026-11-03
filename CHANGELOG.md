@@ -4,6 +4,31 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Added
+- *Keep screen on during the ride* (main window, on by default): while Zwift starts and runs,
+  Tretlager asks the desktop through the Inhibit portal not to dim, blank or lock the screen and
+  not to suspend, also during a break without touching mouse or keyboard. Works on Plasma
+  (PowerDevil) and GNOME (session manager); the inhibition ends with the ride or when Tretlager
+  quits (`core/awake.py`).
+
+- Notice when Bluetooth headphones (or any other device) are connected through the bridge's
+  adapter while a sensor is still waiting: audio crowds the sensors out (tinytin: KICKR plus
+  headphones on the AX201, the TICKR timed out for ten minutes until the headphones were removed).
+  The bridge reports these devices in its status (`other_devices`); the adapter reset after a
+  stuck controller names them as the reason instead of resetting.
+
+### Fixed
+- Sensor bridge: a heart rate strap that lost its connection during a break did not come back,
+  even after removing and adding it again (tinytin, Intel AX201, kernel 7.2). Every attempt ran
+  into the kernel's 20 s connection timeout while the strap was advertising; the kernel logged
+  "ACL packet for unknown connection handle", i.e. the controller kept a link that the kernel had
+  given up on. After three timeouts in a row of a device that is found, the bridge now switches
+  the adapter off and on (at most every ten minutes, not while other Bluetooth devices such as
+  headphones are connected; then it asks the user to do it). The other sensors reconnect and Zwift
+  keeps them thanks to the grace period.
+- The bridge logs the trainer's control point answers at debug level only; at one line per second
+  they pushed everything else out of `bridge.log` during a long ride.
+
 ## [0.11.0] - 2026-11-01
 
 ### Added

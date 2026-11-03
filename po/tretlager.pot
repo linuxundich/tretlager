@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 20:21+0100\n"
+"POT-Creation-Date: 2026-11-03 23:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,48 +18,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: tretlager/bridge/device.py:84
+#: tretlager/bridge/device.py:142 tretlager/bridge/device.py:147
+#: tretlager/bridge/device.py:166
+msgid "Bluetooth is stuck – switch Bluetooth off and on again"
+msgstr ""
+
+#: tretlager/bridge/device.py:159
+msgid ""
+"Another Bluetooth device such as headphones is using the adapter – "
+"disconnect it or connect it through another adapter"
+msgstr ""
+
+#: tretlager/bridge/device.py:186
 msgid "Out of range or asleep"
 msgstr ""
 
-#: tretlager/bridge/device.py:87
+#: tretlager/bridge/device.py:189
 msgid "Device is asleep – pedal briefly or put on the strap"
 msgstr ""
 
-#: tretlager/bridge/device.py:89
+#: tretlager/bridge/device.py:191
 msgid "Connection timed out, trying again"
 msgstr ""
 
-#: tretlager/bridge/device.py:91
+#: tretlager/bridge/device.py:193
 msgid "Bluetooth is off or the adapter is missing"
 msgstr ""
 
-#: tretlager/bridge/device.py:93
+#: tretlager/bridge/device.py:195
 msgid "Bluetooth is busy, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:95
+#: tretlager/bridge/device.py:197
 msgid "Connection attempt aborted, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:97
+#: tretlager/bridge/device.py:199
 msgid "Bluetooth denies access to the device"
 msgstr ""
 
-#: tretlager/bridge/device.py:100
+#: tretlager/bridge/device.py:202
 msgid "Connection failed, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:262
+#: tretlager/bridge/device.py:377
 msgid ""
 "Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"
 msgstr ""
 
-#: tretlager/bridge/device.py:284
+#: tretlager/bridge/device.py:399
 msgid "Connection to the device lost"
 msgstr ""
 
-#: tretlager/bridge/device.py:346
+#: tretlager/bridge/device.py:461
 msgid "Device not connected"
 msgstr ""
 
@@ -141,7 +152,7 @@ msgstr ""
 msgid "Adjusting the window"
 msgstr ""
 
-#: tretlager/core/launch.py:230 tretlager/kde/app.py:661
+#: tretlager/core/launch.py:230 tretlager/kde/app.py:684
 msgid "Zwift is running"
 msgstr ""
 
@@ -729,81 +740,85 @@ msgstr ""
 msgid "Helper exited with code {code}"
 msgstr ""
 
-#: tretlager/kde/app.py:518
+#: tretlager/kde/app.py:521
 msgid "Power source changed: AC"
 msgstr ""
 
-#: tretlager/kde/app.py:518
+#: tretlager/kde/app.py:521
 msgid "Power source changed: battery"
 msgstr ""
 
-#: tretlager/kde/app.py:520
+#: tretlager/kde/app.py:523
 msgid "Power source changed"
 msgstr ""
 
-#: tretlager/kde/app.py:521
+#: tretlager/kde/app.py:524
 msgid ""
 "Switching between AC and battery can upset the NVIDIA driver. If Zwift "
 "hangs, close it with Alt+F4 and restart it with the power adapter connected."
 msgstr ""
 
-#: tretlager/kde/app.py:550
+#: tretlager/kde/app.py:553
 msgid ""
 "GNU General Public License, version 3 or later: https://www.gnu.org/licenses/"
 "gpl-3.0.html"
 msgstr ""
 
-#: tretlager/kde/app.py:564
+#: tretlager/kde/app.py:567
 msgid "Sensor bridge restarted after an update"
 msgstr ""
 
-#: tretlager/kde/app.py:613
+#: tretlager/kde/app.py:607
+msgid "Zwift ride"
+msgstr ""
+
+#: tretlager/kde/app.py:636
 msgid "valid"
 msgstr ""
 
-#: tretlager/kde/app.py:613
+#: tretlager/kde/app.py:636
 msgid "renewed at start"
 msgstr ""
 
-#: tretlager/kde/app.py:614
+#: tretlager/kde/app.py:637
 msgid "expired – please sign in again"
 msgstr ""
 
-#: tretlager/kde/app.py:615
+#: tretlager/kde/app.py:638
 msgid "not signed in"
 msgstr ""
 
-#: tretlager/kde/app.py:618
+#: tretlager/kde/app.py:641
 #, python-brace-format
 msgid ", renewal for {n} more day"
 msgid_plural ", renewal for {n} more days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/kde/app.py:637
+#: tretlager/kde/app.py:660
 msgid "Preparing the start"
 msgstr ""
 
-#: tretlager/kde/app.py:658
+#: tretlager/kde/app.py:681
 #, python-brace-format
 msgid "Unexpected error ({name})"
 msgstr ""
 
-#: tretlager/kde/app.py:679
+#: tretlager/kde/app.py:702
 #, python-brace-format
 msgid "{version} kept as the proven Wine version"
 msgstr ""
 
-#: tretlager/kde/app.py:682
+#: tretlager/kde/app.py:705
 msgid "Zwift closed"
 msgstr ""
 
-#: tretlager/kde/app.py:700
+#: tretlager/kde/app.py:723
 #, python-brace-format
 msgid "NVIDIA driver reported {errors}"
 msgstr ""
 
-#: tretlager/kde/app.py:760
+#: tretlager/kde/app.py:783
 #, python-brace-format
 msgid "Could not save the error report ({name})."
 msgstr ""
@@ -963,8 +978,8 @@ msgid ""
 "subscription."
 msgstr ""
 
-#: tretlager/kde/qml/AboutPage.qml:89 tretlager/kde/qml/SensorsPage.qml:128
-#: tretlager/kde/qml/SensorsPage.qml:135
+#: tretlager/kde/qml/AboutPage.qml:89 tretlager/kde/qml/SensorsPage.qml:140
+#: tretlager/kde/qml/SensorsPage.qml:147
 msgid "Sensor bridge"
 msgstr ""
 
@@ -1032,7 +1047,7 @@ msgid ""
 "license terms apply."
 msgstr ""
 
-#: tretlager/kde/qml/AboutPage.qml:129 tretlager/kde/qml/MainPage.qml:198
+#: tretlager/kde/qml/AboutPage.qml:129 tretlager/kde/qml/MainPage.qml:207
 msgid "Zwift"
 msgstr ""
 
@@ -1127,25 +1142,25 @@ msgstr ""
 msgid "Checking the system…"
 msgstr ""
 
-#: tretlager/kde/qml/DeviceDelegate.qml:22 tretlager/kde/qml/SensorsPage.qml:15
+#: tretlager/kde/qml/DeviceDelegate.qml:22 tretlager/kde/qml/SensorsPage.qml:18
 msgid "Smart trainer"
 msgstr ""
 
-#: tretlager/kde/qml/DeviceDelegate.qml:22 tretlager/kde/qml/SensorsPage.qml:15
+#: tretlager/kde/qml/DeviceDelegate.qml:22 tretlager/kde/qml/SensorsPage.qml:18
 msgid "Power meter"
 msgstr ""
 
-#: tretlager/kde/qml/DeviceDelegate.qml:23 tretlager/kde/qml/SensorsPage.qml:16
+#: tretlager/kde/qml/DeviceDelegate.qml:23 tretlager/kde/qml/SensorsPage.qml:19
 msgid "Cadence sensor"
 msgstr ""
 
-#: tretlager/kde/qml/DeviceDelegate.qml:23 tretlager/kde/qml/SensorsPage.qml:16
+#: tretlager/kde/qml/DeviceDelegate.qml:23 tretlager/kde/qml/SensorsPage.qml:19
 msgid "Heart rate strap"
 msgstr ""
 
 #: tretlager/kde/qml/DeviceDelegate.qml:23
 #: tretlager/kde/qml/DeviceDelegate.qml:121
-#: tretlager/kde/qml/SensorsPage.qml:16 tretlager/kde/qml/SensorsPage.qml:82
+#: tretlager/kde/qml/SensorsPage.qml:19 tretlager/kde/qml/SensorsPage.qml:94
 msgid "Sensor"
 msgstr ""
 
@@ -1290,13 +1305,13 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-#: tretlager/kde/qml/LogDialog.qml:9 tretlager/kde/qml/MainPage.qml:63
-#: tretlager/kde/qml/MainPage.qml:72 tretlager/kde/qml/PreparePage.qml:46
+#: tretlager/kde/qml/LogDialog.qml:9 tretlager/kde/qml/MainPage.qml:65
+#: tretlager/kde/qml/MainPage.qml:74 tretlager/kde/qml/PreparePage.qml:46
 #: tretlager/kde/qml/ZwiftPage.qml:29
 msgid "Log"
 msgstr ""
 
-#: tretlager/kde/qml/LoginPage.qml:10 tretlager/kde/qml/MainPage.qml:239
+#: tretlager/kde/qml/LoginPage.qml:10 tretlager/kde/qml/MainPage.qml:256
 msgid "Sign-in"
 msgstr ""
 
@@ -1462,72 +1477,72 @@ msgstr ""
 msgid "%1, bundled with Tretlager"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:29
+#: tretlager/kde/qml/MainPage.qml:31
 msgid "The sensor bridge is starting …"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:31
+#: tretlager/kde/qml/MainPage.qml:33
 msgid ""
 "No sensors set up. Zwift starts anyway; sensors can be added under Sensors."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:33
+#: tretlager/kde/qml/MainPage.qml:35
 msgid "Sensor connected: %2"
 msgid_plural "All %1 sensors connected: %2"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/kde/qml/MainPage.qml:35
+#: tretlager/kde/qml/MainPage.qml:37
 msgid ""
 "%1 of %2 sensors connected. Still searching: %3 – pedal briefly or put on "
 "the strap."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:47
+#: tretlager/kde/qml/MainPage.qml:49
 msgid "Log of the last start"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:53
+#: tretlager/kde/qml/MainPage.qml:55
 msgid ""
 "The Zwift session has expired. After signing in again, Zwift starts with one "
 "click again."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:55
+#: tretlager/kde/qml/MainPage.qml:57
 msgid "Sign in…"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:69
+#: tretlager/kde/qml/MainPage.qml:71
 msgid ""
 "The graphics driver reported errors during the last ride (%1). Shortly "
 "before, the power source switched between AC and battery; that is the likely "
 "cause."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:70
+#: tretlager/kde/qml/MainPage.qml:72
 msgid "The graphics driver reported errors during the last ride (%1)."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:71
+#: tretlager/kde/qml/MainPage.qml:73
 msgid ""
 "Restart Zwift with the power adapter connected; if it still hangs, restart "
 "the computer."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:78
+#: tretlager/kde/qml/MainPage.qml:80
 msgid ""
 "The power source changed during the start. If Zwift hangs, close it with "
 "Alt+F4 and restart it with the power adapter connected."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:79
+#: tretlager/kde/qml/MainPage.qml:81
 msgid ""
 "The power source changed during the last ride. Switching between AC and "
 "battery can upset the graphics driver; best connect the power adapter before "
 "starting and keep it connected during the ride."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:84
+#: tretlager/kde/qml/MainPage.qml:86
 msgid ""
 "The computer is running on battery. Best start Zwift with the power adapter "
 "connected and keep it connected during the ride: switching between AC and "
@@ -1535,39 +1550,46 @@ msgid ""
 "heavily throttled."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:93 tretlager/kde/qml/MainPage.qml:100
-#: tretlager/kde/qml/MainPage.qml:161 tretlager/kde/qml/Main.qml:58
-#: tretlager/kde/qml/SensorsPage.qml:10
+#: tretlager/kde/qml/MainPage.qml:95 tretlager/kde/qml/MainPage.qml:103
+#: tretlager/kde/qml/MainPage.qml:109 tretlager/kde/qml/MainPage.qml:170
+#: tretlager/kde/qml/Main.qml:58 tretlager/kde/qml/SensorsPage.qml:10
 msgid "Sensors"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:99
+#: tretlager/kde/qml/MainPage.qml:101
+msgid ""
+"%1 shares the Bluetooth adapter with the sensors and crowds them out while "
+"it plays audio. Disconnect it, or connect it through another Bluetooth "
+"adapter."
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:108
 msgid ""
 "A sensor often loses its connection. Usually the computer is too far from "
 "the trainer."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:105
+#: tretlager/kde/qml/MainPage.qml:114
 msgid "Enjoy the ride!"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:105
+#: tretlager/kde/qml/MainPage.qml:114
 msgid "Zwift is starting…"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:106
+#: tretlager/kde/qml/MainPage.qml:115
 msgid "Ready to ride"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:106
+#: tretlager/kde/qml/MainPage.qml:115
 msgid "Almost ready"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:107
+#: tretlager/kde/qml/MainPage.qml:116
 msgid "Tretlager waits minimised and tidies up after the ride."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:135
+#: tretlager/kde/qml/MainPage.qml:144
 msgid ""
 "Before starting, Tretlager checks the sensor bridge and renews the Zwift "
 "session. After a Tretlager update it adapts the Zwift environment, and it "
@@ -1575,14 +1597,14 @@ msgid ""
 "most powerful graphics card and at the screen's resolution."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:154
+#: tretlager/kde/qml/MainPage.qml:163
 msgid ""
 "Not an official Zwift app, use at your own risk. Not for races: Tretlager "
 "does not guarantee that the sensor bridge passes power, cadence and heart "
 "rate to Zwift correctly."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:164
+#: tretlager/kde/qml/MainPage.qml:173
 msgid ""
 "Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the "
 "trainer and heart rate strap and offers them to Zwift as Wahoo devices with "
@@ -1590,54 +1612,54 @@ msgid ""
 "KICKR …” for power, cadence and resistance, “Wahoo HRM …” for heart rate."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:172 tretlager/kde/qml/SensorsPage.qml:101
+#: tretlager/kde/qml/MainPage.qml:181 tretlager/kde/qml/SensorsPage.qml:113
 msgid "Sensor bridge is off"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:172
+#: tretlager/kde/qml/MainPage.qml:181
 msgid "No devices set up"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:173
+#: tretlager/kde/qml/MainPage.qml:182
 msgid "It starts with Tretlager and before every ride."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:174
+#: tretlager/kde/qml/MainPage.qml:183
 msgid "Add the trainer and heart rate strap under Sensors."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:189
+#: tretlager/kde/qml/MainPage.qml:198
 msgid "Manage sensors"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:202
+#: tretlager/kde/qml/MainPage.qml:211
 msgid "Version"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:204
+#: tretlager/kde/qml/MainPage.qml:213
 msgid "%1, up to date"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:205
+#: tretlager/kde/qml/MainPage.qml:214
 msgid "%1, update to %2 at the next start"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:211
+#: tretlager/kde/qml/MainPage.qml:220
 msgid "Not checked yet"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:214
+#: tretlager/kde/qml/MainPage.qml:223
 msgid ""
 "Tretlager tested the graphics path during setup. On laptops with two "
 "graphics chips, Zwift runs on the NVIDIA card while the desktop stays on the "
 "power-saving chip. The screen resolution stays unchanged."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:219
+#: tretlager/kde/qml/MainPage.qml:228
 msgid "Wine"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:223
+#: tretlager/kde/qml/MainPage.qml:232
 msgid ""
 "Wine comes with Tretlager and is updated with Tretlager. Tretlager keeps the "
 "last proven version: if Zwift runs worse after an update, the switch below "
@@ -1645,28 +1667,38 @@ msgid ""
 "then replaces the kept version."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:230
+#: tretlager/kde/qml/MainPage.qml:239
 msgid "Use previous Wine version"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:231
+#: tretlager/kde/qml/MainPage.qml:240
 msgid ""
 "%1 instead of %2. Only needed if Zwift has not run properly since the last "
 "Tretlager update."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:243
+#: tretlager/kde/qml/MainPage.qml:248
+msgid "Keep screen on during the ride"
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:249
+msgid ""
+"The screen does not dim, switch off or lock while Zwift runs, even during a "
+"break."
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:260
 msgid ""
 "The official sign-in does not work on Linux, so it runs through a separate "
 "sign-in window. This contradicts Zwift's terms of service. The session is "
 "only stored in this computer's keyring."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:248
+#: tretlager/kde/qml/MainPage.qml:265
 msgid "Sign in again…"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:255
+#: tretlager/kde/qml/MainPage.qml:272
 msgid "Log of the last start…"
 msgstr ""
 
@@ -1772,219 +1804,233 @@ msgstr ""
 msgid "Apply changes…"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:19
+#: tretlager/kde/qml/SensorsPage.qml:22
 msgid "strong"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:19
+#: tretlager/kde/qml/SensorsPage.qml:22
 msgid "medium"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:19
+#: tretlager/kde/qml/SensorsPage.qml:22
 msgid "weak"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:19
+#: tretlager/kde/qml/SensorsPage.qml:22
 msgid "%1 (%2 dBm)"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:27
+#: tretlager/kde/qml/SensorsPage.qml:30
 msgid "Pedal briefly and put on the heart rate strap."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:39
+#: tretlager/kde/qml/SensorsPage.qml:42
 msgid ""
 "The selected Bluetooth adapter is unplugged or turned off. Until it is back, "
 "the bridge uses the built-in adapter and then switches back by itself."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:44
+#: tretlager/kde/qml/SensorsPage.qml:48
+msgid ""
+"%1 is also connected through the sensors' Bluetooth adapter. While it plays "
+"audio, the adapter has hardly any time left for the sensors: they are no "
+"longer found or do not connect. Disconnect it, or connect it through another "
+"Bluetooth adapter."
+msgstr ""
+
+#: tretlager/kde/qml/SensorsPage.qml:50
+msgid ""
+"Also connected through the sensors' Bluetooth adapter: %1. If a sensor does "
+"not connect, disconnect this device for a test."
+msgstr ""
+
+#: tretlager/kde/qml/SensorsPage.qml:56
 msgid ""
 "The connection to %1 drops often. Usually the radio path is too long. "
 "Remedy: move the computer closer to the trainer or place a USB Bluetooth "
 "dongle on an extension cable next to the trainer."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:51
+#: tretlager/kde/qml/SensorsPage.qml:63
 msgid "Sensors nearby"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:53
+#: tretlager/kde/qml/SensorsPage.qml:65
 msgid ""
 "The search takes about ten seconds and finds smart trainers, power meters, "
 "cadence sensors and heart rate straps. Pedal briefly beforehand so the "
 "trainer wakes up; a heart rate strap only transmits with skin contact."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:58
+#: tretlager/kde/qml/SensorsPage.qml:70
 msgid "Searching…"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:58
+#: tretlager/kde/qml/SensorsPage.qml:70
 msgid "Search for sensors"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:59
+#: tretlager/kde/qml/SensorsPage.qml:71
 msgid "Turn on the sensor bridge for this."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:68
+#: tretlager/kde/qml/SensorsPage.qml:80
 msgid "Nothing found"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:69
+#: tretlager/kde/qml/SensorsPage.qml:81
 msgid "Wake up the trainer, put on the strap and search again."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:82
+#: tretlager/kde/qml/SensorsPage.qml:94
 msgid "%1 · signal %2"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:86
+#: tretlager/kde/qml/SensorsPage.qml:98
 msgid "Paired"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:86
+#: tretlager/kde/qml/SensorsPage.qml:98
 msgid "Add"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:96
+#: tretlager/kde/qml/SensorsPage.qml:108
 msgid "Paired sensors"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:101
+#: tretlager/kde/qml/SensorsPage.qml:113
 msgid "No sensors paired yet"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:102
+#: tretlager/kde/qml/SensorsPage.qml:114
 msgid "Search for sensors above and add them."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:103
+#: tretlager/kde/qml/SensorsPage.qml:115
 msgid "Turn on the bridge to manage sensors."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:130
+#: tretlager/kde/qml/SensorsPage.qml:142
 msgid ""
 "Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the "
 "trainer and heart rate strap and offers them to Zwift as Wahoo devices with "
 "“Direct Connect”; the Zwift Companion app is not needed."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:136
+#: tretlager/kde/qml/SensorsPage.qml:148
 msgid "Running and offering the sensors to Zwift"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:136
+#: tretlager/kde/qml/SensorsPage.qml:148
 msgid "Off – Zwift sees no sensors"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:145 tretlager/kde/qml/SensorsPage.qml:158
+#: tretlager/kde/qml/SensorsPage.qml:157 tretlager/kde/qml/SensorsPage.qml:170
 msgid "Bluetooth adapter"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:146
+#: tretlager/kde/qml/SensorsPage.qml:158
 msgid "The bridge connects all sensors through this adapter."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:161
+#: tretlager/kde/qml/SensorsPage.qml:173
 msgid ""
 "A USB Bluetooth dongle helps if the computer is far from the trainer (place "
 "it next to the trainer on an extension cable) or if the built-in chip does "
 "not get along with a sensor. Once plugged in, it can be selected here."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:166
+#: tretlager/kde/qml/SensorsPage.qml:178
 msgid "Start at login"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:167
+#: tretlager/kde/qml/SensorsPage.qml:179
 msgid "Otherwise it starts with Tretlager and before every ride."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:174
+#: tretlager/kde/qml/SensorsPage.qml:186
 msgid "Offer on the network"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:176
+#: tretlager/kde/qml/SensorsPage.qml:188
 msgid ""
 "Visible on the local network; any device on the network can then control the "
 "trainer."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:177
+#: tretlager/kde/qml/SensorsPage.qml:189
 msgid ""
 "Only needed if Zwift runs on another device (Apple TV, iPad, second "
 "computer)."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:187
+#: tretlager/kde/qml/SensorsPage.qml:199
 msgid "Troubleshooting"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:196
+#: tretlager/kde/qml/SensorsPage.qml:208
 msgid "Sensor not in use right now"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:197
+#: tretlager/kde/qml/SensorsPage.qml:209
 msgid ""
 "Pause instead of removing: Tretlager then stops searching for it, and the "
 "pairing is kept."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:198
+#: tretlager/kde/qml/SensorsPage.qml:210
 msgid "Zwift does not find the sensors"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:199
+#: tretlager/kde/qml/SensorsPage.qml:211
 msgid ""
 "The bridge must be running. In Zwift, select “Wahoo KICKR …” or “Wahoo HRM "
 "…” under Paired Devices."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:200
+#: tretlager/kde/qml/SensorsPage.qml:212
 msgid "Heart rate far too high"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:201
+#: tretlager/kde/qml/SensorsPage.qml:213
 msgid ""
 "Moisten the electrodes, tighten the strap and wear only one strap. If that "
 "does not help, replace the strap's battery."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:202
+#: tretlager/kde/qml/SensorsPage.qml:214
 msgid "Device stays at “Searching for the device…”"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:203
+#: tretlager/kde/qml/SensorsPage.qml:215
 msgid ""
 "Pedal briefly or unclip the strap for a moment; the bridge searches every "
 "ten seconds."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:204
+#: tretlager/kde/qml/SensorsPage.qml:216
 msgid "Device never connects"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:205
+#: tretlager/kde/qml/SensorsPage.qml:217
 msgid ""
 "Some sensors do not get along with certain Bluetooth chips. Tretlager "
 "reports known cases on the device; a USB Bluetooth dongle selected as the "
 "Bluetooth adapter helps then."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:206
+#: tretlager/kde/qml/SensorsPage.qml:218
 msgid "Connection drops often"
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:207
+#: tretlager/kde/qml/SensorsPage.qml:219
 msgid ""
 "Bluetooth does not travel well through walls. Move the computer closer to "
 "the trainer or place a USB Bluetooth dongle on an extension cable next to "
 "the trainer."
 msgstr ""
 
-#: tretlager/kde/qml/SensorsPage.qml:225
+#: tretlager/kde/qml/SensorsPage.qml:237
 msgid "Skip"
 msgstr ""
 

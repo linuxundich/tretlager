@@ -20,6 +20,7 @@ from dbus_fast.service import ServiceInterface, method, signal as dbus_signal
 from .. import BRIDGE_BUS_NAME, BRIDGE_OBJECT_PATH, __version__
 from . import adapters, gatt
 from .config import BridgeConfig
+from . import device
 from .device import BridgedDevice, connect_lock
 from .mdns import Announcer
 
@@ -41,6 +42,7 @@ class Bridge(ServiceInterface):
         self.hci = ""  # resolved adapter, empty = default
         self.adapter_missing = False
         self._adapter_check = 0
+        self.others: list[dict] = []  # other devices connected through the adapter (headphones)
 
     async def resolve_adapter(self) -> bool:
         """Resolve the selected adapter; True if the adapter in use has changed."""
@@ -74,7 +76,7 @@ class Bridge(ServiceInterface):
         cfg = self.config.find(address)
         if cfg and address not in self.devices:
             dev = BridgedDevice(cfg, self.announcer, self._mark_dirty, local_only=self.config.local_only,
-                                adapter=self.hci)
+                                adapter=self.hci, bridged=lambda: [c.address for c in self.config.devices])
             self.devices[address] = dev
             dev.start()
 
@@ -94,9 +96,17 @@ class Bridge(ServiceInterface):
             # If an adapter is selected, check every ten seconds whether it is still present and
             # powered (USB dongle unplugged or switched off), or has come back.
             self._adapter_check += 1
-            if self.config.adapter and self._adapter_check % 10 == 0:
+            # Not while the bridge switches the adapter off and on itself (stuck controller).
+            if self.config.adapter and self._adapter_check % 10 == 0 and not device.resetting:
                 if await self.resolve_adapter():
                     await self.restart_devices()
+            if self._adapter_check % 5 == 0 and not device.resetting:
+                others = await device.other_devices(self.hci, [c.address for c in self.config.devices])
+                if others != self.others:
+                    if others:
+                        log.info("also connected through the adapter: %s", ", ".join(o["address"] for o in others))
+                    self.others = others
+                    self._mark_dirty()
             live = any(d.state == "connected" for d in self.devices.values())
             if self._dirty or live:
                 self._dirty = False
@@ -118,7 +128,8 @@ class Bridge(ServiceInterface):
         return json.dumps({"running": True, "version": __version__, "scanning": self.scanning,
                            "local_only": self.config.local_only,
                            "adapter": self.config.adapter, "adapter_hci": self.hci or next(iter(self.adapters), ""),
-                           "adapter_missing": self.adapter_missing, "devices": devices})
+                           "adapter_missing": self.adapter_missing, "other_devices": self.others,
+                           "devices": devices})
 
     # --- D-Bus ---
 

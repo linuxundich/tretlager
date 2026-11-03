@@ -81,7 +81,11 @@
 - [ ] UI: Plasma polish (icons checked, remove button new)
 - [x] Network change: close connections whose local address has disappeared
 - [ ] Test without any network connection (announcement on lo present)
-- [ ] Check a longer ride (≥ 30 min) for stability
+- [x] Check a longer ride (≥ 30 min) for stability (100 km on tinytin, 2026-11-03: Zwift stable)
+- [x] Strap that drops during a break never came back (stuck controller, AX201): adapter reset after three timeouts in a row (2026-11-03)
+- [ ] Ride on tinytin: walk away from the trainer during a break and check that the TICKR comes back by itself (look for "seems stuck" in `bridge.log`)
+- [ ] Headphones on the bridge adapter: check the notice in the real window (tinytin, AX201) and whether a second adapter for the headphones keeps the sensors stable
+- [ ] Keep screen on: check on a real Plasma and GNOME ride that the screen neither dims nor locks during a break
 - [x] Network change during the ride: announcement on 127.0.0.1, listening only on loopback (2026-10-29)
 - [ ] Repeat the network change test: cable off/on during the ride
 
