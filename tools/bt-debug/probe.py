@@ -158,35 +158,45 @@ class Probe:
 
     # --- Observer scan on a second adapter ---
 
-    async def observe(self, system: MessageBus):
-        await asyncio.sleep(3.0)  # let the bridge state tell us its adapter first
-        adapters = await self.adapters(system)
+    def wanted_observer(self, adapters: dict) -> str:
+        if self.args.observe == "none" or not self.bridge_hci:
+            return ""
         if self.args.observe == "auto":
-            others = [h for h in adapters if h != self.bridge_hci]
-            self.observer = others[0] if others and self.bridge_hci else ""
-        elif self.args.observe != "none":
-            self.observer = self.args.observe
-        if not self.observer:
-            emit("observer", hci="", note="no second adapter, observer scan off")
-            return
-        if self.observer == self.bridge_hci:
-            emit("observer", hci=self.observer, note="same adapter as the bridge, observer scan off")
-            self.observer = ""
-            return
-        emit("observer", hci=self.observer, address=adapters.get(self.observer))
-        path = f"/org/bluez/{self.observer}"
-        await system.call(Message(destination="org.bluez", path=path, interface="org.bluez.Adapter1",
-                                  member="SetDiscoveryFilter", signature="a{sv}",
-                                  body=[{"Transport": Variant("s", "le"), "DuplicateData": Variant("b", True)}]))
+            others = sorted(h for h in adapters if h != self.bridge_hci)
+            return others[0] if others else ""
+        return self.args.observe if self.args.observe in adapters and self.args.observe != self.bridge_hci else ""
+
+    async def observe(self, system: MessageBus):
+        """Scan through the adapter the bridge does not use; follows adapters coming and going."""
+        await asyncio.sleep(3.0)  # let the bridge state tell us its adapter first
+        current = None
         while True:
-            for member in ("StartDiscovery",):
-                reply = await system.call(Message(destination="org.bluez", path=path,
-                                                  interface="org.bluez.Adapter1", member=member))
-                if reply.message_type == MessageType.ERROR and "InProgress" not in (reply.error_name or ""):
-                    emit("probe-error", where="observer", error=f"{reply.error_name}: {reply.body}")
+            adapters = await self.adapters(system)
+            want = self.wanted_observer(adapters)
+            if want != current:
+                emit("observer", hci=want, bridge=self.bridge_hci, address=adapters.get(want),
+                     note="" if want else "no second adapter, observer scan off")
+                self.adv.clear()
+                current = self.observer = want
+                if want:
+                    await system.call(Message(destination="org.bluez", path=f"/org/bluez/{want}",
+                                              interface="org.bluez.Adapter1", member="SetDiscoveryFilter",
+                                              signature="a{sv}",
+                                              body=[{"Transport": Variant("s", "le"),
+                                                     "DuplicateData": Variant("b", True)}]))
+            if not current:
+                await asyncio.sleep(5.0)
+                continue
+            path = f"/org/bluez/{current}"
+            reply = await system.call(Message(destination="org.bluez", path=path,
+                                              interface="org.bluez.Adapter1", member="StartDiscovery"))
+            if reply.message_type == MessageType.ERROR and "InProgress" not in (reply.error_name or ""):
+                emit("probe-error", where="observer", error=f"{reply.error_name}: {reply.body}")
             await asyncio.sleep(OBSERVE_CYCLE)
             await system.call(Message(destination="org.bluez", path=path, interface="org.bluez.Adapter1",
                                       member="StopDiscovery"))
+            if self.observer != current:
+                continue
             seen = {dev for (h, dev) in self.adv}
             for (h, dev), (n, rssi, lo, hi) in sorted(self.adv.items()):
                 emit("adv", hci=h, dev=dev, n=n, rssi=rssi, min=lo, max=hi, window=OBSERVE_CYCLE)
