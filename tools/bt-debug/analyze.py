@@ -62,6 +62,9 @@ def load(run: Path):
             ev.append((t, "advraw", "", e))
         elif k == "dev":
             keep = {x: y for x, y in e.items() if x not in ("hci", "dev")}
+            if set(keep) == {"RSSI"}:
+                ev.append((t, "rssi", "", e))  # advertising heard while the bridge scans
+                continue
             ev.append((t, f"bluez@{e['hci']}", f"{name(e['dev'])}: {keep}", e))
         elif k == "disconnected":
             ev.append((t, f"bluez@{e['hci']}", f"{name(e['dev'])}: DISCONNECTED reason={e['reason']} {e.get('message', '')}", e))
@@ -128,7 +131,7 @@ def main():
     print("== timeline")
     last_txt = {}
     for t, src, txt, extra in ev:
-        if t < start or src in ("hr",) or (src == "advraw" and not args.full):
+        if t < start or src in ("hr", "rssi") or (src == "advraw" and not args.full):
             continue
         if src == "advraw":
             txt = f"{name(extra['dev'])} n={extra['n']} rssi={extra.get('min')}..{extra.get('max')}"
