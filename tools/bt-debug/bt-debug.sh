@@ -7,6 +7,7 @@
 #   bt-debug.sh btmon                               HCI trace as root (asks for the sudo password)
 #   bt-debug.sh status                              is everything running, last events
 #   bt-debug.sh stop                                stop the recording, bridge back to normal
+#   bt-debug.sh restart-probe                       reload probe.py into the running recording
 #
 # Recordings live in ~/bt-debug/runs/<time>/, ~/bt-debug/runs/current points to the newest.
 set -euo pipefail
@@ -51,6 +52,13 @@ snapshot() {
     } > "$1" 2>&1
 }
 
+kill_instance() {  # $1 = probe or bridge
+    local f="$CUR/$1.instance" id
+    [ -s "$f" ] || return 0
+    id=$(tr -dc 0-9 < "$f")
+    [ -n "$id" ] && flatpak kill "$id" 2>/dev/null || true
+}
+
 unit_up() { systemctl --user is-active --quiet "$1"; }
 
 case "${1:-}" in
@@ -71,13 +79,22 @@ start)
     # Bridge in debug mode (every notification in bridge.log); our instance owns the D-Bus name,
     # the Tretlager window and Zwift use it as usual.
     bridge_quit
+    # flatpak run moves the app into its own scope: stopping the unit does not end it, so keep
+    # the instance id and end it with `flatpak kill`.
     systemd-run --user -q --unit=btdbg-bridge -p StandardOutput="truncate:$RUN/bridge-stderr.log" \
-        /usr/bin/flatpak run --env=TRETLAGER_DEBUG=1 --command=/app/bin/tretlager-bridge $APP
+        /bin/sh -c "exec /usr/bin/flatpak run --instance-id-fd=3 --env=TRETLAGER_DEBUG=1 \
+        --command=/app/bin/tretlager-bridge $APP 3>'$RUN/bridge.instance'"
+    # The probe must only start once the debug bridge owns the name (it never activates one).
+    for _ in $(seq 30); do
+        gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+            --method org.freedesktop.DBus.NameHasOwner $APP.Bridge 2>/dev/null | grep -q true && break
+        sleep 0.5
+    done
     systemd-run --user -q --unit=btdbg-bridgelog -p StandardOutput="truncate:$RUN/bridge.log" \
         tail -F -n 0 "$STATE/bridge.log"
     systemd-run --user -q --unit=btdbg-probe -p StandardError="truncate:$RUN/probe-stderr.log" \
-        /usr/bin/flatpak run --filesystem="$BASE" --command=python3 $APP "$BIN/probe.py" \
-        --out "$RUN/events.jsonl" --observe "$OBSERVE"
+        /bin/sh -c "exec /usr/bin/flatpak run --instance-id-fd=3 --filesystem='$BASE' --command=python3 $APP \
+        '$BIN/probe.py' --out '$RUN/events.jsonl' --observe '$OBSERVE' 3>'$RUN/probe.instance'"
     echo "$(stamp) start observe=$OBSERVE" >> "$RUN/marks.log"
     echo "recording: $RUN"
     ;;
@@ -101,19 +118,30 @@ btmon)
     echo "HCI trace to $(readlink -f "$CUR")/hci.btsnoop – keep this window open, Ctrl+C ends."
     sudo btmon -w "$(readlink -f "$CUR")/hci.btsnoop"
     ;;
+restart-probe)
+    kill_instance probe
+    systemctl --user stop btdbg-probe 2>/dev/null || true
+    systemctl --user reset-failed btdbg-probe 2>/dev/null || true
+    RUN="$(readlink -f "$CUR")"
+    systemd-run --user -q --unit=btdbg-probe -p StandardError="append:$RUN/probe-stderr.log" \
+        /bin/sh -c "exec /usr/bin/flatpak run --instance-id-fd=3 --filesystem='$BASE' --command=python3 $APP \
+        '$BIN/probe.py' --out '$RUN/events.jsonl' --observe '${2:-auto}' 3>'$RUN/probe.instance'"
+    echo "probe restarted"
+    ;;
 status)
     for u in "${UNITS[@]}"; do printf '%-18s %s\n' "$u" "$(systemctl --user is-active "$u" 2>/dev/null || true)"; done
     [ -L "$CUR" ] && { echo "run: $(readlink -f "$CUR")"; ls -la "$CUR/" | tail -n +2; echo "-- marks"; tail -5 "$CUR/marks.log"; }
     ;;
 stop)
     [ -L "$CUR" ] && echo "$(stamp) stop" >> "$CUR/marks.log"
-    systemctl --user stop btdbg-probe 2>/dev/null || true
+    kill_instance probe
     bridge_quit
+    kill_instance bridge
     for u in "${UNITS[@]}"; do systemctl --user stop "$u" 2>/dev/null || true; done
     [ -L "$CUR" ] && snapshot "$CUR/stop.txt"
     echo "stopped; the Tretlager window starts the normal bridge again when needed"
     ;;
 *)
-    sed -n '2,12p' "$0"; exit 1
+    sed -n '2,13p' "$0"; exit 1
     ;;
 esac

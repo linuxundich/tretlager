@@ -16,7 +16,7 @@ import asyncio
 import json
 import time
 
-from dbus_fast import BusType, Message, MessageType, Variant
+from dbus_fast import BusType, Message, MessageFlag, MessageType, Variant
 from dbus_fast.aio import MessageBus
 
 BRIDGE = ("de.linuxundich.Tretlager.Bridge", "/de/linuxundich/Tretlager/Bridge", "de.linuxundich.Tretlager.Bridge")
@@ -119,8 +119,9 @@ class Probe:
     async def poll_bridge(self, session: MessageBus, once: bool = False):
         while True:
             try:
+                # never D-Bus-activate a second, normal bridge next to the debug bridge
                 reply = await session.call(Message(destination=BRIDGE[0], path=BRIDGE[1], interface=BRIDGE[2],
-                                                   member="GetStatus"))
+                                                   member="GetStatus", flags=MessageFlag.NO_AUTOSTART))
                 if reply.message_type == MessageType.ERROR:
                     if self.last_bridge.get("_") != ("down",):
                         emit("bridge", running=False, error=reply.error_name)
