@@ -5,6 +5,9 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 ## [Unreleased]
 
 ### Added
+- `tools/bt-debug`: recorder for sensor drops on a test computer (bridge in debug mode, BlueZ
+  events with disconnect reason, bridge state, kernel/bluetoothd log, advertising seen through a
+  second adapter, markers for breaks) plus `analyze.py`, which merges it into one timeline.
 - *Keep screen on during the ride* (main window, on by default): while Zwift starts and runs,
   Tretlager asks the desktop through the Inhibit portal not to dim, blank or lock the screen and
   not to suspend, also during a break without touching mouse or keyboard. Works on Plasma
