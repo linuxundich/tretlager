@@ -89,21 +89,24 @@
   so every later connection starts at 1995 ms (6 s supervision timeout); service discovery then outlasts the
   bridge timeout and the bridge loops on "Connection timed out". `bluetoothctl remove` and switching the
   adapter off/on (our "seems stuck" reset) do not clear it; unplugging the USB stick or a reboot does.
-  Find a way without root (Flatpak has no mgmt socket), otherwise tell the user to replug/restart.
+  Partly fixed 2026-11-06: link and discovery are split, discovery may take 90 s (TICKR recovered by
+  itself after 40 s); repeated failures show a replug hint. Still open: does the HRM-Pro Plus (2 s
+  interval, 6 s supervision timeout) get through discovery in 90 s, and is there a way without root to
+  clear the remembered interval (Flatpak has no mgmt socket).
   Trigger (seen while pairing with bluetoothctl): the strap asks for 240 ms and then 1980 ms as soon as it is
   connected and nobody has subscribed to the heart rate. Pairing makes it worse: BlueZ then stores the
   parameters on disk and loads them again after a replug; keep sensors unpaired. Android starts every new
   connection with its own defaults, which is why the strap is fine on the Pixel. Ideas: detect "link up but
   discovery times out" and show "unplug and replug the Bluetooth stick" instead of resetting; try whether
   Trusted on/off (mgmt Add/Remove Device) clears the kernel parameters without root
-- [ ] The "seems stuck" adapter reset fires on discovery timeouts with an established link too, and drops the
-  KICKR each time without helping: only reset when no connection was established
+- [x] The "seems stuck" adapter reset fires on discovery timeouts with an established link too, and drops the
+  KICKR each time without helping: only reset when no connection was established (2026-11-06)
 - [ ] HRM-Pro Plus ends the connection by itself after about 7 minutes (0x13, twice on 2026-11-06, also with the
   Garmin watch and phone Bluetooth off) and then stops advertising for minutes. Firmware is current. On the
   Pixel (nRF Connect, paired) it stayed connected for 25 minutes; unclear whether pairing or Android makes the
   difference
-- [ ] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
-  failing): exit if the bridge is not the primary owner
+- [x] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
+  failing): exit if the bridge is not the primary owner (2026-11-06)
 - [x] Repeat the stuck-strap test for the TICKR (2026-11-06): same cause. The TICKR switches its own connection
   to 997.5 ms right after connecting (link layer procedure, heart rate keeps flowing); after a drop out of
   range every new connection starts at 500 ms or more and service discovery times out. Adapter off/on does

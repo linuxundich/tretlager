@@ -21,6 +21,15 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
   stuck controller names them as the reason instead of resetting.
 
 ### Fixed
+- Heart rate straps that came back in range (or reconnected after a drop) never connected again
+  until the Bluetooth adapter was unplugged or the computer restarted. The straps switch their
+  own connection to long intervals (TICKR about 1 s, HRM-Pro Plus about 2 s), Linux starts every
+  new connection with them, and service discovery outlasted the bridge's 20 s limit. The bridge
+  now sets up the link first (20 s) and then waits up to 90 s for discovery without blocking the
+  other sensors; on tinytin the TICKR came back after 40 s. If discovery keeps failing, the
+  sensor shows "unplug and plug in the Bluetooth adapter, or restart the computer" instead of the
+  adapter reset, which did not help and dropped the trainer too.
+- A second bridge instance no longer runs next to the first one and fights over the sensors.
 - Sensor bridge: a heart rate strap that lost its connection during a break did not come back,
   even after removing and adding it again (tinytin, Intel AX201, kernel 7.2). Every attempt ran
   into the kernel's 20 s connection timeout while the strap was advertising; the kernel logged
