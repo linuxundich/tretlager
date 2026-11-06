@@ -7,6 +7,10 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 ## [0.11.1] - 2026-11-06
 
 ### Added
+- Help: new section *Heart rate straps* on the technical quirks found with bt-debug and btmon:
+  TICKR and HRM-Pro Plus switch to long connection intervals that Linux keeps for the next
+  connection, the HRM-Pro Plus ends its connection by itself every 7 to 15 minutes, and straps
+  should not be paired in the system settings.
 - `tools/bt-debug`: recorder for sensor drops on a test computer (bridge in debug mode, BlueZ
   events with disconnect reason, bridge state, kernel/bluetoothd log, advertising seen through a
   second adapter, markers for breaks) plus `analyze.py`, which merges it into one timeline.
