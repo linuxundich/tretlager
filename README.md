@@ -15,6 +15,8 @@
 <p align="center">
   <a href="https://github.com/linuxundich/tretlager/releases/latest"><strong>Download Flatpak</strong></a>
   &nbsp;·&nbsp; Flathub: not planned &nbsp;·&nbsp;
+  <a href="https://linuxundich.de/en/projects/tretlager/">Project page</a>
+  &nbsp;·&nbsp;
   <a href="docs/HARDWARE.md">Tested hardware</a>
   &nbsp;·&nbsp;
   <a href="CHANGELOG.md">Changelog</a>
@@ -115,7 +117,10 @@ application launcher.
 - A new Wine version comes with a new Tretlager version. The last working one is kept, and a
   switch brings it back if Zwift misbehaves.
 - Tretlager warns when the laptop runs on battery or the power supply changes during a ride,
-  and it knows chip and sensor combinations that don't get along.
+  and when Bluetooth headphones on the bridge's adapter crowd out the sensors.
+- While Zwift starts and runs, the screen stays on, also during a break without mouse or keyboard.
+- During a Zwift update the overview shows the download progress.
+- *Save error report…* writes a ZIP with the logs; tokens, passwords and email addresses are removed.
 - Help pages and troubleshooting tips are built in. The interface speaks English and German.
 
 <p align="center">
@@ -200,12 +205,22 @@ The first build compiles Wine and takes a while (about 15 minutes on 20 cores).
 ## More
 
 - [Tested hardware and software](docs/HARDWARE.md) in detail
-- [Changelog](CHANGELOG.md) · [Backlog](BACKLOG.md)
+- [Project page on my blog](https://linuxundich.de/en/projects/tretlager/) · [Changelog](CHANGELOG.md) · [Backlog](BACKLOG.md)
 - [Technical notes](docs/technical-notes.md): requirements, everyday use, troubleshooting, development
 - Background: [feasibility study](FEASIBILITY.md), [UX concept](docs/ux-concept.md),
   [Flatpak plan](docs/flatpak.md), [updates](docs/updates.md),
   [QA audit](docs/qa-audit-2026-10-30.md)
 - Found a bug or tested other hardware? [Open an issue](https://github.com/linuxundich/tretlager/issues)
+
+## On the blog
+
+Tretlager has its own page on my blog
+[Linux und Ich](https://linuxundich.de/en/projects/tretlager/), with more
+details on the app and news about upcoming versions. The
+[project overview](https://linuxundich.de/en/projects/) lists everything else
+I build for the Linux desktop. Questions, ideas or feedback that don't fit
+into an issue? [Get in touch](https://linuxundich.de/en/contact/), I read
+every message.
 
 ## Use of AI
 
