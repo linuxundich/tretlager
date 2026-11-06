@@ -25,6 +25,13 @@
   <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.11.1" date="2026-11-06">
+      <description>
+        <p>Heart rate straps come back by themselves after a dropout or a break out of range,
+        instead of hanging until the Bluetooth adapter is replugged. A screen-on option for the
+        ride and a warning when headphones share the Bluetooth adapter.</p>
+      </description>
+    </release>
     <release version="0.11.0" date="2026-11-01">
       <description>
         <p>Error reports and two monitors.</p>

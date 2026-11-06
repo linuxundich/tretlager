@@ -4,6 +4,8 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-06
+
 ### Added
 - `tools/bt-debug`: recorder for sensor drops on a test computer (bridge in debug mode, BlueZ
   events with disconnect reason, bridge state, kernel/bluetoothd log, advertising seen through a
