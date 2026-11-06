@@ -42,6 +42,23 @@ rate strap.
 - **Bluetooth adapter**: A USB dongle on an extension cable next to the trainer helps with dead
   spots and with chips that do not get along with a sensor.
 
+## Heart rate straps
+<!-- icon: network-bluetooth -->
+
+- **Long connection intervals**: The Wahoo TICKR and the Garmin HRM-Pro Plus switch their
+  Bluetooth connection to a long interval by themselves, the TICKR to about 1 second, the HRM-Pro
+  Plus to about 2 seconds. Heart rate still arrives in time, but Linux remembers the interval and
+  starts the next connection with it. Reconnecting therefore takes up to a minute, and for about
+  half a minute heart rate comes only every few seconds until the strap shortens the interval.
+- **Garmin HRM-Pro Plus**: It ends the Bluetooth connection by itself every 7 to 15 minutes,
+  also right next to the computer, and then stays silent for two to five minutes. Tretlager
+  reconnects on its own, but heart rate is missing for that time. For Zwift the Wahoo TICKR is
+  the better choice.
+- **Not paired in the system settings**: Tretlager connects to the straps without pairing. A
+  strap that is connected without anyone reading the heart rate, for example while pairing it in
+  the Bluetooth settings, immediately asks for the slow interval, and when paired, Linux keeps it
+  even after a restart. Remove straps paired by mistake in the Bluetooth settings.
+
 ## Sign-in
 <!-- icon: user-identity -->
 
@@ -91,11 +108,12 @@ using it is at your own risk.**
   adapter; Tretlager points this out.
 - [data-warning] **Sensor is found but never connects**: It does not get along with the
   Bluetooth chip; Tretlager reports known cases on the sensor. Remedy: USB Bluetooth dongle.
-- [network-bluetooth] **Sensor does not come back after a break**: If a sensor is in range but
-  every attempt times out, the Bluetooth chip is stuck. Tretlager then switches Bluetooth off and
-  on once by itself; the trainer reconnects within seconds and Zwift keeps both. If other
-  Bluetooth devices such as headphones are connected, it leaves that to you: switch Bluetooth off
-  and on in the system tray.
+- [network-bluetooth] **Sensor does not come back after a break**: Allow up to two minutes
+  (see *Heart rate straps*). If the sensor then shows *unplug and plug in the Bluetooth adapter,
+  or restart the computer*, Linux keeps a slow connection setting for it that only this clears;
+  switching Bluetooth off and on does not help. If no connection comes up at all, the Bluetooth
+  chip is stuck: Tretlager switches Bluetooth off and on once by itself, unless headphones or
+  other devices are connected.
 - [system-suspend-inhibited] **Screen dims or locks during the ride**: Switch on *Keep screen on
   during the ride* in the main window. It only applies while Zwift runs.
 - [network-wireless-disconnected] **Connection drops often**: Move the computer closer to the

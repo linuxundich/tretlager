@@ -43,6 +43,25 @@ Pulsgurt.
 - **Bluetooth-Adapter**: Ein USB-Stick mit Verlängerung neben dem Trainer hilft bei Funklöchern
   und bei Chips, die einen Sensor nicht vertragen.
 
+## Pulsgurte
+<!-- icon: network-bluetooth -->
+
+- **Lange Verbindungsintervalle**: Wahoo TICKR und Garmin HRM-Pro Plus stellen ihre
+  Bluetooth-Verbindung selbst auf ein langes Intervall um, der TICKR auf etwa 1 Sekunde, der
+  HRM-Pro Plus auf etwa 2 Sekunden. Der Puls kommt trotzdem rechtzeitig an, aber Linux merkt sich
+  das Intervall und beginnt die nächste Verbindung damit. Das Wiederverbinden dauert deshalb bis
+  zu einer Minute, und etwa eine halbe Minute lang kommt der Puls nur alle paar Sekunden, bis der
+  Gurt das Intervall wieder verkürzt.
+- **Garmin HRM-Pro Plus**: Er beendet die Bluetooth-Verbindung alle 7 bis 15 Minuten von sich
+  aus, auch direkt neben dem Rechner, und schweigt danach zwei bis fünf Minuten. Tretlager
+  verbindet ihn selbstständig neu, in dieser Zeit fehlt aber der Puls. Für Zwift ist der Wahoo
+  TICKR die bessere Wahl.
+- **Nicht in den Systemeinstellungen koppeln**: Tretlager verbindet sich ohne Kopplung mit den
+  Gurten. Ein Gurt, der verbunden ist, ohne dass jemand den Puls abruft, etwa beim Koppeln in den
+  Bluetooth-Einstellungen, verlangt sofort das langsame Intervall, und gekoppelt behält Linux es
+  sogar über einen Neustart hinaus. Versehentlich gekoppelte Gurte in den Bluetooth-Einstellungen
+  entfernen.
+
 ## Anmeldung
 <!-- icon: user-identity -->
 
@@ -93,11 +112,12 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
   Tretlager weist darauf hin.
 - [data-warning] **Sensor wird gefunden, verbindet sich aber nie**: Er verträgt den
   Bluetooth-Chip nicht; bekannte Fälle meldet Tretlager am Sensor. Abhilfe: USB-Bluetooth-Stick.
-- [network-bluetooth] **Sensor kommt nach einer Pause nicht zurück**: Ist ein Sensor in Reichweite,
-  läuft aber jeder Versuch in eine Zeitüberschreitung, hängt der Bluetooth-Chip. Tretlager schaltet
-  Bluetooth dann einmal selbst aus und wieder ein; der Trainer verbindet sich nach wenigen Sekunden
-  neu, und Zwift behält beide. Sind andere Bluetooth-Geräte wie Kopfhörer verbunden, überlässt
-  Tretlager das dir: Bluetooth im Systemabschnitt der Kontrollleiste aus- und einschalten.
+- [network-bluetooth] **Sensor kommt nach einer Pause nicht zurück**: Bis zu zwei Minuten
+  abwarten (siehe *Pulsgurte*). Zeigt der Sensor dann *Bluetooth-Stick ab- und wieder anstecken
+  oder den Rechner neu starten*, hält Linux für ihn eine langsame Verbindungseinstellung fest, die
+  nur das löscht; Bluetooth aus- und einschalten hilft nicht. Kommt gar keine Verbindung zustande,
+  hängt der Bluetooth-Chip: Tretlager schaltet Bluetooth dann einmal selbst aus und wieder ein,
+  außer wenn Kopfhörer oder andere Geräte verbunden sind.
 - [system-suspend-inhibited] **Bildschirm wird während der Fahrt dunkel oder sperrt**: Im
   Hauptfenster *Bildschirm während der Fahrt anlassen* einschalten. Das gilt nur, solange Zwift läuft.
 - [network-wireless-disconnected] **Verbindung bricht oft ab**: Rechner näher an den Trainer

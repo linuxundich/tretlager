@@ -107,6 +107,9 @@
   difference
 - [x] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
   failing): exit if the bridge is not the primary owner (2026-11-06)
+- [ ] Retest the HRM-Pro Plus on the built-in AX201 with 0.11.1: the "discovery hangs" finding of 2026-10-29
+  (btcompat warning) looks like the same remembered slow interval, which also hit the UB500 on 2026-11-06.
+  If it connects now, drop the warning
 - [x] Repeat the stuck-strap test for the TICKR (2026-11-06): same cause. The TICKR switches its own connection
   to 997.5 ms right after connecting (link layer procedure, heart rate keeps flowing); after a drop out of
   range every new connection starts at 500 ms or more and service discovery times out. Adapter off/on does
