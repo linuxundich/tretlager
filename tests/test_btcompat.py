@@ -22,23 +22,30 @@ def test_adapter_chip_without_adapter(tmp_path):
     assert btcompat.adapter_chip(root=tmp_path) is None
 
 
-def test_hrm_pro_on_ax201_warns():
+ISSUE = btcompat.Issue(chips=frozenset({"8087:0026"}), device=__import__("re").compile(r"^Strap"),
+                       device_name="Strap", text="Strap does not like {chip}", short="Not with {chip}")
+
+
+def test_known_issue_warns(monkeypatch):
+    monkeypatch.setattr(btcompat, "KNOWN_ISSUES", [ISSUE])
     ax201 = btcompat.Chip("8087:0026", "Intel Wi-Fi 6 AX201")
-    for name in ("HRMPro+:462237", "HRM-Pro:123456"):
-        text = btcompat.issue_for(ax201, name)
-        assert "Garmin HRM-Pro" in text and "AX201" in text
-        assert "AX201" in btcompat.issue_for(ax201, name, short=True)
+    assert btcompat.issue_for(ax201, "Strap 1") == "Strap does not like Intel Wi-Fi 6 AX201"
+    assert btcompat.issue_for(ax201, "Strap 1", short=True) == "Not with Intel Wi-Fi 6 AX201"
     assert btcompat.issue_for(ax201, "TICKR 9029") == ""
+    assert btcompat.issue_for(btcompat.Chip("8087:0029", "Intel Wi-Fi 6 AX200"), "Strap 1") == ""
+    assert btcompat.issue_for(None, "Strap 1") == ""
 
 
-def test_hrm_pro_on_other_chip_is_fine():
-    assert btcompat.issue_for(btcompat.Chip("8087:0029", "Intel Wi-Fi 6 AX200"), "HRMPro+:462237") == ""
-    assert btcompat.issue_for(None, "HRMPro+:462237") == ""
-
-
-def test_annotate_adds_field():
+def test_hrm_pro_on_ax201_no_longer_warns():
+    # 2026-11-06: the "hang" was the remembered slow interval; it connects with 0.11.2
     ax201 = btcompat.Chip("8087:0026", "Intel Wi-Fi 6 AX201")
-    out = btcompat.annotate([{"name": "HRMPro+:1"}, {"name": "Wahoo KICKR C058"}], ax201)
+    assert btcompat.issue_for(ax201, "HRMPro+:462237") == ""
+
+
+def test_annotate_adds_field(monkeypatch):
+    monkeypatch.setattr(btcompat, "KNOWN_ISSUES", [ISSUE])
+    ax201 = btcompat.Chip("8087:0026", "Intel Wi-Fi 6 AX201")
+    out = btcompat.annotate([{"name": "Strap 1"}, {"name": "Wahoo KICKR C058"}], ax201)
     assert out[0]["compat"] and out[0]["compat_short"] and out[1]["compat"] == ""
 
 

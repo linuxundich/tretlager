@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 13:46+0100\n"
+"POT-Creation-Date: 2026-11-06 14:03+0100\n"
 "PO-Revision-Date: 2026-10-31 17:00+0100\n"
 "Last-Translator: Christoph Langner <mail@christoph-langner.de>\n"
 "Language-Team: German\n"
@@ -117,32 +117,7 @@ msgstr "Unerwartete Antwort der Bridge"
 msgid "Keep sensors ready at login"
 msgstr "Sensoren beim Anmelden bereithalten"
 
-#: tretlager/core/btcompat.py:62
-#, python-brace-format
-msgid ""
-"The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
-"({chip}). It is found, but the connection never completes; range and battery "
-"are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as "
-"the Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another "
-"heart rate strap such as a Wahoo TICKR."
-msgstr ""
-"Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses "
-"Rechners ({chip}). Er wird zwar gefunden, die Verbindung kommt aber nie "
-"zustande; an Reichweite oder Batterie liegt das nicht. Abhilfe: einen USB-"
-"Bluetooth-Stick anschließen und unter Sensoren als Bluetooth-Adapter wählen "
-"(getestet: TP-Link UB500) oder einen anderen Pulsgurt nutzen, etwa einen "
-"Wahoo TICKR."
-
-#: tretlager/core/btcompat.py:67
-#, python-brace-format
-msgid ""
-"Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth "
-"dongle"
-msgstr ""
-"Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-"
-"Bluetooth-Stick"
-
-#: tretlager/core/btcompat.py:85 tretlager/core/btcompat.py:96
+#: tretlager/core/btcompat.py:74 tretlager/core/btcompat.py:85
 msgid "unknown chip"
 msgstr "unbekannter Chip"
 
@@ -2456,3 +2431,26 @@ msgstr ""
 #: tretlager/kde/qml/ZwiftPage.qml:107
 msgid "Cancel"
 msgstr "Abbrechen"
+
+#, python-brace-format
+#~ msgid ""
+#~ "The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
+#~ "({chip}). It is found, but the connection never completes; range and "
+#~ "battery are not the cause. Remedy: plug in a USB Bluetooth dongle and "
+#~ "select it as the Bluetooth adapter under Sensors (tested: TP-Link UB500), "
+#~ "or use another heart rate strap such as a Wahoo TICKR."
+#~ msgstr ""
+#~ "Der Garmin HRM-Pro verbindet sich nicht mit dem Bluetooth-Chip dieses "
+#~ "Rechners ({chip}). Er wird zwar gefunden, die Verbindung kommt aber nie "
+#~ "zustande; an Reichweite oder Batterie liegt das nicht. Abhilfe: einen USB-"
+#~ "Bluetooth-Stick anschließen und unter Sensoren als Bluetooth-Adapter "
+#~ "wählen (getestet: TP-Link UB500) oder einen anderen Pulsgurt nutzen, etwa "
+#~ "einen Wahoo TICKR."
+
+#, python-brace-format
+#~ msgid ""
+#~ "Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth "
+#~ "dongle"
+#~ msgstr ""
+#~ "Verbindet sich nicht mit diesem Bluetooth-Chip ({chip}). Abhilfe: USB-"
+#~ "Bluetooth-Stick"

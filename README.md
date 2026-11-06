@@ -155,7 +155,7 @@ known quirks are in [docs/HARDWARE.md](docs/HARDWARE.md).
 |---|---|---|
 | Wahoo KICKR V4 smart trainer | Bluetooth LE (FTMS, Cycling Power) | power, cadence, ERG mode and climbs work |
 | Wahoo TICKR heart rate strap | Bluetooth LE (Heart Rate) | works |
-| Garmin HRM-Pro Plus heart rate strap | Bluetooth LE (Heart Rate) | works with the TP-Link UB500; the Intel AX201 does not connect to it |
+| Garmin HRM-Pro Plus heart rate strap | Bluetooth LE (Heart Rate) | works with the Intel AX201 and the TP-Link UB500; ends its connection by itself every 7–15 minutes and reconnects after a few minutes |
 
 Other trainers and straps that use the standard Bluetooth services (FTMS, Cycling Power, Cycling
 Speed and Cadence, Heart Rate) should work but are untested. ANT+ is not supported.

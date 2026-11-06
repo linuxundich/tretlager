@@ -51,7 +51,7 @@ Intel graphics and redoes its graphics check when the card comes back.
 |---|---|---|
 | Wahoo KICKR V4 (smart trainer) | FTMS with control point, Cycling Power, Wahoo's own services | Power, cadence, ERG mode and simulated climbs work. The V4 has no built-in Direct Connect; the bridge provides it. |
 | Wahoo TICKR (heart rate strap) | Heart Rate | Works. Implausibly high values usually mean a weak battery or dry electrodes. |
-| Garmin HRM-Pro Plus (heart rate strap) | Heart Rate | Works through the TP-Link UB500. With the Intel AX201 the connection hangs during service discovery; Tretlager knows this combination and suggests a USB adapter. |
+| Garmin HRM-Pro Plus (heart rate strap) | Heart Rate | Works through the Intel AX201 and the TP-Link UB500. Switches its connection to a 2 s interval, which Linux keeps for the next connection; reconnecting then takes up to two minutes (0.11.2 waits for it). Ends the connection by itself every 7–15 minutes and is silent for a few minutes. The earlier finding "hangs with the AX201" (2026-10-29) was this slow interval. |
 
 ANT+ is not supported; Wine cannot reach ANT+ sticks, and the bridge only speaks Bluetooth LE.
 

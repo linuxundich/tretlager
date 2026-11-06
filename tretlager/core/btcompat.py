@@ -1,12 +1,10 @@
 """Known problem combinations of Bluetooth chip and sensor.
 
-Some sensors do not get along with certain Bluetooth chips, without range or battery being the
-cause. Finding on tinytin (2026-10-29): the Garmin HRM-Pro Plus is found on the built-in Intel
-AX201 (firmware 202-5.26), but GATT service discovery after connecting hangs every time; on the
-Intel AX200 (smokki) and on the USB dongle TP-Link UB500 (Realtek RTL8761BU, tinytin, 2026-10-30)
-the same strap works. Suspected cause: a problem with LE 2M. Tretlager recognises the chip by its
-USB ID and warns when adding the device and in the overview, instead of letting the strap show
-"Connecting …" forever.
+Some sensors might not get along with certain Bluetooth chips, without range or battery being the
+cause. Tretlager recognises the chip by its USB ID and warns when adding the device and in the
+overview. The first case (Garmin HRM-Pro Plus on the Intel AX201, 2026-10-29: service discovery
+"hung every time") was really the slow connection interval Linux remembers for a strap; the
+bridge has waited long enough since 0.11.2 and the entry is gone.
 
 Add new cases as an entry in KNOWN_ISSUES – only with a real finding.
 """
@@ -54,19 +52,10 @@ class Issue:
     short: str  # one line in the scan results
 
 
-KNOWN_ISSUES = [
-    Issue(
-        chips=frozenset({"8087:0026"}),
-        device=re.compile(r"^HRM-?Pro", re.IGNORECASE),  # "HRM-Pro:…", "HRMPro+:…"
-        device_name="Garmin HRM-Pro",
-        text=_("The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
-               "({chip}). It is found, but the connection never completes; range and battery "
-               "are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as the "
-               "Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another heart "
-               "rate strap such as a Wahoo TICKR."),
-        short=_("Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth dongle"),
-    ),
-]
+# Empty since 0.11.2: the only entry, Garmin HRM-Pro x Intel AX201 (8087:0026), turned out to be
+# the slow connection interval the kernel remembers (see bridge/device.py, DISCOVERY_TIMEOUT); with
+# 0.11.2 the strap connects through the AX201 in 7 to 12 s (tinytin, 2026-11-06).
+KNOWN_ISSUES: list[Issue] = []
 
 
 def adapter_chip(adapter: str = "hci0", root: Path = BLUETOOTH) -> Chip | None:

@@ -49,14 +49,15 @@
 
 - [x] Bridge core (DIRCON, GATT proxy, avahi, D-Bus, systemd user service)
 - [x] UI: service on/off, autostart, search/add/remove devices, live values
-- [ ] HRM-Pro Plus on tinytin: LE 1M cross-check (`btmgmt phy`), otherwise test a USB Bluetooth stick
-  (warning since 0.6.2 via `core/btcompat.py`; add new findings there)
+- [x] HRM-Pro Plus on tinytin: LE 1M cross-check (`btmgmt phy`), otherwise test a USB Bluetooth stick
+  (warning since 0.6.2 via `core/btcompat.py`; add new findings there). Not a PHY problem: the remembered
+  slow interval (2026-11-06), fixed in 0.11.2, warning removed
 - [x] Switch the bridge to a selectable adapter (0.6.3; switching, missing adapter and fallback
   verified on tinytin, not yet with a real USB stick)
 - [x] Test with a real USB Bluetooth stick (Oct 30, TP-Link UB500): HRM-Pro Plus via the stick ok,
   switching, turning the stick off and on ok
 - [ ] Pull the stick during a ride in Zwift (real unplugging instead of switching off)
-- [ ] HRM-Pro Plus via UB500 unreliable: on the morning of Oct 30 connected twice (after 40–120 s),
+- [x] HRM-Pro Plus via UB500 unreliable (explained 2026-11-06 by the remembered slow interval, fixed in 0.11.2): on the morning of Oct 30 connected twice (after 40–120 s),
   at midday despite signal (−74 dBm), without phone Bluetooth, worn alone and after restarting the stick
   only timeouts; KICKR on the same stick connected immediately. Approaches: btmon capture (root),
   force LE 1M (`btmgmt phy`), connection parameters/timeout of the bridge, a second stick of a different make.
@@ -68,7 +69,7 @@
   `ServicesResolved=false` → GATT service discovery hangs as on the AX201, even after RemoveDevice and
   replugging the stick. Next step: btmon capture and force LE 1M (`btmgmt --index 1 phy`,
   root); the bridge could do a targeted disconnect + clear cache when service discovery hangs
-- [ ] After switching, the first connection attempt of the HRM-Pro sometimes needs one more round
+- [x] After switching, the first connection attempt of the HRM-Pro sometimes needs one more round (same cause, 0.11.2)
   (incomplete service discovery → wait time grows); possibly reset the wait time after an adapter change
 - [x] Package update does not restart the running bridge → solved in the Flatpak: Tretlager restarts an
   older bridge on opening (version comparison, since 0.8.0; requires a new version number)
@@ -84,7 +85,7 @@
 - [x] Check a longer ride (≥ 30 min) for stability (100 km on tinytin, 2026-11-03: Zwift stable)
 - [x] Strap that drops during a break never came back (stuck controller, AX201): adapter reset after three timeouts in a row (2026-11-03)
 - [ ] Ride on tinytin: walk away from the trainer during a break and check that the TICKR comes back by itself (look for "seems stuck" in `bridge.log`)
-- [ ] HRM-Pro Plus stuck after a drop (bt-debug + btmon on tinytin, 2026-11-06): the strap sends an L2CAP
+- [x] HRM-Pro Plus stuck after a drop (fixed in 0.11.1/0.11.2; bt-debug + btmon on tinytin, 2026-11-06): the strap sends an L2CAP
   connection parameter update for a 1980–1999 ms interval, the kernel accepts it and keeps it per adapter,
   so every later connection starts at 1995 ms (6 s supervision timeout); service discovery then outlasts the
   bridge timeout and the bridge loops on "Connection timed out". `bluetoothctl remove` and switching the
@@ -107,9 +108,9 @@
   difference
 - [x] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
   failing): exit if the bridge is not the primary owner (2026-11-06)
-- [ ] Retest the HRM-Pro Plus on the built-in AX201 with 0.11.1: the "discovery hangs" finding of 2026-10-29
+- [x] Retest the HRM-Pro Plus on the built-in AX201 with 0.11.1: the "discovery hangs" finding of 2026-10-29
   (btcompat warning) looks like the same remembered slow interval, which also hit the UB500 on 2026-11-06.
-  If it connects now, drop the warning
+  If it connects now, drop the warning (2026-11-06: connects through the AX201 in 7–12 s, warning removed)
 - [x] Repeat the stuck-strap test for the TICKR (2026-11-06): same cause. The TICKR switches its own connection
   to 997.5 ms right after connecting (link layer procedure, heart rate keeps flowing); after a drop out of
   range every new connection starts at 500 ms or more and service discovery times out. Adapter off/on does

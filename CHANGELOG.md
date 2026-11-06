@@ -4,6 +4,11 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Removed
+- The warning "Garmin HRM-Pro does not connect to this Bluetooth chip" for the Intel AX201: the
+  service discovery that "hung" there was the slow interval Linux remembers for the strap. With
+  0.11.2 the HRM-Pro Plus connects through the AX201 in 7 to 12 seconds (tinytin, 2026-11-06).
+
 ## [0.11.2] - 2026-11-06
 
 ### Changed

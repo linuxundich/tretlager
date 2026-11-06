@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 13:46+0100\n"
+"POT-Creation-Date: 2026-11-06 14:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -112,24 +112,7 @@ msgstr ""
 msgid "Keep sensors ready at login"
 msgstr ""
 
-#: tretlager/core/btcompat.py:62
-#, python-brace-format
-msgid ""
-"The Garmin HRM-Pro does not connect to this computer's Bluetooth chip "
-"({chip}). It is found, but the connection never completes; range and battery "
-"are not the cause. Remedy: plug in a USB Bluetooth dongle and select it as "
-"the Bluetooth adapter under Sensors (tested: TP-Link UB500), or use another "
-"heart rate strap such as a Wahoo TICKR."
-msgstr ""
-
-#: tretlager/core/btcompat.py:67
-#, python-brace-format
-msgid ""
-"Does not connect to this Bluetooth chip ({chip}). Remedy: USB Bluetooth "
-"dongle"
-msgstr ""
-
-#: tretlager/core/btcompat.py:85 tretlager/core/btcompat.py:96
+#: tretlager/core/btcompat.py:74 tretlager/core/btcompat.py:85
 msgid "unknown chip"
 msgstr ""
 
