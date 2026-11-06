@@ -4,6 +4,8 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-11-06
+
 ### Changed
 - While Zwift updates itself before the ride, the overview says *Zwift is being updated…* in the
   headline and *Updating from … to … – Zwift starts afterwards* under Version, instead of *Zwift is

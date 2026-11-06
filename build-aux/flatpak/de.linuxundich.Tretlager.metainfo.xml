@@ -25,6 +25,12 @@
   <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.11.3" date="2026-11-06">
+      <description>
+        <p>The overview says when Zwift is being updated, and the warning about the Garmin HRM-Pro on
+        the Intel AX201 is gone: with 0.11.2 the strap connects there too.</p>
+      </description>
+    </release>
     <release version="0.11.2" date="2026-11-06">
       <description>
         <p>Sensors show that they were found while they are being read, and slow heart rate straps
