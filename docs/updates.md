@@ -88,8 +88,13 @@ before from the size of the Zwift folder (“about”). Shared code in `core/man
 
 Verified on tinytin (Oct 30): with the current version, 0 of 19,903 files missing, reconciliation
 1 s; during a real first installation 0 → 99 % evenly in 9 minutes (5.1 GB, ≈ 10 MB/s). Without
-the staging folder, the display stayed at 0 % for 9 minutes and then jumped to 99 %. A real Zwift
-update has not been released yet; it goes through the same launcher and staging folder.
+the staging folder, the display stayed at 0 % for 9 minutes and then jumped to 99 %.
+
+First real Zwift update on tinytin (Nov 6, Tretlager 0.11.2): 1.124.0 (167761) → 1.125.0 (168455).
+The launcher downloaded about 280 MB into the staging folder in 50 s, moved it into the Zwift folder
+at once and switched the version file; Tretlager showed “Updating Zwift (… → …): 0.2 of 0.3 GB”
+with a progress bar and started Zwift 16 s later (game log: “Client version check: UPDATED”).
+Whole update about 1.5 minutes.
 
 ## Procedure for a new Tretlager version
 
@@ -105,7 +110,7 @@ update has not been released yet; it goes through the same launcher and staging 
 - [ ] Tretlager reports by itself when a new version is available (Flatpak portal
   `CreateUpdateMonitor` / `Update`) – deliberately left open, distribution via Flathub is not
   planned.
-- [x] Progress during a Zwift update from the manifest (observe during a real update).
+- [x] Progress during a Zwift update from the manifest (observed during a real update, Nov 6).
 - [x] Keep the previous Wine version (one) and make it selectable.
 - [ ] Renew a specific Windows component (e.g. a newer WebView2) when Zwift requires it: revision
   marker per verb, then `winetricks --force <verb>` in the reconciliation.
