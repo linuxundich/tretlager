@@ -4,6 +4,9 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Changed
+- README and project page: new passage on the end of Windows 10 as a reason to switch to Linux.
+
 ## [0.11.3] - 2026-11-06
 
 ### Changed

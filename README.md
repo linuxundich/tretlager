@@ -35,6 +35,13 @@
 > the Zwift launcher, which contradicts Zwift's terms of service. Tretlager shows these points
 > before the first start and only goes on once you accept them.
 
+## Why Linux, why now
+
+Windows 10 no longer gets updates, and plenty of the computers that only ever run Zwift cannot
+officially run Windows 11. Zwift has already dropped support for Windows 8, and Windows 10 will
+probably follow at some point. Then it is either upgrading the hardware or switching to Linux. That
+is where Tretlager comes in: the old computer can stay, only the system underneath changes.
+
 ## See it in action
 
 <a href="docs/tretlager-demo.mp4"><img src="docs/screenshots/demo-poster.webp" width="420" align="right" alt="Play the Tretlager demo video"/></a>
