@@ -89,12 +89,19 @@
   so every later connection starts at 1995 ms (6 s supervision timeout); service discovery then outlasts the
   bridge timeout and the bridge loops on "Connection timed out". `bluetoothctl remove` and switching the
   adapter off/on (our "seems stuck" reset) do not clear it; unplugging the USB stick or a reboot does.
-  Find a way without root (Flatpak has no mgmt socket), otherwise tell the user to replug/restart
+  Find a way without root (Flatpak has no mgmt socket), otherwise tell the user to replug/restart.
+  Trigger (seen while pairing with bluetoothctl): the strap asks for 240 ms and then 1980 ms as soon as it is
+  connected and nobody has subscribed to the heart rate. Pairing makes it worse: BlueZ then stores the
+  parameters on disk and loads them again after a replug; keep sensors unpaired. Android starts every new
+  connection with its own defaults, which is why the strap is fine on the Pixel. Ideas: detect "link up but
+  discovery times out" and show "unplug and replug the Bluetooth stick" instead of resetting; try whether
+  Trusted on/off (mgmt Add/Remove Device) clears the kernel parameters without root
 - [ ] The "seems stuck" adapter reset fires on discovery timeouts with an established link too, and drops the
   KICKR each time without helping: only reset when no connection was established
 - [ ] HRM-Pro Plus ends the connection by itself after about 7 minutes (0x13, twice on 2026-11-06, also with the
-  Garmin watch and phone Bluetooth off) and then stops advertising for minutes. Check the strap firmware and
-  try a 15-minute connection with another central (nRF Connect on a phone)
+  Garmin watch and phone Bluetooth off) and then stops advertising for minutes. Firmware is current. On the
+  Pixel (nRF Connect, paired) it stayed connected for 25 minutes; unclear whether pairing or Android makes the
+  difference
 - [ ] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
   failing): exit if the bridge is not the primary owner
 - [ ] Repeat the stuck-strap test for the TICKR (same kernel parameter cause?)
