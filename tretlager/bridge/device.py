@@ -8,7 +8,7 @@ import time
 from typing import Callable
 
 from bleak import BleakClient, BleakScanner
-from bleak.exc import BleakDeviceNotFoundError, BleakError
+from bleak.exc import BleakDBusError, BleakDeviceNotFoundError, BleakError
 from dbus_fast import BusType, Message, MessageType, Variant
 from dbus_fast.aio import MessageBus
 
@@ -27,12 +27,18 @@ NOT_FOUND_DELAY = 10.0
 # "Connection unstable" hint: this many drops or failed attempts within this period.
 UNSTABLE_EVENTS = 3
 UNSTABLE_WINDOW = 600.0
-# Connecting plus service discovery. Attempts run one after another (connect_lock): a hanging
-# attempt holds up all other devices for that long (measured 2026-10-31: TICKR took 40 s, the
-# KICKR had to wait). Only the Garmin HRM-Pro Plus needs more than 20 s for service discovery.
+# Setting up the link (BlueZ Device1.Connect). Attempts run one after another (connect_lock): a
+# hanging attempt holds up all other devices for that long, so this stays short.
 CONNECT_TIMEOUT = 20.0
-SLOW_CONNECT_TIMEOUT = 40.0
-SLOW_CONNECT_NAMES = ("HRM-Pro",)
+# Service discovery once the link is up, outside connect_lock. Sensors switch their own connection
+# to long intervals (TICKR about 1 s, Garmin HRM-Pro Plus about 2 s), and Linux starts every new
+# connection with the interval the sensor asked for last: the kernel keeps it per adapter, only
+# unplugging the adapter or a restart clears it (bt-debug and btmon on tinytin, 2026-11-06). At 1 s
+# discovery took 23 s (TICKR), the old limit of 20 s gave up just before and the bridge looped
+# forever. Once subscribed, the sensors pick their interval themselves, so patience is enough.
+DISCOVERY_TIMEOUT = 90.0
+# Discovery failures in a row with the link up before the bridge asks for a replug.
+SLOW_FAILURES = 2
 # How long a device stays announced to Zwift, with its DIRCON server open, after a drop.
 # Zwift keeps the pairing and simply receives data again after reconnecting; otherwise the
 # device disappears from Zwift and has to be found again (QA audit B-04).
@@ -56,11 +62,6 @@ _last_reset: dict[str, float] = {}
 resetting: set[str] = set()  # adapters being switched off and on; the service skips its adapter check
 
 
-def connect_timeout(name: str) -> float:
-    """Time limit for connecting and service discovery; long only for sensors known to be slow."""
-    return SLOW_CONNECT_TIMEOUT if any(n.lower() in (name or "").lower() for n in SLOW_CONNECT_NAMES) else CONNECT_TIMEOUT
-
-
 # BlueZ sets up only one connection at a time per adapter ("Operation already in progress").
 connect_lock = asyncio.Lock()
 
@@ -68,9 +69,36 @@ _PROPS = {"read": dircon.PROP_READ, "write": dircon.PROP_WRITE, "write-without-r
           "notify": dircon.PROP_NOTIFY, "indicate": dircon.PROP_INDICATE}
 
 
+def device_path(address: str, adapter: str = "") -> str:
+    return f"/org/bluez/{adapter or 'hci0'}/dev_" + address.upper().replace(":", "_")
+
+
+async def bluez_connect(address: str, adapter: str, timeout: float) -> None:
+    """Set up the link only (Device1.Connect returns before service discovery is done).
+
+    Raises asyncio.TimeoutError when no link comes up, BleakDBusError for BlueZ errors.
+    """
+    path = device_path(address, adapter)
+    bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+    try:
+        try:
+            reply = await asyncio.wait_for(bus.call(Message(destination="org.bluez", path=path,
+                                                            interface="org.bluez.Device1", member="Connect")),
+                                           timeout)
+        except asyncio.TimeoutError:
+            # cancel the pending request, otherwise BlueZ keeps trying
+            await bus.call(Message(destination="org.bluez", path=path, interface="org.bluez.Device1",
+                                   member="Disconnect"))
+            raise
+        if reply.message_type == MessageType.ERROR and reply.error_name != "org.bluez.Error.AlreadyConnected":
+            raise BleakDBusError(reply.error_name, reply.body)
+    finally:
+        bus.disconnect()
+
+
 async def bluez_disconnect(address: str, adapter: str = "") -> None:
     """Disconnect the device in BlueZ if it is still connected (errors are ignored)."""
-    path = f"/org/bluez/{adapter or 'hci0'}/dev_" + address.upper().replace(":", "_")
+    path = device_path(address, adapter)
     try:
         bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
     except Exception:
@@ -182,7 +210,7 @@ def describe_error(e: BaseException) -> tuple[str, bool]:
     still goes to the bridge log.
     """
     raw = str(e)
-    if isinstance(e, BleakDeviceNotFoundError) or "was not found" in raw:
+    if isinstance(e, BleakDeviceNotFoundError) or "was not found" in raw or "UnknownObject" in raw:
         return N_("Out of range or asleep"), True
     if "failed to discover services" in raw:
         # Device fell asleep again while connecting (KICKR after a break): retry soon.
@@ -238,6 +266,7 @@ class BridgedDevice:
         self._trouble: list[float] = []  # times of drops and failed attempts
         self._grace: asyncio.Task | None = None  # grace period after a drop
         self._announced: list[str] = []  # services announced to Zwift
+        self._link_up = False  # the current attempt got past Device1.Connect
 
     # --- GattBackend for the DIRCON server ---
 
@@ -320,7 +349,8 @@ class BridgedDevice:
 
     async def _run(self) -> None:
         failures = 0
-        timeouts = 0  # connection timeouts in a row of a device that was found
+        timeouts = 0  # link timeouts in a row of a device that was found (stuck controller)
+        slow = 0  # discovery failures in a row with the link up (slow interval kept by the kernel)
         while True:
             not_found = False
             try:
@@ -331,11 +361,19 @@ class BridgedDevice:
                 text, not_found = describe_error(e)
                 if not not_found or "failed to discover" in str(e):
                     self._note_trouble()
-                # find_device_by_address returns None instead of timing out: a timeout comes from
-                # connect, the device was advertising.
-                timeouts = timeouts + 1 if isinstance(e, (asyncio.TimeoutError, TimeoutError)) else 0
+                link_up, self._link_up = self._link_up, False
+                # find_device_by_address returns None instead of timing out: a timeout before the
+                # link is up comes from Device1.Connect, the device was advertising.
+                timeouts = timeouts + 1 if isinstance(e, (asyncio.TimeoutError, TimeoutError)) and not link_up else 0
+                slow = slow + 1 if link_up else 0
+                if slow >= SLOW_FAILURES:
+                    # The adapter reset does not clear the remembered interval and drops the other
+                    # devices, so ask for what helps.
+                    text = N_("Bluetooth keeps a slow setting for this sensor – unplug and plug in the "
+                              "Bluetooth adapter, or restart the computer")
                 self._set_state("error", text)
-                log.warning("%s: %s (%s: %s)", self.cfg.address, text, type(e).__name__, e)
+                log.warning("%s: %s (%s: %s)%s", self.cfg.address, text, type(e).__name__, e,
+                            " [link was up]" if link_up else "")
                 if timeouts >= STUCK_TIMEOUTS:
                     async with connect_lock:
                         await self._teardown()
@@ -368,10 +406,16 @@ class BridgedDevice:
             device = await BleakScanner.find_device_by_address(self.cfg.address, timeout=FIND_TIMEOUT, bluez=bluez)
             if device is None:
                 raise BleakDeviceNotFoundError(self.cfg.address, f"Device with address {self.cfg.address} was not found.")
-            client = BleakClient(device, disconnected_callback=lambda _c: self._disconnected.set(),
-                                 timeout=connect_timeout(self.cfg.name), bluez=bluez)
-            self._client = client  # disconnect in _teardown even on failure
-            await client.connect()
+            started = time.monotonic()
+            await bluez_connect(self.cfg.address, self.adapter, CONNECT_TIMEOUT)
+            self._link_up = True
+        # Service discovery without the lock: bleak sees the link and only waits for the services.
+        client = BleakClient(device, disconnected_callback=lambda _c: self._disconnected.set(),
+                             timeout=DISCOVERY_TIMEOUT, bluez=bluez)
+        self._client = client  # disconnect in _teardown even on failure
+        await client.connect()
+        self._link_up = False
+        log.info("%s: connected, services after %.0f s", self.cfg.address, time.monotonic() - started)
         services = self._collect_services(client)
         if not services:
             raise RuntimeError(N_("Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"))

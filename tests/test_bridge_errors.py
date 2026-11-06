@@ -16,10 +16,18 @@ def test_find_timeout_short_and_separate():
     assert device.FIND_TIMEOUT <= 10 < device.CONNECT_TIMEOUT
 
 
-def test_connect_timeout_long_only_for_slow_sensors():
-    assert device.connect_timeout("TICKR 9029") == device.CONNECT_TIMEOUT == 20.0
-    assert device.connect_timeout("HRM-Pro+:123456") == device.SLOW_CONNECT_TIMEOUT
-    assert device.connect_timeout("") == device.CONNECT_TIMEOUT
+def test_link_short_discovery_long():
+    # 2026-11-06: with the slow interval the kernel remembers, TICKR discovery took 23 s
+    assert device.CONNECT_TIMEOUT == 20.0
+    assert device.DISCOVERY_TIMEOUT >= 60
+
+
+@pytest.fixture(autouse=True)
+def no_bluez_connect(monkeypatch):
+    """The link setup goes to BlueZ directly; the fakes below only replace bleak."""
+    async def link(*_a, **_kw):
+        pass
+    monkeypatch.setattr(device, "bluez_connect", link)
 
 
 # --- B-03: understandable error texts of the bridge ---
@@ -33,6 +41,7 @@ def test_connect_timeout_long_only_for_slow_sensors():
     (BleakDBusError("org.bluez.Error.Failed", ["le-connection-abort-by-local"]), "aborted", False),
     (RuntimeError("Connection to the device lost"), "Connection to the device lost", False),
     (BleakError("something odd"), "Connection failed", False),
+    (BleakDBusError("org.freedesktop.DBus.Error.UnknownObject", ["Method Connect"]), "Out of range", True),
 ])
 def test_describe_error(exc, text, not_found):
     got, nf = device.describe_error(exc)
@@ -158,8 +167,11 @@ def test_grace_expires_and_withdraws(monkeypatch):
 # --- Stuck controller (2026-11-03): connection timeouts in a row of a device that is found ---
 
 def test_stuck_controller_resets_adapter(monkeypatch):
-    class TimingOutClient(FakeClient):
-        async def connect(self):
+    """No link comes up although the strap advertises: switch the adapter off and on."""
+    stuck = {"on": True}
+
+    async def link(*_a, **_kw):
+        if stuck["on"]:
             raise asyncio.TimeoutError()
 
     async def found(*_a, **_kw):
@@ -171,10 +183,11 @@ def test_stuck_controller_resets_adapter(monkeypatch):
 
     async def reset(adapter, bridged):
         resets.append((adapter, list(bridged)))
-        monkeypatch.setattr(device, "BleakClient", FakeClient)  # after the reset the strap connects
+        stuck["on"] = False  # after the reset the strap connects
         return ""
     monkeypatch.setattr(device.BleakScanner, "find_device_by_address", found)
-    monkeypatch.setattr(device, "BleakClient", TimingOutClient)
+    monkeypatch.setattr(device, "BleakClient", FakeClient)
+    monkeypatch.setattr(device, "bluez_connect", link)
     monkeypatch.setattr(device, "bluez_disconnect", no_disconnect)
     monkeypatch.setattr(device, "reset_adapter", reset)
     monkeypatch.setattr(device, "RECONNECT_DELAY", 0.01)
@@ -187,6 +200,42 @@ def test_stuck_controller_resets_adapter(monkeypatch):
         await asyncio.sleep(0.3)
         assert resets == [("hci0", ["AA:BB:CC:DD:EE:FF"])]
         assert dev.state == "connected"
+        await dev.stop()
+
+    asyncio.run(scenario())
+
+
+def test_slow_discovery_asks_for_replug_without_reset(monkeypatch):
+    """Link up, but discovery never finishes (interval the kernel remembers, 2026-11-06): the adapter
+    reset would not help and would drop the trainer, so the bridge asks for a replug instead."""
+    class SlowClient(FakeClient):
+        async def connect(self):
+            raise asyncio.TimeoutError()
+
+    async def found(*_a, **_kw):
+        return object()
+
+    async def no_disconnect(*_a, **_kw):
+        pass
+    resets = []
+
+    async def reset(adapter, bridged):
+        resets.append(adapter)
+        return ""
+    monkeypatch.setattr(device.BleakScanner, "find_device_by_address", found)
+    monkeypatch.setattr(device, "BleakClient", SlowClient)
+    monkeypatch.setattr(device, "bluez_disconnect", no_disconnect)
+    monkeypatch.setattr(device, "reset_adapter", reset)
+    monkeypatch.setattr(device, "RECONNECT_DELAY", 0.01)
+    monkeypatch.setattr(device, "MAX_RECONNECT_DELAY", 0.01)
+
+    async def scenario():
+        dev = device.BridgedDevice(DeviceConfig("AA:BB:CC:DD:EE:FF", "HRMPro+:1", "heartrate", 0), FakeAnnouncer(),
+                                   lambda: None, adapter="hci0")
+        dev.start()
+        await asyncio.sleep(0.3)
+        assert resets == []
+        assert dev.state == "error" and "unplug" in dev.error
         await dev.stop()
 
     asyncio.run(scenario())

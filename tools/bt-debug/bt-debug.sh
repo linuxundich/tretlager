@@ -1,7 +1,8 @@
 #!/bin/bash
 # Record everything needed to understand sensor drops of the Tretlager bridge on this computer.
 #
-#   bt-debug.sh start [--observe auto|none|hciN]   start a recording (restarts the bridge in debug mode)
+#   bt-debug.sh start [--observe auto|none|hciN]   start a recording (restarts the bridge in debug mode;
+#                                                   TL_SRC=<dir> runs the bridge from a source tree)
 #   bt-debug.sh mark "walked away"                  add a marker (pause, walk away, back, …)
 #   bt-debug.sh marks                               interactive: every line typed becomes a marker
 #   bt-debug.sh btmon                               HCI trace as root (asks for the sudo password)
@@ -81,9 +82,17 @@ start)
     bridge_quit
     # flatpak run moves the app into its own scope: stopping the unit does not end it, so keep
     # the instance id and end it with `flatpak kill`.
+    # TL_SRC=<source tree>: run the bridge from there (inside the Flatpak runtime) instead of /app
+    if [ -n "${TL_SRC:-}" ]; then
+        BRIDGE_CMD="--filesystem=$TL_SRC:ro --env=PYTHONPATH=$TL_SRC --command=python3"
+        BRIDGE_ARGS="-m tretlager.bridge"
+        echo "$(stamp) bridge from $TL_SRC" >> "$RUN/marks.log"
+    else
+        BRIDGE_CMD="--command=/app/bin/tretlager-bridge"; BRIDGE_ARGS=""
+    fi
     systemd-run --user -q --unit=btdbg-bridge -p StandardOutput="truncate:$RUN/bridge-stderr.log" \
-        /bin/sh -c "exec /usr/bin/flatpak run --instance-id-fd=3 --env=TRETLAGER_DEBUG=1 \
-        --command=/app/bin/tretlager-bridge $APP 3>'$RUN/bridge.instance'"
+        /bin/sh -c "exec /usr/bin/flatpak run --instance-id-fd=3 --env=TRETLAGER_DEBUG=1 $BRIDGE_CMD \
+        $APP $BRIDGE_ARGS 3>'$RUN/bridge.instance'"
     # The probe must only start once the debug bridge owns the name (it never activates one).
     for _ in $(seq 30); do
         gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \

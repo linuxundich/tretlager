@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-03 23:42+0100\n"
+"POT-Creation-Date: 2026-11-06 12:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,59 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: tretlager/bridge/device.py:142 tretlager/bridge/device.py:147
-#: tretlager/bridge/device.py:166
+#: tretlager/bridge/device.py:170 tretlager/bridge/device.py:175
+#: tretlager/bridge/device.py:194
 msgid "Bluetooth is stuck – switch Bluetooth off and on again"
 msgstr ""
 
-#: tretlager/bridge/device.py:159
+#: tretlager/bridge/device.py:187
 msgid ""
 "Another Bluetooth device such as headphones is using the adapter – "
 "disconnect it or connect it through another adapter"
 msgstr ""
 
-#: tretlager/bridge/device.py:186
+#: tretlager/bridge/device.py:214
 msgid "Out of range or asleep"
 msgstr ""
 
-#: tretlager/bridge/device.py:189
+#: tretlager/bridge/device.py:217
 msgid "Device is asleep – pedal briefly or put on the strap"
 msgstr ""
 
-#: tretlager/bridge/device.py:191
+#: tretlager/bridge/device.py:219
 msgid "Connection timed out, trying again"
 msgstr ""
 
-#: tretlager/bridge/device.py:193
+#: tretlager/bridge/device.py:221
 msgid "Bluetooth is off or the adapter is missing"
 msgstr ""
 
-#: tretlager/bridge/device.py:195
+#: tretlager/bridge/device.py:223
 msgid "Bluetooth is busy, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:197
+#: tretlager/bridge/device.py:225
 msgid "Connection attempt aborted, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:199
+#: tretlager/bridge/device.py:227
 msgid "Bluetooth denies access to the device"
 msgstr ""
 
-#: tretlager/bridge/device.py:202
+#: tretlager/bridge/device.py:230
 msgid "Connection failed, retrying"
 msgstr ""
 
-#: tretlager/bridge/device.py:377
+#: tretlager/bridge/device.py:372
+msgid ""
+"Bluetooth keeps a slow setting for this sensor – unplug and plug in the "
+"Bluetooth adapter, or restart the computer"
+msgstr ""
+
+#: tretlager/bridge/device.py:421
 msgid ""
 "Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"
 msgstr ""
 
-#: tretlager/bridge/device.py:399
+#: tretlager/bridge/device.py:443
 msgid "Connection to the device lost"
 msgstr ""
 
-#: tretlager/bridge/device.py:461
+#: tretlager/bridge/device.py:505
 msgid "Device not connected"
 msgstr ""
 

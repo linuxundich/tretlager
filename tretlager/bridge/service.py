@@ -14,6 +14,7 @@ import signal
 
 from bleak import BleakScanner
 from bleak.exc import BleakDBusError
+from dbus_fast import NameFlag, RequestNameReply
 from dbus_fast.aio import MessageBus
 from dbus_fast.service import ServiceInterface, method, signal as dbus_signal
 
@@ -241,7 +242,13 @@ async def run() -> None:
     bridge = Bridge()
     bus = await MessageBus().connect()
     bus.export(BRIDGE_OBJECT_PATH, bridge)
-    await bus.request_name(BRIDGE_BUS_NAME)
+    # Without DO_NOT_QUEUE a second bridge waits in the queue and still connects every sensor:
+    # two bridges fight over the same devices (seen with bt-debug, 2026-11-05).
+    reply = await bus.request_name(BRIDGE_BUS_NAME, NameFlag.DO_NOT_QUEUE)
+    if reply not in (RequestNameReply.PRIMARY_OWNER, RequestNameReply.ALREADY_OWNER):
+        log.warning("another bridge is already running, exiting")
+        bus.disconnect()
+        return
     log.info("bridge ready, %d device(s) configured", len(bridge.config.devices))
     await bridge.resolve_adapter()
     bridge.start_devices()
