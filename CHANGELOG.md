@@ -4,6 +4,11 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Changed
+- While Zwift updates itself before the ride, the overview says *Zwift is being updated…* in the
+  headline and *Updating from … to … – Zwift starts afterwards* under Version, instead of *Zwift is
+  starting…* and *update … at the next start* (first real update 1.124.0 → 1.125.0, 2026-11-06).
+
 ### Removed
 - The warning "Garmin HRM-Pro does not connect to this Bluetooth chip" for the Intel AX201: the
   service discovery that "hung" there was the slow interval Linux remembers for the strap. With

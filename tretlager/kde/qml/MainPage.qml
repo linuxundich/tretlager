@@ -111,7 +111,9 @@ ColumnsPage {
 
     // --- Start (frameless) ---
     PageHero {
-        title: page.la.zwiftRunning ? i18n("Enjoy the ride!") : page.la.busy ? i18n("Zwift is starting…")
+        title: page.la.zwiftRunning ? i18n("Enjoy the ride!")
+             : page.la.busy && page.la.updating ? i18n("Zwift is being updated…")
+             : page.la.busy ? i18n("Zwift is starting…")
              : page.sensorsReady ? i18n("Ready to ride") : i18n("Almost ready")
         text: page.la.zwiftRunning ? i18n("Tretlager waits minimised and tidies up after the ride.")
             : page.la.busy && page.la.text !== "" ? page.la.text
@@ -209,7 +211,9 @@ ColumnsPage {
             maximumWidth: Infinity
             FormCard.FormTextDelegate {
                 text: i18n("Version")
-                description: !page.la.remote ? (page.la.version || i18n("unknown"))
+                description: page.la.busy && page.la.updating && page.la.remote
+                    ? i18n("Updating from %1 to %2 – Zwift starts afterwards", page.la.version || i18n("unknown"), page.la.remote)
+                    : !page.la.remote ? (page.la.version || i18n("unknown"))
                     : page.la.remote === page.la.version ? i18n("%1, up to date", page.la.version)
                     : i18n("%1, update to %2 at the next start", page.la.version || i18n("unknown"), page.la.remote)
                 icon.name: "update-none"

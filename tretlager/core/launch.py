@@ -199,10 +199,13 @@ def maximize_window_kde(log: Callable[[str], None]) -> bool:
 class Launcher:
     """Performs a launch; progress(text) for the status line, log(text) for the log."""
 
-    def __init__(self, progress: Callable[..., None], log: Callable[[str], None]):
-        """progress(text, percent=-1): status line, percent 0–100 or -1 without a progress bar."""
+    def __init__(self, progress: Callable[..., None], log: Callable[[str], None],
+                 updating: Callable[[bool], None] = lambda _on: None):
+        """progress(text, percent=-1): status line, percent 0–100 or -1 without a progress bar.
+        updating(True/False): a Zwift update is running (the window says so in the headline)."""
         self.progress = progress
         self.log = log
+        self.updating = updating
         self.ctx = setup.Context(log=log, progress=lambda _step, pct, text: progress(text, pct) if text else None)
 
     @property
@@ -279,6 +282,7 @@ class Launcher:
         tracker = UpdateProgress()
         if tracker.total:
             self.log(_("Zwift update: {gb} GB to download").format(gb=f"{tracker.total / 10**9:.1f}"))
+        self.updating(True)
         self.ctx.wineserver_kill()
         subprocess.Popen(["wine", "start", "/d", r"C:\Program Files (x86)\Zwift", "ZwiftLauncher.exe", "SilentLaunch"],
                          env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -302,6 +306,7 @@ class Launcher:
                     return
             raise LaunchError(_("The Zwift update did not finish. Tretlager continues it on the next start."))
         finally:
+            self.updating(False)
             self.ctx.wineserver_kill()
 
     def run_from_process(self) -> Path:

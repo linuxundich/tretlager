@@ -72,3 +72,21 @@ def test_reconcile_reports_failed_step(monkeypatch, tmp_path):
         launcher.reconcile()
     assert any("Wine environment" in t for t in texts)
     assert not (tmp_path / "snapshots").exists()  # leftover cleaned up
+
+
+def test_launcher_reports_running_zwift_update(monkeypatch, tmp_path):
+    """The window shows "Zwift is being updated…" while the launcher downloads (Christoph, 2026-11-06)."""
+    from tretlager.core import launch, setup
+    versions = iter(["1.124.0 (167761)", "1.125.0 (168455)"])
+    monkeypatch.setattr(setup, "game_version", lambda: next(versions, "1.125.0 (168455)"))
+    monkeypatch.setattr(launch, "remote_version", lambda: "1.125.0 (168455)")
+    monkeypatch.setattr(launch, "UpdateProgress", lambda: type("T", (), {"total": 0, "percent": lambda s: -1})())
+    monkeypatch.setattr(launch.subprocess, "Popen", lambda *a, **kw: None)
+    monkeypatch.setattr(launch.time, "sleep", lambda _s: None)
+    monkeypatch.setattr(launch.state, "update", lambda *a, **kw: None)
+    flags = []
+    launcher = launch.Launcher(progress=lambda *_a: None, log=lambda _t: None, updating=flags.append)
+    monkeypatch.setattr(launcher.ctx, "wineserver_kill", lambda: None)
+    monkeypatch.setattr(type(launcher), "env", property(lambda self: {}))
+    launcher.update_if_needed()
+    assert flags == [True, False]

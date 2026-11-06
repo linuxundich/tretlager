@@ -496,7 +496,8 @@ class Backend(QObject):
     _launchEvent = Signal(dict)
 
     def _init_launch(self) -> None:
-        self._launch = {"busy": False, "zwiftRunning": False, "text": "", "percent": -1, "error": "", "needLogin": False,
+        self._launch = {"busy": False, "zwiftRunning": False, "updating": False, "text": "", "percent": -1, "error": "",
+                        "needLogin": False,
                         "wine": {"bundled": "", "kept": "", "useKept": False, "active": ""},
                         "log": "", "version": "", "remote": "", "renderer": "", "login": "",
                         "onBattery": power.on_ac() is False, "powerChanged": False, "gpuErrors": ""}
@@ -663,7 +664,7 @@ class Backend(QObject):
             applog.debug("Launch: %s", text)  # debug mode only
             self._launchEvent.emit({"logline": text})
         launcher = launch.Launcher(progress=lambda t, p=-1: self._launchEvent.emit({"text": t, "percent": float(p)}),
-                                   log=log)
+                                   log=log, updating=lambda on: self._launchEvent.emit({"updating": bool(on)}))
 
         def work():
             try:

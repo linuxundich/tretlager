@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 14:03+0100\n"
+"POT-Creation-Date: 2026-11-06 14:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,111 +120,111 @@ msgstr ""
 msgid "Could not load the KWin script"
 msgstr ""
 
-#: tretlager/core/launch.py:214
+#: tretlager/core/launch.py:217
 msgid "Checking the sensor bridge"
 msgstr ""
 
-#: tretlager/core/launch.py:216
+#: tretlager/core/launch.py:219
 msgid "Checking the sign-in"
 msgstr ""
 
-#: tretlager/core/launch.py:224
+#: tretlager/core/launch.py:227
 #, python-brace-format
 msgid "Wine DPI adjusted to the screen: {dpi}"
 msgstr ""
 
-#: tretlager/core/launch.py:225
+#: tretlager/core/launch.py:228
 msgid "Start Zwift"
 msgstr ""
 
-#: tretlager/core/launch.py:228
+#: tretlager/core/launch.py:231
 msgid "Adjusting the window"
 msgstr ""
 
-#: tretlager/core/launch.py:230 tretlager/kde/app.py:684
+#: tretlager/core/launch.py:233 tretlager/kde/app.py:685
 msgid "Zwift is running"
 msgstr ""
 
-#: tretlager/core/launch.py:234
+#: tretlager/core/launch.py:237
 msgid "Sensor bridge not installed, starting without sensors"
 msgstr ""
 
-#: tretlager/core/launch.py:238
+#: tretlager/core/launch.py:241
 msgid "Sensor bridge started"
 msgstr ""
 
-#: tretlager/core/launch.py:250
+#: tretlager/core/launch.py:253
 msgid "New Wine with Tretlager: back to the bundled version"
 msgstr ""
 
-#: tretlager/core/launch.py:256 tretlager/core/launch.py:257
+#: tretlager/core/launch.py:259 tretlager/core/launch.py:260
 #, python-brace-format
 msgid "Completing setup: {step}"
 msgstr ""
 
-#: tretlager/core/launch.py:261
+#: tretlager/core/launch.py:264
 msgid "Check setup"
 msgstr ""
 
-#: tretlager/core/launch.py:263
+#: tretlager/core/launch.py:266
 msgid "The setup could not be checked."
 msgstr ""
 
-#: tretlager/core/launch.py:270
+#: tretlager/core/launch.py:273
 #, python-brace-format
 msgid "Could not check for updates: {error}"
 msgstr ""
 
-#: tretlager/core/launch.py:277
+#: tretlager/core/launch.py:280
 #, python-brace-format
 msgid "Updating Zwift ({old} → {new})"
 msgstr ""
 
-#: tretlager/core/launch.py:281
+#: tretlager/core/launch.py:284
 #, python-brace-format
 msgid "Zwift update: {gb} GB to download"
 msgstr ""
 
-#: tretlager/core/launch.py:293
+#: tretlager/core/launch.py:297
 #, python-brace-format
 msgid "{title}: {done} of {total} GB"
 msgstr ""
 
-#: tretlager/core/launch.py:297
+#: tretlager/core/launch.py:301
 #, python-brace-format
 msgid "{title}, for {n} minute"
 msgid_plural "{title}, for {n} minutes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/core/launch.py:300
+#: tretlager/core/launch.py:304
 #, python-brace-format
 msgid "Zwift updated to {version}"
 msgstr ""
 
-#: tretlager/core/launch.py:303
+#: tretlager/core/launch.py:307
 msgid ""
 "The Zwift update did not finish. Tretlager continues it on the next start."
 msgstr ""
 
-#: tretlager/core/launch.py:319
+#: tretlager/core/launch.py:324
 msgid "Could not compile the start helper."
 msgstr ""
 
-#: tretlager/core/launch.py:353
+#: tretlager/core/launch.py:358
 msgid "The Zwift launcher does not start."
 msgstr ""
 
-#: tretlager/core/launch.py:370
+#: tretlager/core/launch.py:375
 #, python-brace-format
 msgid "Could not start Zwift (RunFromProcess, code {code})."
 msgstr ""
 
-#: tretlager/core/launch.py:373
+#: tretlager/core/launch.py:378
 msgid "Could not start Zwift (timed out)."
 msgstr ""
 
-#: tretlager/core/launch.py:402
+#: tretlager/core/launch.py:407
 msgid "Sensor bridge stopped"
 msgstr ""
 
@@ -729,85 +729,85 @@ msgstr ""
 msgid "Helper exited with code {code}"
 msgstr ""
 
-#: tretlager/kde/app.py:521
+#: tretlager/kde/app.py:522
 msgid "Power source changed: AC"
 msgstr ""
 
-#: tretlager/kde/app.py:521
+#: tretlager/kde/app.py:522
 msgid "Power source changed: battery"
 msgstr ""
 
-#: tretlager/kde/app.py:523
+#: tretlager/kde/app.py:524
 msgid "Power source changed"
 msgstr ""
 
-#: tretlager/kde/app.py:524
+#: tretlager/kde/app.py:525
 msgid ""
 "Switching between AC and battery can upset the NVIDIA driver. If Zwift "
 "hangs, close it with Alt+F4 and restart it with the power adapter connected."
 msgstr ""
 
-#: tretlager/kde/app.py:553
+#: tretlager/kde/app.py:554
 msgid ""
 "GNU General Public License, version 3 or later: https://www.gnu.org/licenses/"
 "gpl-3.0.html"
 msgstr ""
 
-#: tretlager/kde/app.py:567
+#: tretlager/kde/app.py:568
 msgid "Sensor bridge restarted after an update"
 msgstr ""
 
-#: tretlager/kde/app.py:607
+#: tretlager/kde/app.py:608
 msgid "Zwift ride"
 msgstr ""
 
-#: tretlager/kde/app.py:636
+#: tretlager/kde/app.py:637
 msgid "valid"
 msgstr ""
 
-#: tretlager/kde/app.py:636
+#: tretlager/kde/app.py:637
 msgid "renewed at start"
 msgstr ""
 
-#: tretlager/kde/app.py:637
+#: tretlager/kde/app.py:638
 msgid "expired – please sign in again"
 msgstr ""
 
-#: tretlager/kde/app.py:638
+#: tretlager/kde/app.py:639
 msgid "not signed in"
 msgstr ""
 
-#: tretlager/kde/app.py:641
+#: tretlager/kde/app.py:642
 #, python-brace-format
 msgid ", renewal for {n} more day"
 msgid_plural ", renewal for {n} more days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: tretlager/kde/app.py:660
+#: tretlager/kde/app.py:661
 msgid "Preparing the start"
 msgstr ""
 
-#: tretlager/kde/app.py:681
+#: tretlager/kde/app.py:682
 #, python-brace-format
 msgid "Unexpected error ({name})"
 msgstr ""
 
-#: tretlager/kde/app.py:702
+#: tretlager/kde/app.py:703
 #, python-brace-format
 msgid "{version} kept as the proven Wine version"
 msgstr ""
 
-#: tretlager/kde/app.py:705
+#: tretlager/kde/app.py:706
 msgid "Zwift closed"
 msgstr ""
 
-#: tretlager/kde/app.py:723
+#: tretlager/kde/app.py:724
 #, python-brace-format
 msgid "NVIDIA driver reported {errors}"
 msgstr ""
 
-#: tretlager/kde/app.py:783
+#: tretlager/kde/app.py:784
 #, python-brace-format
 msgid "Could not save the error report ({name})."
 msgstr ""
@@ -1036,7 +1036,7 @@ msgid ""
 "license terms apply."
 msgstr ""
 
-#: tretlager/kde/qml/AboutPage.qml:129 tretlager/kde/qml/MainPage.qml:207
+#: tretlager/kde/qml/AboutPage.qml:129 tretlager/kde/qml/MainPage.qml:209
 msgid "Zwift"
 msgstr ""
 
@@ -1310,7 +1310,7 @@ msgstr ""
 msgid "Log"
 msgstr ""
 
-#: tretlager/kde/qml/LoginPage.qml:10 tretlager/kde/qml/MainPage.qml:256
+#: tretlager/kde/qml/LoginPage.qml:10 tretlager/kde/qml/MainPage.qml:260
 msgid "Sign-in"
 msgstr ""
 
@@ -1550,7 +1550,7 @@ msgid ""
 msgstr ""
 
 #: tretlager/kde/qml/MainPage.qml:95 tretlager/kde/qml/MainPage.qml:103
-#: tretlager/kde/qml/MainPage.qml:109 tretlager/kde/qml/MainPage.qml:170
+#: tretlager/kde/qml/MainPage.qml:109 tretlager/kde/qml/MainPage.qml:172
 #: tretlager/kde/qml/Main.qml:58 tretlager/kde/qml/SensorsPage.qml:10
 msgid "Sensors"
 msgstr ""
@@ -1572,23 +1572,27 @@ msgstr ""
 msgid "Enjoy the ride!"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:114
-msgid "Zwift is starting…"
-msgstr ""
-
 #: tretlager/kde/qml/MainPage.qml:115
-msgid "Ready to ride"
-msgstr ""
-
-#: tretlager/kde/qml/MainPage.qml:115
-msgid "Almost ready"
+msgid "Zwift is being updated…"
 msgstr ""
 
 #: tretlager/kde/qml/MainPage.qml:116
+msgid "Zwift is starting…"
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:117
+msgid "Ready to ride"
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:117
+msgid "Almost ready"
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:118
 msgid "Tretlager waits minimised and tidies up after the ride."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:144
+#: tretlager/kde/qml/MainPage.qml:146
 msgid ""
 "Before starting, Tretlager checks the sensor bridge and renews the Zwift "
 "session. After a Tretlager update it adapts the Zwift environment, and it "
@@ -1596,14 +1600,14 @@ msgid ""
 "most powerful graphics card and at the screen's resolution."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:163
+#: tretlager/kde/qml/MainPage.qml:165
 msgid ""
 "Not an official Zwift app, use at your own risk. Not for races: Tretlager "
 "does not guarantee that the sensor bridge passes power, cadence and heart "
 "rate to Zwift correctly."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:173
+#: tretlager/kde/qml/MainPage.qml:175
 msgid ""
 "Zwift cannot use Bluetooth on Linux. The sensor bridge connects to the "
 "trainer and heart rate strap and offers them to Zwift as Wahoo devices with "
@@ -1611,54 +1615,58 @@ msgid ""
 "KICKR …” for power, cadence and resistance, “Wahoo HRM …” for heart rate."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:181 tretlager/kde/qml/SensorsPage.qml:113
+#: tretlager/kde/qml/MainPage.qml:183 tretlager/kde/qml/SensorsPage.qml:113
 msgid "Sensor bridge is off"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:181
+#: tretlager/kde/qml/MainPage.qml:183
 msgid "No devices set up"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:182
+#: tretlager/kde/qml/MainPage.qml:184
 msgid "It starts with Tretlager and before every ride."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:183
+#: tretlager/kde/qml/MainPage.qml:185
 msgid "Add the trainer and heart rate strap under Sensors."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:198
+#: tretlager/kde/qml/MainPage.qml:200
 msgid "Manage sensors"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:211
+#: tretlager/kde/qml/MainPage.qml:213
 msgid "Version"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:213
+#: tretlager/kde/qml/MainPage.qml:215
+msgid "Updating from %1 to %2 – Zwift starts afterwards"
+msgstr ""
+
+#: tretlager/kde/qml/MainPage.qml:217
 msgid "%1, up to date"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:214
+#: tretlager/kde/qml/MainPage.qml:218
 msgid "%1, update to %2 at the next start"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:220
+#: tretlager/kde/qml/MainPage.qml:224
 msgid "Not checked yet"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:223
+#: tretlager/kde/qml/MainPage.qml:227
 msgid ""
 "Tretlager tested the graphics path during setup. On laptops with two "
 "graphics chips, Zwift runs on the NVIDIA card while the desktop stays on the "
 "power-saving chip. The screen resolution stays unchanged."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:228
+#: tretlager/kde/qml/MainPage.qml:232
 msgid "Wine"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:232
+#: tretlager/kde/qml/MainPage.qml:236
 msgid ""
 "Wine comes with Tretlager and is updated with Tretlager. Tretlager keeps the "
 "last proven version: if Zwift runs worse after an update, the switch below "
@@ -1666,38 +1674,38 @@ msgid ""
 "then replaces the kept version."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:239
+#: tretlager/kde/qml/MainPage.qml:243
 msgid "Use previous Wine version"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:240
+#: tretlager/kde/qml/MainPage.qml:244
 msgid ""
 "%1 instead of %2. Only needed if Zwift has not run properly since the last "
 "Tretlager update."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:248
+#: tretlager/kde/qml/MainPage.qml:252
 msgid "Keep screen on during the ride"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:249
+#: tretlager/kde/qml/MainPage.qml:253
 msgid ""
 "The screen does not dim, switch off or lock while Zwift runs, even during a "
 "break."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:260
+#: tretlager/kde/qml/MainPage.qml:264
 msgid ""
 "The official sign-in does not work on Linux, so it runs through a separate "
 "sign-in window. This contradicts Zwift's terms of service. The session is "
 "only stored in this computer's keyring."
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:265
+#: tretlager/kde/qml/MainPage.qml:269
 msgid "Sign in again…"
 msgstr ""
 
-#: tretlager/kde/qml/MainPage.qml:272
+#: tretlager/kde/qml/MainPage.qml:276
 msgid "Log of the last start…"
 msgstr ""
 
