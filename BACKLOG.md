@@ -104,7 +104,10 @@
   difference
 - [ ] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
   failing): exit if the bridge is not the primary owner
-- [ ] Repeat the stuck-strap test for the TICKR (same kernel parameter cause?)
+- [x] Repeat the stuck-strap test for the TICKR (2026-11-06): same cause. The TICKR switches its own connection
+  to 997.5 ms right after connecting (link layer procedure, heart rate keeps flowing); after a drop out of
+  range every new connection starts at 500 ms or more and service discovery times out. Adapter off/on does
+  not help, replugging the stick does. The KICKR also had discovery timeouts on reconnect (stored ~100 ms)
 - [ ] Headphones on the bridge adapter: check the notice in the real window (tinytin, AX201) and whether a second adapter for the headphones keeps the sensors stable
 - [ ] Keep screen on: check on a real Plasma and GNOME ride that the screen neither dims nor locks during a break
 - [x] Network change during the ride: announcement on 127.0.0.1, listening only on loopback (2026-10-29)
