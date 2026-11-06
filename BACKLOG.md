@@ -84,6 +84,20 @@
 - [x] Check a longer ride (≥ 30 min) for stability (100 km on tinytin, 2026-11-03: Zwift stable)
 - [x] Strap that drops during a break never came back (stuck controller, AX201): adapter reset after three timeouts in a row (2026-11-03)
 - [ ] Ride on tinytin: walk away from the trainer during a break and check that the TICKR comes back by itself (look for "seems stuck" in `bridge.log`)
+- [ ] HRM-Pro Plus stuck after a drop (bt-debug + btmon on tinytin, 2026-11-06): the strap sends an L2CAP
+  connection parameter update for a 1980–1999 ms interval, the kernel accepts it and keeps it per adapter,
+  so every later connection starts at 1995 ms (6 s supervision timeout); service discovery then outlasts the
+  bridge timeout and the bridge loops on "Connection timed out". `bluetoothctl remove` and switching the
+  adapter off/on (our "seems stuck" reset) do not clear it; unplugging the USB stick or a reboot does.
+  Find a way without root (Flatpak has no mgmt socket), otherwise tell the user to replug/restart
+- [ ] The "seems stuck" adapter reset fires on discovery timeouts with an established link too, and drops the
+  KICKR each time without helping: only reset when no connection was established
+- [ ] HRM-Pro Plus ends the connection by itself after about 7 minutes (0x13, twice on 2026-11-06, also with the
+  Garmin watch and phone Bluetooth off) and then stops advertising for minutes. Check the strap firmware and
+  try a 15-minute connection with another central (nRF Connect on a phone)
+- [ ] A second bridge instance runs next to the first when the name is taken (`request_name` queues instead of
+  failing): exit if the bridge is not the primary owner
+- [ ] Repeat the stuck-strap test for the TICKR (same kernel parameter cause?)
 - [ ] Headphones on the bridge adapter: check the notice in the real window (tinytin, AX201) and whether a second adapter for the headphones keeps the sensors stable
 - [ ] Keep screen on: check on a real Plasma and GNOME ride that the screen neither dims nor locks during a break
 - [x] Network change during the ride: announcement on 127.0.0.1, listening only on loopback (2026-10-29)
