@@ -33,7 +33,7 @@ FormCard.AbstractFormDelegate {
 
     function stateColor(st) {
         return st === "connected" ? Kirigami.Theme.positiveTextColor
-             : st === "connecting" ? Kirigami.Theme.neutralTextColor
+             : st === "connecting" || st === "reading" ? Kirigami.Theme.neutralTextColor
              : st === "error" ? Kirigami.Theme.negativeTextColor
              : Kirigami.Theme.disabledTextColor
     }
@@ -41,6 +41,7 @@ FormCard.AbstractFormDelegate {
         switch (d.state) {
         case "connected": return d.zwift_clients > 0 ? i18n("Connected to Zwift") : i18n("Connected, waiting for Zwift")
         case "connecting": return i18n("Searching for the device…")
+        case "reading": return i18n("Found, reading the sensor…")
         case "disconnected": return i18n("Disconnected, trying again")
         case "error": return d.error || i18n("Unreachable")
         case "paused": return i18n("Paused")
@@ -51,6 +52,7 @@ FormCard.AbstractFormDelegate {
         switch (d.state) {
         case "connected": return i18n("The bridge receives data and offers the device to Zwift.")
         case "connecting": return i18n("Pedal briefly or put on the strap; a strap does not transmit without skin contact.")
+        case "reading": return i18n("The sensor has answered. After a dropout it often still uses a slow connection setting; reading its services can then take up to two minutes.")
         case "error": return (d.error ? d.error + ". " : "") + i18n("The device is asleep, too far away or connected to another device. If it is not in use right now: pause it.")
         case "paused": return i18n("Paused: the bridge does not search for the device or offer it to Zwift. Resume as soon as it is needed again.")
         }

@@ -19,7 +19,7 @@ def test_find_timeout_short_and_separate():
 def test_link_short_discovery_long():
     # 2026-11-06: with the slow interval the kernel remembers, TICKR discovery took 23 s
     assert device.CONNECT_TIMEOUT == 20.0
-    assert device.DISCOVERY_TIMEOUT >= 60
+    assert device.DISCOVERY_TIMEOUT >= 120  # HRM-Pro Plus needed 80 s
 
 
 @pytest.fixture(autouse=True)
@@ -208,6 +208,8 @@ def test_stuck_controller_resets_adapter(monkeypatch):
 def test_slow_discovery_asks_for_replug_without_reset(monkeypatch):
     """Link up, but discovery never finishes (interval the kernel remembers, 2026-11-06): the adapter
     reset would not help and would drop the trainer, so the bridge asks for a replug instead."""
+    states = []
+
     class SlowClient(FakeClient):
         async def connect(self):
             raise asyncio.TimeoutError()
@@ -231,9 +233,10 @@ def test_slow_discovery_asks_for_replug_without_reset(monkeypatch):
 
     async def scenario():
         dev = device.BridgedDevice(DeviceConfig("AA:BB:CC:DD:EE:FF", "HRMPro+:1", "heartrate", 0), FakeAnnouncer(),
-                                   lambda: None, adapter="hci0")
+                                   lambda: states.append(dev.state), adapter="hci0")
         dev.start()
         await asyncio.sleep(0.3)
+        assert "reading" in states  # found and linked, not "searching"
         assert resets == []
         assert dev.state == "error" and "unplug" in dev.error
         await dev.stop()

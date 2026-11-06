@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tretlager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 12:47+0100\n"
+"POT-Creation-Date: 2026-11-06 13:46+0100\n"
 "PO-Revision-Date: 2026-10-31 17:00+0100\n"
 "Last-Translator: Christoph Langner <mail@christoph-langner.de>\n"
 "Language-Team: German\n"
@@ -67,18 +67,18 @@ msgstr ""
 "Bluetooth hält für diesen Sensor eine langsame Einstellung fest – Bluetooth-"
 "Stick ab- und wieder anstecken oder den Rechner neu starten"
 
-#: tretlager/bridge/device.py:421
+#: tretlager/bridge/device.py:424
 msgid ""
 "Device offers no supported service (FTMS, Cycling Power, CSC, heart rate)"
 msgstr ""
 "Gerät bietet keinen unterstützten Dienst (FTMS, Cycling Power, CSC, "
 "Herzfrequenz)"
 
-#: tretlager/bridge/device.py:443
+#: tretlager/bridge/device.py:446
 msgid "Connection to the device lost"
 msgstr "Verbindung zum Gerät verloren"
 
-#: tretlager/bridge/device.py:505
+#: tretlager/bridge/device.py:508
 msgid "Device not connected"
 msgstr "Gerät nicht verbunden"
 
@@ -1261,7 +1261,7 @@ msgid "Heart rate strap"
 msgstr "Pulsgurt"
 
 #: tretlager/kde/qml/DeviceDelegate.qml:23
-#: tretlager/kde/qml/DeviceDelegate.qml:121
+#: tretlager/kde/qml/DeviceDelegate.qml:123
 #: tretlager/kde/qml/SensorsPage.qml:19 tretlager/kde/qml/SensorsPage.qml:94
 msgid "Sensor"
 msgstr "Sensor"
@@ -1294,22 +1294,26 @@ msgid "Searching for the device…"
 msgstr "Sucht das Gerät …"
 
 #: tretlager/kde/qml/DeviceDelegate.qml:44
+msgid "Found, reading the sensor…"
+msgstr "Gefunden, Sensor wird ausgelesen …"
+
+#: tretlager/kde/qml/DeviceDelegate.qml:45
 msgid "Disconnected, trying again"
 msgstr "Getrennt, neuer Versuch folgt"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:45
+#: tretlager/kde/qml/DeviceDelegate.qml:46
 msgid "Unreachable"
 msgstr "Nicht erreichbar"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:46
+#: tretlager/kde/qml/DeviceDelegate.qml:47
 msgid "Paused"
 msgstr "Pausiert"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:52
+#: tretlager/kde/qml/DeviceDelegate.qml:53
 msgid "The bridge receives data and offers the device to Zwift."
 msgstr "Die Bridge empfängt Daten und bietet das Gerät Zwift an."
 
-#: tretlager/kde/qml/DeviceDelegate.qml:53
+#: tretlager/kde/qml/DeviceDelegate.qml:54
 msgid ""
 "Pedal briefly or put on the strap; a strap does not transmit without skin "
 "contact."
@@ -1317,7 +1321,16 @@ msgstr ""
 "Kurz in die Pedale treten bzw. den Gurt anlegen; ohne Hautkontakt sendet ein "
 "Gurt nicht."
 
-#: tretlager/kde/qml/DeviceDelegate.qml:54
+#: tretlager/kde/qml/DeviceDelegate.qml:55
+msgid ""
+"The sensor has answered. After a dropout it often still uses a slow "
+"connection setting; reading its services can then take up to two minutes."
+msgstr ""
+"Der Sensor hat geantwortet. Nach einem Abbruch nutzt er oft noch eine "
+"langsame Verbindungseinstellung; das Auslesen seiner Dienste kann dann bis "
+"zu zwei Minuten dauern."
+
+#: tretlager/kde/qml/DeviceDelegate.qml:56
 msgid ""
 "The device is asleep, too far away or connected to another device. If it is "
 "not in use right now: pause it."
@@ -1325,7 +1338,7 @@ msgstr ""
 "Das Gerät schläft, ist zu weit entfernt oder mit einem anderen Gerät "
 "verbunden. Wird es gerade nicht genutzt: pausieren."
 
-#: tretlager/kde/qml/DeviceDelegate.qml:55
+#: tretlager/kde/qml/DeviceDelegate.qml:57
 msgid ""
 "Paused: the bridge does not search for the device or offer it to Zwift. "
 "Resume as soon as it is needed again."
@@ -1333,27 +1346,27 @@ msgstr ""
 "Pausiert: Die Bridge sucht das Gerät nicht und bietet es Zwift nicht an. "
 "Fortsetzen, sobald es wieder gebraucht wird."
 
-#: tretlager/kde/qml/DeviceDelegate.qml:120
+#: tretlager/kde/qml/DeviceDelegate.qml:122
 msgid "In Zwift: %1"
 msgstr "In Zwift: %1"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:199
+#: tretlager/kde/qml/DeviceDelegate.qml:201
 msgid "Resume"
 msgstr "Fortsetzen"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:199
+#: tretlager/kde/qml/DeviceDelegate.qml:201
 msgid "Pause"
 msgstr "Pausieren"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:201
+#: tretlager/kde/qml/DeviceDelegate.qml:203
 msgid "Resume: search again and offer to Zwift"
 msgstr "Fortsetzen: wieder suchen und Zwift anbieten"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:202
+#: tretlager/kde/qml/DeviceDelegate.qml:204
 msgid "Pause: stop searching until resumed"
 msgstr "Pausieren: nicht mehr suchen, bis zum Fortsetzen"
 
-#: tretlager/kde/qml/DeviceDelegate.qml:211
+#: tretlager/kde/qml/DeviceDelegate.qml:213
 msgid "Remove device"
 msgstr "Gerät entfernen"
 

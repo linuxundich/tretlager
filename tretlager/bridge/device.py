@@ -36,7 +36,7 @@ CONNECT_TIMEOUT = 20.0
 # unplugging the adapter or a restart clears it (bt-debug and btmon on tinytin, 2026-11-06). At 1 s
 # discovery took 23 s (TICKR), the old limit of 20 s gave up just before and the bridge looped
 # forever. Once subscribed, the sensors pick their interval themselves, so patience is enough.
-DISCOVERY_TIMEOUT = 90.0
+DISCOVERY_TIMEOUT = 150.0  # HRM-Pro Plus at 2 s: 38 s and 80 s measured on 2026-11-06
 # Discovery failures in a row with the link up before the bridge asks for a replug.
 SLOW_FAILURES = 2
 # How long a device stays announced to Zwift, with its DIRCON server open, after a drop.
@@ -249,7 +249,7 @@ class BridgedDevice:
         self.adapter = adapter  # hciN, empty = default adapter
         self.announcer = announcer
         self.on_change = on_change
-        self.state = "disconnected"  # state values sent over D-Bus: disconnected, connecting, connected, error
+        self.state = "disconnected"  # state values sent over D-Bus: disconnected, connecting, reading, connected, error
         self.error = ""
         self.values: dict = {}
         self.values_at = 0.0
@@ -409,6 +409,9 @@ class BridgedDevice:
             started = time.monotonic()
             await bluez_connect(self.cfg.address, self.adapter, CONNECT_TIMEOUT)
             self._link_up = True
+        # Found and linked; with a remembered slow interval reading the services takes minutes, and
+        # "Searching for the device…" looked as if the strap was not found (Christoph, 2026-11-06).
+        self._set_state("reading")
         # Service discovery without the lock: bleak sees the link and only waits for the services.
         client = BleakClient(device, disconnected_callback=lambda _c: self._disconnected.set(),
                              timeout=DISCOVERY_TIMEOUT, bluez=bluez)

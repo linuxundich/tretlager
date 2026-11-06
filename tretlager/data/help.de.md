@@ -47,11 +47,11 @@ Pulsgurt.
 <!-- icon: network-bluetooth -->
 
 - **Lange Verbindungsintervalle**: Wahoo TICKR und Garmin HRM-Pro Plus stellen ihre
-  Bluetooth-Verbindung selbst auf ein langes Intervall um, der TICKR auf etwa 1 Sekunde, der
-  HRM-Pro Plus auf etwa 2 Sekunden. Der Puls kommt trotzdem rechtzeitig an, aber Linux merkt sich
-  das Intervall und beginnt die nächste Verbindung damit. Das Wiederverbinden dauert deshalb bis
-  zu einer Minute, und etwa eine halbe Minute lang kommt der Puls nur alle paar Sekunden, bis der
-  Gurt das Intervall wieder verkürzt.
+  Bluetooth-Verbindung selbst auf ein langes Intervall um, der TICKR auf etwa 1 Sekunde, der HRM-Pro
+  Plus auf etwa 2 Sekunden. Der Puls kommt trotzdem rechtzeitig an, aber Linux merkt sich das
+  Intervall und beginnt die nächste Verbindung damit. Das Wiederverbinden dauert deshalb bis zu zwei
+  Minuten (*Gefunden, Sensor wird ausgelesen …*), und etwa eine halbe Minute lang kommt der Puls nur
+  alle paar Sekunden, bis der Gurt das Intervall wieder verkürzt.
 - **Garmin HRM-Pro Plus**: Er beendet die Bluetooth-Verbindung alle 7 bis 15 Minuten von sich
   aus, auch direkt neben dem Rechner, und schweigt danach zwei bis fünf Minuten. Tretlager
   verbindet ihn selbstständig neu, in dieser Zeit fehlt aber der Puls. Für Zwift ist der Wahoo
@@ -112,7 +112,7 @@ Anmeldeseite von Zwift deshalb in einem eigenen Fenster. **Zwift erlaubt das nic
   Tretlager weist darauf hin.
 - [data-warning] **Sensor wird gefunden, verbindet sich aber nie**: Er verträgt den
   Bluetooth-Chip nicht; bekannte Fälle meldet Tretlager am Sensor. Abhilfe: USB-Bluetooth-Stick.
-- [network-bluetooth] **Sensor kommt nach einer Pause nicht zurück**: Bis zu zwei Minuten
+- [network-bluetooth] **Sensor kommt nach einer Pause nicht zurück**: Bis zu drei Minuten
   abwarten (siehe *Pulsgurte*). Zeigt der Sensor dann *Bluetooth-Stick ab- und wieder anstecken
   oder den Rechner neu starten*, hält Linux für ihn eine langsame Verbindungseinstellung fest, die
   nur das löscht; Bluetooth aus- und einschalten hilft nicht. Kommt gar keine Verbindung zustande,

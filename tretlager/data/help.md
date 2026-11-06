@@ -45,11 +45,12 @@ rate strap.
 ## Heart rate straps
 <!-- icon: network-bluetooth -->
 
-- **Long connection intervals**: The Wahoo TICKR and the Garmin HRM-Pro Plus switch their
-  Bluetooth connection to a long interval by themselves, the TICKR to about 1 second, the HRM-Pro
-  Plus to about 2 seconds. Heart rate still arrives in time, but Linux remembers the interval and
-  starts the next connection with it. Reconnecting therefore takes up to a minute, and for about
-  half a minute heart rate comes only every few seconds until the strap shortens the interval.
+- **Long connection intervals**: The Wahoo TICKR and the Garmin HRM-Pro Plus switch their Bluetooth
+  connection to a long interval by themselves, the TICKR to about 1 second, the HRM-Pro Plus to
+  about 2 seconds. Heart rate still arrives in time, but Linux remembers the interval and starts the
+  next connection with it. Reconnecting therefore takes up to two minutes (*Found, reading the
+  sensor…*), and for about half a minute heart rate comes only every few seconds until the strap
+  shortens the interval.
 - **Garmin HRM-Pro Plus**: It ends the Bluetooth connection by itself every 7 to 15 minutes,
   also right next to the computer, and then stays silent for two to five minutes. Tretlager
   reconnects on its own, but heart rate is missing for that time. For Zwift the Wahoo TICKR is
@@ -108,7 +109,7 @@ using it is at your own risk.**
   adapter; Tretlager points this out.
 - [data-warning] **Sensor is found but never connects**: It does not get along with the
   Bluetooth chip; Tretlager reports known cases on the sensor. Remedy: USB Bluetooth dongle.
-- [network-bluetooth] **Sensor does not come back after a break**: Allow up to two minutes
+- [network-bluetooth] **Sensor does not come back after a break**: Allow up to three minutes
   (see *Heart rate straps*). If the sensor then shows *unplug and plug in the Bluetooth adapter,
   or restart the computer*, Linux keeps a slow connection setting for it that only this clears;
   switching Bluetooth off and on does not help. If no connection comes up at all, the Bluetooth

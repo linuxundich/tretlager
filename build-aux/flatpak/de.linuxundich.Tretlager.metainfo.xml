@@ -25,6 +25,12 @@
   <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.11.2" date="2026-11-06">
+      <description>
+        <p>Sensors show that they were found while they are being read, and slow heart rate straps
+        get more time to reconnect.</p>
+      </description>
+    </release>
     <release version="0.11.1" date="2026-11-06">
       <description>
         <p>Heart rate straps come back by themselves after a dropout or a break out of range,

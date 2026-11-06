@@ -4,6 +4,15 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-11-06
+
+### Changed
+- Sensors show *Found, reading the sensor…* as soon as the link is up, instead of *Searching for
+  the device…*: with a remembered slow interval reading the services takes minutes, and the old
+  text looked as if the strap was not found.
+- Service discovery may take up to 150 s instead of 90 s: the HRM-Pro Plus needed 80 s on tinytin
+  right after the 0.11.1 release.
+
 ## [0.11.1] - 2026-11-06
 
 ### Added
