@@ -25,6 +25,13 @@
   <url type="vcs-browser">https://github.com/linuxundich/tretlager</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.11.4" date="2026-11-11">
+      <description>
+        <p>Setting up the system works on Ubuntu: the WineHQ key is accepted and Ubuntu gets the
+        matching Wine builds. Icons and colors follow the desktop outside Plasma, and the Debian
+        package lists all the modules it needs.</p>
+      </description>
+    </release>
     <release version="0.11.3" date="2026-11-06">
       <description>
         <p>The overview says when Zwift is being updated, and the warning about the Garmin HRM-Pro on

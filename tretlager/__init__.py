@@ -1,6 +1,6 @@
 """Tretlager – set up Zwift on Linux, start it and connect it to sensors."""
 
-__version__ = "0.11.3"  # must match the topmost version in the CHANGELOG (tests/test_version.py)
+__version__ = "0.11.4"  # must match the topmost version in the CHANGELOG (tests/test_version.py)
 
 APP_ID = "de.linuxundich.Tretlager"
 BRIDGE_BUS_NAME = "de.linuxundich.Tretlager.Bridge"

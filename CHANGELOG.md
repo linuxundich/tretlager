@@ -4,6 +4,7 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.4] - 2026-11-11
 ### Fixed
 - Ubuntu (GNOME): setting up the system failed with `NO_PUBKEY 76F1A20FF987672F` because APT reads an
   armored key only with the extension `.asc`; the WineHQ key is now stored and referenced as `.asc`.
