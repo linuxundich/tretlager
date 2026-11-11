@@ -176,7 +176,8 @@ Speed and Cadence, Heart Rate) should work but are untested. ANT+ is not support
 
 > [!NOTE]
 > Tretlager targets current distributions with Flatpak. TUXEDO OS with Plasma is the main
-> target, GNOME works. Fedora, Ubuntu and openSUSE are planned but untested; reports are welcome.
+> target, GNOME works. Ubuntu 26.04 (GNOME) was tested with the Debian package, the Flatpak is
+> untested there. Fedora and openSUSE are planned but untested; reports are welcome.
 
 Your system needs Flatpak with the Flathub remote, BlueZ with a Bluetooth LE adapter, a running
 `avahi-daemon` and a Secret Service keyring (KWallet or GNOME Keyring). Tretlager brings

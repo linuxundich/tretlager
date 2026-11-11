@@ -22,6 +22,10 @@ All development, the long test rides and the demo video happened on this laptop.
 | System | TUXEDO OS (Debian forky base), kernel 7.2.7 (TUXEDO), BlueZ 5.87 |
 | Desktop | KDE Plasma 6.7.4 on Wayland, display scaling 160 % |
 
+On 2026-11-11 the same laptop was also set up with Ubuntu 26.04.1 LTS (GNOME): the assistant ran
+through with the Debian package (WineHQ Ubuntu builds, Breeze icons and colors outside Plasma).
+The Flatpak was not tried there.
+
 Zwift runs on the RTX 3050 Ti through PRIME render offload and uses about 3.3 GB of video
 memory. With the laptop on its power supply the game runs smoothly; switching between power
 supply and battery during a ride can hang the NVIDIA driver (Xid 69), so Tretlager warns about it.
