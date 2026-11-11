@@ -15,7 +15,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from .. import APP_ID, __version__, build_id
 from . import desktopstyle, zwiftwindow
 from .i18n import LocalizedContext
-from ..core import applog, awake, bridgectl, btcompat, debug, display, helpdoc, instance, launch, login, power, prepare, report, setup, state, systemcheck, wine
+from ..core import applog, awake, bridgectl, btcompat, debug, display, gnomealive, helpdoc, instance, launch, login, power, prepare, report, setup, state, systemcheck, wine
 from ..i18n import LANGUAGE, _, ngettext
 
 # Embedded sign-in (as in the official launcher): needs QtWebEngine. Without the module,
@@ -805,6 +805,8 @@ def main() -> int:
     applog.set_debug(debug.enabled())
     if instance.forward("start" if start else "show"):
         return 0
+    if not launch.process_running("ZwiftApp.exe"):
+        gnomealive.restore()  # a crash during the last ride must not leave the GNOME setting changed
     restyle = desktopstyle.wanted(in_flatpak=bridgectl.IN_FLATPAK)
     if restyle:
         # Outside Plasma the portal reports the desktop's icon theme (GNOME: Adwaita), which the KDE

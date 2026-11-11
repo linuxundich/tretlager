@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from . import bridgectl, debug, display, login, paths, setup, state, wine
+from . import bridgectl, debug, display, gnomealive, login, paths, setup, state, wine, x11window
 from .manifest import UpdateProgress, remote_version  # noqa: F401 (also for callers of launch)
 from ..i18n import _, ngettext
 
@@ -332,6 +332,8 @@ class Launcher:
                            env=self.env, capture_output=True, timeout=60)
 
     def start(self, token: dict) -> None:
+        if gnomealive.disable():
+            self.log(_("GNOME: \"not responding\" check switched off while Zwift runs"))
         rfp = self.run_from_process()
         self.ensure_display_settings()
         self.ctx.wineserver_kill()
@@ -388,7 +390,11 @@ class Launcher:
         # First run moves the window to the remembered monitor, the next one maximises it;
         # maximising more than once does no harm.
         for _attempt in range(3):
-            if not maximize_window_kde(self.log):
+            if kwin_available():
+                if not maximize_window_kde(self.log):
+                    return
+            elif not x11window.maximize("zwiftapp.exe"):
+                self.log(_("Could not maximise the Zwift window"))
                 return
             time.sleep(4)
         # From now on KWin reports which monitor the window is on (remembered for the next start).
@@ -400,6 +406,7 @@ class Launcher:
     def after_exit(self) -> None:
         """After exit: kill leftovers, stop the bridge unless it is set to autostart."""
         unload_kwin_script(WATCH_SCRIPT_NAME)
+        gnomealive.restore()
         self.ctx.wineserver_kill()
         try:
             if bridgectl.is_running() and not bridgectl.autostart():

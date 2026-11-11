@@ -4,6 +4,17 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.5] - 2026-11-11
+
+### Fixed
+- GNOME (Ubuntu): Zwift now fills the screen by itself. Outside Plasma the window is maximised through
+  the X11 protocol (EWMH), as KWin does it on Plasma; no extra package needed.
+- GNOME (Ubuntu): no more "zwiftapp.exe is not responding" dialog while Zwift loads. During the ride
+  Tretlager switches off GNOME's alive check (`org.gnome.mutter check-alive-timeout`) and puts the old
+  value back afterwards; after a crash the next start restores it. Not in the Flatpak (the sandbox
+  cannot reach the GNOME settings): there, run `gsettings set org.gnome.mutter check-alive-timeout 0`
+  yourself if the dialog bothers you.
+
 ## [0.11.4] - 2026-11-11
 
 ### Fixed
