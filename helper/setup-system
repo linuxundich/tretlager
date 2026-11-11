@@ -17,13 +17,27 @@ import sys
 import tempfile
 
 WINEHQ_FPR = "D43F640145369C51D786DDEA76F1A20FF987672F"
-WINEHQ_URI = "https://dl.winehq.org/wine-builds/debian"
+WINEHQ_BASE = "https://dl.winehq.org/wine-builds"
+WINEHQ_URI = WINEHQ_BASE + "/debian"
 WINEHQ_SUITE = "forky"
 PACKAGES = ["winehq-devel", "cabextract", "osslsigncode"]
 
+
+def winehq_repo(os_release: str = "/etc/os-release") -> tuple[str, str]:
+    """(URI, suite) of the WineHQ repository for this system: Ubuntu gets its own builds (the Debian
+    ones need newer libraries such as libavcodec63), everything else the Debian forky builds."""
+    try:
+        osr = dict(l.strip().split("=", 1) for l in open(os_release) if "=" in l)
+    except OSError:
+        osr = {}
+    osr = {k: v.strip('"') for k, v in osr.items()}
+    if osr.get("ID") == "ubuntu" and osr.get("VERSION_CODENAME"):
+        return WINEHQ_BASE + "/ubuntu", osr["VERSION_CODENAME"]
+    return WINEHQ_URI, WINEHQ_SUITE
+
 KEY_SRC = "/usr/share/tretlager/winehq.key"
-KEY_DST = "/etc/apt/keyrings/winehq-archive.key"
-SOURCES_DST = "/etc/apt/sources.list.d/winehq-forky.sources"
+KEY_DST = "/etc/apt/keyrings/winehq-archive.asc"
+SOURCES_DST = "/etc/apt/sources.list.d/winehq.sources"
 
 
 def N_(text):
@@ -116,7 +130,8 @@ def main():
     write_file(KEY_DST, key)
 
     emit("step", text=N_("Setting up the package source"))
-    write_file(SOURCES_DST, (f"Types: deb\nURIs: {WINEHQ_URI}\nSuites: {WINEHQ_SUITE}\nComponents: main\n"
+    uri, suite = winehq_repo()
+    write_file(SOURCES_DST, (f"Types: deb\nURIs: {uri}\nSuites: {suite}\nComponents: main\n"
                              f"Architectures: amd64\nSigned-By: {KEY_DST}\n").encode())
     emit("progress", percent=5, text=N_("Package source set up"))
 

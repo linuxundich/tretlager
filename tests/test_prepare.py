@@ -43,7 +43,15 @@ def test_plan_properties():
 
 def test_sources_text_amd64_only():
     text = prepare.sources_text("/k.key")
-    assert "Architectures: amd64\n" in text and "Signed-By: /k.key" in text and "Suites: forky" in text
+    assert "Architectures: amd64\n" in text and "Signed-By: /k.key" in text and "Suites: " in text
+
+
+def test_winehq_repo_per_system(tmp_path):
+    f = tmp_path / "os-release"
+    f.write_text('ID=ubuntu\nVERSION_CODENAME=resolute\n')
+    assert prepare.winehq_repo(str(f)) == ("https://dl.winehq.org/wine-builds/ubuntu", "resolute")
+    f.write_text('ID=tuxedo\nVERSION_CODENAME=forky\n')
+    assert prepare.winehq_repo(str(f)) == (prepare.WINEHQ_URI, "forky")
 
 
 def test_bundled_key_file_exists():
@@ -52,9 +60,9 @@ def test_bundled_key_file_exists():
 
 def test_helper_constants_match_core():
     helper = (ROOT / "helper/setup-system").read_text()
-    for name in ("WINEHQ_FPR", "WINEHQ_URI", "WINEHQ_SUITE", "PACKAGES"):
+    for name in ("WINEHQ_FPR", "WINEHQ_BASE", "WINEHQ_URI", "WINEHQ_SUITE", "PACKAGES"):
         m = re.search(rf"^{name} = (.+)$", helper, re.M)
-        assert m and eval(m.group(1)) == getattr(prepare, name), name  # noqa: S307
+        assert m and eval(m.group(1), {"WINEHQ_BASE": prepare.WINEHQ_BASE}) == getattr(prepare, name), name  # noqa: S307
 
 
 def test_helper_refuses_other_commands():

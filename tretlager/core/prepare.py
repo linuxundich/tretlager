@@ -18,10 +18,24 @@ from typing import Callable
 from ..i18n import _
 
 WINEHQ_FPR = "D43F640145369C51D786DDEA76F1A20FF987672F"
-WINEHQ_URI = "https://dl.winehq.org/wine-builds/debian"
+WINEHQ_BASE = "https://dl.winehq.org/wine-builds"
+WINEHQ_URI = WINEHQ_BASE + "/debian"
 WINEHQ_SUITE = "forky"
 # What Tretlager needs; cabextract for winetricks, osslsigncode for the signature check.
 PACKAGES = ["winehq-devel", "cabextract", "osslsigncode"]
+
+
+def winehq_repo(os_release: str = "/etc/os-release") -> tuple[str, str]:
+    """(URI, suite) of the WineHQ repository for this system: Ubuntu gets its own builds (the Debian
+    ones need newer libraries such as libavcodec63), everything else the Debian forky builds."""
+    try:
+        osr = dict(l.strip().split("=", 1) for l in open(os_release) if "=" in l)
+    except OSError:
+        osr = {}
+    osr = {k: v.strip('"') for k, v in osr.items()}
+    if osr.get("ID") == "ubuntu" and osr.get("VERSION_CODENAME"):
+        return WINEHQ_BASE + "/ubuntu", osr["VERSION_CODENAME"]
+    return WINEHQ_URI, WINEHQ_SUITE
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 KEY_PATH = DATA_DIR / "winehq.key"
@@ -31,13 +45,14 @@ SYSTEM_LISTS = Path("/var/lib/apt/lists")
 
 
 def sources_text(key_path: str | Path) -> str:
-    return (f"Types: deb\nURIs: {WINEHQ_URI}\nSuites: {WINEHQ_SUITE}\nComponents: main\n"
+    uri, suite = winehq_repo()
+    return (f"Types: deb\nURIs: {uri}\nSuites: {suite}\nComponents: main\n"
             f"Architectures: amd64\nSigned-By: {key_path}\n")
 
 
 def winehq_source_present(sources_dir: Path = SYSTEM_SOURCES) -> bool:
     return any(sources_dir.glob("winehq-*.sources")) or any(
-        WINEHQ_URI in p.read_text(errors="ignore") for p in sources_dir.glob("*") if p.is_file())
+        WINEHQ_BASE in p.read_text(errors="ignore") for p in sources_dir.glob("*") if p.is_file())
 
 
 @dataclass
@@ -65,7 +80,7 @@ class Plan:
 
     def to_dict(self) -> dict:
         return {"add_source": self.add_source, "nothing_to_do": self.nothing_to_do, "error": self.error,
-                "download_bytes": self.download_bytes, "fingerprint": WINEHQ_FPR, "uri": WINEHQ_URI,
+                "download_bytes": self.download_bytes, "fingerprint": WINEHQ_FPR, "uri": winehq_repo()[0],
                 "packages": [p.__dict__ for p in self.packages], "removals": self.removals}
 
 
@@ -116,7 +131,7 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
         for sub in ("lists/partial", "cache/archives/partial", "wine-only", "all"):
             (tmp / sub).mkdir(parents=True)
         if add_source:
-            key = tmp / "winehq.key"
+            key = tmp / "winehq.asc"  # apt only reads armored keys with the .asc extension
             key.write_bytes(KEY_PATH.read_bytes())
             text = sources_text(key)
             (tmp / "wine-only" / "winehq.sources").write_text(text)
@@ -128,7 +143,7 @@ def plan(packages: list[str] | None = None, force_temp_source: bool = False) -> 
         for src in SYSTEM_SOURCES.glob("*"):
             if src.suffix not in (".sources", ".list") or (tmp / "all" / src.name).exists():
                 continue
-            if add_source and WINEHQ_URI in src.read_text(errors="ignore"):
+            if add_source and WINEHQ_BASE in src.read_text(errors="ignore"):
                 continue  # otherwise two Signed-By for the same source
             (tmp / "all" / src.name).symlink_to(src)
         for lst in SYSTEM_LISTS.iterdir():

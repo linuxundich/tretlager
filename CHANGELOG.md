@@ -4,6 +4,21 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Fixed
+- Ubuntu (GNOME): setting up the system failed with `NO_PUBKEY 76F1A20FF987672F` because APT reads an
+  armored key only with the extension `.asc`; the WineHQ key is now stored and referenced as `.asc`.
+- Ubuntu: Wine could not be planned because the Debian forky builds need `libavcodec63`. Ubuntu now
+  gets the WineHQ Ubuntu builds (`wine-builds/ubuntu`, suite = release codename); the source file is
+  called `winehq.sources`.
+- Ubuntu: the app did not start (`No module named 'PySide6.QtDBus'`); the Debian package now depends
+  on `python3-pyside6.qtdbus`.
+- Ubuntu: white window because `qml6-module-qtquick-effects` was not installed; the Debian package now
+  lists every QML module the pages import (effects, dialogs, window, core).
+- Ubuntu (GNOME): missing icons and Fusion look. Outside Plasma the app now also follows the desktop's
+  light/dark setting and font in the distribution package, falls back to the Breeze icon theme, and
+  the Debian package depends on `breeze-icon-theme`, `breeze` and `qml6-module-org-kde-desktop`
+  (recommends `plasma-integration`).
+
 ### Changed
 - README and project page: new passage on the end of Windows 10 as a reason to switch to Linux.
 

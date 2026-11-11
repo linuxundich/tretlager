@@ -812,7 +812,11 @@ def main() -> int:
         # The Plasma platform theme brings Breeze (style, icons, colors) in full.
         # Force it, not just default it: Flatpak passes a host QT_QPA_PLATFORMTHEME through
         # (e.g. qt5ct from ~/.bash_profile), which is missing in the sandbox.
-        os.environ["QT_QPA_PLATFORMTHEME"] = "kde"
+        # Distribution package (Ubuntu/GNOME): only when plasma-integration is installed.
+        if bridgectl.IN_FLATPAK or any(
+                Path(d, "plugins/platformthemes/KDEPlasmaPlatformTheme6.so").exists()
+                for d in ("/usr/lib/qt6", "/usr/lib/x86_64-linux-gnu/qt6")):
+            os.environ["QT_QPA_PLATFORMTHEME"] = "kde"
     if QtWebEngineQuick is not None:
         if bridgectl.IN_FLATPAK:
             # WebEngine comes from the BaseApp (/app), but Qt only looks for the helper process in the
@@ -826,6 +830,12 @@ def main() -> int:
     app.setDesktopFileName(APP_ID)
     app.setWindowIcon(QIcon.fromTheme(APP_ID, QIcon(str(ICON_FILE))))
     if restyle:
+        if not bridgectl.IN_FLATPAK:
+            # Without the Plasma platform theme the desktop's icon theme (Yaru) lacks KDE icon names
+            # (empty placeholders): fall back to Breeze, which the package depends on.
+            QIcon.setFallbackThemeName("breeze")
+            if QIcon.themeName() not in ("breeze", "breeze-dark"):
+                QIcon.setThemeName("breeze")
         desktopstyle.DesktopStyle(app).start()  # light/dark and font from the desktop
     engine = QQmlApplicationEngine()
     localized = LocalizedContext()  # i18n functions for Kirigami Addons

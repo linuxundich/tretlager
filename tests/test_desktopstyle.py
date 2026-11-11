@@ -21,7 +21,8 @@ Name=Breeze Dark
 def test_wanted_only_in_flatpak_outside_plasma():
     assert desktopstyle.wanted({"XDG_CURRENT_DESKTOP": "GNOME"}, in_flatpak=True)
     assert not desktopstyle.wanted({"XDG_CURRENT_DESKTOP": "KDE"}, in_flatpak=True)
-    assert not desktopstyle.wanted({"XDG_CURRENT_DESKTOP": "GNOME"}, in_flatpak=False)
+    assert desktopstyle.wanted({"XDG_CURRENT_DESKTOP": "ubuntu:GNOME"}, in_flatpak=False)
+    assert not desktopstyle.wanted({"XDG_CURRENT_DESKTOP": "KDE"}, in_flatpak=False)
 
 
 def test_scheme_name():

@@ -29,8 +29,9 @@ GNOME_FONT = ("org.gnome.desktop.interface", "font-name")
 
 
 def wanted(env=os.environ, in_flatpak: bool = False) -> bool:
-    """Only in the Flatpak and not under Plasma (there the portal provides the real KDE settings)."""
-    return in_flatpak and "KDE" not in env.get("XDG_CURRENT_DESKTOP", "").upper()
+    """Everywhere outside Plasma (Flatpak and distribution package, e.g. Ubuntu/GNOME); under Plasma
+    the platform theme provides the real KDE settings. `in_flatpak` is kept for callers."""
+    return "KDE" not in env.get("XDG_CURRENT_DESKTOP", "").upper()
 
 
 def scheme_name(color_scheme) -> str:

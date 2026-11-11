@@ -6,12 +6,14 @@ Priority: optional
 Maintainer: Christoph Langner <mail@christoph-langner.de>
 Installed-Size: @SIZE@
 Depends: python3 (>= 3.12), python3-bleak, python3-dbus-fast, python3-secretstorage,
- python3-pyside6.qtcore, python3-pyside6.qtgui, python3-pyside6.qtqml, python3-pyside6.qtquick,
+ python3-pyside6.qtcore, python3-pyside6.qtdbus, python3-pyside6.qtgui, python3-pyside6.qtqml, python3-pyside6.qtquick,
  python3-pyside6.qtquickcontrols2, qml6-module-org-kde-kirigami, qml6-module-org-kde-kirigamiaddons-formcard,
  qml6-module-org-kde-kirigamiaddons-components, qml6-module-qtquick-layouts,
  python3-pyside6.qtwebenginequick, qml6-module-qtwebengine,
- qml6-module-qtquick-controls, avahi-daemon, bluez, pkexec, gpg, osslsigncode, cabextract, systemd
-Recommends: qml6-module-org-kde-desktop
+ qml6-module-qtquick-controls, qml6-module-qtquick-effects, qml6-module-qtquick-dialogs,
+ qml6-module-qtquick-window, qml6-module-qtcore, qml6-module-org-kde-desktop, breeze-icon-theme, breeze,
+ avahi-daemon, bluez, pkexec, gpg, osslsigncode, cabextract, systemd
+Recommends: plasma-integration
 Description: Set up Zwift on Linux, launch it and connect your sensors
  Tretlager sets up the official Windows client of Zwift under Wine (WineHQ),
  verifies the installer's signature, picks the graphics path (NVIDIA via PRIME
