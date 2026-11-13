@@ -254,7 +254,9 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
 
 - [x] **Setup hangs after the .NET installation until the time limit (1 h).** Fixed 2026-11-13:
   `Context.run()` waits for the process (`selectors` + `poll()`) and stops collecting output
-  `OUTPUT_GRACE` seconds later; tests in `tests/test_setup.py`. During the take the
+  `OUTPUT_GRACE` seconds later; tests in `tests/test_setup.py`. Verified on tinytin against real Wine
+  (a command that starts the Wine services and leaves a process behind, as the hanging installer did):
+  reading until end-of-file took 203 s and only stopped because of a kill, the new way takes 2.8 s. During the take the
   "Microsoft components" step stood still for 33 minutes with nothing happening; the setup only
   continued after the Wine services were killed by hand. Measured on tinytin with 0.11.5:
   - The .NET 4.8 installer finishes successfully (`DDSet_Status: Installation has completed successfully`),
