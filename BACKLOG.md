@@ -249,3 +249,24 @@ Implementation in milestones (core Python `tretlager/core`, UI PySide6 + Kirigam
   - UI: game selection in the assistant (set up one or both), start button per game or a selection on start;
     texts and liability notices no longer Zwift-only
   - Naming: app description and README mention both games
+
+## Found while recording the 0.11 screencast (2026-11-13)
+
+- [x] **Setup hangs after the .NET installation until the time limit (1 h).** Fixed 2026-11-13:
+  `Context.run()` waits for the process (`selectors` + `poll()`) and stops collecting output
+  `OUTPUT_GRACE` seconds later; tests in `tests/test_setup.py`. During the take the
+  "Microsoft components" step stood still for 33 minutes with nothing happening; the setup only
+  continued after the Wine services were killed by hand. Measured on tinytin with 0.11.5:
+  - The .NET 4.8 installer finishes successfully (`DDSet_Status: Installation has completed successfully`),
+    but `msiexec.exe` and its `Setup.exe` stay alive, blocked in `anon_pipe_read` (known Wine behaviour).
+  - Because of that the wineserver stays up, and so do `services.exe`, `svchost.exe`, `explorer.exe`,
+    `rpcss.exe`, `lsass.exe` and `plugplay.exe`. All of them inherited our output pipe as fd 2.
+  - `ProgressContext.run()` (tretlager/core/setup.py) reads `for line in proc.stdout` until EOF. The pipe
+    only reaches EOF once the **last** holder closes it, so the loop never ends although `winetricks`
+    itself is long gone (it stood there as a zombie).
+  - The watchdog thread only kills the process after `timeout`, which is 3600 s for this step.
+  - Fix ideas: read with a timeout (`selectors` on the pipe plus `proc.poll()`), stop reading as soon as the
+    process has exited and the pipe is empty, run `wineserver -k`/`-w` after each winetricks verb, or give
+    the Wine helpers their own output (`stderr=DEVNULL` for the grandchildren is not possible, so prefer
+    not to depend on EOF).
+  - The same pattern can hit every `run()` call that starts Wine, not just dotnet48.

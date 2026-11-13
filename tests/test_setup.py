@@ -1,3 +1,6 @@
+import threading
+import time
+
 from tretlager.core import setup
 
 OSSL = """Message digest algorithm  : SHA256
@@ -67,3 +70,47 @@ def test_run_setup_skips_done_and_stops_on_error():
         setup.STEPS = old
     assert not ok
     assert calls == [("a", "skipped", "already done"), ("b", "running", ""), ("b", "error", "broken")]
+
+
+# --- Context.run(): waits for the process, not for the end of the pipe ---------------------------
+# Wine helpers inherit the output pipe and outlive the command. Until 2026-11-13 run() read until
+# end-of-file and therefore hung: after the .NET installation the setup stood still for half an hour.
+
+def _ctx():
+    lines = []
+    ctx = setup.Context(log=lines.append)
+    return ctx, lines
+
+
+def test_run_logs_output_and_returns_code():
+    ctx, lines = _ctx()
+    assert ctx.run(["sh", "-c", "echo hello; echo world >&2; exit 3"], env={}) == 3
+    assert "hello" in lines and "world" in lines
+
+
+def test_run_returns_when_a_child_keeps_the_pipe_open(monkeypatch):
+    """The command exits, a grandchild holds the pipe: run() must not wait for it."""
+    monkeypatch.setattr(setup, "OUTPUT_GRACE", 0.5)
+    ctx, lines = _ctx()
+    started = time.monotonic()
+    # The background sleep inherits stdout, so the pipe stays open for 30 s
+    rc = ctx.run(["sh", "-c", "echo before; sleep 30 & exit 0"], env={}, timeout=3600)
+    took = time.monotonic() - started
+    assert rc == 0
+    assert "before" in lines                      # output up to then is kept
+    assert took < 10, f"run() waited {took:.1f} s for the pipe"
+
+
+def test_run_honours_cancel():
+    ctx, _lines = _ctx()
+    threading.Timer(0.3, ctx.cancel.set).start()
+    started = time.monotonic()
+    ctx.run(["sh", "-c", "sleep 30"], env={}, timeout=3600)
+    assert time.monotonic() - started < 10
+
+
+def test_run_honours_timeout():
+    ctx, _lines = _ctx()
+    started = time.monotonic()
+    ctx.run(["sh", "-c", "sleep 30"], env={}, timeout=1)
+    assert time.monotonic() - started < 10

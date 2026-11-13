@@ -4,6 +4,13 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+### Fixed
+- Setup no longer gets stuck after the .NET installation. The step "Microsoft components" could stand
+  still for up to an hour although the installation was long finished: Wine leaves helper processes
+  running that keep the output pipe open, and Tretlager waited for the end of that output. It now waits
+  for the command itself and stops collecting output two seconds later. This can affect every setup step
+  that starts Wine.
+
 ## [0.11.5] - 2026-11-11
 
 ### Fixed

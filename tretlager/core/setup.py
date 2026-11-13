@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import selectors
 import shutil
 import subprocess
 import threading
@@ -41,6 +42,10 @@ WINEBOOT_TIMEOUT = 5 * 60  # creating ≈ 30 s, adapting to a new Wine is quicke
 WINE_DISPLAY_KEYS = ["UseXRandR", "UseXVidMode"]
 GLTEST_SRC = Path(__file__).resolve().parent.parent / "data" / "gltest" / "GLTest.cs"
 CSC = r"C:\windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+# Context.run(): how long output is still collected after the command exited, and how often
+# cancellation and the time limit are checked.
+OUTPUT_GRACE = 2.0
+POLL_INTERVAL = 0.2
 
 
 class SetupError(Exception):
@@ -61,30 +66,65 @@ class Context:
         return dict(os.environ, WINEPREFIX=str(paths.PREFIX), WINEDEBUG="-all", PATH=wine.env_path())
 
     def run(self, cmd: list[str], env: dict | None = None, cwd: Path | None = None, timeout: int = 3600) -> int:
-        """Run a command, output goes to the log line by line."""
-        self.log("$ " + " ".join(cmd))
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                                env=env or self.wine_env, cwd=cwd, errors="replace")
-        assert proc.stdout
-        # A separate thread watches for cancellation and the time limit: if a program hangs silently
-        # (e.g. winetricks in a dialog), the loop below would never get to the next line.
-        done = threading.Event()
+        """Run a command, output goes to the log line by line.
 
-        def watchdog() -> None:
-            deadline = time.monotonic() + timeout
-            while not done.wait(1):
+        Waits for the PROCESS, not for the end of its output. Wine starts helpers (wineserver,
+        services.exe, explorer.exe, rpcss.exe …) that inherit our pipe and outlive the command, so the
+        pipe only reaches end-of-file much later or never. Reading until then froze the setup: after the
+        .NET installation "Installing dotnet48" stood still for half an hour while winetricks was already
+        a zombie, and only the one-hour limit would have ended it (measured on tinytin, 2026-11-13).
+        """
+        self.log("$ " + " ".join(cmd))
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                env=env or self.wine_env, cwd=cwd)
+        assert proc.stdout
+        rest = b""
+
+        def emit(raw: bytes) -> None:
+            line = raw.decode("utf-8", "replace").rstrip()
+            if line and "libEGL warning" not in line and "pci id for fd" not in line:
+                self.log(line)
+
+        sel = selectors.DefaultSelector()
+        sel.register(proc.stdout, selectors.EVENT_READ)
+        deadline = time.monotonic() + timeout
+        rc: int | None = None
+        exited: float | None = None          # when the command itself finished
+        try:
+            while True:
+                for _ in sel.select(POLL_INTERVAL):
+                    try:
+                        chunk = os.read(proc.stdout.fileno(), 65536)
+                    except OSError:
+                        chunk = b""
+                    if not chunk:            # end of file: nobody holds the pipe any more
+                        sel.unregister(proc.stdout)
+                        break
+                    rest += chunk
+                    *lines, rest = rest.split(b"\n")
+                    for raw in lines:
+                        emit(raw)
+                if rc is None:
+                    rc = proc.poll()
+                    if rc is not None:
+                        exited = time.monotonic()
                 if self.cancel.is_set() or time.monotonic() > deadline:
                     proc.kill()
-                    return
-        threading.Thread(target=watchdog, daemon=True).start()
-        try:
-            for line in proc.stdout:
-                line = line.rstrip()
-                if line and "libEGL warning" not in line and "pci id for fd" not in line:
-                    self.log(line)
-            return proc.wait()
+                    rc = proc.wait()
+                    break
+                if not sel.get_map():        # pipe closed and command finished
+                    if rc is not None:
+                        break
+                elif exited is not None and time.monotonic() - exited > OUTPUT_GRACE:
+                    # Helpers still hold the pipe; stop collecting instead of waiting for them
+                    self.log(f"(output ends here, Wine helpers keep the pipe open; rc {rc})")
+                    break
         finally:
-            done.set()
+            sel.close()
+            if rest:
+                emit(rest)
+            proc.stdout.close()
+        return rc if rc is not None else proc.wait()
 
     def wineserver_kill(self) -> None:
         subprocess.run(["wineserver", "-k"], env=self.wine_env, capture_output=True)
