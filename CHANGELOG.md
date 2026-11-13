@@ -4,6 +4,8 @@ All notable changes to Tretlager. Format based on [Keep a Changelog](https://kee
 
 ## [Unreleased]
 
+## [0.11.6] - 2026-11-13
+
 ### Fixed
 - Setup no longer gets stuck after the .NET installation. The step "Microsoft components" could stand
   still for up to an hour although the installation was long finished: Wine leaves helper processes
